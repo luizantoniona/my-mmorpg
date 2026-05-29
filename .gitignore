@@ -2,7 +2,7 @@
 #----Folders
 .vscode/
 #----Files
-database/server_data
+Database/server_data
 
 
 
@@ -14,18 +14,18 @@ database/server_data
 
 #----Client
 #----Folders
-client/.qtcreator/
-client/.vs/
-client/build/
+Client/.qtcreator/
+Client/.vs/
+Client/build/
 #----Files
-client/*.txt.user*
+Client/*.txt.user*
 
 
 
 #----Server
 #----Folders
-server/.qtcreator/
-server/.vs/
-server/build/
+Server/.qtcreator/
+Server/.vs/
+Server/build/
 #----Files
-server/*.txt.user*
+Server/*.txt.user*
