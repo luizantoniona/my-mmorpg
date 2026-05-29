@@ -1,0 +1,9 @@
+{
+    "name": "mmorpg-server",
+    "version": "0.1.0",
+    "dependencies": [
+        "drogon",
+        "sqlite3",
+        "gtest"
+    ]
+}
