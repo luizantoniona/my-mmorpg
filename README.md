@@ -1,18 +1,14 @@
 # 🛡️🧙 MyMMO
 
-## 👥 People
-This project was envisioned, created, and is maintained by:  
-- **[Luiz Antonio Nicolau Anghinoni](https://github.com/luizantoniona)**
-
 ## 📦 Project Organization:
 
-### 🛡️ [`Server`](https://github.com/luizantoniona/my-mmorpg/tree/main/server)
+### 🛡️ [`Server`](https://github.com/luizantoniona/my-mmorpg/tree/main/Server)
 - **TODO**
 
-### ⚔️ [`Client`](https://github.com/luizantoniona/my-mmorpg/tree/main/client)
+### ⚔️ [`Client`](https://github.com/luizantoniona/my-mmorpg/tree/main/Client)
 - **TODO**
 
-### 🧩 [`Data`](https://github.com/luizantoniona/my-mmorpg/tree/main/data)
+### 🧩 [`Data`](https://github.com/luizantoniona/my-mmorpg/tree/main/Data)
 - **TODO**
 
 ---
@@ -23,5 +19,11 @@ These instructions will help you set up the project locally for development and 
 ### 📁 Clone the Repository
 ```bash
 git clone https://github.com/luizantoniona/my-mmorpg.git
-cd idle-mmorpg
+cd my-mmorpg
 ```
+
+---
+
+## 👥 People
+This project was envisioned, created, and is maintained by:  
+- **[Luiz Antonio Nicolau Anghinoni](https://github.com/luizantoniona)**
