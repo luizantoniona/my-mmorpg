@@ -13,7 +13,7 @@ int main() {
     std::cout << "Starting Server" << std::endl;
 
     // --- Database ---
-    Engine::Singleton<Database::Database>::instance().initialize( DATABASE_PATH );
+    Engine::Singleton<Engine::Database>::instance().initialize( DATABASE_PATH );
 
     // --- World ---
     Engine::Singleton<Engine::WorldManager>::instance().initialize( WORLD_DATA_PATH );

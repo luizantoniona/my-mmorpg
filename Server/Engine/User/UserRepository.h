@@ -12,7 +12,7 @@ namespace Engine {
 
 class UserRepository : public Repository {
 public:
-    explicit UserRepository();
+    UserRepository();
 
     bool createUser( std::string& username, std::string& password );
 
