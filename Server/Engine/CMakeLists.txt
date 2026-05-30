@@ -8,7 +8,7 @@ file(GLOB_RECURSE ENGINE_SOURCES
 )
 
 file(GLOB_RECURSE ENGINE_HEADERS
-    Character/*.cpp
+    Character/*.h
     Commons/*.h
     Database/*.h
     Network/*.h
