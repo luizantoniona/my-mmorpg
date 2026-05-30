@@ -1,9 +1,19 @@
 file(GLOB_RECURSE ENGINE_SOURCES
-    Helper/*.cpp
+    Character/*.cpp
+    Commons/*.cpp
+    Database/*.cpp
+    Network/*.cpp
+    User/*.cpp
+    World/*.cpp
 )
 
 file(GLOB_RECURSE ENGINE_HEADERS
-    Helper/*.h
+    Character/*.cpp
+    Commons/*.h
+    Database/*.h
+    Network/*.h
+    User/*.h
+    World/*.h
 )
 
 add_library(EngineLib STATIC

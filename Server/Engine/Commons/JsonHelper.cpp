@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-namespace Helper {
+namespace Engine {
 
 Json::Value JsonHelper::loadJsonFile( const std::string& path ) {
     std::ifstream file( path );
@@ -31,4 +31,4 @@ Json::Value JsonHelper::parseJsonString( const std::string& content ) {
     return jsonData;
 }
 
-} // namespace Helper
+} // namespace Engine

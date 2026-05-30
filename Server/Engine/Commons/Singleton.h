@@ -4,7 +4,7 @@
 #include <memory>
 #include <mutex>
 
-namespace Commons {
+namespace Engine {
 
 template <typename T>
 class Singleton {
@@ -39,6 +39,6 @@ std::unique_ptr<T> Singleton<T>::_instance = nullptr;
 template <typename T>
 std::mutex Singleton<T>::_mutex;
 
-} // namespace Commons
+} // namespace Engine
 
 #endif // SINGLETON_H
