@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace Database {
+namespace Engine {
 
 class QueryLoader {
 public:
@@ -11,6 +11,6 @@ public:
     static std::string loadFromString( const std::string& sql );
 };
 
-} // namespace Database
+} // namespace Engine
 
 #endif // QUERYLOADER_H

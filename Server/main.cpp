@@ -1,14 +1,19 @@
 #include <drogon/drogon.h>
 
 #include <Engine/Commons/Singleton.h>
+#include <Engine/Database/Database.h>
 #include <Engine/World/WorldManager.h>
 
 namespace {
+constexpr const char* DATABASE_PATH = "../../../Database/ServerDatabase";
 constexpr const char* WORLD_DATA_PATH = "../../../Data/World";
 } // namespace
 
 int main() {
     std::cout << "Starting Server" << std::endl;
+
+    // --- Database ---
+    Engine::Singleton<Database::Database>::instance().initialize( DATABASE_PATH );
 
     // --- World ---
     Engine::Singleton<Engine::WorldManager>::instance().initialize( WORLD_DATA_PATH );

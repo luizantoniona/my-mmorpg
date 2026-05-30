@@ -3,9 +3,9 @@
 #include <fstream>
 #include <sstream>
 
-namespace Database {
+namespace Engine {
 
-std::string Database::QueryLoader::loadFromFile( const std::string& path ) {
+std::string QueryLoader::loadFromFile( const std::string& path ) {
     std::ifstream file( path );
 
     if ( !file.is_open() ) {
@@ -21,4 +21,4 @@ std::string QueryLoader::loadFromString( const std::string& sql ) {
     return sql;
 }
 
-} // namespace Database
+} // namespace Engine
