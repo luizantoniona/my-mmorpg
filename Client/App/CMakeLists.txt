@@ -1,5 +1,17 @@
+file(GLOB_RECURSE APP_SOURCES
+    RegisterTypes.cpp
+    Manager/*.cpp
+)
+
+file(GLOB_RECURSE APP_HEADERS
+    RegisterTypes.h
+    Manager/*.h
+)
+
 qt_add_executable(MMORPGClient
     main.cpp
+    ${APP_SOURCES}
+    ${APP_HEADERS}
 )
 
 qt_add_qml_module(MMORPGClient
@@ -8,13 +20,18 @@ qt_add_qml_module(MMORPGClient
     QML_FILES
     Main.qml
     ApplicationWindow.qml
-    Pages/Account.qml
-    Pages/Game.qml
-    Pages/Login.qml
+    QML/Account/AccountPage.qml
+    QML/Game/GamePage.qml
+    QML/Login/LoginPage.qml
+    QML/Theme/Colors.qml
+    QML/Theme/Spaces.qml
 )
 
-# add_subdirectory(Control)
-# add_subdirectory(QML)
+set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/QML/Theme/Colors.qml
+    ${CMAKE_CURRENT_SOURCE_DIR}/QML/Theme/Spaces.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
 
 # file(GLOB_RECURSE SVG_FILES
 #     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}

@@ -7,9 +7,8 @@ Window {
     title: "MMORPG Client"
     visibility: Window.Windowed
     visible: true
-
-    width: 1024
-    height: 768
+    width: Screen.width / 1.5
+    height: Screen.height / 1.5
 
     ApplicationWindow {
         id: application

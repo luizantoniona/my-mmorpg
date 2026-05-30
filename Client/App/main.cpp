@@ -4,6 +4,8 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
+#include "RegisterTypes.h"
+
 int main( int argc, char* argv[] ) {
     QQuickStyle::setStyle( "Basic" );
 
@@ -14,6 +16,9 @@ int main( int argc, char* argv[] ) {
     QSurfaceFormat::setDefaultFormat( format );
 
     QQmlApplicationEngine engine;
+
+    RegisterTypes::registerTypes();
+
     QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
     engine.loadFromModule( "MMORPGClient", "Main" );
 
