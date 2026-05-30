@@ -1,11 +1,17 @@
 #include <drogon/drogon.h>
 
-namespace {
+#include <Engine/Commons/Singleton.h>
+#include <Engine/World/WorldManager.h>
 
+namespace {
+constexpr const char* WORLD_DATA_PATH = "../../../Data/World";
 } // namespace
 
 int main() {
     std::cout << "Starting Server" << std::endl;
+
+    // --- World ---
+    Engine::Singleton<Engine::WorldManager>::instance().initialize( WORLD_DATA_PATH );
 
     drogon::app()
         .addListener( "0.0.0.0", 8080 )
