@@ -3,11 +3,14 @@ qt_add_executable(MMORPGClient
 )
 
 qt_add_qml_module(MMORPGClient
-    URI main
+    URI MMORPGClient
     VERSION 1.0
     QML_FILES
     Main.qml
     ApplicationWindow.qml
+    Pages/Account.qml
+    Pages/Game.qml
+    Pages/Login.qml
 )
 
 # add_subdirectory(Control)
