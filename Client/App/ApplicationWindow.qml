@@ -37,6 +37,10 @@ Item {
         id: accountManager
     }
 
+    ServerManager {
+        id: serverManager
+    }
+
     Component {
         id: loginPage
 
@@ -44,6 +48,7 @@ Item {
             id: login
 
             vAccountManager: accountManager
+            vServerManager: serverManager
         }
     }
 
@@ -54,6 +59,7 @@ Item {
             id: account
 
             vAccountManager: accountManager
+            vServerManager: serverManager
         }
     }
 
@@ -64,6 +70,7 @@ Item {
             id: game
 
             vAccountManager: accountManager
+            vServerManager: serverManager
         }
     }
 
