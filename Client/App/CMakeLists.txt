@@ -1,11 +1,11 @@
+add_subdirectory(Engine)
+
 file(GLOB_RECURSE APP_SOURCES
     RegisterTypes.cpp
-    Manager/*.cpp
 )
 
 file(GLOB_RECURSE APP_HEADERS
     RegisterTypes.h
-    Manager/*.h
 )
 
 qt_add_executable(MMORPGClient
@@ -46,6 +46,7 @@ set_source_files_properties(
 
 target_link_libraries(MMORPGClient
     # PRIVATE ControlLib
+    PRIVATE EngineLib
     PRIVATE Qt6::QuickControls2
     PRIVATE ${QML_MODULES}
 )

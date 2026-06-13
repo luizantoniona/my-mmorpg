@@ -4,6 +4,7 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
+#include "Engine/RegisterEngineTypes.h"
 #include "RegisterTypes.h"
 
 int main( int argc, char* argv[] ) {
@@ -17,6 +18,7 @@ int main( int argc, char* argv[] ) {
 
     QQmlApplicationEngine engine;
 
+    RegisterEngineTypes::registerTypes();
     RegisterTypes::registerTypes();
 
     QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );

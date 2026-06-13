@@ -22,7 +22,6 @@ find_package(Qt6 REQUIRED COMPONENTS QuickControls2)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
-add_subdirectory(Engine)
 add_subdirectory(App)
 
 if(MMORPGCLIENT_BUILD_TESTS)

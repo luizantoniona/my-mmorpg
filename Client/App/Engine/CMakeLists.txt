@@ -16,5 +16,6 @@ target_include_directories(EngineLib
 )
 
 target_link_libraries(EngineLib
-    PUBLIC Qt6::Core
+    PRIVATE Qt6::Core
+    PRIVATE Qt6::QuickControls2
 )
