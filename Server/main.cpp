@@ -6,7 +6,7 @@
 
 namespace {
 constexpr const char* DATABASE_PATH = "../../../Database/ServerDatabase";
-constexpr const char* WORLD_DATA_PATH = "../../../Data/World";
+constexpr const char* WORLD_DATA_PATH = "../../../Data/World/";
 } // namespace
 
 int main() {
