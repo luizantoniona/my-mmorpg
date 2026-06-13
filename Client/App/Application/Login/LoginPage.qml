@@ -1,12 +1,18 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import Controls
 import Managers
 
 Item {
     id: root
 
     required property AccountManager vAccountManager
+    required property ServerManager vServerManager
+
+    LoginPageControl {
+        id: control
+    }
 
     Rectangle {
         id: background
