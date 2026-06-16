@@ -1,16 +1,16 @@
-#ifndef USERMODEL_H
-#define USERMODEL_H
+#ifndef ACCOUNTMODEL_H
+#define ACCOUNTMODEL_H
 
 #include <string>
 
 namespace Engine {
 
-class UserModel {
+class AccountModel {
 public:
-    UserModel();
+    AccountModel();
 
-    int idUser() const;
-    void setIdUser( int idUser );
+    int idAccount() const;
+    void setIdAccount( int idAccount );
 
     std::string dsUsername() const;
     void setDsUsername( const std::string& dsUsername );
@@ -19,11 +19,11 @@ public:
     void setDsPassword( const std::string& dsPassword );
 
 private:
-    int _idUser;
+    int _idAccount;
     std::string _dsUsername;
     std::string _dsPassword;
 };
 
 } // namespace Engine
 
-#endif // USERMODEL_H
+#endif // ACCOUNTMODEL_H

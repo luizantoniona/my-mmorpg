@@ -1,15 +1,15 @@
-CREATE TABLE user (
-    id_user INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE account (
+    id_account INTEGER PRIMARY KEY AUTOINCREMENT,
     ds_username VARCHAR,
     ds_password VARCHAR
 );
 
 CREATE TABLE 'character' (
     id_character INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_user INTEGER NOT NULL,
+    id_account INTEGER NOT NULL,
     ds_name VARCHAR(20) NOT NULL,
 
-    FOREIGN KEY (id_user) REFERENCES user(id_user) ON DELETE CASCADE
+    FOREIGN KEY (id_account) REFERENCES account(id_account) ON DELETE CASCADE
 );
 
 CREATE TABLE character_inventory (

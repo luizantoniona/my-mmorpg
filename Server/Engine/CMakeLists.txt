@@ -1,18 +1,18 @@
 file(GLOB_RECURSE ENGINE_SOURCES
+    Account/*.cpp
     Character/*.cpp
     Commons/*.cpp
     Database/*.cpp
     Network/*.cpp
-    User/*.cpp
     World/*.cpp
 )
 
 file(GLOB_RECURSE ENGINE_HEADERS
+    Account/*.h
     Character/*.h
     Commons/*.h
     Database/*.h
     Network/*.h
-    User/*.h
     World/*.h
 )
 

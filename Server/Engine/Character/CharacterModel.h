@@ -12,15 +12,15 @@ public:
     int idCharacter() const;
     void setIdCharacter( int idCharacter );
 
-    int idUser() const;
-    void setIdUser( int idUser );
+    int idAccount() const;
+    void setIdAccount( int idAccount );
 
     std::string name() const;
     void setName( const std::string& name );
 
 private:
     int _idCharacter;
-    int _idUser;
+    int _idAccount;
     std::string _name;
 };
 

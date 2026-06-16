@@ -1,9 +1,9 @@
 #include "AuthController.h"
 
+#include <Engine/Account/AccountRepository.h>
 #include <Engine/Commons/Singleton.h>
 #include <Engine/Database/Database.h>
 #include <Engine/Network/NetworkServer.h>
-#include <Engine/User/UserRepository.h>
 
 namespace Engine {
 
@@ -31,7 +31,7 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
     std::string username = ( *requestJson )[ "username" ].asString();
     std::string password = ( *requestJson )[ "password" ].asString();
 
-    auto user = UserRepository().findByUsernameAndPassword( username, password );
+    auto user = AccountRepository().findByUsernameAndPassword( username, password );
 
     if ( !user ) {
         responseJson[ "error" ] = "Invalid credentials";
@@ -41,9 +41,9 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
         return;
     }
 
-    std::string sessionId = Singleton<NetworkServer>::instance().createSession( user->idUser(), user->dsUsername() );
+    std::string sessionId = Singleton<NetworkServer>::instance().createSession( user->idAccount(), user->dsUsername() );
 
-    responseJson[ "userID" ] = user->idUser();
+    responseJson[ "userID" ] = user->idAccount();
     responseJson[ "username" ] = user->dsUsername();
     responseJson[ "sessionID" ] = sessionId;
     responseJson[ "message" ] = "Login successful";
@@ -69,14 +69,14 @@ void AuthController::logout( const drogon::HttpRequestPtr& request, std::functio
 
             std::cout << "AuthController::logout" << " [UUID] " << sessionId << std::endl;
 
-            responseJson["message"] = "Logout successful";
+            responseJson[ "message" ] = "Logout successful";
             auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
             response->setStatusCode( drogon::k200OK );
             callback( response );
             return;
 
         } else {
-            responseJson["error"] = "Failed to destroy session";
+            responseJson[ "error" ] = "Failed to destroy session";
             auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
             response->setStatusCode( drogon::k500InternalServerError );
             callback( response );
@@ -120,7 +120,7 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
         return;
     }
 
-    UserRepository userRepository;
+    AccountRepository userRepository;
 
     if ( userRepository.findByUsername( username ) ) {
         responseJson[ "error" ] = "Username already exists";
@@ -130,7 +130,7 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
         return;
     }
 
-    if ( !userRepository.createUser( username, password ) ) {
+    if ( !userRepository.createAccount( username, password ) ) {
         responseJson[ "error" ] = "Failed to create user";
         auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
         response->setStatusCode( drogon::k500InternalServerError );
@@ -148,9 +148,9 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
         return;
     }
 
-    std::string sessionId = Singleton<NetworkServer>::instance().createSession( user->idUser(), user->dsUsername() );
+    std::string sessionId = Singleton<NetworkServer>::instance().createSession( user->idAccount(), user->dsUsername() );
 
-    responseJson[ "userID" ] = user->idUser();
+    responseJson[ "userID" ] = user->idAccount();
     responseJson[ "username" ] = user->dsUsername();
     responseJson[ "sessionID" ] = sessionId;
     responseJson[ "message" ] = "User created successfully";

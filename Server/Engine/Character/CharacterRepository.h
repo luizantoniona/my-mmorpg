@@ -14,13 +14,13 @@ class CharacterRepository : public Repository {
 public:
     explicit CharacterRepository();
 
-    int createCharacter( const int idUser, const std::string& dsName );
+    int createCharacter( const int idAccount, const std::string& dsName );
     bool deleteCharacter( int idCharacter );
     bool updateCharacter( CharacterModel character );
 
-    std::vector<std::unique_ptr<CharacterModel>> findAllByIdUser( const int idUser );
+    std::vector<std::unique_ptr<CharacterModel>> findAllByIdAccount( const int idAccount );
 
-    std::unique_ptr<CharacterModel> findByIdUserAndIdCharacter( const int idUser, const int idCharacter );
+    std::unique_ptr<CharacterModel> findByIdAccountAndIdCharacter( const int idAccount, const int idCharacter );
 };
 
 } // namespace Engine

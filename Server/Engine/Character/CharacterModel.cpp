@@ -4,7 +4,7 @@ namespace Engine {
 
 CharacterModel::CharacterModel() :
     _idCharacter( 0 ),
-    _idUser( 0 ),
+    _idAccount( 0 ),
     _name( "" ) {
 }
 
@@ -16,12 +16,12 @@ void CharacterModel::setIdCharacter( int idCharacter ) {
     _idCharacter = idCharacter;
 }
 
-int CharacterModel::idUser() const {
-    return _idUser;
+int CharacterModel::idAccount() const {
+    return _idAccount;
 }
 
-void CharacterModel::setIdUser( int idUser ) {
-    _idUser = idUser;
+void CharacterModel::setIdAccount( int idAccount ) {
+    _idAccount = idAccount;
 }
 
 std::string CharacterModel::name() const {
