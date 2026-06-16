@@ -10,8 +10,8 @@ class NetworkSession {
 public:
     NetworkSession();
 
-    int idUser() const;
-    void setIdUser( const int idUser );
+    int idAccount() const;
+    void setIdAccount( const int idAccount );
 
     std::string username() const;
     void setUsername( const std::string& username );
@@ -23,7 +23,7 @@ public:
     void setCreatedAt( std::chrono::system_clock::time_point createdAt );
 
 private:
-    int _idUser;
+    int _idAccount;
     std::string _username;
     std::string _uuid;
     std::chrono::system_clock::time_point _createdAt;

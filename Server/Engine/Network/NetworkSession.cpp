@@ -3,17 +3,18 @@
 namespace Engine {
 
 NetworkSession::NetworkSession() :
-    _idUser( 0 ),
+    _idAccount( 0 ),
     _username( "" ),
     _uuid( "" ),
-    _createdAt() {}
-
-int NetworkSession::idUser() const {
-    return _idUser;
+    _createdAt() {
 }
 
-void NetworkSession::setIdUser( const int idUser ) {
-    _idUser = idUser;
+int NetworkSession::idAccount() const {
+    return _idAccount;
+}
+
+void NetworkSession::setIdAccount( const int idAccount ) {
+    _idAccount = idAccount;
 }
 
 std::string NetworkSession::username() const {

@@ -12,13 +12,13 @@ NetworkServer::~NetworkServer() {
     clearSessions();
 }
 
-std::string NetworkServer::createSession( const int idUser, const std::string& username ) {
+std::string NetworkServer::createSession( const int idAccount, const std::string& username ) {
     std::lock_guard lock( _sessionMutex );
 
     std::string sessionId = drogon::utils::getUuid();
 
     NetworkSession session;
-    session.setIdUser( idUser );
+    session.setIdAccount( idAccount );
     session.setUsername( username );
     session.setUuid( sessionId );
     session.setCreatedAt( std::chrono::system_clock::now() );

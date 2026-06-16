@@ -15,7 +15,7 @@ public:
     NetworkServer();
     ~NetworkServer();
 
-    std::string createSession( const int idUser, const std::string& username );
+    std::string createSession( const int idAccount, const std::string& username );
 
     bool deleteSession( const std::string& uuid );
 

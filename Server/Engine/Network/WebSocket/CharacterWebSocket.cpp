@@ -57,7 +57,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     connection->setContext( std::make_shared<std::string>( sessionId ) );
 
-    // if ( !Singleton<WorldManager>::instance().addCharacter( sessionId, session->idUser(), idCharacter, connection ) ) {
+    // if ( !Singleton<WorldManager>::instance().addCharacter( sessionId, session->idAccount(), idCharacter, connection ) ) {
     //     connection->send( R"({"error":"invalid_character"})" );
     //     connection->shutdown();
     //     return;
