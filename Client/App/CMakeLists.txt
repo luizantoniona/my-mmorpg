@@ -15,7 +15,11 @@ qt_add_qml_module(
   Application/ApplicationWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
+  Application/Login/LoginBackground.qml
+  Application/Login/LoginCardFrame.qml
   Application/Login/LoginPage.qml
+  Component/ButtonCustom.qml
+  Component/InputFieldCustom.qml
   Theme/Colors.qml
   Theme/Spaces.qml)
 
