@@ -1,5 +1,7 @@
 find_package(GTest REQUIRED)
 
-add_subdirectory(Unit)
+add_executable(MMORPGServerTests test_example.cpp)
 
-enable_testing()
+target_link_libraries(MMORPGServerTests PRIVATE GTest::gtest_main)
+
+add_test(NAME MMORPGServerTests COMMAND MMORPGServerTests)
