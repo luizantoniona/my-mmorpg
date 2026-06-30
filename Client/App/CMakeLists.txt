@@ -29,6 +29,7 @@ qt_add_qml_module(
   Application/Login/LoginPage.qml
   Component/ButtonCustom.qml
   Component/InputFieldCustom.qml
+  Component/PanelCustom.qml
   Theme/Colors.qml
   Theme/Spaces.qml)
 

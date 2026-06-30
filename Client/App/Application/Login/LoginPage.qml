@@ -20,73 +20,29 @@ Item {
 
         RowLayout {
 
-            ColumnLayout {
+            PanelCustom {
+                width: 400
+                height: 300
 
-                Rectangle {
-                    width: 50
-                    height: 50
-                    color: Colors.primary
-                }
+                ColumnLayout {
+                    anchors.centerIn: parent
 
-                Rectangle {
-                    width: 50
-                    height: 50
-                    color: Colors.primaryHover
-                }
+                    InputFieldCustom {
+                        vTitle: "Usuário"
+                        vPlaceholder: "Digite seu usuário"
+                    }
 
-                Rectangle {
-                    width: 50
-                    height: 50
-                    color: Colors.primaryPressed
-                }
+                    InputFieldCustom {
+                        vTitle: "Senha"
+                        vPlaceholder: "Digite sua senha"
+                        vEchoMode: TextInput.Password
+                    }
 
-                Rectangle {
-                    width: 50
-                    height: 50
-                    color: Colors.background
-                }
-
-                Rectangle {
-                    width: 50
-                    height: 50
-                    color: Colors.surface
-                }
-
-                Rectangle {
-                    width: 50
-                    height: 50
-                    color: Colors.accent
-                }
-
-                Rectangle {
-                    width: 50
-                    height: 50
-                    color: Colors.accentHover
-                }
-
-                Rectangle {
-                    width: 50
-                    height: 50
-                    color: Colors.accentPressed
-                }
-            }
-
-            ColumnLayout {
-                InputFieldCustom {
-                    vTitle: "Usuário"
-                    vPlaceholder: "Digite seu usuário"
-                }
-
-                InputFieldCustom {
-                    vTitle: "Senha"
-                    vPlaceholder: "Digite sua senha"
-                    vEchoMode: TextInput.Password
-                }
-
-                ButtonCustom {
-                    vText: "Entrar"
-                    onClicked: function (){
-                        console.log("Login")
+                    ButtonCustom {
+                        vText: "Entrar"
+                        onClicked: function (){
+                            console.log("Login")
+                        }
                     }
                 }
             }

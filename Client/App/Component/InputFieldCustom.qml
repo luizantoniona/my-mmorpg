@@ -6,31 +6,31 @@ import MMORPGClient
 Item {
     id: root
 
-    property string vTitle: ""
-    property string vText: ""
-    property string vPlaceholder: ""
     property int vEchoMode: TextInput.Normal
+    property string vPlaceholder: ""
+    property string vText: ""
+    property string vTitle: ""
 
-    implicitWidth: 280
     implicitHeight: 72
+    implicitWidth: 280
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 4
+        spacing: Spaces.spacing8
 
         Text {
+            color: Colors.text
             text: root.vTitle
-            color: Colors.textOnBackground
             visible: root.vTitle !== ""
         }
 
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: 40
-            radius: 6
-            color: Colors.surface
+            border.color: Colors.primary0
             border.width: 1
-            border.color: Colors.outline
+            color: Colors.primary1
+            implicitHeight: 40
+            radius: 8
 
             TextField {
                 id: textField
@@ -38,11 +38,12 @@ Item {
                 anchors.fill: parent
                 anchors.leftMargin: 12
                 anchors.rightMargin: 12
-                text: root.vText
-                placeholderText: root.vPlaceholder
-                echoMode: root.vEchoMode
                 background: null
-                color: Colors.textOnSurface
+                color: Colors.text
+                echoMode: root.vEchoMode
+                placeholderText: root.vPlaceholder
+                text: root.vText
+
                 onTextChanged: root.vText = text
             }
         }

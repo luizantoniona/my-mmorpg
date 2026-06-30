@@ -27,7 +27,7 @@ Item {
     Rectangle {
         id: background
         anchors.fill: parent
-        color: '#ffffff'
+        color: Colors.background0
     }
 
     StackView {

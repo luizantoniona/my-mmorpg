@@ -10,20 +10,20 @@ Item {
     property string vText: ""
     property bool vEnabled: true
 
-        implicitWidth: 160
-        implicitHeight: 40
+    implicitWidth: 160
+    implicitHeight: 40
 
     Rectangle {
         anchors.fill: parent
-        radius: 6
-        color: mouseArea.pressed ? Colors.primaryPressed : Colors.primary
-        border.width: 1
-        border.color: Colors.accent
+        radius: 8
+        color: mouseArea.pressed ? Colors.primary2 : Colors.primary1
+        border.width: 2
+        border.color: Colors.primary0
 
         Text {
             anchors.centerIn: parent
             text: root.vText
-            color: Colors.textOnBackground
+            color: Colors.text
             font.bold: true
         }
 

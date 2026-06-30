@@ -3,23 +3,30 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    // Brand
-    readonly property color primary: "#083B2F"
-    readonly property color primaryHover: "#0B6E4F"
-    readonly property color primaryPressed: "#0A5D3F"
-
     // Backgrounds
-    readonly property color background: "#1A1A1A"
-    readonly property color surface: "#E8E0C8"
+    readonly property color background0: "#0A0A0A"
+    readonly property color background1: "#1A1A1A"
+    readonly property color background2: "#2A2A2A"
+    readonly property color background3: "#3A3A3A"
+    readonly property color background4: "#4A4A4A"
 
-    // Details
-    readonly property color accent: "#D4AF37"
-    readonly property color accentHover: "#E4C14E"
-    readonly property color accentPressed: "#B99221"
+    // Primary - Twilight Shadows
+    readonly property color primary0: "#583434"
+    readonly property color primary1: "#854E4E"
+    readonly property color primary2: "#B26868"
+
+    // Secondary - Black Velvet
+    readonly property color secondary0: "#341534"
+    readonly property color secondary1: "#4E1F4E"
+    readonly property color secondary2: "#682A68"
+
+    // Accent - Black Gold
+    readonly property color accent0: "#8A6E1A"
+    readonly property color accent1: "#C9A12A"
+    readonly property color accent2: "#F8D43A"
 
     // Text
-    readonly property color textPrimary: "#1A1A1A"
-    readonly property color textSecondary: "#F0F0F0"
+    readonly property color text: "#F0F0F0"
 
     // Status
     readonly property color success: "#56C271"
