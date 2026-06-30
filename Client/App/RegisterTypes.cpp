@@ -10,11 +10,11 @@
 
 void RegisterTypes::registerTypes() {
     // Page Controls
-    qmlRegisterType<AccountPageControl>( "Controls", 1, 0, "AccountPageControl" );
-    qmlRegisterType<GamePageControl>( "Controls", 1, 0, "GamePageControl" );
-    qmlRegisterType<LoginPageControl>( "Controls", 1, 0, "LoginPageControl" );
+    qmlRegisterType<AccountPageControl>( "MMORPGClient.Controls", 1, 0, "AccountPageControl" );
+    qmlRegisterType<GamePageControl>( "MMORPGClient.Controls", 1, 0, "GamePageControl" );
+    qmlRegisterType<LoginPageControl>( "MMORPGClient.Controls", 1, 0, "LoginPageControl" );
 
     // Managers
-    qmlRegisterType<AccountManager>( "Managers", 1, 0, "AccountManager" );
-    qmlRegisterType<ServerManager>( "Managers", 1, 0, "ServerManager" );
+    qmlRegisterType<AccountManager>( "MMORPGClient.Managers", 1, 0, "AccountManager" );
+    qmlRegisterType<ServerManager>( "MMORPGClient.Managers", 1, 0, "ServerManager" );
 }

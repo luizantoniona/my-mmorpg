@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import MMORPGClient
 
 Window {
     id: window

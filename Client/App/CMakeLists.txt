@@ -1,8 +1,19 @@
-file(GLOB_RECURSE APP_SOURCES RegisterTypes.cpp Application/*.cpp Manager/*.cpp)
+set(APP_SOURCES
+    RegisterTypes.cpp Application/Account/AccountPageControl.cpp
+    Application/Game/GamePageControl.cpp Application/Login/LoginPageControl.cpp
+    Manager/AccountManager.cpp Manager/ServerManager.cpp)
 
-file(GLOB_RECURSE APP_HEADERS RegisterTypes.h Application/*.h Manager/*.h)
+set(APP_HEADERS
+    RegisterTypes.h Application/Account/AccountPageControl.h
+    Application/Game/GamePageControl.h Application/Login/LoginPageControl.h
+    Manager/AccountManager.h Manager/ServerManager.h)
 
 qt_add_executable(MMORPGClientApp main.cpp ${APP_SOURCES} ${APP_HEADERS})
+
+set_source_files_properties(
+  ${CMAKE_CURRENT_SOURCE_DIR}/Theme/Colors.qml
+  ${CMAKE_CURRENT_SOURCE_DIR}/Theme/Spaces.qml PROPERTIES QT_QML_SINGLETON_TYPE
+                                                          TRUE)
 
 qt_add_qml_module(
   MMORPGClientApp
@@ -15,18 +26,11 @@ qt_add_qml_module(
   Application/ApplicationWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
-  Application/Login/LoginBackground.qml
-  Application/Login/LoginCardFrame.qml
   Application/Login/LoginPage.qml
   Component/ButtonCustom.qml
   Component/InputFieldCustom.qml
   Theme/Colors.qml
   Theme/Spaces.qml)
-
-set_source_files_properties(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Theme/Colors.qml
-  ${CMAKE_CURRENT_SOURCE_DIR}/Theme/Spaces.qml
-  PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 # file(GLOB_RECURSE SVG_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} Assets/*.svg
 # )

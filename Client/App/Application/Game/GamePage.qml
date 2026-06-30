@@ -1,6 +1,7 @@
 import QtQuick
-import Controls
-import Managers
+import MMORPGClient
+import MMORPGClient.Controls
+import MMORPGClient.Managers
 
 Item {
     id: root

@@ -1,8 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import Controls
-import Managers
+import MMORPGClient
+import MMORPGClient.Controls
+import MMORPGClient.Managers
 
 Item {
     id: root
@@ -14,104 +15,79 @@ Item {
         id: control
     }
 
-    LoginBackground {
-        anchors.fill: parent
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        color: "#000000"
-        opacity: 0.28
-    }
-
     Item {
         anchors.fill: parent
 
-        LoginCardFrame {
-            id: loginCard
-            width: Math.min(460, parent.width * 0.85)
-            height: 500
-            anchors.centerIn: parent
+        RowLayout {
 
             ColumnLayout {
-                anchors.fill: parent
-                spacing: 14
 
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 10
+                Rectangle {
+                    width: 50
+                    height: 50
+                    color: Colors.primary
                 }
 
-                Label {
-                    Layout.fillWidth: true
-                    text: "MyMMORPG"
-                    color: "#c9a227"
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: 38
-                    font.bold: true
+                Rectangle {
+                    width: 50
+                    height: 50
+                    color: Colors.primaryHover
                 }
 
-                Label {
-                    Layout.fillWidth: true
-                    text: "A realm awaits"
-                    color: "#d4c791"
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: 14
-                    opacity: 0.9
+                Rectangle {
+                    width: 50
+                    height: 50
+                    color: Colors.primaryPressed
                 }
 
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 8
+                Rectangle {
+                    width: 50
+                    height: 50
+                    color: Colors.background
+                }
+
+                Rectangle {
+                    width: 50
+                    height: 50
+                    color: Colors.surface
+                }
+
+                Rectangle {
+                    width: 50
+                    height: 50
+                    color: Colors.accent
+                }
+
+                Rectangle {
+                    width: 50
+                    height: 50
+                    color: Colors.accentHover
+                }
+
+                Rectangle {
+                    width: 50
+                    height: 50
+                    color: Colors.accentPressed
+                }
+            }
+
+            ColumnLayout {
+                InputFieldCustom {
+                    vTitle: "Usuário"
+                    vPlaceholder: "Digite seu usuário"
                 }
 
                 InputFieldCustom {
-                    id: userField
-                    Layout.fillWidth: true
-                    labelText: "Usuario"
-                    placeholderText: "Digite seu usuario"
-                }
-
-                InputFieldCustom {
-                    id: passwordField
-                    Layout.fillWidth: true
-                    labelText: "Senha"
-                    placeholderText: "Digite sua senha"
-                    echoMode: TextInput.Password
-                }
-
-                InputFieldCustom {
-                    id: serverField
-                    Layout.fillWidth: true
-                    labelText: "Servidor"
-                    placeholderText: "127.0.0.1:8080"
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 4
+                    vTitle: "Senha"
+                    vPlaceholder: "Digite sua senha"
+                    vEchoMode: TextInput.Password
                 }
 
                 ButtonCustom {
-                    id: loginButton
-                    Layout.fillWidth: true
-                    text: "Entrar"
-                    primaryColor: "#0b3d2e"
-                    hoverColor: "#1c6b4c"
-                    borderColor: "#c9a227"
-                }
-
-                ButtonCustom {
-                    id: createAccountButton
-                    Layout.fillWidth: true
-                    text: "Criar conta"
-                    secondary: true
-                    borderColor: "#6d5430"
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    vText: "Entrar"
+                    onClicked: function (){
+                        console.log("Login")
+                    }
                 }
             }
         }

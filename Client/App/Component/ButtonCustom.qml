@@ -1,38 +1,39 @@
 import QtQuick
 import QtQuick.Controls
+import MMORPGClient
 
-Button {
+Item {
     id: root
 
-    property color primaryColor: "#0b3d2e"
-    property color hoverColor: "#1c6b4c"
-    property color borderColor: "#c9a227"
-    property color textColor: "#efe7c2"
-    property bool secondary: false
+    signal clicked()
 
-    implicitWidth: 220
-    implicitHeight: 44
-    hoverEnabled: true
+    property string vText: ""
+    property bool vEnabled: true
 
-    contentItem: Text {
-        text: root.text
-        color: root.secondary ? "#c9a227" : root.textColor
-        font.pixelSize: 15
-        font.bold: !root.secondary
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideRight
-    }
+        implicitWidth: 160
+        implicitHeight: 40
 
-    background: Rectangle {
+    Rectangle {
+        anchors.fill: parent
         radius: 6
-        border.width: root.secondary ? 1 : 2
-        border.color: root.borderColor
-        color: {
-            if (root.secondary)
-                return root.down ? "#2a2516" : root.hovered ? "#1f1a0f" : "#17130c";
+        color: mouseArea.pressed ? Colors.primaryPressed : Colors.primary
+        border.width: 1
+        border.color: Colors.accent
 
-            return root.down ? root.primaryColor : root.hovered ? root.hoverColor : root.primaryColor;
+        Text {
+            anchors.centerIn: parent
+            text: root.vText
+            color: Colors.textOnBackground
+            font.bold: true
+        }
+
+        MouseArea {
+            id: mouseArea
+
+            anchors.fill: parent
+            enabled: root.vEnabled
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.clicked()
         }
     }
 }

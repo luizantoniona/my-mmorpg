@@ -1,7 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Managers
+import MMORPGClient
+import MMORPGClient.Controls
+import MMORPGClient.Managers
 
 Item {
     id: root
