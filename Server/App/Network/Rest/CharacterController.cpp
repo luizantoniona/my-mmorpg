@@ -2,13 +2,13 @@
 
 #include <optional>
 
-#include <Engine/Character/CharacterRepository.h>
+#include <Database/Database.h>
 #include <Engine/Commons/Singleton.h>
-#include <Engine/Database/Database.h>
-#include <Engine/Network/NetworkServer.h>
-#include <Engine/Network/NetworkSession.h>
+#include <Network/NetworkServer.h>
+#include <Network/NetworkSession.h>
+#include <Repository/CharacterRepository.h>
 
-namespace Engine {
+namespace Server {
 
 void CharacterController::create( const drogon::HttpRequestPtr& request, std::function<void( const drogon::HttpResponsePtr& )>&& callback ) const {
     auto token = request->getHeader( "Authorization" );
@@ -21,7 +21,7 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
     }
 
     std::string sessionId = token.substr( prefix.length() );
-    std::optional<NetworkSession> session = Singleton<NetworkServer>::instance().getSession( sessionId );
+    std::optional<NetworkSession> session = Engine::Singleton<NetworkServer>::instance().getSession( sessionId );
 
     if ( !session ) {
         auto resp = drogon::HttpResponse::newHttpResponse();
@@ -71,7 +71,7 @@ void CharacterController::remove( const drogon::HttpRequestPtr& request, std::fu
     }
 
     std::string sessionId = token.substr( prefix.length() );
-    std::optional<NetworkSession> session = Singleton<NetworkServer>::instance().getSession( sessionId );
+    std::optional<NetworkSession> session = Engine::Singleton<NetworkServer>::instance().getSession( sessionId );
 
     if ( !session ) {
         auto resp = drogon::HttpResponse::newHttpResponse();
@@ -121,7 +121,7 @@ void CharacterController::list( const drogon::HttpRequestPtr& request, std::func
 
     if ( token.rfind( prefix, 0 ) == 0 ) {
         std::string sessionId = token.substr( prefix.length() );
-        std::optional<NetworkSession> session = Singleton<NetworkServer>::instance().getSession( sessionId );
+        std::optional<NetworkSession> session = Engine::Singleton<NetworkServer>::instance().getSession( sessionId );
 
         if ( session ) {
             int idAccount = session->idAccount();
@@ -164,4 +164,4 @@ void CharacterController::list( const drogon::HttpRequestPtr& request, std::func
     callback( resp );
 }
 
-} // namespace Engine
+} // namespace Server

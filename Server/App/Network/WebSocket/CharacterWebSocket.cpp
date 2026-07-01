@@ -1,10 +1,10 @@
 #include "CharacterWebSocket.h"
 
 #include <Engine/Commons/Singleton.h>
-#include <Engine/Network/NetworkServer.h>
-#include <Engine/World/WorldManager.h>
+#include <Manager/WorldManager.h>
+#include <Network/NetworkServer.h>
 
-namespace Engine {
+namespace Server {
 
 void CharacterWebSocket::handleNewMessage( const drogon::WebSocketConnectionPtr& connection, std::string&& message, const drogon::WebSocketMessageType& type ) {
     auto sessionIdPtr = connection->getContext<std::string>();
@@ -47,7 +47,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     int idCharacter = std::stoi( characterParam );
 
-    auto& server = Singleton<NetworkServer>::instance();
+    auto& server = Engine::Singleton<NetworkServer>::instance();
     auto session = server.getSession( sessionId );
     if ( !session ) {
         connection->send( R"({"error":"invalid_session"})" );
@@ -76,4 +76,4 @@ void CharacterWebSocket::handleConnectionClosed( const drogon::WebSocketConnecti
     // Singleton<WorldManager>::instance().removeCharacter( *uuidPtr );
 }
 
-} // namespace Engine
+} // namespace Server

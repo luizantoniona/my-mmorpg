@@ -3,7 +3,7 @@
 
 #include <sqlite3.h>
 
-namespace Engine {
+namespace Server {
 
 class Repository {
 public:
@@ -13,6 +13,6 @@ protected:
     sqlite3* _db;
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // REPOSITORY_H

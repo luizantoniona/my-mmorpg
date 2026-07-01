@@ -3,10 +3,10 @@
 #include <Engine/Commons/JsonHelper.h>
 #include <Engine/Commons/Singleton.h>
 
-namespace Engine {
+namespace Server {
 
 MessageReceiver::MessageReceiver() {
-    _worldManager = &Singleton<WorldManager>::instance();
+    _worldManager = &Engine::Singleton<WorldManager>::instance();
 }
 
 void MessageReceiver::receive( const std::string& sessionId, const std::string& message ) {
@@ -14,7 +14,7 @@ void MessageReceiver::receive( const std::string& sessionId, const std::string& 
         return;
     }
 
-    Json::Value messageJson = JsonHelper::parseJsonString( message );
+    Json::Value messageJson = Engine::JsonHelper::parseJsonString( message );
     if ( messageJson.isNull() || !messageJson.isObject() ) {
         return;
     }
@@ -22,4 +22,4 @@ void MessageReceiver::receive( const std::string& sessionId, const std::string& 
     // _worldManager->handleMessage( sessionId, messageJson );
 }
 
-} // namespace Engine
+} // namespace Server

@@ -1,10 +1,10 @@
 #include "AuthFilter.h"
 
 #include <Engine/Commons/Singleton.h>
-#include <Engine/Network/NetworkServer.h>
-#include <Engine/Network/NetworkSession.h>
+#include <Network/NetworkServer.h>
+#include <Network/NetworkSession.h>
 
-namespace Engine {
+namespace Server {
 
 void AuthFilter::doFilter( const drogon::HttpRequestPtr& request, drogon::FilterCallback&& callback, drogon::FilterChainCallback&& chainCallback ) {
     if ( request->method() == drogon::HttpMethod::Options ) {
@@ -18,7 +18,7 @@ void AuthFilter::doFilter( const drogon::HttpRequestPtr& request, drogon::Filter
     if ( token.rfind( prefix, 0 ) == 0 ) {
         std::string sessionId = token.substr( prefix.length() );
 
-        std::optional<NetworkSession> session = Singleton<NetworkServer>::instance().getSession( sessionId );
+        std::optional<NetworkSession> session = Engine::Singleton<NetworkServer>::instance().getSession( sessionId );
         if ( session ) {
             chainCallback();
             return;
@@ -31,4 +31,4 @@ void AuthFilter::doFilter( const drogon::HttpRequestPtr& request, drogon::Filter
     callback( res );
 }
 
-} // namespace Engine
+} // namespace Server

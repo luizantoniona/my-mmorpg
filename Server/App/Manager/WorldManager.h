@@ -7,7 +7,7 @@
 
 #include <Engine/World/WorldModel.h>
 
-namespace Manager {
+namespace Server {
 
 class WorldManager {
 public:
@@ -23,6 +23,6 @@ private:
     std::unique_ptr<Engine::WorldModel> _world;
 };
 
-} // namespace Manager
+} // namespace Server
 
 #endif // WORLDMANAGER_H

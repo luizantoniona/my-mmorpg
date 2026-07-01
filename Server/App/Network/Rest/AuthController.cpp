@@ -1,11 +1,11 @@
 #include "AuthController.h"
 
-#include <Engine/Account/AccountRepository.h>
+#include <Database/Database.h>
 #include <Engine/Commons/Singleton.h>
-#include <Engine/Database/Database.h>
-#include <Engine/Network/NetworkServer.h>
+#include <Network/NetworkServer.h>
+#include <Repository/AccountRepository.h>
 
-namespace Engine {
+namespace Server {
 
 void AuthController::login( const drogon::HttpRequestPtr& request, std::function<void( const drogon::HttpResponsePtr& )>&& callback ) const {
     auto requestJson = request->getJsonObject();
@@ -41,7 +41,7 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
         return;
     }
 
-    std::string sessionId = Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
+    std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
     responseJson[ "idAccount" ] = account->idAccount();
     responseJson[ "username" ] = account->dsUsername();
@@ -63,9 +63,9 @@ void AuthController::logout( const drogon::HttpRequestPtr& request, std::functio
 
     if ( token.rfind( prefix, 0 ) == 0 ) {
         std::string sessionId = token.substr( prefix.length() );
-        std::optional<NetworkSession> session = Singleton<NetworkServer>::instance().getSession( sessionId );
+        std::optional<NetworkSession> session = Engine::Singleton<NetworkServer>::instance().getSession( sessionId );
 
-        if ( session && Singleton<NetworkServer>::instance().deleteSession( sessionId ) ) {
+        if ( session && Engine::Singleton<NetworkServer>::instance().deleteSession( sessionId ) ) {
 
             std::cout << "AuthController::logout" << " [UUID] " << sessionId << std::endl;
 
@@ -148,7 +148,7 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
         return;
     }
 
-    std::string sessionId = Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
+    std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
     responseJson[ "idAccount" ] = account->idAccount();
     responseJson[ "username" ] = account->dsUsername();
@@ -162,4 +162,4 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
     callback( response );
 }
 
-} // namespace Engine
+} // namespace Server

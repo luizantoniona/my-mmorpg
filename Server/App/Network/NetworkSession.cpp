@@ -1,6 +1,6 @@
 #include "NetworkSession.h"
 
-namespace Engine {
+namespace Server {
 
 NetworkSession::NetworkSession() :
     _idAccount( 0 ),
@@ -41,4 +41,4 @@ void NetworkSession::setCreatedAt( std::chrono::system_clock::time_point created
     _createdAt = createdAt;
 }
 
-} // namespace Engine
+} // namespace Server

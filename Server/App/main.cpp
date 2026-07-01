@@ -1,8 +1,8 @@
 #include <drogon/drogon.h>
 
+#include <Database/Database.h>
 #include <Engine/Commons/Singleton.h>
-#include <Engine/Database/Database.h>
-#include <Engine/World/WorldManager.h>
+#include <Manager/WorldManager.h>
 
 namespace {
 constexpr const char* DATABASE_PATH = "../../../Database/ServerDatabase";
@@ -13,10 +13,10 @@ int main() {
     std::cout << "Starting Server" << std::endl;
 
     // --- Database ---
-    Engine::Singleton<Engine::Database>::instance().initialize( DATABASE_PATH );
+    Engine::Singleton<Server::Database>::instance().initialize( DATABASE_PATH );
 
     // --- World ---
-    Engine::Singleton<Engine::WorldManager>::instance().initialize( WORLD_DATA_PATH );
+    Engine::Singleton<Server::WorldManager>::instance().initialize( WORLD_DATA_PATH );
 
     drogon::app()
         .addListener( "0.0.0.0", 8080 )

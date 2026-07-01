@@ -5,7 +5,7 @@
 #include <Engine/Commons/Singleton.h>
 #include <Engine/World/WorldFactory.h>
 
-namespace Manager {
+namespace Server {
 
 WorldManager::WorldManager() :
     _running( false ),
@@ -52,4 +52,4 @@ void WorldManager::finalize() {
     }
 }
 
-} // namespace Manager
+} // namespace Server

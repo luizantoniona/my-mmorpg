@@ -4,11 +4,10 @@
 #include <memory>
 #include <vector>
 
-#include <Database/Repository.h>
+#include <Engine/Character/CharacterModel.h>
+#include <Repository/Repository.h>
 
-#include "CharacterModel.h"
-
-namespace Engine {
+namespace Server {
 
 class CharacterRepository : public Repository {
 public:
@@ -16,13 +15,13 @@ public:
 
     int createCharacter( const int idAccount, const std::string& dsName );
     bool deleteCharacter( int idCharacter );
-    bool updateCharacter( CharacterModel character );
+    bool updateCharacter( Engine::CharacterModel character );
 
-    std::vector<std::unique_ptr<CharacterModel>> findAllByIdAccount( const int idAccount );
+    std::vector<std::unique_ptr<Engine::CharacterModel>> findAllByIdAccount( const int idAccount );
 
-    std::unique_ptr<CharacterModel> findByIdAccountAndIdCharacter( const int idAccount, const int idCharacter );
+    std::unique_ptr<Engine::CharacterModel> findByIdAccountAndIdCharacter( const int idAccount, const int idCharacter );
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // CHARACTERREPOSITORY_H

@@ -3,9 +3,9 @@
 
 #include <drogon/HttpController.h>
 
-#include <Engine/Network/Filter/AuthFilter.h>
+#include <Network/Filter/AuthFilter.h>
 
-namespace Engine {
+namespace Server {
 
 class AuthController : public drogon::HttpController<AuthController> {
 public:
@@ -22,6 +22,6 @@ public:
     void sign( const drogon::HttpRequestPtr& request, std::function<void( const drogon::HttpResponsePtr& )>&& callback ) const;
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // AUTHCONTROLLER_H

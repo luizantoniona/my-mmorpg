@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include <Engine/World/WorldManager.h>
+#include <Manager/WorldManager.h>
 
-namespace Engine {
+namespace Server {
 
 class MessageReceiver {
 public:
@@ -17,6 +17,6 @@ private:
     WorldManager* _worldManager;
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // MESSAGERECEIVER_H

@@ -1,13 +1,12 @@
 #include "Repository.h"
 
+#include <Database/Database.h>
 #include <Engine/Commons/Singleton.h>
 
-#include "Database.h"
-
-namespace Engine {
+namespace Server {
 
 Repository::Repository() :
-    _db( Singleton<Database>::instance().database() ) {
+    _db( Engine::Singleton<Database>::instance().database() ) {
 }
 
-} // namespace Engine
+} // namespace Server

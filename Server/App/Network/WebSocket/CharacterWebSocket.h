@@ -6,7 +6,7 @@
 
 #include "MessageReceiver.h"
 
-namespace Engine {
+namespace Server {
 
 class CharacterWebSocket : public drogon::WebSocketController<CharacterWebSocket> {
 public:
@@ -21,9 +21,9 @@ public:
     void handleConnectionClosed( const drogon::WebSocketConnectionPtr& connection ) override;
 
 private:
-    Engine::MessageReceiver _receiver;
+    MessageReceiver _receiver;
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // CHARACTERWEBSOCKET_H

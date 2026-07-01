@@ -8,7 +8,7 @@
 
 #include "NetworkSession.h"
 
-namespace Engine {
+namespace Server {
 
 class NetworkServer {
 public:
@@ -28,6 +28,6 @@ private:
     std::unordered_map<std::string, NetworkSession> _sessions;
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // NETWORKSERVER_H

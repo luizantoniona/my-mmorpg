@@ -4,11 +4,10 @@
 #include <memory>
 #include <string>
 
-#include <Engine/Database/Repository.h>
+#include <Engine/Account/AccountModel.h>
+#include <Repository/Repository.h>
 
-#include "AccountModel.h"
-
-namespace Engine {
+namespace Server {
 
 class AccountRepository : public Repository {
 public:
@@ -16,10 +15,10 @@ public:
 
     bool createAccount( std::string& username, std::string& password );
 
-    std::unique_ptr<AccountModel> findByUsername( const std::string& username );
-    std::unique_ptr<AccountModel> findByUsernameAndPassword( const std::string& username, const std::string& password );
+    std::unique_ptr<Engine::AccountModel> findByUsername( const std::string& username );
+    std::unique_ptr<Engine::AccountModel> findByUsernameAndPassword( const std::string& username, const std::string& password );
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // ACCOUNTREPOSITORY_H

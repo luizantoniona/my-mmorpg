@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace Engine {
+namespace Server {
 
 std::string QueryLoader::loadFromFile( const std::string& path ) {
     std::ifstream file( path );
@@ -21,4 +21,4 @@ std::string QueryLoader::loadFromString( const std::string& sql ) {
     return sql;
 }
 
-} // namespace Engine
+} // namespace Server

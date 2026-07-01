@@ -4,7 +4,7 @@
 #include <chrono>
 #include <string>
 
-namespace Engine {
+namespace Server {
 
 class NetworkSession {
 public:
@@ -29,6 +29,6 @@ private:
     std::chrono::system_clock::time_point _createdAt;
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // NETWORKSESSION_H

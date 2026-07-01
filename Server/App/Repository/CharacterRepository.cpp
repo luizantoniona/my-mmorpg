@@ -1,8 +1,8 @@
 #include "CharacterRepository.h"
 
-#include <Engine/Database/Query.h>
+#include <Database/Query.h>
 
-namespace Engine {
+namespace Server {
 
 CharacterRepository::CharacterRepository() :
     Repository() {
@@ -47,7 +47,7 @@ bool CharacterRepository::deleteCharacter( int idCharacter ) {
     return query.exec();
 }
 
-bool CharacterRepository::updateCharacter( CharacterModel character ) {
+bool CharacterRepository::updateCharacter( Engine::CharacterModel character ) {
     const int idCharacter = character.idCharacter();
 
     bool success = true;
@@ -59,7 +59,7 @@ bool CharacterRepository::updateCharacter( CharacterModel character ) {
     return success;
 }
 
-std::vector<std::unique_ptr<CharacterModel>> CharacterRepository::findAllByIdAccount( const int idAccount ) {
+std::vector<std::unique_ptr<Engine::CharacterModel>> CharacterRepository::findAllByIdAccount( const int idAccount ) {
     const std::string sql = R"SQL(
         SELECT
             id_character,
@@ -72,10 +72,10 @@ std::vector<std::unique_ptr<CharacterModel>> CharacterRepository::findAllByIdAcc
 
     query.bindInt( 1, idAccount );
 
-    std::vector<std::unique_ptr<CharacterModel>> characters;
+    std::vector<std::unique_ptr<Engine::CharacterModel>> characters;
 
     while ( query.step() ) {
-        auto character = std::make_unique<CharacterModel>();
+        auto character = std::make_unique<Engine::CharacterModel>();
         character->setIdCharacter( query.getColumnInt( 0 ) );
         character->setIdAccount( query.getColumnInt( 1 ) );
         character->setName( query.getColumnText( 2 ) );
@@ -86,7 +86,7 @@ std::vector<std::unique_ptr<CharacterModel>> CharacterRepository::findAllByIdAcc
     return characters;
 }
 
-std::unique_ptr<CharacterModel> CharacterRepository::findByIdAccountAndIdCharacter( const int idAccount, const int idCharacter ) {
+std::unique_ptr<Engine::CharacterModel> CharacterRepository::findByIdAccountAndIdCharacter( const int idAccount, const int idCharacter ) {
     const std::string sql = R"SQL(
         SELECT
             id_character,
@@ -101,7 +101,7 @@ std::unique_ptr<CharacterModel> CharacterRepository::findByIdAccountAndIdCharact
     query.bindInt( 2, idCharacter );
 
     if ( query.step() ) {
-        auto character = std::make_unique<CharacterModel>();
+        auto character = std::make_unique<Engine::CharacterModel>();
         character->setIdCharacter( query.getColumnInt( 0 ) );
         character->setIdAccount( query.getColumnInt( 1 ) );
         character->setName( query.getColumnText( 2 ) );
@@ -119,4 +119,4 @@ std::unique_ptr<CharacterModel> CharacterRepository::findByIdAccountAndIdCharact
     return nullptr;
 }
 
-} // namespace Engine
+} // namespace Server

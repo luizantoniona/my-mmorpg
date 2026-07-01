@@ -4,7 +4,7 @@
 #include <sqlite3.h>
 #include <string>
 
-namespace Engine {
+namespace Server {
 
 class Query {
 public:
@@ -27,6 +27,6 @@ private:
     sqlite3_stmt* _stmt;
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // QUERY_H

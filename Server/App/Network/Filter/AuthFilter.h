@@ -3,13 +3,13 @@
 
 #include <drogon/HttpFilter.h>
 
-namespace Engine {
+namespace Server {
 
 class AuthFilter : public drogon::HttpFilter<AuthFilter> {
 public:
     void doFilter( const drogon::HttpRequestPtr& request, drogon::FilterCallback&& callback, drogon::FilterChainCallback&& chainCallback ) override;
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // AUTHFILTER_H

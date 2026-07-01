@@ -2,7 +2,7 @@
 
 #include <drogon/drogon.h>
 
-namespace Engine {
+namespace Server {
 
 NetworkServer::NetworkServer() :
     _sessions( {} ) {
@@ -52,4 +52,4 @@ std::optional<NetworkSession> NetworkServer::getSession( const std::string& uuid
     return std::nullopt;
 }
 
-} // namespace Engine
+} // namespace Server

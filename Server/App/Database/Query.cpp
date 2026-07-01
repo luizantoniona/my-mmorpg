@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace Engine {
+namespace Server {
 
 Query::Query( sqlite3* db, const std::string& sql ) :
     _stmt( nullptr ) {
@@ -57,4 +57,4 @@ std::string Query::getColumnText( int index ) {
     return text ? reinterpret_cast<const char*>( text ) : "";
 }
 
-} // namespace Engine
+} // namespace Server

@@ -21,6 +21,12 @@ add_library(EngineLib STATIC
     ${ENGINE_HEADERS}
 )
 
+find_package(jsoncpp CONFIG REQUIRED)
+
+target_link_libraries(EngineLib
+    PUBLIC JsonCpp::JsonCpp
+)
+
 add_library(Engine::EngineLib ALIAS EngineLib)
 
 target_compile_features(EngineLib PUBLIC cxx_std_20)

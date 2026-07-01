@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace Engine {
+namespace Server {
 
 Database::Database() :
     _database( nullptr ),
@@ -80,4 +80,4 @@ void Database::close() {
     }
 }
 
-} // namespace Engine
+} // namespace Server

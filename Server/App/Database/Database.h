@@ -5,7 +5,7 @@
 
 #include <sqlite3.h>
 
-namespace Engine {
+namespace Server {
 
 class Database {
 public:
@@ -26,6 +26,6 @@ private:
     void close();
 };
 
-} // namespace Engine
+} // namespace Server
 
 #endif // DATABASE_H

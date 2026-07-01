@@ -4,6 +4,7 @@
 	"dependencies": [
 		"drogon",
 		"gtest",
+		"jsoncpp",
 		"sqlite3"
 	]
 }

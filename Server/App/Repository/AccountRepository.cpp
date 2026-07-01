@@ -1,8 +1,8 @@
 #include "AccountRepository.h"
 
-#include <Engine/Database/Query.h>
+#include <Database/Query.h>
 
-namespace Engine {
+namespace Server {
 
 AccountRepository::AccountRepository() :
     Repository() {
@@ -22,7 +22,7 @@ bool AccountRepository::createAccount( std::string& username, std::string& passw
     return query.exec();
 }
 
-std::unique_ptr<AccountModel> AccountRepository::findByUsername( const std::string& username ) {
+std::unique_ptr<Engine::AccountModel> AccountRepository::findByUsername( const std::string& username ) {
     const std::string sql = R"SQL(
         SELECT
             id_account,
@@ -36,7 +36,7 @@ std::unique_ptr<AccountModel> AccountRepository::findByUsername( const std::stri
     query.bindText( 1, username );
 
     if ( query.step() ) {
-        auto account = std::make_unique<AccountModel>();
+        auto account = std::make_unique<Engine::AccountModel>();
         account->setIdAccount( query.getColumnInt( 0 ) );
         account->setDsUsername( query.getColumnText( 1 ) );
         account->setDsPassword( query.getColumnText( 2 ) );
@@ -46,7 +46,7 @@ std::unique_ptr<AccountModel> AccountRepository::findByUsername( const std::stri
     return nullptr;
 }
 
-std::unique_ptr<AccountModel> AccountRepository::findByUsernameAndPassword( const std::string& username, const std::string& password ) {
+std::unique_ptr<Engine::AccountModel> AccountRepository::findByUsernameAndPassword( const std::string& username, const std::string& password ) {
     const std::string sql = R"SQL(
         SELECT
             id_account,
@@ -61,7 +61,7 @@ std::unique_ptr<AccountModel> AccountRepository::findByUsernameAndPassword( cons
     query.bindText( 2, password );
 
     if ( query.step() ) {
-        auto account = std::make_unique<AccountModel>();
+        auto account = std::make_unique<Engine::AccountModel>();
         account->setIdAccount( query.getColumnInt( 0 ) );
         account->setDsUsername( query.getColumnText( 1 ) );
         account->setDsPassword( query.getColumnText( 2 ) );
@@ -71,4 +71,4 @@ std::unique_ptr<AccountModel> AccountRepository::findByUsernameAndPassword( cons
     return nullptr;
 }
 
-} // namespace Engine
+} // namespace Server
