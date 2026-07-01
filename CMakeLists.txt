@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE AND DEFINED ENV{VCPKG_ROOT})
+  file(TO_CMAKE_PATH "$ENV{VCPKG_ROOT}" VCPKG_ROOT_CMAKE)
+  set(CMAKE_TOOLCHAIN_FILE
+      "${VCPKG_ROOT_CMAKE}/scripts/buildsystems/vcpkg.cmake"
+      CACHE STRING "")
+endif()
+
 project(MMORPG LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -9,13 +16,13 @@ option(BUILD_SERVER "Build MMORPGServer" ON)
 option(BUILD_CLIENT "Build MMORPGClient" OFF)
 option(BUILD_EDITOR "Build Editor" OFF)
 
+add_subdirectory(Engine)
+
 if(BUILD_SERVER)
-  add_subdirectory(Engine)
   add_subdirectory(Server)
 endif()
 
 if(BUILD_CLIENT)
-  add_subdirectory(Engine)
   add_subdirectory(Client)
 endif()
 

@@ -1,6 +1,8 @@
 #----General
 #----Folders
+.qtcreator/
 .vscode/
+build/
 #----Files
 Database/ServerDatabase
 

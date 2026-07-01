@@ -36,40 +36,6 @@ File: Server/Engine/Network/WebSocket/CharacterWebSocket.h
 Route:
 - WS /ws/character
 
-## DTOs sent to the client
-
-### AccountDTO
-File: Server/Engine/Account/AccountDTO.h
-
-Fields:
-- idAccount (int)
-- username (string)
-
-Example:
-```json
-{
-  "idAccount": 1,
-  "username": "luiz"
-}
-```
-
-### CharacterDTO
-File: Server/Engine/Character/CharacterDTO.h
-
-Fields:
-- idCharacter (int)
-- idAccount (int)
-- name (string)
-
-Example:
-```json
-{
-  "idCharacter": 10,
-  "idAccount": 1,
-  "name": "Knight"
-}
-```
-
 ## Current REST Contract
 
 ### POST /login
@@ -250,8 +216,3 @@ Error messages sent by server:
 ```json
 {"error":"invalid_session"}
 ```
-
-## Compatibility Notes
-
-- The schema and DTOs use account/idAccount.
-- Server controllers and session internals are now standardized on account/idAccount naming.
