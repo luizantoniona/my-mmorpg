@@ -3,10 +3,9 @@
 #include <chrono>
 
 #include <Engine/Commons/Singleton.h>
+#include <Engine/World/WorldFactory.h>
 
-#include "WorldFactory.h"
-
-namespace Engine {
+namespace Manager {
 
 WorldManager::WorldManager() :
     _running( false ),
@@ -14,11 +13,12 @@ WorldManager::WorldManager() :
     _world( nullptr ) {
 }
 
-WorldManager::~WorldManager() {}
+WorldManager::~WorldManager() {
+}
 
 void WorldManager::initialize( const std::string& worldPath ) {
     if ( !_world ) {
-        _world = WorldFactory::createWorld( worldPath );
+        _world = Engine::WorldFactory::createWorld( worldPath );
     }
 
     if ( _running ) {
@@ -52,4 +52,4 @@ void WorldManager::finalize() {
     }
 }
 
-} // namespace Engine
+} // namespace Manager

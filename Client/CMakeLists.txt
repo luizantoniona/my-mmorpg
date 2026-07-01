@@ -11,7 +11,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt6 REQUIRED COMPONENTS Qml)
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(Qt6 REQUIRED COMPONENTS QuickControls2)
-find_package(EngineLib CONFIG REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.8)
 

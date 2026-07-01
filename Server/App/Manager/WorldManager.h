@@ -5,9 +5,9 @@
 #include <string>
 #include <thread>
 
-#include "WorldModel.h"
+#include <Engine/World/WorldModel.h>
 
-namespace Engine {
+namespace Manager {
 
 class WorldManager {
 public:
@@ -20,9 +20,9 @@ public:
 private:
     std::atomic<bool> _running;
     std::thread _thread;
-    std::unique_ptr<WorldModel> _world;
+    std::unique_ptr<Engine::WorldModel> _world;
 };
 
-} // namespace Engine
+} // namespace Manager
 
 #endif // WORLDMANAGER_H

@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <Engine/Database/Repository.h>
+#include <Database/Repository.h>
 
 #include "CharacterModel.h"
 
