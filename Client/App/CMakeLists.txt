@@ -20,6 +20,8 @@ qt_add_qml_module(
   MMORPGClient
   VERSION
   1.0
+  IMPORTS
+  MMORPG.UI
   QML_FILES
   Main.qml
   Application/ApplicationWindow.qml
@@ -37,5 +39,6 @@ target_link_libraries(
   MMORPGClientApp
   PRIVATE Qt6::QuickControls2
   PRIVATE MMORPG::MMORPGEngine
-  PRIVATE MMORPGUI
-  PRIVATE ${QML_MODULES})
+  PRIVATE MMORPG::MMORPGUI)
+
+qt_finalize_executable(MMORPGClientApp)

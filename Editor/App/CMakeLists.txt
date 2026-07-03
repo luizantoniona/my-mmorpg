@@ -9,6 +9,8 @@ qt_add_qml_module(
   MMORPGEditor
   VERSION
   1.0
+  IMPORTS
+  MMORPG.UI
   QML_FILES
   Main.qml
   Editor/EditorPage.qml)
