@@ -1,20 +1,18 @@
 set(APP_SOURCES
-  RegisterTypes.cpp
-  Application/Account/AccountPageControl.cpp
-  Application/Game/GamePageControl.cpp
-  Application/Login/LoginPageControl.cpp
-  Manager/AccountManager.cpp
-  Manager/ServerManager.cpp
-)
+    RegisterTypes.cpp
+    RegisterTypes.h
+    Application/Account/AccountPageControl.cpp
+    Application/Account/AccountPageControl.h
+    Application/Game/GamePageControl.cpp
+    Application/Game/GamePageControl.h
+    Application/Login/LoginPageControl.cpp
+    Application/Login/LoginPageControl.h
+    Manager/AccountManager.cpp
+    Manager/AccountManager.h
+    Manager/ServerManager.cpp
+    Manager/ServerManager.h)
 
-set(APP_HEADERS
-  RegisterTypes.h
-  Application/Account/AccountPageControl.h
-  Application/Game/GamePageControl.h
-  Application/Login/LoginPageControl.h
-  Manager/AccountManager.h
-  Manager/ServerManager.h
-)
+qt_add_executable(MMORPGClientApp main.cpp ${APP_SOURCES})
 
 qt_add_executable(MMORPGClientApp main.cpp ${APP_SOURCES} ${APP_HEADERS})
 
@@ -46,8 +44,9 @@ qt_add_qml_module(MMORPGClientApp
 # qt_add_resources(${PROJECT_NAME} PREFIX "/Assets" BASE "Assets" FILES
 # ${SVG_FILES} )
 
-target_link_libraries(MMORPGClientApp
+target_link_libraries(
+  MMORPGClientApp
   PRIVATE Qt6::QuickControls2
-  PRIVATE Engine::EngineLib
-  PRIVATE ${QML_MODULES}
-)
+  PRIVATE MMORPG::MMORPGEngine
+  PRIVATE MMORPGUI
+  PRIVATE ${QML_MODULES})

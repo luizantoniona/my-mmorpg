@@ -1,40 +1,36 @@
 set(APP_SOURCES
-  Database/Database.cpp
-  Database/Query.cpp
-  Database/QueryLoader.cpp
-  Manager/WorldManager.cpp
-  Network/NetworkServer.cpp
-  Network/NetworkSession.cpp
-  Network/Filter/AuthFilter.cpp
-  Network/Rest/AuthController.cpp
-  Network/Rest/CharacterController.cpp
-  Network/Rest/StatusController.cpp
-  Network/WebSocket/CharacterWebSocket.cpp
-  Network/WebSocket/MessageReceiver.cpp
-  Repository/AccountRepository.cpp
-  Repository/CharacterRepository.cpp
-  Repository/Repository.cpp
-)
+    Database/Database.cpp
+    Database/Database.h
+    Database/Query.cpp
+    Database/Query.h
+    Database/QueryLoader.cpp
+    Database/QueryLoader.h
+    Manager/WorldManager.cpp
+    Manager/WorldManager.h
+    Network/NetworkServer.cpp
+    Network/NetworkServer.h
+    Network/NetworkSession.cpp
+    Network/NetworkSession.h
+    Network/Filter/AuthFilter.cpp
+    Network/Filter/AuthFilter.h
+    Network/Rest/AuthController.cpp
+    Network/Rest/AuthController.h
+    Network/Rest/CharacterController.cpp
+    Network/Rest/CharacterController.h
+    Network/Rest/StatusController.cpp
+    Network/Rest/StatusController.h
+    Network/WebSocket/CharacterWebSocket.cpp
+    Network/WebSocket/CharacterWebSocket.h
+    Network/WebSocket/MessageReceiver.cpp
+    Network/WebSocket/MessageReceiver.h
+    Repository/AccountRepository.cpp
+    Repository/AccountRepository.h
+    Repository/CharacterRepository.cpp
+    Repository/CharacterRepository.h
+    Repository/Repository.cpp
+    Repository/Repository.h)
 
-set(APP_HEADERS
-  Database/Database.h
-  Database/Query.h
-  Database/QueryLoader.h
-  Manager/WorldManager.h
-  Network/NetworkServer.h
-  Network/NetworkSession.h
-  Network/Filter/AuthFilter.h
-  Network/Rest/AuthController.h
-  Network/Rest/CharacterController.h
-  Network/Rest/StatusController.h
-  Network/WebSocket/CharacterWebSocket.h
-  Network/WebSocket/MessageReceiver.h
-  Repository/AccountRepository.h
-  Repository/CharacterRepository.h
-  Repository/Repository.h
-)
-
-add_executable(${PROJECT_NAME} main.cpp ${APP_SOURCES} ${APP_HEADERS})
+add_executable(${PROJECT_NAME} main.cpp ${APP_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -42,4 +38,4 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 if(WIN32)
   target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::sqlite3::sqlite3)
 endif()
-target_link_libraries(${PROJECT_NAME} PRIVATE Engine::EngineLib)
+target_link_libraries(${PROJECT_NAME} PRIVATE MMORPG::MMORPGEngine)

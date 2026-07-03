@@ -1,36 +1,29 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(EngineLib LANGUAGES CXX)
+project(MMORPGEngine LANGUAGES CXX)
 
-file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS
+file(
+  GLOB_RECURSE
+  ENGINE_SOURCES
+  CONFIGURE_DEPENDS
   Account/*.cpp
-  Character/*.cpp
-  Commons/*.cpp
-  World/*.cpp
-)
-
-file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS
   Account/*.h
+  Character/*.cpp
   Character/*.h
+  Commons/*.cpp
   Commons/*.h
-  World/*.h
-)
+  World/*.cpp
+  World/*.h)
 
-add_library(EngineLib STATIC
-    ${ENGINE_SOURCES}
-    ${ENGINE_HEADERS}
-)
+add_library(${PROJECT_NAME} STATIC ${ENGINE_SOURCES})
 
 find_package(jsoncpp CONFIG REQUIRED)
 
-target_link_libraries(EngineLib
-    PUBLIC JsonCpp::JsonCpp
-)
+target_link_libraries(${PROJECT_NAME} PUBLIC JsonCpp::JsonCpp)
 
-add_library(Engine::EngineLib ALIAS EngineLib)
+add_library(MMORPG::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_compile_features(EngineLib PUBLIC cxx_std_20)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
-target_include_directories(EngineLib
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-)
+target_include_directories(
+  ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>)
