@@ -4,6 +4,7 @@
 .vscode/
 build/
 #----Files
+*.txt.user*
 Database/ServerDatabase
 
 
