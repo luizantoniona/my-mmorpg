@@ -14,29 +14,18 @@ set(APP_SOURCES
 
 qt_add_executable(MMORPGClientApp main.cpp ${APP_SOURCES})
 
-qt_add_executable(MMORPGClientApp main.cpp ${APP_SOURCES} ${APP_HEADERS})
-
-set_source_files_properties(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Theme/Colors.qml
-  ${CMAKE_CURRENT_SOURCE_DIR}/Theme/Spaces.qml 
-  PROPERTIES QT_QML_SINGLETON_TYPE TRUE
-)
-
-qt_add_qml_module(MMORPGClientApp
-  URI MMORPGClient
-  VERSION 1.0
+qt_add_qml_module(
+  MMORPGClientApp
+  URI
+  MMORPGClient
+  VERSION
+  1.0
   QML_FILES
   Main.qml
   Application/ApplicationWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
-  Application/Login/LoginPage.qml
-  Component/ButtonCustom.qml
-  Component/InputFieldCustom.qml
-  Component/PanelCustom.qml
-  Theme/Colors.qml
-  Theme/Spaces.qml
-)
+  Application/Login/LoginPage.qml)
 
 # file(GLOB_RECURSE SVG_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} Assets/*.svg
 # )

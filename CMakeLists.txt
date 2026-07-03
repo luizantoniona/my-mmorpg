@@ -13,10 +13,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_SERVER "Build MMORPGServer" ON)
-option(BUILD_CLIENT "Build MMORPGClient" OFF)
-option(BUILD_EDITOR "Build Editor" OFF)
+option(BUILD_CLIENT "Build MMORPGClient" ON)
+option(BUILD_EDITOR "Build MMORPGEditor" ON)
 
 add_subdirectory(Engine)
+
+if(BUILD_CLIENT OR BUILD_EDITOR)
+  add_subdirectory(UI)
+endif()
 
 if(BUILD_SERVER)
   add_subdirectory(Server)
