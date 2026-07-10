@@ -1,33 +1,9 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(MMORPGUI LANGUAGES CXX)
+
 find_package(Qt6 REQUIRED COMPONENTS Core Qml Quick QuickControls2)
 
-qt_add_library(MMORPGUI STATIC)
+qt_standard_project_setup(REQUIRES 6.8)
 
-add_library(MMORPG::MMORPGUI ALIAS MMORPGUI)
-
-set_target_properties(MMORPGUI PROPERTIES AUTOMOC ON AUTORCC ON)
-
-set_source_files_properties(Qml/Theme/Colors.qml Qml/Theme/Spaces.qml
-                            PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
-
-qt_add_qml_module(
-  MMORPGUI
-  URI
-  MMORPGComponent
-  VERSION
-  1.0
-  QML_FILES
-  Qml/Component/ButtonCustom.qml
-  Qml/Component/InputFieldCustom.qml
-  Qml/Component/PanelCustom.qml
-  Qml/Theme/Colors.qml
-  Qml/Theme/Spaces.qml
-  # SOURCES ButtonCustomControl.cpp ButtonCustomControl.h
-)
-
-target_link_libraries(
-  MMORPGUI
-  PUBLIC Qt6::Core
-  PUBLIC Qt6::Qml
-  PUBLIC Qt6::Quick)
-
-qt_finalize_target(MMORPGUI)
+add_subdirectory(UI)

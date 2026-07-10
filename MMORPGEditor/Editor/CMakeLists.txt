@@ -18,7 +18,7 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE Qt6::QuickControls2
   PRIVATE MMORPG::MMORPGEngine
-  # PRIVATE MMORPG::MMORPGUI
+  PRIVATE MMORPG::MMORPGUI
 )
 
 qt_finalize_executable(${PROJECT_NAME})

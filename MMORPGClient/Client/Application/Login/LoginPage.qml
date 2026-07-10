@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import MMORPGUIComponents
 import MMORPGClientComponents
 import MMORPGClientControls
 import MMORPGClientManagers
@@ -20,32 +21,32 @@ Item {
 
         RowLayout {
 
-            // PanelCustom {
-            //     width: 400
-            //     height: 300
+            PanelCustom {
+                width: 400
+                height: 300
 
-            //     ColumnLayout {
-            //         anchors.centerIn: parent
+                ColumnLayout {
+                    anchors.centerIn: parent
 
-            //         InputFieldCustom {
-            //             vTitle: "Usuário"
-            //             vPlaceholder: "Digite seu usuário"
-            //         }
+                    InputFieldCustom {
+                        vTitle: "Usuário"
+                        vPlaceholder: "Digite seu usuário"
+                    }
 
-            //         InputFieldCustom {
-            //             vTitle: "Senha"
-            //             vPlaceholder: "Digite sua senha"
-            //             vEchoMode: TextInput.Password
-            //         }
+                    InputFieldCustom {
+                        vTitle: "Senha"
+                        vPlaceholder: "Digite sua senha"
+                        vEchoMode: TextInput.Password
+                    }
 
-            //         ButtonCustom {
-            //             vText: "Entrar"
-            //             onClicked: function (){
-            //                 console.log("Login")
-            //             }
-            //         }
-            //     }
-            // }
+                    ButtonCustom {
+                        vText: "Entrar"
+                        onClicked: function (){
+                            console.log("Login")
+                        }
+                    }
+                }
+            }
         }
     }
 }

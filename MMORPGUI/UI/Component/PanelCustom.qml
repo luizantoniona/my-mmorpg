@@ -1,5 +1,5 @@
 import QtQuick
-import MMORPG.UI
+import MMORPGUIComponents
 
 Item {
     id: root

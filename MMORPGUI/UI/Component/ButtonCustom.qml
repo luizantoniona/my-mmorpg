@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import MMORPG.UI
+import MMORPGUIComponents
 
 Item {
     id: root
