@@ -12,7 +12,7 @@ set_source_files_properties(Qml/Theme/Colors.qml Qml/Theme/Spaces.qml
 qt_add_qml_module(
   MMORPGUI
   URI
-  MMORPG.UI
+  MMORPGComponent
   VERSION
   1.0
   QML_FILES
@@ -24,7 +24,10 @@ qt_add_qml_module(
   # SOURCES ButtonCustomControl.cpp ButtonCustomControl.h
 )
 
-target_link_libraries(MMORPGUI PUBLIC Qt6::Core Qt6::Qml Qt6::Quick
-                                      Qt6::QuickControls2)
+target_link_libraries(
+  MMORPGUI
+  PUBLIC Qt6::Core
+  PUBLIC Qt6::Qml
+  PUBLIC Qt6::Quick)
 
 qt_finalize_target(MMORPGUI)

@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import MMORPGClient
 import MMORPGClient.Controls
 import MMORPGClient.Managers
 

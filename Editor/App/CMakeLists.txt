@@ -9,8 +9,6 @@ qt_add_qml_module(
   MMORPGEditor
   VERSION
   1.0
-  IMPORTS
-  MMORPG.UI
   QML_FILES
   Main.qml
   Editor/EditorPage.qml)
@@ -18,4 +16,5 @@ qt_add_qml_module(
 target_link_libraries(
   MMORPGEditorApp
   PRIVATE Qt6::QuickControls2
-  PRIVATE MMORPGUI)
+  PRIVATE MMORPG::MMORPGEngine
+  PRIVATE MMORPG::MMORPGUI)

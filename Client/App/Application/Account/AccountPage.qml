@@ -1,5 +1,4 @@
 import QtQuick
-import MMORPGClient
 import MMORPGClient.Controls
 import MMORPGClient.Managers
 
