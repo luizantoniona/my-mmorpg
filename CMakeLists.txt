@@ -16,18 +16,17 @@ option(BUILD_SERVER "Build MMORPGServer" ON)
 option(BUILD_CLIENT "Build MMORPGClient" ON)
 option(BUILD_EDITOR "Build MMORPGEditor" ON)
 
-add_subdirectory(Engine)
+add_subdirectory(MMORPGEngine)
+add_subdirectory(MMORPGUI)
 
 if(BUILD_SERVER)
-  add_subdirectory(Server)
+  add_subdirectory(MMORPGServer)
 endif()
 
 if(BUILD_CLIENT)
-  add_subdirectory(UI)
-  add_subdirectory(Client)
+  add_subdirectory(MMORPGClient)
 endif()
 
 if(BUILD_EDITOR)
-  add_subdirectory(UI)
-  add_subdirectory(Editor)
+  add_subdirectory(MMORPGEditor)
 endif()
