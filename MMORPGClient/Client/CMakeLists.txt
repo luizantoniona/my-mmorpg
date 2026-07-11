@@ -39,5 +39,3 @@ target_link_libraries(
   PRIVATE MMORPG::MMORPGEngine
   PRIVATE MMORPG::MMORPGUI
 )
-
-qt_finalize_executable(${PROJECT_NAME})

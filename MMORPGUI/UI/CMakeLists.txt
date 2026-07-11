@@ -16,6 +16,8 @@ qt_add_qml_module(
   MMORPGUIComponents
   VERSION
   1.0
+  OUTPUT_DIRECTORY
+  ${CMAKE_CURRENT_BINARY_DIR}/MMORPGUIComponents
   QML_FILES
   Component/ButtonCustom.qml
   Component/InputFieldCustom.qml
@@ -31,5 +33,3 @@ target_link_libraries(
   PUBLIC Qt6::Qml
   PUBLIC Qt6::Quick
   PUBLIC Qt6::QuickControls2)
-
-qt_finalize_target(${PROJECT_NAME})
