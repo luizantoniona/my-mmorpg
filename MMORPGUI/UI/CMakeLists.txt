@@ -22,6 +22,8 @@ qt_add_qml_module(
   Component/ButtonCustom.qml
   Component/InputFieldCustom.qml
   Component/PanelCustom.qml
+  Component/SpacerHorizontal.qml
+  Component/SpacerVertical.qml
   Theme/Colors.qml
   Theme/Spaces.qml
   # SOURCES ButtonCustomControl.cpp ButtonCustomControl.h

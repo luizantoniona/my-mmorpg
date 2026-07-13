@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import MMORPGUIComponents
 import MMORPGClientComponents
 import MMORPGClientControls
 import MMORPGClientManagers
@@ -26,12 +27,14 @@ Item {
 
     Rectangle {
         id: background
+
         anchors.fill: parent
         color: Colors.background0
     }
 
     StackView {
         id: stack
+
         anchors.fill: parent
     }
 

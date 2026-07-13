@@ -6,12 +6,15 @@ Item {
 
     default property alias vContent: content.data
 
-    property color vBackgroundColor: Colors.background2
-    property color vBorderColor: Colors.background1
+    property color vBackgroundColor: Colors.background1
+    property color vBorderColor: Colors.background2
 
     property int vRadius: 8
     property int vBorderWidth: 8
-    property int vMargin: 16
+    property int vMargin: 8
+
+    implicitWidth: 300
+    implicitHeight: 200
 
     Rectangle {
         id: panel

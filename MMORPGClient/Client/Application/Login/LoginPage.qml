@@ -16,37 +16,65 @@ Item {
         id: control
     }
 
-    Item {
+    ColumnLayout {
+        spacing: Spaces.spacing8
         anchors.fill: parent
 
+        PanelCustom {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 200
+
+            InputFieldCustom {
+                vTitle: qsTr("Server")
+                vPlaceholder: qsTr("")
+            }
+        }
+
+        SpacerVertical {}
+
         RowLayout {
+            spacing: Spaces.spacing8
 
-            PanelCustom {
-                width: 400
-                height: 300
+            ColumnLayout {
+                Rectangle {
+                    color: Colors.background4
+                    height: Screen.height * 0.5
+                    width: Screen.width * 0.5
+                }
+            }
 
-                ColumnLayout {
-                    anchors.centerIn: parent
+            SpacerHorizontal {}
 
-                    InputFieldCustom {
-                        vTitle: "Usuário"
-                        vPlaceholder: "Digite seu usuário"
-                    }
+            ColumnLayout {
+                PanelCustom {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
 
-                    InputFieldCustom {
-                        vTitle: "Senha"
-                        vPlaceholder: "Digite sua senha"
-                        vEchoMode: TextInput.Password
-                    }
+                    ColumnLayout {
+                        anchors.fill: parent
 
-                    ButtonCustom {
-                        vText: "Entrar"
-                        onClicked: function (){
-                            console.log("Login")
+                        InputFieldCustom {
+                            vTitle: qsTr("Username")
+                            vPlaceholder: qsTr("")
+                        }
+
+                        InputFieldCustom {
+                            vTitle: qsTr("Password")
+                            vPlaceholder: qsTr("")
+                            vEchoMode: TextInput.Password
+                        }
+
+                        ButtonCustom {
+                            vText: "Entrar"
+                            onClicked: function () {
+                                vServerManager.serverAddress = "";
+                            }
                         }
                     }
                 }
             }
         }
+
+        SpacerVertical {}
     }
 }

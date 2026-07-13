@@ -22,7 +22,7 @@ qt_add_qml_module(
   1.0
   QML_FILES
   Main.qml
-  Application/ApplicationWindow.qml
+  Application/MainWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
   Application/Login/LoginPage.qml)
@@ -37,5 +37,4 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE Qt6::QuickControls2
   PRIVATE MMORPG::MMORPGEngine
-  PRIVATE MMORPG::MMORPGUI
-)
+  PRIVATE MMORPG::MMORPGUI)

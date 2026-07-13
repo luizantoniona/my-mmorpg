@@ -5,6 +5,7 @@
 
 class ServerManager : public QObject {
     Q_OBJECT
+    Q_PROPERTY( QString serverAddress READ serverAddress WRITE setServerAddress NOTIFY serverAddressChanged FINAL )
 
 public:
     explicit ServerManager( QObject* parent = nullptr );
@@ -13,12 +14,11 @@ public:
     QString serverAddress() const;
     void setServerAddress( const QString& serverAddress );
 
-    QString serverPort() const;
-    void setServerPort( const QString& serverPort );
+signals:
+    void serverAddressChanged();
 
 private:
     QString _serverAddress;
-    QString _serverPort;
 };
 
 #endif // SERVERMANAGER_H

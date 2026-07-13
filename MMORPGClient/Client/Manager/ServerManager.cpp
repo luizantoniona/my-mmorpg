@@ -1,8 +1,8 @@
 #include "ServerManager.h"
 
 ServerManager::ServerManager( QObject* parent ) :
-    QObject( parent ) {
-}
+    QObject( parent ),
+    _serverAddress( "" ) {}
 
 ServerManager::~ServerManager() = default;
 
@@ -11,13 +11,11 @@ QString ServerManager::serverAddress() const {
 }
 
 void ServerManager::setServerAddress( const QString& serverAddress ) {
+    if ( _serverAddress == serverAddress ) {
+        return;
+    }
+
     _serverAddress = serverAddress;
-}
 
-QString ServerManager::serverPort() const {
-    return _serverPort;
-}
-
-void ServerManager::setServerPort( const QString& serverPort ) {
-    _serverPort = serverPort;
+    emit serverAddressChanged();
 }
