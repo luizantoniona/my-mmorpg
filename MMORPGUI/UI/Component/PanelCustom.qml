@@ -6,30 +6,39 @@ Item {
 
     default property alias vContent: content.data
 
+    readonly property alias panel: panel
+
     property color vBackgroundColor: Colors.background1
     property color vBorderColor: Colors.background2
 
-    property int vRadius: 8
-    property int vBorderWidth: 8
-    property int vMargin: 8
+    property int vBorder: Borders.borders2
+    property int vMargins: Spaces.spacing8
+    property int vPadding: Spaces.spacing8
+    property int vRadius: Spaces.spacing8
 
-    implicitWidth: 300
-    implicitHeight: 200
+    implicitWidth: 100
+    implicitHeight: 100
 
     Rectangle {
         id: panel
 
-        anchors.fill: parent
-        anchors.margins: root.vMargin
-        radius: root.vRadius
+        anchors{
+            fill: parent
+            margins: root.vMargins
+        }
+        border {
+            width: root.vBorder
+            color: root.vBorderColor
+        }
+        clip: true
         color: root.vBackgroundColor
-        border.width: root.vBorderWidth
-        border.color: root.vBorderColor
+        radius: root.vRadius
 
         Item {
             id: content
 
             anchors.fill: parent
+            anchors.margins: root.vPadding
         }
     }
 }
