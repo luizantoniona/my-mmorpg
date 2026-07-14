@@ -25,7 +25,9 @@ qt_add_qml_module(
   Application/MainWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
-  Application/Login/LoginPage.qml)
+  Application/Login/LoginPage.qml
+  Application/Login/Component/AccountPanel.qml
+  Application/Login/Component/ServerPanel.qml)
 
 # file(GLOB_RECURSE SVG_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} Assets/*.svg
 # )

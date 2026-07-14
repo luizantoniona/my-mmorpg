@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import MMORPGUIComponents
 import MMORPGClientComponents
 import MMORPGClientControls
@@ -16,65 +15,31 @@ Item {
         id: control
     }
 
+    // TODO: Add background image?
+
     ColumnLayout {
-        spacing: Spaces.spacing8
         anchors.fill: parent
 
-        PanelCustom {
+        ServerPanel {
             Layout.fillWidth: true
             Layout.preferredHeight: 200
-
-            InputFieldCustom {
-                vTitle: qsTr("Server")
-                vPlaceholder: qsTr("")
-            }
         }
-
-        SpacerVertical {}
 
         RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             spacing: Spaces.spacing8
 
-            ColumnLayout {
-                Rectangle {
-                    color: Colors.background4
-                    height: Screen.height * 0.5
-                    width: Screen.width * 0.5
-                }
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                // TODO: LOGO / Background / Something
             }
 
-            SpacerHorizontal {}
-
-            ColumnLayout {
-                PanelCustom {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-
-                    ColumnLayout {
-                        anchors.fill: parent
-
-                        InputFieldCustom {
-                            vTitle: qsTr("Username")
-                            vPlaceholder: qsTr("")
-                        }
-
-                        InputFieldCustom {
-                            vTitle: qsTr("Password")
-                            vPlaceholder: qsTr("")
-                            vEchoMode: TextInput.Password
-                        }
-
-                        ButtonCustom {
-                            vText: "Entrar"
-                            onClicked: function () {
-                                vServerManager.serverAddress = "";
-                            }
-                        }
-                    }
-                }
+            AccountPanel {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
             }
         }
-
-        SpacerVertical {}
     }
 }
