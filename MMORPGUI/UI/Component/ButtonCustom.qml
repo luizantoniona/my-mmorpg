@@ -5,7 +5,7 @@ import MMORPGUIComponents
 Item {
     id: root
 
-    signal clicked()
+    signal clicked
 
     property string vText: ""
     property bool vEnabled: true
@@ -24,7 +24,7 @@ Item {
             anchors.centerIn: parent
             text: root.vText
             color: Colors.text
-            font.bold: true
+            font: Fonts.bodyBold
         }
 
         MouseArea {

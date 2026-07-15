@@ -22,6 +22,7 @@ Item {
             color: Colors.text
             text: root.vTitle
             visible: root.vTitle !== ""
+            font: Fonts.bodyBold
         }
 
         Rectangle {
@@ -43,6 +44,7 @@ Item {
                 echoMode: root.vEchoMode
                 placeholderText: root.vPlaceholder
                 text: root.vText
+                font: Fonts.bodyBold
 
                 onTextChanged: root.vText = text
             }
