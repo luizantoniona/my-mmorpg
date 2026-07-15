@@ -2,11 +2,16 @@
 
 #include <QSettings>
 
+namespace {
+constexpr const char* SETTINGS_SCOPE = "MMORPG";
+constexpr const char* SETTINGS_SUB_SCOPE = "Client";
+} // namespace
+
 ServerManager::ServerManager() :
     _serverAddress( "" ) {
 
-    QSettings settings( "MyMMORPG", "Client" );
-    _serverAddress = settings.value( "lastServerAddress", "http://localhost:8080" ).toString();
+    QSettings settings( QSettings::IniFormat, QSettings::UserScope, SETTINGS_SCOPE, SETTINGS_SUB_SCOPE );
+    _serverAddress = settings.value( "ServerAddress", "" ).toString();
 }
 
 ServerManager::~ServerManager() = default;
@@ -18,6 +23,6 @@ QString ServerManager::serverAddress() const {
 void ServerManager::setServerAddress( const QString& serverAddress ) {
     _serverAddress = serverAddress;
 
-    QSettings settings( "MyMMORPG", "Client" );
-    settings.setValue( "lastServerAddress", _serverAddress );
+    QSettings settings( SETTINGS_SCOPE, SETTINGS_SUB_SCOPE );
+    settings.setValue( "ServerAddress", _serverAddress );
 }
