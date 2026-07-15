@@ -1,21 +1,15 @@
 #ifndef SERVERMANAGER_H
 #define SERVERMANAGER_H
 
-#include <QObject>
+#include <QString>
 
-class ServerManager : public QObject {
-    Q_OBJECT
-    Q_PROPERTY( QString serverAddress READ serverAddress WRITE setServerAddress NOTIFY serverAddressChanged FINAL )
-
+class ServerManager {
 public:
-    explicit ServerManager( QObject* parent = nullptr );
+    ServerManager();
     ~ServerManager();
 
     QString serverAddress() const;
     void setServerAddress( const QString& serverAddress );
-
-signals:
-    void serverAddressChanged();
 
 private:
     QString _serverAddress;

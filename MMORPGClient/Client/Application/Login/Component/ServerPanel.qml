@@ -5,6 +5,10 @@ import MMORPGUIComponents
 Item {
     id: root
 
+    property alias vServerText: serverInput.vText
+
+    signal connectClicked(string server)
+
     PanelCustom {
         anchors.fill: parent
 
@@ -16,14 +20,16 @@ Item {
             }
 
             InputFieldCustom {
+                id: serverInput
+
                 vTitle: qsTr("")
-                vPlaceholder: qsTr("")
+                vPlaceholder: qsTr("Ex: http://127.0.0.1:8080")
             }
 
             ButtonCustom {
                 vText: qsTr("Connect")
                 onClicked: function () {
-                    // TODO
+                    connectClicked(serverInput.vText)
                 }
             }
 
