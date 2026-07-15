@@ -3,13 +3,9 @@ import QtQuick.Layouts
 import MMORPGUIComponents
 import MMORPGClientComponents
 import MMORPGClientControls
-import MMORPGClientManagers
 
 Item {
     id: root
-
-    required property AccountManager vAccountManager
-    required property ServerManager vServerManager
 
     LoginPageControl {
         id: control

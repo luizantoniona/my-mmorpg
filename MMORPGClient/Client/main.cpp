@@ -4,6 +4,10 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
+#include <MMORPGEngine/Commons/Singleton.h>
+
+#include "Manager/AccountManager.h"
+#include "Manager/ServerManager.h"
 #include "RegisterTypes.h"
 
 int main( int argc, char* argv[] ) {
@@ -16,6 +20,12 @@ int main( int argc, char* argv[] ) {
     QSurfaceFormat::setDefaultFormat( format );
 
     QQmlApplicationEngine engine;
+
+    // --- Server configuration
+    Engine::Singleton<ServerManager>::instance();
+
+    // --- Account configuration
+    Engine::Singleton<AccountManager>::instance();
 
     RegisterTypes::registerTypes();
 

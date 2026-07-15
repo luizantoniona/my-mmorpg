@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import MMORPGUIComponents
 import MMORPGClientComponents
 import MMORPGClientControls
-import MMORPGClientManagers
 
 Item {
     id: root
@@ -38,22 +37,11 @@ Item {
         anchors.fill: parent
     }
 
-    AccountManager {
-        id: accountManager
-    }
-
-    ServerManager {
-        id: serverManager
-    }
-
     Component {
         id: loginPage
 
         LoginPage {
             id: login
-
-            vAccountManager: accountManager
-            vServerManager: serverManager
         }
     }
 
@@ -62,9 +50,6 @@ Item {
 
         AccountPage {
             id: account
-
-            vAccountManager: accountManager
-            vServerManager: serverManager
         }
     }
 
@@ -73,9 +58,6 @@ Item {
 
         GamePage {
             id: game
-
-            vAccountManager: accountManager
-            vServerManager: serverManager
         }
     }
 
