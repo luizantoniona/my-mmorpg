@@ -5,9 +5,21 @@ import MMORPGUIComponents
 Item {
     id: root
 
-    property alias vServerText: serverInput.vText
+    property alias serverText: serverInput.vText
 
     signal connectClicked(string server)
+
+    function handleConnectionSuccess() {
+        serverStatus.vStatus = ServerStatus.Status.Online
+    }
+
+    function handleConnectionConnecting() {
+        serverStatus.vStatus = ServerStatus.Status.Connecting
+    }
+
+    function handleConnectionFailed() {
+        serverStatus.vStatus = ServerStatus.Status.Offline
+    }
 
     PanelCustom {
         anchors.fill: parent
@@ -33,10 +45,10 @@ Item {
                 }
             }
 
-            Rectangle {
-                color: Colors.background4
-                height: 50
-                width: 50
+            ServerStatus {
+                id: serverStatus
+
+                vStatus: ServerStatus.Status.Offline
             }
         }
     }

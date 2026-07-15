@@ -19,8 +19,9 @@ public slots:
 
 signals:
     void serverAddressChanged();
-    void connectionSuccess();
     void connectionFailed();
+    void connectionConnecting();
+    void connectionSuccess();
 
 private:
     QString _serverAddress;

@@ -22,6 +22,8 @@ QString LoginPageControl::serverAddress() const {
 }
 
 void LoginPageControl::connectServer( const QString& serverAddress ) {
+    emit connectionConnecting();
+
     QString formattedAddress = serverAddress;
     if ( !formattedAddress.startsWith( "http://" ) && !formattedAddress.startsWith( "https://" ) ) {
         formattedAddress = "http://" + formattedAddress;
