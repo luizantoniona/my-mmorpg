@@ -1,18 +1,42 @@
 #ifndef SERVERMANAGER_H
 #define SERVERMANAGER_H
 
-#include <QString>
+#include <QNetworkAccessManager>
+#include <QObject>
 
-class ServerManager {
+class ServerManager : public QObject {
+    Q_OBJECT
+    Q_PROPERTY( QString serverAddress READ serverAddress NOTIFY serverAddressChanged )
+    Q_PROPERTY( ConnectionState connectionState READ connectionState NOTIFY connectionStateChanged )
+
 public:
-    ServerManager();
+    explicit ServerManager( QObject* parent = nullptr );
     ~ServerManager();
 
+    enum class ConnectionState {
+        Disconnected,
+        Connected,
+        Connecting,
+        Failed
+    };
+    Q_ENUM( ConnectionState )
+
     QString serverAddress() const;
-    void setServerAddress( const QString& serverAddress );
+    void setServerAddress( const QString& address );
+
+    ConnectionState connectionState() const;
+    void setConnectionState( ConnectionState state );
+
+public slots:
+    void connectServer( const QString& address );
+
+signals:
+    void serverAddressChanged();
+    void connectionStateChanged();
 
 private:
     QString _serverAddress;
+    ConnectionState _connectionState;
+    QNetworkAccessManager _networkManager;
 };
-
 #endif // SERVERMANAGER_H

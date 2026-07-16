@@ -1,25 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
 import MMORPGUIComponents
+import MMORPGClientManagers
 
 Item {
     id: root
-
-    property alias serverText: serverInput.vText
-
-    signal connectClicked(string server)
-
-    function handleConnectionSuccess() {
-        serverStatus.vStatus = ServerStatus.Status.Online
-    }
-
-    function handleConnectionConnecting() {
-        serverStatus.vStatus = ServerStatus.Status.Connecting
-    }
-
-    function handleConnectionFailed() {
-        serverStatus.vStatus = ServerStatus.Status.Offline
-    }
 
     PanelCustom {
         anchors.fill: parent
@@ -34,6 +19,7 @@ Item {
             InputFieldCustom {
                 id: serverInput
 
+                vText: ServerManager.serverAddress
                 vTitle: qsTr("")
                 vPlaceholder: qsTr("Ex: http://127.0.0.1:8080")
             }
@@ -41,14 +27,24 @@ Item {
             ButtonCustom {
                 vText: qsTr("Connect")
                 onClicked: function () {
-                    connectClicked(serverInput.vText)
+                    ServerManager.connectServer(serverInput.vText)
                 }
             }
 
             ServerStatus {
                 id: serverStatus
 
-                vStatus: ServerStatus.Status.Offline
+                vStatus: {
+                    switch (ServerManager.connectionState) {
+                    case ServerManager.Connected:
+                        return ServerStatus.Status.Online
+                    case ServerManager.Connecting:
+                        return ServerStatus.Status.Connecting
+                    case ServerManager.Disconnected:
+                    case ServerManager.Failed:
+                        return ServerStatus.Status.Offline
+                    }
+                }
             }
         }
     }

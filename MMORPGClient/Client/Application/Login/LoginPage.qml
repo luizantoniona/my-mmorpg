@@ -9,18 +9,6 @@ Item {
 
     LoginPageControl {
         id: control
-
-        onConnectionFailed: function () {
-            serverPanel.handleConnectionFailed()
-        }
-
-        onConnectionConnecting: function () {
-            serverPanel.handleConnectionConnecting()
-        }
-
-        onConnectionSuccess: function () {
-            serverPanel.handleConnectionSuccess()
-        }
     }
 
     // TODO: Add background image
@@ -32,12 +20,6 @@ Item {
 
             Layout.fillWidth: true
             Layout.preferredHeight: 200
-
-            serverText: control.serverAddress
-
-            onConnectClicked: function (server) {
-                control.connectServer(server)
-            }
         }
 
         RowLayout {
@@ -56,9 +38,5 @@ Item {
                 Layout.fillHeight: true
             }
         }
-    }
-
-    Component.onCompleted: function () {
-        control.connectServer(control.serverAddress)
     }
 }
