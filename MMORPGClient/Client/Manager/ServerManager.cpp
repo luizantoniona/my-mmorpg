@@ -19,40 +19,25 @@ ServerManager::ServerManager( QObject* parent ) :
     QSettings settings( QSettings::IniFormat, QSettings::UserScope, SETTINGS_SCOPE, SETTINGS_SUB_SCOPE );
     _serverAddress = settings.value( "ServerAddress", "" ).toString();
 
-    connectServer( _serverAddress );
+    connectServer( _serverAddress.toString() );
 }
 
 ServerManager::~ServerManager() = default;
 
 QString ServerManager::serverAddress() const {
-    return _serverAddress;
-}
-
-void ServerManager::setServerAddress( const QString& address ) {
-    if ( _serverAddress == address ) {
-        return;
-    }
-
-    _serverAddress = address;
-
-    QSettings settings( QSettings::IniFormat, QSettings::UserScope, SETTINGS_SCOPE, SETTINGS_SUB_SCOPE );
-    settings.setValue( "ServerAddress", address );
-
-    emit serverAddressChanged();
+    return _serverAddress.toString();
 }
 
 ServerManager::ConnectionState ServerManager::connectionState() const {
     return _connectionState;
 }
 
-void ServerManager::setConnectionState( ConnectionState state ) {
-    if ( _connectionState == state ) {
-        return;
-    }
+QNetworkReply* ServerManager::get( const QString& endpoint ) {
+    return _networkManager.get( buildRequest( endpoint ) );
+}
 
-    _connectionState = state;
-
-    emit connectionStateChanged();
+QNetworkReply* ServerManager::post( const QString& endpoint, const QByteArray& body ) {
+    return _networkManager.post( buildRequest( endpoint ), body );
 }
 
 void ServerManager::connectServer( const QString& address ) {
@@ -62,20 +47,20 @@ void ServerManager::connectServer( const QString& address ) {
 
     setConnectionState( ConnectionState::Connecting );
 
-    QString formatted = address;
-    if ( !formatted.startsWith( "http://" ) && !formatted.startsWith( "https://" ) ) {
-        formatted.prepend( "http://" );
+    QUrl serverUrl( address );
+    if ( serverUrl.scheme().isEmpty() ) {
+        serverUrl.setScheme( "http" );
     }
 
-    auto reply = _networkManager.get( QNetworkRequest( QUrl( formatted + "/status" ) ) );
+    QNetworkRequest request( serverUrl.resolved( QUrl( "/status" ) ) );
 
-    connect( reply, &QNetworkReply::finished, this, [ this, reply ]() {
-        QString finalAddress = reply->request().url().toString().replace( "/status", "" );
+    auto reply = _networkManager.get( request );
 
+    connect( reply, &QNetworkReply::finished, this, [ this, reply, serverUrl ]() {
         reply->deleteLater();
 
         if ( reply->error() == QNetworkReply::NoError ) {
-            setServerAddress( finalAddress );
+            setServerAddress( serverUrl );
             setConnectionState( ConnectionState::Connected );
 
         } else {
@@ -83,3 +68,83 @@ void ServerManager::connectServer( const QString& address ) {
         }
     } );
 }
+
+QUrl ServerManager::buildUrl( const QString& endpoint ) const {
+    QUrl url = _serverAddress;
+
+    QString path = url.path();
+
+    if ( !path.endsWith( '/' ) ) {
+        path += '/';
+    }
+
+    path += endpoint.startsWith( '/' ) ? endpoint.mid( 1 ) : endpoint;
+
+    url.setPath( path );
+
+    return url;
+}
+
+QNetworkRequest ServerManager::buildRequest( const QString& endpoint ) const {
+    QNetworkRequest request( buildUrl( endpoint ) );
+
+    request.setHeader( QNetworkRequest::ContentTypeHeader, "application/json" );
+
+    request.setRawHeader( "Accept", "application/json" );
+
+    return request;
+}
+
+void ServerManager::setServerAddress( const QUrl& serverAddress ) {
+    if ( _serverAddress == serverAddress ) {
+        return;
+    }
+
+    _serverAddress = serverAddress;
+
+    QSettings settings( QSettings::IniFormat, QSettings::UserScope, SETTINGS_SCOPE, SETTINGS_SUB_SCOPE );
+    settings.setValue( "ServerAddress", serverAddress );
+
+    emit serverAddressChanged();
+}
+
+void ServerManager::setConnectionState( ConnectionState connectionState ) {
+    if ( _connectionState == connectionState ) {
+        return;
+    }
+
+    _connectionState = connectionState;
+
+    emit connectionStateChanged();
+}
+
+/*
+Engine::Singleton<ServerManager>
+
+ServerManager
+│
+├── HTTP
+│   ├── GET
+│   ├── POST
+│   ├── PATCH
+│   └── DELETE
+│
+├── WebSocket
+│   ├── connect()
+│   ├── disconnect()
+│   ├── send()
+│   └── receive()
+│
+├── Session
+│   ├── token
+│   ├── refresh token
+│   └── headers
+│
+├── Server
+│   ├── address
+│   ├── ping
+│   └── status
+│
+└── Settings
+    └── salvar endereço
+*/

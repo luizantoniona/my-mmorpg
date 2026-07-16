@@ -22,10 +22,11 @@ public:
     Q_ENUM( ConnectionState )
 
     QString serverAddress() const;
-    void setServerAddress( const QString& address );
 
     ConnectionState connectionState() const;
-    void setConnectionState( ConnectionState state );
+
+    QNetworkReply* get( const QString& endpoint );
+    QNetworkReply* post( const QString& endpoint, const QByteArray& body );
 
 public slots:
     void connectServer( const QString& address );
@@ -35,7 +36,14 @@ signals:
     void connectionStateChanged();
 
 private:
-    QString _serverAddress;
+    QUrl buildUrl( const QString& endpoint ) const;
+    QNetworkRequest buildRequest( const QString& endpoint ) const;
+
+    void setServerAddress( const QUrl& serverAddress );
+    void setConnectionState( ConnectionState connectionState );
+
+private:
+    QUrl _serverAddress;
     ConnectionState _connectionState;
     QNetworkAccessManager _networkManager;
 };
