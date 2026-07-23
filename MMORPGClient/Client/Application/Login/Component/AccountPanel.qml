@@ -29,6 +29,15 @@ Item {
                     */
                 }
             }
+
+            ButtonBase {
+                vText: qsTr("Disconnect")
+                onClicked: function () {
+                    /*
+                        TODO: Implement disconnect for server change
+                    */
+                }
+            }
         }
     }
 }
