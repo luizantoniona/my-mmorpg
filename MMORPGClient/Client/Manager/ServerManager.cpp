@@ -45,12 +45,19 @@ void ServerManager::connectServer( const QString& address ) {
         return;
     }
 
+    if ( address.isEmpty() ) {
+        return;
+    }
+
     setConnectionState( ConnectionState::Connecting );
 
-    QUrl serverUrl( address );
-    if ( serverUrl.scheme().isEmpty() ) {
-        serverUrl.setScheme( "http" );
+    QString url = address.trimmed();
+
+    if ( !url.startsWith( "http://" ) && !url.startsWith( "https://" ) ) {
+        url.prepend( "http://" );
     }
+
+    QUrl serverUrl( url );
 
     QNetworkRequest request( serverUrl.resolved( QUrl( "/status" ) ) );
 
