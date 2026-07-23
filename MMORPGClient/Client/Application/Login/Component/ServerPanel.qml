@@ -6,10 +6,12 @@ import MMORPGClientManagers
 Item {
     id: root
 
-    PanelCustom {
+    property int vStatus: ServerManager.connectionState
+
+    PanelBase {
         anchors.fill: parent
 
-        vContent: RowLayout {
+        ColumnLayout {
             spacing: Spaces.spacing8
 
             Text {

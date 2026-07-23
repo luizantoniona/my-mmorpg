@@ -5,10 +5,10 @@ import MMORPGUIComponents
 Item {
     id: root
 
-    PanelCustom {
+    PanelBase {
         anchors.fill: parent
 
-        vContent: ColumnLayout {
+        ColumnLayout {
 
             InputFieldCustom {
                 vTitle: qsTr("Username")
