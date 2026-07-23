@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <MMORPGEngine/Character/CharacterModel.h>
+#include <MMORPGEngine/Core/Character/CharacterModel.h>
 #include <Repository/Repository.h>
 
 namespace Server {

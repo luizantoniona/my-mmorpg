@@ -10,21 +10,21 @@ find_package(Qt6 REQUIRED COMPONENTS
 )
 
 set(PROJECT_SOURCES
-    Account/AccountDTO.cpp
-    Account/AccountDTO.h
-    Account/AccountModel.cpp
-    Account/AccountModel.h
-    Character/CharacterDTO.cpp
-    Character/CharacterDTO.h
-    Character/CharacterModel.cpp
-    Character/CharacterModel.h
     Commons/JsonHelper.cpp
     Commons/JsonHelper.h
     Commons/Singleton.h
-    World/WorldFactory.cpp
-    World/WorldFactory.h
-    World/WorldModel.cpp
-    World/WorldModel.h)
+    Core/Account/AccountDTO.cpp
+    Core/Account/AccountDTO.h
+    Core/Account/AccountModel.cpp
+    Core/Account/AccountModel.h
+    Core/Character/CharacterDTO.cpp
+    Core/Character/CharacterDTO.h
+    Core/Character/CharacterModel.cpp
+    Core/Character/CharacterModel.h
+    Core/World/WorldFactory.cpp
+    Core/World/WorldFactory.h
+    Core/World/WorldModel.cpp
+    Core/World/WorldModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h)
 

@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include <MMORPGEngine/Account/AccountModel.h>
+#include <MMORPGEngine/Core/Account/AccountModel.h>
 #include <Repository/Repository.h>
 
 namespace Server {
