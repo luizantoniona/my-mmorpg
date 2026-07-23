@@ -22,6 +22,8 @@ qt_add_qml_module(
   Component/InputFieldCustom.qml
   Component/PanelCustom.qml
   Component/Button/ButtonBase.qml
+  Component/Spacer/SpacerHorizontal.qml
+  Component/Spacer/SpacerVertical.qml
   Component/Text/TextTitle.qml
   Theme/Borders.qml
   Theme/Colors.qml
