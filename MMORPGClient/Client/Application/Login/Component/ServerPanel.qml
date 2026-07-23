@@ -24,7 +24,7 @@ Item {
                 vPlaceholder: qsTr("Ex: http://127.0.0.1:8080")
             }
 
-            ButtonCustom {
+            ButtonBase {
                 vText: qsTr("Connect")
                 onClicked: function () {
                     ServerManager.connectServer(serverInput.vText)

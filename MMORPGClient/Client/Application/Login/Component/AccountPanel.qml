@@ -21,10 +21,12 @@ Item {
                 vEchoMode: TextInput.Password
             }
 
-            ButtonCustom {
+            ButtonBase {
                 vText: qsTr("Login")
                 onClicked: function () {
-                    // TODO
+                    /*
+                        TODO: Implement login
+                    */
                 }
             }
         }
