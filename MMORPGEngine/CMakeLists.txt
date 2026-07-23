@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.16)
 
 project(MMORPGEngine LANGUAGES CXX)
 
+set(CMAKE_AUTOMOC ON)
+
+find_package(Qt6 REQUIRED COMPONENTS
+  Core
+  Network
+)
+
 set(PROJECT_SOURCES
     Account/AccountDTO.cpp
     Account/AccountDTO.h
@@ -18,12 +25,17 @@ set(PROJECT_SOURCES
     World/WorldFactory.h
     World/WorldModel.cpp
     World/WorldModel.h)
+    Network/HttpClient.cpp
+    Network/HttpClient.h)
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
 find_package(jsoncpp CONFIG REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC JsonCpp::JsonCpp)
+target_link_libraries(${PROJECT_NAME}
+  PUBLIC JsonCpp::JsonCpp
+  PUBLIC Qt6::Core
+  PUBLIC Qt6::Network)
 
 add_library(MMORPG::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 

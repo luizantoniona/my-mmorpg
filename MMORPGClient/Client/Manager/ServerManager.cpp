@@ -1,9 +1,6 @@
 #include "ServerManager.h"
 
-#include <QNetworkReply>
-#include <QNetworkRequest>
 #include <QSettings>
-#include <QUrl>
 
 namespace {
 constexpr const char* SETTINGS_SCOPE = "MMORPG";
@@ -12,12 +9,11 @@ constexpr const char* SETTINGS_SUB_SCOPE = "Client";
 
 ServerManager::ServerManager( QObject* parent ) :
     QObject( parent ),
-    _serverAddress( "" ),
     _connectionState( ConnectionState::Disconnected ),
-    _networkManager() {
+    _httpClient( this ) {
 
     QSettings settings( QSettings::IniFormat, QSettings::UserScope, SETTINGS_SCOPE, SETTINGS_SUB_SCOPE );
-    _serverAddress = settings.value( "ServerAddress", "" ).toString();
+    _serverAddress = settings.value( "ServerAddress", "" ).toUrl();
 
     connectServer( _serverAddress.toString() );
 }
@@ -33,11 +29,11 @@ ServerManager::ConnectionState ServerManager::connectionState() const {
 }
 
 QNetworkReply* ServerManager::get( const QString& endpoint ) {
-    return _networkManager.get( buildRequest( endpoint ) );
+    return _httpClient.get( endpoint );
 }
 
 QNetworkReply* ServerManager::post( const QString& endpoint, const QByteArray& body ) {
-    return _networkManager.post( buildRequest( endpoint ), body );
+    return _httpClient.post( endpoint, body );
 }
 
 void ServerManager::connectServer( const QString& address ) {
@@ -59,10 +55,9 @@ void ServerManager::connectServer( const QString& address ) {
 
     QUrl serverUrl( url );
 
-    QNetworkRequest request( serverUrl.resolved( QUrl( "/status" ) ) );
+    _httpClient.setBaseUrl( serverUrl );
 
-    auto reply = _networkManager.get( request );
-
+    auto reply = _httpClient.get( "/status" );
     connect( reply, &QNetworkReply::finished, this, [ this, reply, serverUrl ]() {
         reply->deleteLater();
 
@@ -76,38 +71,14 @@ void ServerManager::connectServer( const QString& address ) {
     } );
 }
 
-QUrl ServerManager::buildUrl( const QString& endpoint ) const {
-    QUrl url = _serverAddress;
-
-    QString path = url.path();
-
-    if ( !path.endsWith( '/' ) ) {
-        path += '/';
-    }
-
-    path += endpoint.startsWith( '/' ) ? endpoint.mid( 1 ) : endpoint;
-
-    url.setPath( path );
-
-    return url;
-}
-
-QNetworkRequest ServerManager::buildRequest( const QString& endpoint ) const {
-    QNetworkRequest request( buildUrl( endpoint ) );
-
-    request.setHeader( QNetworkRequest::ContentTypeHeader, "application/json" );
-
-    request.setRawHeader( "Accept", "application/json" );
-
-    return request;
-}
-
 void ServerManager::setServerAddress( const QUrl& serverAddress ) {
     if ( _serverAddress == serverAddress ) {
         return;
     }
 
     _serverAddress = serverAddress;
+
+    _httpClient.setBaseUrl( serverAddress );
 
     QSettings settings( QSettings::IniFormat, QSettings::UserScope, SETTINGS_SCOPE, SETTINGS_SUB_SCOPE );
     settings.setValue( "ServerAddress", serverAddress );
@@ -129,9 +100,6 @@ void ServerManager::setConnectionState( ConnectionState connectionState ) {
 Engine::Singleton<ServerManager>
 
 ServerManager
-├── HTTP
-│   ├── GET
-│   └── POST
 ├── WebSocket
 │   ├── connect()
 │   ├── disconnect()

@@ -1,8 +1,9 @@
 #ifndef SERVERMANAGER_H
 #define SERVERMANAGER_H
 
-#include <QNetworkAccessManager>
 #include <QObject>
+
+#include <MMORPGEngine/Network/HttpClient.h>
 
 class ServerManager : public QObject {
     Q_OBJECT
@@ -36,15 +37,13 @@ signals:
     void connectionStateChanged();
 
 private:
-    QUrl buildUrl( const QString& endpoint ) const;
-    QNetworkRequest buildRequest( const QString& endpoint ) const;
-
     void setServerAddress( const QUrl& serverAddress );
     void setConnectionState( ConnectionState connectionState );
 
 private:
     QUrl _serverAddress;
     ConnectionState _connectionState;
-    QNetworkAccessManager _networkManager;
+    Engine::HttpClient _httpClient;
 };
+
 #endif // SERVERMANAGER_H
