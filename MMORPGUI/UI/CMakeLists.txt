@@ -22,6 +22,7 @@ qt_add_qml_module(
   Component/InputFieldCustom.qml
   Component/PanelCustom.qml
   Component/Button/ButtonBase.qml
+  Component/Text/TextTitle.qml
   Theme/Borders.qml
   Theme/Colors.qml
   Theme/Fonts.qml
