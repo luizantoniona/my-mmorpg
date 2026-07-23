@@ -122,29 +122,22 @@ void ServerManager::setConnectionState( ConnectionState connectionState ) {
 Engine::Singleton<ServerManager>
 
 ServerManager
-│
 ├── HTTP
 │   ├── GET
-│   ├── POST
-│   ├── PATCH
-│   └── DELETE
-│
+│   └── POST
 ├── WebSocket
 │   ├── connect()
 │   ├── disconnect()
 │   ├── send()
 │   └── receive()
-│
 ├── Session
 │   ├── token
 │   ├── refresh token
 │   └── headers
-│
 ├── Server
 │   ├── address
 │   ├── ping
 │   └── status
-│
 └── Settings
     └── salvar endereço
 */
