@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import MMORPGUIComponents
 import MMORPGClientComponents
 import MMORPGClientControls
+import MMORPGClientManagers
 
 Item {
     id: root
@@ -11,16 +12,8 @@ Item {
         id: control
     }
 
-    // TODO: Add background image
     ColumnLayout {
         anchors.fill: parent
-
-        ServerPanel {
-            id: serverPanel
-
-            Layout.fillWidth: true
-            Layout.preferredHeight: 200
-        }
 
         RowLayout {
             Layout.fillWidth: true
@@ -30,12 +23,23 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                // TODO: LOGO / Background / Something
+                // TODO: Change Rectangle by LOGO / Background / Something
+            }
+
+            ServerPanel {
+                id: serverPanel
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                visible: ServerManager.connectionState !== ServerManager.Connected
             }
 
             AccountPanel {
+                id: accountPanel
+
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                visible: ServerManager.connectionState === ServerManager.Connected
             }
         }
     }
