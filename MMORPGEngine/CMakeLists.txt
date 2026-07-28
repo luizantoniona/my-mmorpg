@@ -4,10 +4,7 @@ project(MMORPGEngine LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS
-  Core
-  Network
-)
+find_package(Qt6 REQUIRED COMPONENTS Core Network)
 
 set(PROJECT_SOURCES
     Commons/JsonHelper.cpp
@@ -21,10 +18,16 @@ set(PROJECT_SOURCES
     Core/Character/CharacterDTO.h
     Core/Character/CharacterModel.cpp
     Core/Character/CharacterModel.h
+    Core/World/Catalog/GroundCatalog.cpp
+    Core/World/Catalog/GroundCatalog.h
+    Core/World/Model/GroundModel.cpp
+    Core/World/Model/GroundModel.h
+    Core/World/Model/TileModel.cpp
+    Core/World/Model/TileModel.h
+    Core/World/Model/WorldModel.cpp
+    Core/World/Model/WorldModel.h
     Core/World/WorldFactory.cpp
     Core/World/WorldFactory.h
-    Core/World/WorldModel.cpp
-    Core/World/WorldModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h)
 
@@ -32,7 +35,8 @@ add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
 find_package(jsoncpp CONFIG REQUIRED)
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(
+  ${PROJECT_NAME}
   PUBLIC JsonCpp::JsonCpp
   PUBLIC Qt6::Core
   PUBLIC Qt6::Network)

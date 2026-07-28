@@ -6,7 +6,7 @@
 
 namespace {
 constexpr const char* DATABASE_PATH = "../../../../Database/ServerDatabase";
-constexpr const char* WORLD_DATA_PATH = "../../../../Data/World/";
+constexpr const char* DATA_PATH = "../../../../Data/";
 } // namespace
 
 int main() {
@@ -16,7 +16,7 @@ int main() {
     Engine::Singleton<Server::Database>::instance().initialize( DATABASE_PATH );
 
     // --- World ---
-    Engine::Singleton<Server::WorldManager>::instance().initialize( WORLD_DATA_PATH );
+    Engine::Singleton<Server::WorldManager>::instance().initialize( DATA_PATH );
 
     drogon::app()
     .addListener( "0.0.0.0", 8080 )

@@ -1,0 +1,29 @@
+{
+    "TextureFolder": "Textures",
+    "Tiles": [
+        {
+            "ID": 0,
+            "Walkable": false,
+            "Name": "Void",
+            "TextureFolder": "Void"
+        },
+        {
+            "ID": 1,
+            "Walkable": false,
+            "Name": "Water",
+            "TextureFolder": "Water"
+        },
+        {
+            "ID": 2,
+            "Walkable": true,
+            "Name": "Grass",
+            "TextureFolder": "Grass"
+        },
+        {
+            "ID": 3,
+            "Walkable": true,
+            "Name": "Sand",
+            "TextureFolder": "Sand"
+        }
+    ]
+}

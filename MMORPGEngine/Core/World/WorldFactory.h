@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include "WorldModel.h"
+#include <MMORPGEngine/Core/World/Model/WorldModel.h>
 
 namespace Engine {
 

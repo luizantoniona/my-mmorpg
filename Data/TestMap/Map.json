@@ -1,0 +1,12 @@
+{
+    "Name": "Mapa Teste",
+    "Width": 64,
+    "Height": 64,
+    "Catalogs": {
+        "GroundCatalog": "Grounds.json"
+    },
+    "Floors": [
+        "0.json",
+        "1.json"
+    ]
+}
