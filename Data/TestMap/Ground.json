@@ -1,29 +1,28 @@
 {
-    "TextureFolder": "Textures",
-    "Tiles": [
+    "Grounds": [
         {
-            "ID": 0,
+            "Type": 0,
             "Walkable": false,
             "Name": "Void",
-            "TextureFolder": "Void"
+            "TextureFolder": "Textures/Void"
         },
         {
-            "ID": 1,
+            "Type": 1,
             "Walkable": false,
             "Name": "Water",
-            "TextureFolder": "Water"
+            "TextureFolder": "Textures/Water"
         },
         {
-            "ID": 2,
+            "Type": 2,
             "Walkable": true,
             "Name": "Grass",
-            "TextureFolder": "Grass"
+            "TextureFolder": "Textures/Grass"
         },
         {
-            "ID": 3,
+            "Type": 3,
             "Walkable": true,
             "Name": "Sand",
-            "TextureFolder": "Sand"
+            "TextureFolder": "Textures/Sand"
         }
     ]
 }

@@ -3,7 +3,7 @@
     "Width": 64,
     "Height": 64,
     "Catalogs": {
-        "GroundCatalog": "Grounds.json"
+        "Grounds": "Ground.json"
     },
     "Floors": [
         "0.json",
