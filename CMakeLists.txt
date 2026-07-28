@@ -17,6 +17,7 @@ option(BUILD_CLIENT "Build MMORPGClient" ON)
 option(BUILD_EDITOR "Build MMORPGEditor" ON)
 
 add_subdirectory(MMORPGEngine)
+add_subdirectory(MMORPGNetwork)
 
 add_subdirectory(MMORPGUI)
 list(APPEND QML_IMPORT_PATH "${CMAKE_BINARY_DIR}/MMORPGUI/UI")
@@ -35,4 +36,6 @@ if(BUILD_EDITOR)
   list(APPEND QML_IMPORT_PATH "${CMAKE_BINARY_DIR}/MMORPGEditor/Editor")
 endif()
 
-set(QML_IMPORT_PATH "${QML_IMPORT_PATH}" CACHE STRING "QML import paths" FORCE)
+set(QML_IMPORT_PATH
+    "${QML_IMPORT_PATH}"
+    CACHE STRING "QML import paths" FORCE)

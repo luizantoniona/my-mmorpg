@@ -24,19 +24,19 @@ void GroundModel::setWalkable( bool walkable ) {
     _walkable = walkable;
 }
 
-QString GroundModel::name() const {
+std::string GroundModel::name() const {
     return _name;
 }
 
-void GroundModel::setName( const QString& name ) {
+void GroundModel::setName( const std::string& name ) {
     _name = name;
 }
 
-QString GroundModel::folder() const {
+std::string GroundModel::folder() const {
     return _folder;
 }
 
-void GroundModel::setFolder( const QString& folder ) {
+void GroundModel::setFolder( const std::string& folder ) {
     _folder = folder;
 }
 

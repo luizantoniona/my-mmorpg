@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include <MMORPGEngine/Network/HttpClient.h>
+#include <MMORPGNetwork/Network/HttpClient.h>
 
 class ServerManager : public QObject {
     Q_OBJECT

@@ -2,8 +2,7 @@
 #define GROUNDMODEL_H
 
 #include <cstdint>
-
-#include <QString>
+#include <string>
 
 namespace Engine {
 
@@ -17,17 +16,17 @@ public:
     bool walkable() const;
     void setWalkable( bool walkable );
 
-    QString name() const;
-    void setName( const QString& name );
+    std::string name() const;
+    void setName( const std::string& name );
 
-    QString folder() const;
-    void setFolder( const QString& folder );
+    std::string folder() const;
+    void setFolder( const std::string& folder );
 
 private:
     uint16_t _type;
     bool _walkable;
-    QString _name;
-    QString _folder;
+    std::string _name;
+    std::string _folder;
 };
 
 } // namespace Engine

@@ -12,15 +12,15 @@ const GroundModel* GroundCatalog::ground( uint16_t type ) const {
         return nullptr;
     }
 
-    return &iterator.value();
+    return &iterator->second;
 }
 
-const QMap<uint16_t, GroundModel>& GroundCatalog::grounds() const {
+const std::unordered_map<uint16_t, GroundModel>& GroundCatalog::grounds() const {
     return _grounds;
 }
 
 void GroundCatalog::addGround( const GroundModel& ground ) {
-    _grounds.insert( ground.type(), ground );
+    _grounds.insert( { ground.type(), ground } );
 }
 
 } // namespace Engine

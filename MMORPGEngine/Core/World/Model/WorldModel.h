@@ -9,10 +9,15 @@ class WorldModel {
 public:
     WorldModel();
 
+    std::string name() const;
+    void setName( const std::string& name );
+
     const GroundCatalog& groundCatalog() const;
     GroundCatalog& groundCatalog();
 
 private:
+    std::string _name;
+
     // --- Catalogs ---
     GroundCatalog _groundCatalog;
 
