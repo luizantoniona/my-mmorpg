@@ -44,8 +44,7 @@ Item {
         anchors.fill: parent
         spacing: Spaces.spacing8
 
-        // TODO: Change for header component
-        Item {
+        WorldPageHeader {
             Layout.fillWidth: true
             height: 80
 

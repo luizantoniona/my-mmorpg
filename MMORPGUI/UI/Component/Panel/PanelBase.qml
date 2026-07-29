@@ -29,8 +29,7 @@ Item {
     default property alias contentData: panelContent.contentData
     readonly property alias contentItem: panelContent.contentItem
 
-    implicitWidth: 240
-    implicitHeight: 180
+    anchors.fill: parent
 
     PanelFrame {
         anchors.fill: parent
@@ -47,7 +46,7 @@ Item {
                 right: parent.right
                 top: parent.top
             }
-            height: 48
+            height: root.vHeaderType !== PanelBase.PanelHeaderType.Headerless ? 40 : 0
             visible: root.vHeaderType !== PanelBase.PanelHeaderType.Headerless
             title: root.vHeaderTitle
         }

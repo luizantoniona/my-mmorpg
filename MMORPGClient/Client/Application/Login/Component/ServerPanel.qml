@@ -9,7 +9,6 @@ Item {
     property int vStatus: ServerManager.connectionState
 
     PanelBase {
-        anchors.fill: parent
 
         ColumnLayout {
             anchors.centerIn: parent

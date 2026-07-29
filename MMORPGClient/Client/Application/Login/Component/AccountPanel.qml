@@ -6,7 +6,6 @@ Item {
     id: root
 
     PanelBase {
-        anchors.fill: parent
 
         ColumnLayout {
             anchors.centerIn: parent
