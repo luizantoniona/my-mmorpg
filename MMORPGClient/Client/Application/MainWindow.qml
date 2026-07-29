@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import MMORPGUIComponents
 import MMORPGClientComponents
-import MMORPGClientControls
 
 Item {
     id: root
