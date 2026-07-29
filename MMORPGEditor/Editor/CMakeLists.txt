@@ -1,6 +1,8 @@
 set(PROJECT_SOURCES
-    RegisterTypes.cpp RegisterTypes.h Application/EditorPageControl.cpp
-    Application/EditorPageControl.h)
+    RegisterTypes.cpp
+    RegisterTypes.h
+    Application/World/WorldPageControl.cpp
+    Application/World/WorldPageControl.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 
@@ -13,6 +15,7 @@ qt_add_qml_module(
   QML_FILES
   Main.qml
   Application/MainWindow.qml
+  Application/World/WorldPage.qml)
 
 target_link_libraries(
   ${PROJECT_NAME}

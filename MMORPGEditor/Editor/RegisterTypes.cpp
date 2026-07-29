@@ -2,8 +2,8 @@
 
 #include <QQmlEngine>
 
-#include "Application/EditorPageControl.h"
+#include "Application/World/WorldPageControl.h"
 
 void RegisterTypes::registerTypes() {
-    qmlRegisterType<EditorPageControl>( "MMORPGEditorControls", 1, 0, "EditorPageControl" );
+    qmlRegisterType<WorldPageControl>( "MMORPGEditorControls", 1, 0, "WorldPageControl" );
 }
