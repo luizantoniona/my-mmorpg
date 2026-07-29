@@ -14,6 +14,7 @@ public:
 
 private:
     static void createGroundCatalog( const std::string& groundsFile, WorldModel* world );
+    static void createFloor( const std::string& floorFile, WorldModel* world );
 };
 
 } // namespace Engine

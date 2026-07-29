@@ -6,7 +6,8 @@ GroundModel::GroundModel() :
     _type( 0 ),
     _walkable( false ),
     _name( "" ),
-    _folder( "" ) {}
+    _folder( "" ) {
+}
 
 uint16_t GroundModel::type() const {
     return _type;

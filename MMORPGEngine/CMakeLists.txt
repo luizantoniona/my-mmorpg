@@ -16,6 +16,8 @@ set(PROJECT_SOURCES
     Core/Character/CharacterModel.h
     Core/World/Catalog/GroundCatalog.cpp
     Core/World/Catalog/GroundCatalog.h
+    Core/World/Model/FloorModel.cpp
+    Core/World/Model/FloorModel.h
     Core/World/Model/GroundModel.cpp
     Core/World/Model/GroundModel.h
     Core/World/Model/TileModel.cpp
