@@ -26,7 +26,7 @@ Item {
         case Qt.Key_S:
             // TODO: Move down (Chunk or tile?)
             break
-        case Qt.Key_W:
+        case Qt.Key_D:
             // TODO: Move right (Chunk or tile?)
             break
         case Qt.Key_E:
