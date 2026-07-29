@@ -15,7 +15,8 @@ qt_add_qml_module(
   QML_FILES
   Main.qml
   Application/MainWindow.qml
-  Application/World/WorldPage.qml)
+  Application/World/WorldPage.qml
+  Application/World/Component/WorldPageHeader.qml)
 
 target_link_libraries(
   ${PROJECT_NAME}

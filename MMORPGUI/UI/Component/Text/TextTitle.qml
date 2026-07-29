@@ -4,6 +4,7 @@ import MMORPGUIComponents
 Text {
     id: root
 
+    property string vText: ""
     property color vTextColor: Colors.text
     property int vFontSize: 14
 
@@ -15,4 +16,5 @@ Text {
     }
     verticalAlignment: Text.AlignVCenter
     elide: Text.ElideRight
+    text: vText
 }

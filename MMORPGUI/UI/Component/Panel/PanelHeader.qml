@@ -30,9 +30,10 @@ Item {
         TextTitle {
             id: titleText
 
-            text: root.title
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
+
+            vText: root.title
         }
 
         SpacerHorizontal {}

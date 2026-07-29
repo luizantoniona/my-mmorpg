@@ -46,11 +46,8 @@ Item {
 
         WorldPageHeader {
             Layout.fillWidth: true
-            height: 80
-
-            Rectangle {
-                anchors.fill: parent
-                color: "red"
+            vWorldName: control.worldName
+            vWorldSize: control.worldWidth + " x " + control.worldHeight
             }
         }
 
