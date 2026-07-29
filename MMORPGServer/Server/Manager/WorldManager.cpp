@@ -29,17 +29,17 @@ void WorldManager::initialize( const std::string& worldPath ) {
 
     _running = true;
     _thread = std::thread( [ this, msPerTick ]() {
-            using clock = std::chrono::steady_clock;
-            auto nextTick = clock::now();
+        using clock = std::chrono::steady_clock;
+        auto nextTick = clock::now();
 
-            while ( _running ) {
-                nextTick += std::chrono::milliseconds( msPerTick );
+        while ( _running ) {
+            nextTick += std::chrono::milliseconds( msPerTick );
 
-                // TODO: Tick runtime world and thread systems
+            // TODO: Tick runtime world and thread systems
 
-                std::this_thread::sleep_until( nextTick );
-            }
-        } );
+            std::this_thread::sleep_until( nextTick );
+        }
+    } );
 }
 
 void WorldManager::finalize() {
