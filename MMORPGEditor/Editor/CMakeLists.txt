@@ -12,7 +12,7 @@ qt_add_qml_module(
   1.0
   QML_FILES
   Main.qml
-  Application/EditorPage.qml)
+  Application/MainWindow.qml
 
 target_link_libraries(
   ${PROJECT_NAME}

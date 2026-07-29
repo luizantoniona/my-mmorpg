@@ -3,12 +3,17 @@ import QtQuick.Window
 import MMORPGEditorComponents
 
 Window {
-    width: 1280
-    height: 800
-    visible: true
-    title: "MMORPG World Editor"
+    id: window
 
-    EditorPage {
+    title: "MMORPG World Editor"
+    visibility: Window.Windowed
+    visible: true
+    width: Screen.width / 1.5
+    height: Screen.height / 1.5
+
+    MainWindow {
+        id: application
+
         anchors.fill: parent
     }
 }
