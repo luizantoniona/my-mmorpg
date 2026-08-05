@@ -8,8 +8,17 @@ import MMORPGClientManagers
 Item {
     id: root
 
+    signal success
+
     LoginPageControl {
         id: control
+
+        onLoginSucceeded: function () {
+            root.success()
+        }
+        onLoginFailed: function (error) {
+            accountPanel.vTextError = error
+        }
     }
 
     ColumnLayout {
@@ -40,6 +49,10 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 visible: ServerManager.connectionState === ServerManager.Connected
+
+                onLogin: function (username, password) {
+                    control.login(username, password)
+                }
             }
         }
     }

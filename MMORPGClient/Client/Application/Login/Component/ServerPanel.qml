@@ -30,7 +30,6 @@ Item {
                 vText: qsTr("Connect")
 
                 onClicked: function () {
-                    console.log(serverInput.vText)
                     ServerManager.connectServer(serverInput.vText)
                 }
             }

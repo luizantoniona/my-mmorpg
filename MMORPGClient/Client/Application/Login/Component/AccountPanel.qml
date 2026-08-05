@@ -1,17 +1,23 @@
 import QtQuick
 import QtQuick.Layouts
 import MMORPGUIComponents
+import MMORPGClientManagers
 
 Item {
     id: root
 
-    PanelBase {
+    signal login(string username, string password)
 
+    property string vTextError: ""
+
+    PanelBase {
         ColumnLayout {
             anchors.centerIn: parent
             spacing: Spaces.spacing8
 
             InputFieldCustom {
+                id: usernameField
+
                 Layout.alignment: Qt.AlignHCenter
 
                 vTitle: qsTr("Username")
@@ -19,6 +25,8 @@ Item {
             }
 
             InputFieldCustom {
+                id: passwordField
+
                 Layout.alignment: Qt.AlignHCenter
 
                 vTitle: qsTr("Password")
@@ -31,9 +39,7 @@ Item {
 
                 vText: qsTr("Login")
                 onClicked: function () {
-                    /*
-                        TODO: Implement login
-                    */
+                    root.login(usernameField.vText, passwordField.vText)
                 }
             }
 
@@ -42,10 +48,16 @@ Item {
 
                 vText: qsTr("Disconnect")
                 onClicked: function () {
-                    /*
-                        TODO: Implement disconnect for server change
-                    */
+                    ServerManager.disconnectServer()
                 }
+            }
+
+            TextTitle {
+                visible: root.vTextError.length > 0
+                vText: root.vTextError
+                vTextColor: Colors.error
+                horizontalAlignment: Text.AlignHCenter
+                Layout.alignment: Qt.AlignHCenter
             }
         }
     }

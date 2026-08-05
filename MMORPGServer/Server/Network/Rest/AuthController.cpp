@@ -1,9 +1,10 @@
 #include "AuthController.h"
 
-#include <Database/Database.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <Network/NetworkServer.h>
-#include <Repository/AccountRepository.h>
+#include <MMORPGEngine/Core/Account/AccountDTO.h>
+#include <MMORPGServer/Server/Database/Database.h>
+#include <MMORPGServer/Server/Network/NetworkServer.h>
+#include <MMORPGServer/Server/Repository/AccountRepository.h>
 
 namespace Server {
 
@@ -43,14 +44,11 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
 
     std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
-    responseJson[ "idAccount" ] = account->idAccount();
-    responseJson[ "username" ] = account->dsUsername();
-    responseJson[ "sessionID" ] = sessionId;
-    responseJson[ "message" ] = "Login successful";
+    Engine::AccountDTO accountDTO( *account, sessionId );
 
     std::cout << "AuthController::login [Account] " << account->dsUsername() << " [UUID] " << sessionId << std::endl;
 
-    auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
+    auto response = drogon::HttpResponse::newHttpJsonResponse( accountDTO.toJson() );
     response->setStatusCode( drogon::k200OK );
     callback( response );
 }
@@ -69,7 +67,6 @@ void AuthController::logout( const drogon::HttpRequestPtr& request, std::functio
 
             std::cout << "AuthController::logout" << " [UUID] " << sessionId << std::endl;
 
-            responseJson[ "message" ] = "Logout successful";
             auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
             response->setStatusCode( drogon::k200OK );
             callback( response );
@@ -150,14 +147,11 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
 
     std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
-    responseJson[ "idAccount" ] = account->idAccount();
-    responseJson[ "username" ] = account->dsUsername();
-    responseJson[ "sessionID" ] = sessionId;
-    responseJson[ "message" ] = "Account created successfully";
+    Engine::AccountDTO accountDTO( *account, sessionId );
 
     std::cout << "AuthController::sign [Account] " << account->dsUsername() << " [UUID] " << sessionId << std::endl;
 
-    auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
+    auto response = drogon::HttpResponse::newHttpJsonResponse( accountDTO.toJson() );
     response->setStatusCode( drogon::k201Created );
     callback( response );
 }

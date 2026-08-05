@@ -3,7 +3,7 @@
 
 #include <drogon/HttpController.h>
 
-#include <Network/Filter/AuthFilter.h>
+#include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 
 namespace Server {
 

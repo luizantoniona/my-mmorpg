@@ -41,6 +41,9 @@ Item {
 
         LoginPage {
             id: login
+            onSuccess: function () {
+                root.updatePage("AccountPage")
+            }
         }
     }
 

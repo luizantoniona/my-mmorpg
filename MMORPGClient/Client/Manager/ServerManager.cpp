@@ -36,6 +36,15 @@ QNetworkReply* ServerManager::post( const QString& endpoint, const QByteArray& b
     return _httpClient.post( endpoint, body );
 }
 
+void ServerManager::disconnectServer() {
+    if ( _connectionState == ConnectionState::Disconnected && _serverAddress.isEmpty() ) {
+        return;
+    }
+
+    setServerAddress( {} );
+    setConnectionState( ConnectionState::Disconnected );
+}
+
 void ServerManager::connectServer( const QString& address ) {
     if ( _connectionState == ConnectionState::Connecting ) {
         return;

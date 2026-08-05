@@ -30,6 +30,7 @@ public:
     QNetworkReply* post( const QString& endpoint, const QByteArray& body );
 
 public slots:
+    void disconnectServer();
     void connectServer( const QString& address );
 
 signals:
