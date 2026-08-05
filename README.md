@@ -1,4 +1,6 @@
-# 🛡️🧙 MyMMO
+# 🛡️🧙 MyMMO (Doc: WIP)
+
+# WIP
 
 ## 📦 Project Organization:
 
