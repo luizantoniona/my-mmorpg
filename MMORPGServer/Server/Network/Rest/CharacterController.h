@@ -3,8 +3,6 @@
 
 #include <drogon/HttpController.h>
 
-#include <Network/Filter/AuthFilter.h>
-
 namespace Server {
 
 class CharacterController : public drogon::HttpController<CharacterController> {

@@ -3,8 +3,6 @@
 
 #include <drogon/HttpController.h>
 
-#include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
-
 namespace Server {
 
 class AuthController : public drogon::HttpController<AuthController> {

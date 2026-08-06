@@ -3,6 +3,7 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Core/Account/AccountDTO.h>
 #include <MMORPGServer/Server/Database/Database.h>
+#include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
 #include <MMORPGServer/Server/Repository/AccountRepository.h>
 
@@ -54,36 +55,28 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
 }
 
 void AuthController::logout( const drogon::HttpRequestPtr& request, std::function<void( const drogon::HttpResponsePtr& )>&& callback ) const {
-    auto token = request->getHeader( "Authorization" );
-    const std::string prefix = "X-Session ";
+    const NetworkSession& session = AuthFilter::session( request );
 
     Json::Value responseJson;
 
-    if ( token.rfind( prefix, 0 ) == 0 ) {
-        std::string sessionId = token.substr( prefix.length() );
-        std::optional<NetworkSession> session = Engine::Singleton<NetworkServer>::instance().getSession( sessionId );
+    if ( !Engine::Singleton<NetworkServer>::instance().deleteSession( session.uuid() ) ) {
+        responseJson[ "error" ] = "Failed to destroy session";
 
-        if ( session && Engine::Singleton<NetworkServer>::instance().deleteSession( sessionId ) ) {
+        auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
+        response->setStatusCode( drogon::k500InternalServerError );
 
-            std::cout << "AuthController::logout" << " [UUID] " << sessionId << std::endl;
-
-            auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
-            response->setStatusCode( drogon::k200OK );
-            callback( response );
-            return;
-
-        } else {
-            responseJson[ "error" ] = "Failed to destroy session";
-            auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
-            response->setStatusCode( drogon::k500InternalServerError );
-            callback( response );
-            return;
-        }
+        callback( response );
+        return;
     }
 
-    auto resp = drogon::HttpResponse::newHttpResponse();
-    resp->setStatusCode( drogon::k401Unauthorized );
-    callback( resp );
+    std::cout << "AuthController::logout [UUID] "
+              << session.uuid()
+              << std::endl;
+
+    auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
+    response->setStatusCode( drogon::k200OK );
+
+    callback( response );
 }
 
 void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<void( const drogon::HttpResponsePtr& )>&& callback ) const {
