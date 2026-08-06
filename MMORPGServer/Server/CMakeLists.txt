@@ -13,6 +13,8 @@ set(PROJECT_SOURCES
     Network/NetworkSession.h
     Network/Filter/AuthFilter.cpp
     Network/Filter/AuthFilter.h
+    Network/Rest/AssetsController.cpp
+    Network/Rest/AssetsController.h
     Network/Rest/AuthController.cpp
     Network/Rest/AuthController.h
     Network/Rest/CharacterController.cpp
