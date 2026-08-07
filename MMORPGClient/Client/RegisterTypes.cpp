@@ -4,11 +4,11 @@
 
 #include <MMORPGEngine/Commons/Singleton.h>
 
-#include "Application/Account/AccountPageControl.h"
-#include "Application/Game/GamePageControl.h"
-#include "Application/Login/LoginPageControl.h"
-#include "Manager/ServerManager.h"
+#include <MMORPGClient/Client/Application/Account/AccountPageControl.h>
+#include <MMORPGClient/Client/Application/Game/GamePageControl.h>
+#include <MMORPGClient/Client/Application/Login/LoginPageControl.h>
 #include <MMORPGClient/Client/Application/Sync/SyncPageControl.h>
+#include <MMORPGClient/Client/Manager/ServerManager.h>
 
 void RegisterTypes::registerTypes() {
     // Page Controls
