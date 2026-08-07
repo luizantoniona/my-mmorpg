@@ -20,7 +20,6 @@ qt_add_qml_module(
   ${CMAKE_CURRENT_BINARY_DIR}/MMORPGUIComponents
   QML_FILES
   Component/InputFieldCustom.qml
-  Component/PanelCustom.qml
   Component/Button/ButtonBase.qml
   Component/Panel/PanelBase.qml
   Component/Panel/PanelContent.qml
