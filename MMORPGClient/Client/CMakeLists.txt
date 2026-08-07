@@ -7,6 +7,8 @@ set(PROJECT_SOURCES
     Application/Game/GamePageControl.h
     Application/Login/LoginPageControl.cpp
     Application/Login/LoginPageControl.h
+    Application/Sync/SyncPageControl.cpp
+    Application/Sync/SyncPageControl.h
     Manager/AccountManager.cpp
     Manager/AccountManager.h
     Manager/ServerManager.cpp
@@ -28,7 +30,8 @@ qt_add_qml_module(
   Application/Login/LoginPage.qml
   Application/Login/Component/AccountPanel.qml
   Application/Login/Component/ServerPanel.qml
-  Application/Login/Component/ServerStatus.qml)
+  Application/Login/Component/ServerStatus.qml
+  Application/Sync/SyncPage.qml)
 
 # file(GLOB_RECURSE SVG_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} Assets/*.svg
 # )

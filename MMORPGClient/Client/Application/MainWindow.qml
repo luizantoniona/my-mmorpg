@@ -14,6 +14,9 @@ Item {
         case "LoginPage":
             stack.push(loginPage)
             break
+        case "SyncPage":
+            stack.push(syncPage)
+            break
         case "AccountPage":
             stack.push(accountPage)
             break
@@ -41,9 +44,18 @@ Item {
 
         LoginPage {
             id: login
+
             onSuccess: function () {
-                root.updatePage("AccountPage")
+                root.updatePage("SyncPage")
             }
+        }
+    }
+
+    Component {
+        id: syncPage
+
+        SyncPage {
+            id: sync
         }
     }
 
