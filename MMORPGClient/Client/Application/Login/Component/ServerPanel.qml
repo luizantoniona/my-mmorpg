@@ -14,7 +14,7 @@ Item {
             anchors.centerIn: parent
             spacing: Spaces.spacing8
 
-            InputFieldCustom {
+            InputBase {
                 id: serverInput
 
                 Layout.alignment: Qt.AlignHCenter
