@@ -13,6 +13,11 @@ Database::~Database() {
     close();
 }
 
+bool Database::initialize( const std::string& databasePath ) {
+    _databasePath = databasePath;
+    return open() && create() && migrate();
+}
+
 bool Database::create() {
     if ( !open() ) {
         return false;
@@ -45,11 +50,6 @@ bool Database::migrate() {
     // TODO: Execute SQL's migrations
 
     return true;
-}
-
-bool Database::initialize( const std::string& databasePath ) {
-    _databasePath = databasePath;
-    return open() && create() && migrate();
 }
 
 sqlite3* Database::database() {

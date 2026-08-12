@@ -2,6 +2,9 @@
 
 #include <QSettings>
 
+#include <MMORPGClient/Client/Manager/AccountManager.h>
+#include <MMORPGEngine/Commons/Singleton.h>
+
 namespace {
 constexpr const char* SETTINGS_SCOPE = "MMORPG";
 constexpr const char* SETTINGS_SUB_SCOPE = "Client";
@@ -32,14 +35,28 @@ QNetworkReply* ServerManager::get( const QString& endpoint ) {
     return _httpClient.get( endpoint );
 }
 
+QNetworkReply* ServerManager::getAuthenticated( const QString& endpoint ) {
+    AccountManager& accountManager = Engine::Singleton<AccountManager>::instance();
+    return _httpClient.getAuthenticated( endpoint, accountManager.sessionId() );
+}
+
 QNetworkReply* ServerManager::post( const QString& endpoint, const QByteArray& body ) {
     return _httpClient.post( endpoint, body );
+}
+
+QNetworkReply* ServerManager::postAuthenticated( const QString& endpoint, const QByteArray& body ) {
+    AccountManager& accountManager = Engine::Singleton<AccountManager>::instance();
+    return _httpClient.postAuthenticated( endpoint, body, accountManager.sessionId() );
 }
 
 void ServerManager::disconnectServer() {
     if ( _connectionState == ConnectionState::Disconnected && _serverAddress.isEmpty() ) {
         return;
     }
+
+    // Futuramente:
+    // _httpClient.abortAllRequests();
+    // _webSocket.disconnectFromHost();
 
     setServerAddress( {} );
     setConnectionState( ConnectionState::Disconnected );
@@ -104,24 +121,3 @@ void ServerManager::setConnectionState( ConnectionState connectionState ) {
 
     emit connectionStateChanged();
 }
-
-/*
-Engine::Singleton<ServerManager>
-
-ServerManager
-├── WebSocket
-│   ├── connect()
-│   ├── disconnect()
-│   ├── send()
-│   └── receive()
-├── Session
-│   ├── token
-│   ├── refresh token
-│   └── headers
-├── Server
-│   ├── address
-│   ├── ping
-│   └── status
-└── Settings
-    └── salvar endereço
-*/
