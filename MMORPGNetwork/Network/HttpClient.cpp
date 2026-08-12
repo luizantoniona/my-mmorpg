@@ -18,8 +18,20 @@ QNetworkReply* HttpClient::get( const QString& endpoint, const QHash<QByteArray,
     return _networkManager.get( buildRequest( buildUrl( endpoint ), extraHeaders ) );
 }
 
+QNetworkReply* HttpClient::getAuthenticated( const QString& endpoint, const QString& sessionId, const QHash<QByteArray, QByteArray>& extraHeaders ) {
+    auto headers = extraHeaders;
+    headers[ "Authorization" ] = QString( "X-Session %1" ).arg( sessionId ).toUtf8();
+    return get( endpoint, headers );
+}
+
 QNetworkReply* HttpClient::post( const QString& endpoint, const QByteArray& body, const QHash<QByteArray, QByteArray>& extraHeaders ) {
     return _networkManager.post( buildRequest( buildUrl( endpoint ), extraHeaders ), body );
+}
+
+QNetworkReply* HttpClient::postAuthenticated( const QString& endpoint, const QByteArray& body, const QString& sessionId, const QHash<QByteArray, QByteArray>& extraHeaders ) {
+    auto headers = extraHeaders;
+    headers[ "Authorization" ] = QString( "X-Session %1" ).arg( sessionId ).toUtf8();
+    return post( endpoint, body, headers );
 }
 
 QUrl HttpClient::buildUrl( const QString& endpoint ) const {

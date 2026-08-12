@@ -5,6 +5,8 @@ set(PROJECT_SOURCES
     Database/Query.h
     Database/QueryLoader.cpp
     Database/QueryLoader.h
+    Manager/DataManager.cpp
+    Manager/DataManager.h
     Manager/WorldManager.cpp
     Manager/WorldManager.h
     Network/NetworkServer.cpp
@@ -17,6 +19,8 @@ set(PROJECT_SOURCES
     Network/Rest/AuthController.h
     Network/Rest/CharacterController.cpp
     Network/Rest/CharacterController.h
+    Network/Rest/DataController.cpp
+    Network/Rest/DataController.h
     Network/Rest/StatusController.cpp
     Network/Rest/StatusController.h
     Network/WebSocket/CharacterWebSocket.cpp
@@ -30,8 +34,7 @@ set(PROJECT_SOURCES
     Repository/Repository.cpp
     Repository/Repository.h)
 
-add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES}
-)
+add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

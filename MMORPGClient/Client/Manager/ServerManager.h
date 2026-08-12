@@ -27,7 +27,10 @@ public:
     ConnectionState connectionState() const;
 
     QNetworkReply* get( const QString& endpoint );
+    QNetworkReply* getAuthenticated( const QString& endpoint );
+
     QNetworkReply* post( const QString& endpoint, const QByteArray& body );
+    QNetworkReply* postAuthenticated( const QString& endpoint, const QByteArray& body );
 
 public slots:
     void disconnectServer();

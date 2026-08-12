@@ -8,13 +8,13 @@ import MMORPGClientManagers
 Item {
     id: root
 
-    signal success
+    signal loginSuccess
 
     LoginPageControl {
         id: control
 
         onLoginSucceeded: function () {
-            root.success()
+            root.loginSuccess()
         }
         onLoginFailed: function (error) {
             accountPanel.vTextError = error

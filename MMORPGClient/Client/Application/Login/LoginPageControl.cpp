@@ -38,7 +38,6 @@ void LoginPageControl::login( const QString& username, const QString& password )
     Engine::Singleton<AccountManager>::instance().clear();
 
     QNetworkReply* reply = serverManager.post( "/login", QJsonDocument( requestJson ).toJson( QJsonDocument::Compact ) );
-
     connect( reply, &QNetworkReply::finished, this, [ this, reply ]() {
         reply->deleteLater();
 

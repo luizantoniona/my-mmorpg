@@ -4,11 +4,10 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
+#include <MMORPGClient/Client/Manager/AccountManager.h>
+#include <MMORPGClient/Client/Manager/ServerManager.h>
+#include <MMORPGClient/Client/RegisterTypes.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-
-#include "Manager/AccountManager.h"
-#include "Manager/ServerManager.h"
-#include "RegisterTypes.h"
 
 int main( int argc, char* argv[] ) {
     QQuickStyle::setStyle( "Basic" );

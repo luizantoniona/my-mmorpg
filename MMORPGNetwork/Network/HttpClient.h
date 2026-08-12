@@ -19,8 +19,10 @@ public:
     QUrl baseUrl() const;
 
     QNetworkReply* get( const QString& endpoint, const QHash<QByteArray, QByteArray>& extraHeaders = {} );
+    QNetworkReply* getAuthenticated( const QString& endpoint, const QString& sessionId, const QHash<QByteArray, QByteArray>& extraHeaders = {} );
 
     QNetworkReply* post( const QString& endpoint, const QByteArray& body, const QHash<QByteArray, QByteArray>& extraHeaders = {} );
+    QNetworkReply* postAuthenticated( const QString& endpoint, const QByteArray& body, const QString& sessionId, const QHash<QByteArray, QByteArray>& extraHeaders = {} );
 
 private:
     QUrl buildUrl( const QString& endpoint ) const;

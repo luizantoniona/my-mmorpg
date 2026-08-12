@@ -25,7 +25,15 @@ set(PROJECT_SOURCES
     Core/World/Model/WorldModel.cpp
     Core/World/Model/WorldModel.h
     Core/World/WorldFactory.cpp
-    Core/World/WorldFactory.h)
+    Core/World/WorldFactory.h
+    ManifestDataDTO.cpp
+    ManifestDataDTO.h
+    ManifestDataModel.cpp
+    ManifestDataModel.h
+    ManifestDTO.cpp
+    ManifestDTO.h
+    ManifestModel.cpp
+    ManifestModel.h)
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
