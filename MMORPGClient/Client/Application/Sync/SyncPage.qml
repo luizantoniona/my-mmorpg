@@ -7,7 +7,7 @@ import MMORPGClientControls
 Item {
     id: root
 
-    signal success
+    signal syncSuccess
 
     property string vTextError: ""
     property string vTextStatus: ""
@@ -19,7 +19,7 @@ Item {
             vTextStatus = message
         }
         onSyncSucceeded: function () {
-            root.success()
+            root.syncSuccess()
         }
         onSyncFailed: function (error) {
             vTextError = error
@@ -32,6 +32,14 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
+
+        LoadingProgress {
+            visible: root.vTextStatus.length > 0
+            vProgress: 0.65
+            vText: root.vTextStatus
+            vTextColor: Colors.accent2
+            Layout.alignment: Qt.AlignHCenter
+        }
 
         TextTitle {
             visible: root.vTextError.length > 0

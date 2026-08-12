@@ -45,7 +45,7 @@ Item {
         LoginPage {
             id: login
 
-            onSuccess: function () {
+            onLoginSuccess: function () {
                 root.updatePage("SyncPage")
             }
         }
@@ -56,6 +56,10 @@ Item {
 
         SyncPage {
             id: sync
+
+            onSyncSuccess: function () {
+                root.updatePage("AccountPage")
+            }
         }
     }
 
@@ -64,6 +68,10 @@ Item {
 
         AccountPage {
             id: account
+
+            onLogoutSuccess: function () {
+                root.updatePage("LoginPage")
+            }
         }
     }
 

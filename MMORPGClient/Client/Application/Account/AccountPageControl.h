@@ -9,6 +9,13 @@ class AccountPageControl : public QObject {
 public:
     explicit AccountPageControl( QObject* parent = nullptr );
     ~AccountPageControl();
+
+public slots:
+    void logout();
+
+signals:
+    void logoutSucceeded();
+    void logoutFailed( const QString& error );
 };
 
 #endif // ACCOUNTPAGECONTROL_H

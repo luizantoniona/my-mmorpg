@@ -50,6 +50,7 @@ void SyncPageControl::sync() {
         }
 
         qInfo() << "SyncPageControl::sync" << "Manifest received";
+
         emit syncSucceeded();
     } );
 }
