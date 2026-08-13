@@ -6,34 +6,34 @@ set(PROJECT_SOURCES
     Commons/JsonHelper.cpp
     Commons/JsonHelper.h
     Commons/Singleton.h
-    Core/Account/AccountDTO.cpp
-    Core/Account/AccountDTO.h
-    Core/Account/AccountModel.cpp
-    Core/Account/AccountModel.h
-    Core/Character/CharacterDTO.cpp
-    Core/Character/CharacterDTO.h
-    Core/Character/CharacterModel.cpp
-    Core/Character/CharacterModel.h
-    Core/World/Catalog/GroundCatalog.cpp
-    Core/World/Catalog/GroundCatalog.h
-    Core/World/Model/FloorModel.cpp
-    Core/World/Model/FloorModel.h
-    Core/World/Model/GroundModel.cpp
-    Core/World/Model/GroundModel.h
-    Core/World/Model/TileModel.cpp
-    Core/World/Model/TileModel.h
-    Core/World/Model/WorldModel.cpp
-    Core/World/Model/WorldModel.h
-    Core/World/WorldFactory.cpp
-    Core/World/WorldFactory.h
-    ManifestDataDTO.cpp
-    ManifestDataDTO.h
-    ManifestDataModel.cpp
-    ManifestDataModel.h
-    ManifestDTO.cpp
-    ManifestDTO.h
-    ManifestModel.cpp
-    ManifestModel.h)
+    Account/AccountDTO.cpp
+    Account/AccountDTO.h
+    Account/AccountModel.cpp
+    Account/AccountModel.h
+    Character/CharacterDTO.cpp
+    Character/CharacterDTO.h
+    Character/CharacterModel.cpp
+    Character/CharacterModel.h
+    World/GroundCatalog.cpp
+    World/GroundCatalog.h
+    World/FloorModel.cpp
+    World/FloorModel.h
+    World/GroundModel.cpp
+    World/GroundModel.h
+    World/TileModel.cpp
+    World/TileModel.h
+    World/WorldModel.cpp
+    World/WorldModel.h
+    World/WorldFactory.cpp
+    World/WorldFactory.h
+    Manifest/ManifestDataDTO.cpp
+    Manifest/ManifestDataDTO.h
+    Manifest/ManifestDataModel.cpp
+    Manifest/ManifestDataModel.h
+    Manifest/ManifestDTO.cpp
+    Manifest/ManifestDTO.h
+    Manifest/ManifestModel.cpp
+    Manifest/ManifestModel.h)
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 

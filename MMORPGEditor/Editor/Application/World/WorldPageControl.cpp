@@ -1,6 +1,6 @@
 #include "WorldPageControl.h"
 
-#include <MMORPGEngine/Core/World/WorldFactory.h>
+#include <MMORPGEngine/World/WorldFactory.h>
 
 namespace {
 constexpr const char* DATA_PATH = "../../../Data/";

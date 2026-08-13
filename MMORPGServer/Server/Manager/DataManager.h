@@ -1,7 +1,7 @@
 #ifndef DATAMANAGER_H
 #define DATAMANAGER_H
 
-#include <MMORPGEngine/ManifestModel.h>
+#include <MMORPGEngine/Manifest/ManifestModel.h>
 
 namespace Server {
 

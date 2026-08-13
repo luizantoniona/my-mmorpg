@@ -7,9 +7,9 @@
 
 #include <MMORPGClient/Client/Manager/AccountManager.h>
 #include <MMORPGClient/Client/Manager/ServerManager.h>
+#include <MMORPGEngine/Account/AccountDTO.h>
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Core/Account/AccountDTO.h>
 
 LoginPageControl::LoginPageControl( QObject* parent ) :
     QObject( parent ) {

@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include <MMORPGEngine/ManifestDataDTO.h>
-#include <MMORPGEngine/ManifestModel.h>
+#include <MMORPGEngine/Manifest/ManifestDataDTO.h>
+#include <MMORPGEngine/Manifest/ManifestModel.h>
 
 namespace Engine {
 

@@ -1,7 +1,7 @@
 #include "AuthController.h"
 
+#include <MMORPGEngine/Account/AccountDTO.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Core/Account/AccountDTO.h>
 #include <MMORPGServer/Server/Database/Database.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>

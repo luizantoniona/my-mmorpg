@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include <MMORPGEngine/Core/World/Catalog/GroundCatalog.h>
-#include <MMORPGEngine/Core/World/Model/FloorModel.h>
+#include <MMORPGEngine/World/FloorModel.h>
+#include <MMORPGEngine/World/GroundCatalog.h>
 
 namespace Engine {
 

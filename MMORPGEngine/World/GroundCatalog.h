@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-#include <MMORPGEngine/Core/World/Model/GroundModel.h>
+#include <MMORPGEngine/World/GroundModel.h>
 
 namespace Engine {
 

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <MMORPGEngine/Core/World/Model/TileModel.h>
+#include <MMORPGEngine/World/TileModel.h>
 
 namespace Engine {
 

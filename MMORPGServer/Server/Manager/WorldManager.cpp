@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Core/World/WorldFactory.h>
+#include <MMORPGEngine/World/WorldFactory.h>
 
 namespace Server {
 

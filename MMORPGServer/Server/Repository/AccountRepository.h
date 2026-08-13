@@ -4,8 +4,8 @@
 #include <memory>
 #include <string>
 
-#include <MMORPGEngine/Core/Account/AccountModel.h>
-#include <Repository/Repository.h>
+#include <MMORPGEngine/Account/AccountModel.h>
+#include <MMORPGServer/Server/Repository/Repository.h>
 
 namespace Server {
 

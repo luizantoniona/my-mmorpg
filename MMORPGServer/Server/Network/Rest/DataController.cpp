@@ -1,7 +1,7 @@
 #include "DataController.h"
 
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/ManifestDTO.h>
+#include <MMORPGEngine/Manifest/ManifestDTO.h>
 #include <MMORPGServer/Server/Manager/DataManager.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 

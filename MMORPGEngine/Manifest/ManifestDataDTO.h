@@ -3,7 +3,7 @@
 
 #include <json/json.h>
 
-#include <MMORPGEngine/ManifestDataModel.h>
+#include <MMORPGEngine/Manifest/ManifestDataModel.h>
 
 namespace Engine {
 
