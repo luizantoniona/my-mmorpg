@@ -27,10 +27,10 @@ set(PROJECT_SOURCES
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
     Entity/EntityPositionModel.h
-    Entity/CharacterModel.cpp
-    Entity/CharacterModel.h
-    Entity/CreatureModel.cpp
-    Entity/CreatureModel.h
+    Entity/Character/CharacterModel.cpp
+    Entity/Character/CharacterModel.h
+    Entity/Creature/CreatureModel.cpp
+    Entity/Creature/CreatureModel.h
     Manifest/ManifestDataDTO.cpp
     Manifest/ManifestDataDTO.h
     Manifest/ManifestDataModel.cpp
