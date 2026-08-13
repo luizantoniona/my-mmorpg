@@ -77,43 +77,4 @@ void CharacterController::remove( const drogon::HttpRequestPtr& request, std::fu
     callback( response );
 }
 
-void CharacterController::list( const drogon::HttpRequestPtr& request, std::function<void( const drogon::HttpResponsePtr& )>&& callback ) const {
-    const NetworkSession& session = AuthFilter::session( request );
-
-    int idAccount = session.idAccount();
-
-    Json::Value responseJson;
-    Json::Value charactersJson( Json::arrayValue );
-
-    auto characters = CharacterRepository().findAllByIdAccount( idAccount );
-
-    for ( const auto& character : characters ) {
-
-        Json::Value characterJson = ""; // character->toJson();
-
-        // Json::Value progressionJson = character->progression().toJson();
-        // for ( const auto& key : progressionJson.getMemberNames() ) {
-        //     characterJson[ key ] = progressionJson[ key ];
-        // }
-        //
-        // Json::Value stageJson = character->stage().toJson();
-        // for ( const auto& key : stageJson.getMemberNames() ) {
-        //     characterJson[ key ] = stageJson[ key ];
-        // }
-        //
-        // Json::Value vitalsJson = character->vitals().toJson();
-        // for ( const auto& key : vitalsJson.getMemberNames() ) {
-        //     characterJson[ key ] = vitalsJson[ key ];
-        // }
-
-        charactersJson.append( characterJson );
-    }
-
-    responseJson[ "characters" ] = charactersJson;
-
-    auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
-    response->setStatusCode( drogon::k200OK );
-    callback( response );
-}
-
 } // namespace Server
