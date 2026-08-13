@@ -17,6 +17,8 @@ public:
 
     std::unique_ptr<Engine::AccountModel> findByUsername( const std::string& username );
     std::unique_ptr<Engine::AccountModel> findByUsernameAndPassword( const std::string& username, const std::string& password );
+
+    std::vector<Engine::AccountCharacterModel> findCharacters( const int idAccount );
 };
 
 } // namespace Server

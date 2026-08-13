@@ -5,7 +5,8 @@
 
 #include <json/json.h>
 
-#include "AccountModel.h"
+#include <MMORPGEngine/Account/AccountCharacterDTO.h>
+#include <MMORPGEngine/Account/AccountModel.h>
 
 namespace Engine {
 
@@ -27,10 +28,14 @@ public:
     std::string sessionId() const;
     void setSessionId( const std::string& sessionId );
 
+    const std::vector<AccountCharacterDTO>& characters() const;
+    void setCharacters( const std::vector<AccountCharacterDTO>& characters );
+
 private:
     int _idAccount;
     std::string _username;
     std::string _sessionId;
+    std::vector<AccountCharacterDTO> _characters;
 };
 
 } // namespace Engine

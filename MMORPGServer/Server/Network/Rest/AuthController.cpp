@@ -43,6 +43,8 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
         return;
     }
 
+    account->setCharacters( AccountRepository().findCharacters( account->idAccount() ) );
+
     std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
     Engine::AccountDTO accountDTO( *account, sessionId );
@@ -137,6 +139,8 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
         callback( response );
         return;
     }
+
+    account->setCharacters( AccountRepository().findCharacters( account->idAccount() ) );
 
     std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 

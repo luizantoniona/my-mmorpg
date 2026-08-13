@@ -5,8 +5,11 @@ namespace Engine {
 AccountModel::AccountModel() :
     _idAccount( 0 ),
     _dsUsername( "" ),
-    _dsPassword( "" ) {
+    _dsPassword( "" ),
+    _characters() {
 }
+
+AccountModel::~AccountModel() = default;
 
 int AccountModel::idAccount() const {
     return _idAccount;
@@ -30,6 +33,14 @@ std::string AccountModel::dsPassword() const {
 
 void AccountModel::setDsPassword( const std::string& dsPassword ) {
     _dsPassword = dsPassword;
+}
+
+const std::vector<AccountCharacterModel>& AccountModel::characters() const {
+    return _characters;
+}
+
+void AccountModel::setCharacters( const std::vector<AccountCharacterModel>& characters ) {
+    _characters = characters;
 }
 
 } // namespace Engine
