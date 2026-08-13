@@ -4,8 +4,9 @@
 #include <cstdint>
 #include <unordered_map>
 
+// TODO: Remover catalogos daqui
+#include <MMORPGEngine/Catalog/GroundCatalog.h>
 #include <MMORPGEngine/World/FloorModel.h>
-#include <MMORPGEngine/World/GroundCatalog.h>
 
 namespace Engine {
 

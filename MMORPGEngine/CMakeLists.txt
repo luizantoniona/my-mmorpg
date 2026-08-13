@@ -14,6 +14,8 @@ set(PROJECT_SOURCES
     Commons/JsonHelper.cpp
     Commons/JsonHelper.h
     Commons/Singleton.h
+    Catalog/GroundCatalog.cpp
+    Catalog/GroundCatalog.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
