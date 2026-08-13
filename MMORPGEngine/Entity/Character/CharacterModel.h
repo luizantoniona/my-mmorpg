@@ -3,9 +3,11 @@
 
 #include <string>
 
+#include <MMORPGEngine/Entity/EntityModel.h>
+
 namespace Engine {
 
-class CharacterModel {
+class CharacterModel : public EntityModel {
 public:
     CharacterModel();
 

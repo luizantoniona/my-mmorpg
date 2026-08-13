@@ -11,10 +11,6 @@ set(PROJECT_SOURCES
     Account/AccountDTO.h
     Account/AccountModel.cpp
     Account/AccountModel.h
-    Character/CharacterDTO.cpp
-    Character/CharacterDTO.h
-    Character/CharacterModel.cpp
-    Character/CharacterModel.h
     World/GroundCatalog.cpp
     World/GroundCatalog.h
     World/FloorModel.cpp
@@ -27,6 +23,14 @@ set(PROJECT_SOURCES
     World/WorldModel.h
     World/WorldFactory.cpp
     World/WorldFactory.h
+    Entity/EntityModel.cpp
+    Entity/EntityModel.h
+    Entity/EntityPositionModel.cpp
+    Entity/EntityPositionModel.h
+    Entity/CharacterModel.cpp
+    Entity/CharacterModel.h
+    Entity/CreatureModel.cpp
+    Entity/CreatureModel.h
     Manifest/ManifestDataDTO.cpp
     Manifest/ManifestDataDTO.h
     Manifest/ManifestDataModel.cpp
