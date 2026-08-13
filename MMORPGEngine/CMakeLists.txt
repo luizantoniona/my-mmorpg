@@ -11,16 +11,9 @@ set(PROJECT_SOURCES
     Account/AccountDTO.h
     Account/AccountModel.cpp
     Account/AccountModel.h
-    World/GroundCatalog.cpp
-    World/GroundCatalog.h
-    World/FloorModel.cpp
-    World/FloorModel.h
-    World/GroundModel.cpp
-    World/GroundModel.h
-    World/TileModel.cpp
-    World/TileModel.h
-    World/WorldModel.cpp
-    World/WorldModel.h
+    Commons/JsonHelper.cpp
+    Commons/JsonHelper.h
+    Commons/Singleton.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
@@ -38,7 +31,15 @@ set(PROJECT_SOURCES
     Manifest/ManifestDTO.cpp
     Manifest/ManifestDTO.h
     Manifest/ManifestModel.cpp
-    Manifest/ManifestModel.h)
+    Manifest/ManifestModel.h
+    World/FloorModel.cpp
+    World/FloorModel.h
+    World/GroundModel.cpp
+    World/GroundModel.h
+    World/TileModel.cpp
+    World/TileModel.h
+    World/WorldModel.cpp
+    World/WorldModel.h)
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
