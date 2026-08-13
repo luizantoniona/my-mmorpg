@@ -21,8 +21,6 @@ set(PROJECT_SOURCES
     World/TileModel.h
     World/WorldModel.cpp
     World/WorldModel.h
-    World/WorldFactory.cpp
-    World/WorldFactory.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
@@ -31,6 +29,8 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterModel.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
+    Factory/WorldFactory.cpp
+    Factory/WorldFactory.h
     Manifest/ManifestDataDTO.cpp
     Manifest/ManifestDataDTO.h
     Manifest/ManifestDataModel.cpp
