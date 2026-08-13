@@ -3,9 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 project(MMORPGEngine LANGUAGES CXX)
 
 set(PROJECT_SOURCES
-    Commons/JsonHelper.cpp
-    Commons/JsonHelper.h
-    Commons/Singleton.h
+    Account/AccountCharacterDTO.cpp
+    Account/AccountCharacterDTO.h
+    Account/AccountCharacterModel.cpp
+    Account/AccountCharacterModel.h
     Account/AccountDTO.cpp
     Account/AccountDTO.h
     Account/AccountModel.cpp
