@@ -10,8 +10,8 @@
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 
 namespace {
-constexpr const char* DATABASE_PATH = "../../../../Database/ServerDatabase";
-constexpr const char* DATA_PATH = "../../../../Data/";
+constexpr const char* DATABASE_PATH = "../../../Database/ServerDatabase";
+constexpr const char* DATA_PATH = "../../../Data/";
 } // namespace
 
 int main( int argc, char* argv[] ) {
