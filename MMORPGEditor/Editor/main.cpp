@@ -3,25 +3,24 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
-#include "RegisterTypes.h"
+#include <MMORPGEditor/Editor/RegisterTypes.h>
+#include <MMORPGEngine/Commons/RegisterEngineTypes.h>
 
 int main( int argc, char* argv[] ) {
     QQuickStyle::setStyle( "Basic" );
-
     QGuiApplication app( argc, argv );
-
     QSurfaceFormat format;
     format.setSamples( 8 );
     QSurfaceFormat::setDefaultFormat( format );
-
     QQmlApplicationEngine engine;
 
-    RegisterTypes::registerTypes();
+    // --- Register Types Engine
+    Engine::RegisterEngineTypes::registerTypes();
 
-    QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() {
-        QCoreApplication::exit( -1 );
-    }, Qt::QueuedConnection );
+    // --- Register Types Editor
+    Editor::RegisterTypes::registerTypes();
 
+    QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
     engine.loadFromModule( "MMORPGEditorComponents", "Main" );
 
     return app.exec();

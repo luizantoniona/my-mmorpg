@@ -3,6 +3,7 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
+#include <MMORPGEngine/Commons/RegisterEngineTypes.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGServer/Server/Database/Database.h>
 #include <MMORPGServer/Server/Manager/DataManager.h>
@@ -16,14 +17,16 @@ constexpr const char* DATA_PATH = "../../../Data/";
 
 int main( int argc, char* argv[] ) {
     QQuickStyle::setStyle( "Basic" );
-
     QGuiApplication app( argc, argv );
-
     QSurfaceFormat format;
     format.setSamples( 8 );
     QSurfaceFormat::setDefaultFormat( format );
-
     QQmlApplicationEngine engine;
+
+    // --- Register Types Engine
+    Engine::RegisterEngineTypes::registerTypes();
+
+    // --- Register Types Server
 
     qInfo() << "STARTING SERVER";
 

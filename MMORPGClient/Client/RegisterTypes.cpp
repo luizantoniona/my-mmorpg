@@ -2,13 +2,14 @@
 
 #include <QQmlEngine>
 
-#include <MMORPGEngine/Commons/Singleton.h>
-
 #include <MMORPGClient/Client/Application/Account/AccountPageControl.h>
 #include <MMORPGClient/Client/Application/Game/GamePageControl.h>
 #include <MMORPGClient/Client/Application/Login/LoginPageControl.h>
 #include <MMORPGClient/Client/Application/Sync/SyncPageControl.h>
 #include <MMORPGClient/Client/Manager/ServerManager.h>
+#include <MMORPGEngine/Commons/Singleton.h>
+
+namespace Client {
 
 void RegisterTypes::registerTypes() {
     // Page Controls
@@ -20,3 +21,5 @@ void RegisterTypes::registerTypes() {
     // Manager Singletons
     qmlRegisterSingletonInstance( "MMORPGClientManagers", 1, 0, "ServerManager", &Engine::Singleton<ServerManager>::instance() );
 }
+
+} // namespace Client

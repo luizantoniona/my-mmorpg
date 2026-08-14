@@ -15,6 +15,8 @@ set(PROJECT_SOURCES
     Account/AccountModel.h
     Commons/JsonHelper.cpp
     Commons/JsonHelper.h
+    Commons/RegisterEngineTypes.cpp
+    Commons/RegisterEngineTypes.h
     Commons/Singleton.h
     Catalog/GroundCatalog.cpp
     Catalog/GroundCatalog.h
