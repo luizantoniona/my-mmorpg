@@ -40,6 +40,8 @@ set(PROJECT_SOURCES
     Manifest/ManifestModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
+    Renderer/Viewport.cpp
+    Renderer/Viewport.h
     World/FloorModel.cpp
     World/FloorModel.h
     World/GroundModel.cpp
@@ -53,13 +55,15 @@ add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
 find_package(jsoncpp CONFIG REQUIRED)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Network Qml Quick)
 
 target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC JsonCpp::JsonCpp
   PUBLIC Qt6::Core
-  PUBLIC Qt6::Network)
+  PUBLIC Qt6::Network
+  PUBLIC Qt6::Qml
+  PUBLIC Qt6::Quick)
 
 add_library(MMORPG::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
