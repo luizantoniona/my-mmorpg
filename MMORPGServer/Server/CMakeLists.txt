@@ -7,6 +7,8 @@ set(PROJECT_SOURCES
     Database/QueryLoader.h
     Manager/DataManager.cpp
     Manager/DataManager.h
+    Manager/NetworkManager.cpp
+    Manager/NetworkManager.h
     Manager/WorldManager.cpp
     Manager/WorldManager.h
     Network/NetworkServer.cpp
