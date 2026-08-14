@@ -14,7 +14,7 @@ qt_add_qml_module(
   1.0
   QML_FILES
   Main.qml
-  Application/MainWindow.qml
+  Application/EditorWindow.qml
   Application/World/WorldPage.qml
   Application/World/Component/WorldPageHeader.qml)
 
