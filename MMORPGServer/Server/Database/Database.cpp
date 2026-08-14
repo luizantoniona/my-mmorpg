@@ -18,6 +18,10 @@ bool Database::initialize( const std::string& databasePath ) {
     return open() && create() && migrate();
 }
 
+void Database::finalize() {
+    close();
+}
+
 bool Database::create() {
     if ( !open() ) {
         return false;

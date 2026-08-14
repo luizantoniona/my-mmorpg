@@ -23,6 +23,7 @@ list(APPEND QML_IMPORT_PATH "${CMAKE_BINARY_DIR}/MMORPGUI/UI")
 
 if(BUILD_SERVER)
   add_subdirectory(MMORPGServer)
+  list(APPEND QML_IMPORT_PATH "${CMAKE_BINARY_DIR}/MMORPGServer/Server")
 endif()
 
 if(BUILD_CLIENT)

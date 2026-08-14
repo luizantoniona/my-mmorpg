@@ -1,4 +1,7 @@
-#include <drogon/drogon.h>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQuickStyle>
+#include <QSurfaceFormat>
 
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGServer/Server/Database/Database.h>
@@ -11,8 +14,18 @@ constexpr const char* DATABASE_PATH = "../../../../Database/ServerDatabase";
 constexpr const char* DATA_PATH = "../../../../Data/";
 } // namespace
 
-int main() {
-    std::cout << "Starting Server" << std::endl;
+int main( int argc, char* argv[] ) {
+    QQuickStyle::setStyle( "Basic" );
+
+    QGuiApplication app( argc, argv );
+
+    QSurfaceFormat format;
+    format.setSamples( 8 );
+    QSurfaceFormat::setDefaultFormat( format );
+
+    QQmlApplicationEngine engine;
+
+    qInfo() << "STARTING SERVER";
 
     // --- Database ---
     Engine::Singleton<Server::Database>::instance().initialize( DATABASE_PATH );
@@ -26,10 +39,24 @@ int main() {
     // --- Network ---
     Engine::Singleton<Server::NetworkManager>::instance().initialize();
 
-    while ( true ) {
-    }
+    QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
+    engine.loadFromModule( "MMORPGServerComponents", "Main" );
 
-    std::cout << "Ending Server" << std::endl;
+    app.exec();
+
+    // --- Network ---
+    Engine::Singleton<Server::NetworkManager>::instance().finalize();
+
+    // --- World ---
+    Engine::Singleton<Server::WorldManager>::instance().finalize();
+
+    // --- Data ---
+    Engine::Singleton<Server::DataManager>::instance().finalize();
+
+    // --- Database ---
+    Engine::Singleton<Server::Database>::instance().finalize();
+
+    qInfo() << "ENDING SERVER";
 
     return 0;
 }
