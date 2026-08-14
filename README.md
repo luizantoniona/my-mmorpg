@@ -1,16 +1,17 @@
-# 🛡️🧙 MyMMO (Doc: WIP)
-
-# WIP
+# 🧙‍♂️ MyMMO 🧌 (Doc: WIP)
 
 ## 📦 Project Organization:
 
-### 🛡️ [`Server`](https://github.com/luizantoniona/my-mmorpg/tree/main/Server)
+### 🛠️ [`Server`](https://github.com/luizantoniona/my-mmorpg/tree/main/MMORPGServer)
 - **TODO**
 
-### ⚔️ [`Client`](https://github.com/luizantoniona/my-mmorpg/tree/main/Client)
+### 🎮 [`Client`](https://github.com/luizantoniona/my-mmorpg/tree/main/MMORPGClient)
 - **TODO**
 
-### 🧩 [`Data`](https://github.com/luizantoniona/my-mmorpg/tree/main/Data)
+### 🧩 [`Editor`](https://github.com/luizantoniona/my-mmorpg/tree/main/MMORPGEditor)
+- **TODO**
+
+### ⚙️ [`Engine`](https://github.com/luizantoniona/my-mmorpg/tree/main/MMORPGEngine)
 - **TODO**
 
 ---
@@ -26,6 +27,6 @@ cd my-mmorpg
 
 ---
 
-## 👥 People
+## 🧑‍🚀 People
 This project was envisioned, created, and is maintained by:  
 - **[Luiz Antonio Nicolau Anghinoni](https://github.com/luizantoniona)**
