@@ -1,8 +1,10 @@
 #include "CharacterController.h"
 
-#include <Database/Database.h>
-#include <Network/Filter/AuthFilter.h>
-#include <Repository/CharacterRepository.h>
+#include <QDebug>
+
+#include <MMORPGServer/Server/Database/Database.h>
+#include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
+#include <MMORPGServer/Server/Repository/CharacterRepository.h>
 
 namespace Server {
 
@@ -21,7 +23,7 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
 
     int idAccount = session.idAccount();
 
-    std::cout << "CharacterController::create" << " [ACCOUNT] " << idAccount << " [NAME] " << name << std::endl;
+    qInfo() << "CharacterController::create" << " [ACCOUNT] " << idAccount << " [NAME] " << name;
 
     int idCharacter = CharacterRepository().createCharacter( idAccount, name );
 
@@ -54,7 +56,7 @@ void CharacterController::remove( const drogon::HttpRequestPtr& request, std::fu
     int idAccount = session.idAccount();
     int idCharacter = body[ "characterId" ].asInt();
 
-    std::cout << "CharacterController::remove" << " [ACCOUNT] " << idAccount << " [CHARACTER] " << idCharacter << std::endl;
+    qInfo() << "CharacterController::remove" << " [ACCOUNT] " << idAccount << " [CHARACTER] " << idCharacter;
 
     auto character = CharacterRepository().findByIdAccountAndIdCharacter( idAccount, idCharacter );
     if ( !character || character->idAccount() != idAccount ) {

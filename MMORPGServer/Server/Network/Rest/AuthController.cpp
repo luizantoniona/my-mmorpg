@@ -1,5 +1,7 @@
 #include "AuthController.h"
 
+#include <QDebug>
+
 #include <MMORPGEngine/Account/AccountDTO.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGServer/Server/Database/Database.h>
@@ -49,7 +51,7 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
 
     Engine::AccountDTO accountDTO( *account, sessionId );
 
-    std::cout << "AuthController::login [Account] " << account->dsUsername() << " [UUID] " << sessionId << std::endl;
+    qInfo() << "AuthController::login [Account] " << account->dsUsername() << " [UUID] " << sessionId;
 
     auto response = drogon::HttpResponse::newHttpJsonResponse( accountDTO.toJson() );
     response->setStatusCode( drogon::k200OK );
@@ -71,9 +73,7 @@ void AuthController::logout( const drogon::HttpRequestPtr& request, std::functio
         return;
     }
 
-    std::cout << "AuthController::logout [UUID] "
-              << session.uuid()
-              << std::endl;
+    qInfo() << "AuthController::logout [UUID] " << session.uuid();
 
     auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
     response->setStatusCode( drogon::k200OK );
@@ -146,7 +146,7 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
 
     Engine::AccountDTO accountDTO( *account, sessionId );
 
-    std::cout << "AuthController::sign [Account] " << account->dsUsername() << " [UUID] " << sessionId << std::endl;
+    qInfo() << "AuthController::sign [Account] " << account->dsUsername() << " [UUID] " << sessionId;
 
     auto response = drogon::HttpResponse::newHttpJsonResponse( accountDTO.toJson() );
     response->setStatusCode( drogon::k201Created );

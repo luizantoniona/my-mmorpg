@@ -1,13 +1,13 @@
 #include "WorldFactory.h"
 
-#include <iostream>
+#include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 
 namespace Engine {
 
 std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldPath ) {
-    std::cout << "WorldFactory::createWorld" << std::endl;
+    qInfo() << "WorldFactory::createWorld";
 
     std::unique_ptr<WorldModel> world = std::make_unique<WorldModel>();
 
@@ -22,14 +22,14 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
     // --- Name
     world->setName( mapJson[ "Name" ].asString() );
 
-    std::cout << "WorldFactory::createWorld" << "[MAP_NAME]" << world->name() << std::endl;
+    qInfo() << "WorldFactory::createWorld" << "[MAP_NAME]" << world->name();
 
     // --- Size
     world->setWidth( static_cast<uint16_t>( mapJson[ "Width" ].asUInt() ) );
     world->setHeight( static_cast<uint16_t>( mapJson[ "Height" ].asUInt() ) );
 
     // --- Catalogs
-    std::cout << "WorldFactory::createWorld" << "Creating catalogs" << std::endl;
+    qInfo() << "WorldFactory::createWorld" << "Creating catalogs";
 
     createGroundCatalog( mapPath + mapJson[ "Catalogs" ][ "Grounds" ].asString(), world.get() );
 
@@ -42,10 +42,10 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
 }
 
 void WorldFactory::createGroundCatalog( const std::string& groundsFile, WorldModel* world ) {
-    std::cout << "WorldFactory::createGroundCatalog" << "[GROUND_FILE_PATH]" << groundsFile << std::endl;
+    qInfo() << "WorldFactory::createGroundCatalog" << "[GROUND_FILE_PATH]" << groundsFile;
 
     if ( !world ) {
-        std::cout << "WorldFactory::createGroundCatalog" << "World is nullptr" << std::endl;
+        qInfo() << "WorldFactory::createGroundCatalog" << "World is nullptr";
         return;
     }
 
@@ -65,15 +65,15 @@ void WorldFactory::createGroundCatalog( const std::string& groundsFile, WorldMod
 
         groundCatalog.addGround( ground );
 
-        std::cout << "WorldFactory::createGroundCatalog" << "LOADED:" << ground.type() << ground.name() << std::endl;
+        qInfo() << "WorldFactory::createGroundCatalog" << "LOADED:" << ground.type() << ground.name();
     }
 }
 
 void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world ) {
-    std::cout << "WorldFactory::createFloor" << "[FLOOR_FILE_PATH]" << floorFile << std::endl;
+    qInfo() << "WorldFactory::createFloor" << "[FLOOR_FILE_PATH]" << floorFile;
 
     if ( !world ) {
-        std::cout << "WorldFactory::createFloor" << "World is nullptr" << std::endl;
+        qInfo() << "WorldFactory::createFloor" << "World is nullptr";
         return;
     }
 
@@ -83,7 +83,7 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
     const Json::Value& groundRows = floorJson[ "Ground" ];
 
     if ( !groundRows.isArray() || groundRows.empty() ) {
-        std::cout << "WorldFactory::createFloor" << "Floor has no ground matrix" << std::endl;
+        qInfo() << "WorldFactory::createFloor" << "Floor has no ground matrix";
         return;
     }
 
