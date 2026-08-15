@@ -40,8 +40,12 @@ set(PROJECT_SOURCES
     Manifest/ManifestModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
+    Renderer/Camera.cpp
+    Renderer/Camera.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
+    Renderer/RenderScene.cpp
+    Renderer/RenderScene.h
     Renderer/Viewport.cpp
     Renderer/Viewport.h
     World/FloorModel.cpp

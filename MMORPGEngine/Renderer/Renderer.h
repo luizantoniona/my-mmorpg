@@ -1,8 +1,9 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <QSGNode>
 #include <QSizeF>
+
+#include <MMORPGEngine/Renderer/RenderScene.h>
 
 namespace Engine {
 
@@ -14,7 +15,7 @@ public:
 
     void resize( const QSizeF& size );
 
-    void render( QSGNode* rootNode );
+    void render( RenderScene& scene, const Camera& camera );
 
 private:
     QSizeF _viewportSize;

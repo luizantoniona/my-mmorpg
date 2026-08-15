@@ -9,9 +9,33 @@ namespace Engine {
 
 Viewport::Viewport( QQuickItem* parent ) :
     QQuickItem( parent ),
-    _renderer( nullptr ) {
+    _camera( new Camera() ),
+    _renderer( new Renderer() ) {
 
     setFlag( ItemHasContents, true );
+
+    _renderer->initialize();
+}
+
+QPointF Viewport::cameraPosition() const {
+    return _camera->position();
+}
+
+void Viewport::setCameraPosition(
+    const QPointF& position ) {
+    if ( _camera->position() == position ) {
+        return;
+    }
+
+    _camera->setPosition( position );
+
+    emit cameraPositionChanged();
+
+    update();
+}
+
+Camera* Viewport::camera() const {
+    return _camera;
 }
 
 void Viewport::setRenderer( Renderer* renderer ) {
@@ -25,16 +49,22 @@ void Viewport::setRenderer( Renderer* renderer ) {
     update();
 }
 
+void Viewport::geometryChange( const QRectF& newGeometry, const QRectF& oldGeometry ) {
+    QQuickItem::geometryChange( newGeometry, oldGeometry );
+    _camera->setViewportSize( newGeometry.size() );
+    _renderer->resize( newGeometry.size() );
+}
+
 QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
-    if ( oldNode ) {
-        delete oldNode;
-    }
+    delete oldNode;
 
     auto* rootNode = new QSGNode();
 
-    if ( _renderer ) {
-        _renderer->render( rootNode );
-    }
+    RenderScene scene;
+
+    _renderer->render( scene, *_camera );
+
+    scene.build( rootNode, *_camera );
 
     return rootNode;
 }
