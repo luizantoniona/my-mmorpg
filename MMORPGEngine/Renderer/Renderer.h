@@ -4,6 +4,7 @@
 #include <QSizeF>
 
 #include <MMORPGEngine/Renderer/RenderScene.h>
+#include <MMORPGEngine/Renderer/Renderers/TileRenderer.h>
 
 namespace Engine {
 
@@ -19,6 +20,8 @@ public:
 
 private:
     QSizeF _viewportSize;
+
+    TileRenderer* _tileRenderer;
 };
 
 } // namespace Engine

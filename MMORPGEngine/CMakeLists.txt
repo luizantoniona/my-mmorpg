@@ -44,6 +44,8 @@ set(PROJECT_SOURCES
     Renderer/Camera.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
+    Renderer/Renderers/TileRenderer.cpp
+    Renderer/Renderers/TileRenderer.h
     Renderer/RenderScene.cpp
     Renderer/RenderScene.h
     Renderer/Viewport.cpp
