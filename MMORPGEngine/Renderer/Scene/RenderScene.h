@@ -3,7 +3,7 @@
 
 #include <QList>
 
-#include <MMORPGEngine/Renderer/Camera.h>
+#include <MMORPGEngine/Renderer/Camera/Camera.h>
 
 class QSGNode;
 

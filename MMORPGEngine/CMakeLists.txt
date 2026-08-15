@@ -40,14 +40,12 @@ set(PROJECT_SOURCES
     Manifest/ManifestModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
-    Renderer/Camera.cpp
-    Renderer/Camera.h
+    Renderer/Camera/Camera.cpp
+    Renderer/Camera/Camera.h
+    Renderer/Scene/RenderScene.cpp
+    Renderer/Scene/RenderScene.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
-    Renderer/Renderers/TileRenderer.cpp
-    Renderer/Renderers/TileRenderer.h
-    Renderer/RenderScene.cpp
-    Renderer/RenderScene.h
     Renderer/Viewport.cpp
     Renderer/Viewport.h
     World/FloorModel.cpp
@@ -56,6 +54,8 @@ set(PROJECT_SOURCES
     World/GroundModel.h
     World/TileModel.cpp
     World/TileModel.h
+    Renderer/TileRenderer.cpp
+    Renderer/TileRenderer.h
     World/WorldModel.cpp
     World/WorldModel.h)
 

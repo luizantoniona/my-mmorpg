@@ -50,4 +50,12 @@ QPointF Camera::worldToScreen( const QPointF& worldPosition ) const {
                     relativePosition.y() * _zoom + _viewportSize.height() / 2.0 );
 }
 
+QPointF Camera::screenToWorld( const QPointF& screenPosition ) const {
+    const QPointF relativePosition( screenPosition.x() - _viewportSize.width() / 2.0,
+                                    screenPosition.y() - _viewportSize.height() / 2.0 );
+
+    return QPointF( relativePosition.x() / _zoom + _position.x(),
+                    relativePosition.y() / _zoom + _position.y() );
+}
+
 } // namespace Engine

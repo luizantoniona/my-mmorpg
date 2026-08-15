@@ -24,6 +24,8 @@ public:
 
     QPointF worldToScreen( const QPointF& worldPosition ) const;
 
+    QPointF screenToWorld( const QPointF& screenPosition ) const;
+
 private:
     QPointF _position;
     QSizeF _viewportSize;

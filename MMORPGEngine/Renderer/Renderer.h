@@ -3,8 +3,8 @@
 
 #include <QSizeF>
 
-#include <MMORPGEngine/Renderer/RenderScene.h>
-#include <MMORPGEngine/Renderer/Renderers/TileRenderer.h>
+#include <MMORPGEngine/Renderer/Scene/RenderScene.h>
+#include <MMORPGEngine/Renderer/TileRenderer.h>
 
 namespace Engine {
 

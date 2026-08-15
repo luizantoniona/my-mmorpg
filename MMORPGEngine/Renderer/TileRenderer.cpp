@@ -10,7 +10,7 @@ namespace Engine {
 TileRenderer::TileRenderer() {
 }
 
-void TileRenderer::render( RenderScene& scene, const Camera& camera ) {
+void TileRenderer::render( RenderScene& scene, const Camera& camera, const RenderWorld& world ) {
     const QRectF visibleRect = camera.visibleRect();
 
     const int startX = static_cast<int>( std::floor( visibleRect.left() / TILE_SIZE ) );
@@ -21,14 +21,22 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera ) {
 
     const int endY = static_cast<int>( std::ceil( visibleRect.bottom() / TILE_SIZE ) );
 
+    constexpr int z = 0;
+
     for ( int y = startY; y <= endY; ++y ) {
         for ( int x = startX; x <= endX; ++x ) {
-            renderTile( scene, x, y );
+            const TileModel* tile = world.tile( x, y, z );
+
+            if ( !tile ) {
+                continue;
+            }
+
+            renderTile( scene, x, y, z );
         }
     }
 }
 
-void TileRenderer::renderTile( RenderScene& scene, int x, int y ) {
+void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z ) {
     const QPointF position( x * TILE_SIZE, y * TILE_SIZE );
     scene.addRect( position, QSizeF( TILE_SIZE - TILE_GAP, TILE_SIZE - TILE_GAP ) );
 }
