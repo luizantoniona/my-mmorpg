@@ -6,7 +6,7 @@
 
 // TODO: Remover catalogos daqui
 #include <MMORPGEngine/Catalog/GroundCatalog.h>
-#include <MMORPGEngine/World/FloorModel.h>
+#include <MMORPGEngine/World/Floor/FloorModel.h>
 
 namespace Engine {
 

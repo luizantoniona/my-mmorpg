@@ -48,16 +48,16 @@ set(PROJECT_SOURCES
     Renderer/World/RenderWorld.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
-    World/FloorModel.cpp
-    World/FloorModel.h
-    World/GroundModel.cpp
-    World/GroundModel.h
-    World/TileModel.cpp
-    World/TileModel.h
     Renderer/TileRenderer.cpp
     Renderer/TileRenderer.h
     UI/Viewport/Viewport.cpp
     UI/Viewport/Viewport.h
+    World/Floor/FloorModel.cpp
+    World/Floor/FloorModel.h
+    World/Tile/GroundModel.cpp
+    World/Tile/GroundModel.h
+    World/Tile/TileModel.cpp
+    World/Tile/TileModel.h
     World/WorldModel.cpp
     World/WorldModel.h)
 

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <MMORPGEngine/World/TileModel.h>
+#include <MMORPGEngine/World/Tile/TileModel.h>
 
 namespace Engine {
 
@@ -20,8 +20,8 @@ public:
 
     void resize( uint16_t width, uint16_t height );
 
-    TileModel* tile( uint16_t x, uint16_t y );
-    const TileModel* tile( uint16_t x, uint16_t y ) const;
+    TileModel* tile( int32_t x, int32_t y );
+    const TileModel* tile( int32_t x, int32_t y ) const;
 
 private:
     int32_t _z;

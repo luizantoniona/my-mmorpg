@@ -31,7 +31,7 @@ void FloorModel::resize( uint16_t width, uint16_t height ) {
     _tiles.resize( static_cast<size_t>( width ) * height );
 }
 
-TileModel* FloorModel::tile( uint16_t x, uint16_t y ) {
+TileModel* FloorModel::tile( int32_t x, int32_t y ) {
     if ( x >= _width || y >= _height ) {
         return nullptr;
     }
@@ -39,7 +39,7 @@ TileModel* FloorModel::tile( uint16_t x, uint16_t y ) {
     return &_tiles[ static_cast<size_t>( y ) * _width + x ];
 }
 
-const TileModel* FloorModel::tile( uint16_t x, uint16_t y ) const {
+const TileModel* FloorModel::tile( int32_t x, int32_t y ) const {
     if ( x >= _width || y >= _height ) {
         return nullptr;
     }
