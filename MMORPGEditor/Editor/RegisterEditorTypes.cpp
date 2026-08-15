@@ -1,4 +1,4 @@
-#include "RegisterTypes.h"
+#include "RegisterEditorTypes.h"
 
 #include <QQmlEngine>
 
@@ -6,7 +6,7 @@
 
 namespace Editor {
 
-void RegisterTypes::registerTypes() {
+void RegisterEditorTypes::registerTypes() {
     qmlRegisterType<WorldPageControl>( "MMORPGEditorControls", 1, 0, "WorldPageControl" );
 }
 

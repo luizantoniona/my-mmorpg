@@ -3,7 +3,7 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
-#include <MMORPGEditor/Editor/RegisterTypes.h>
+#include <MMORPGEditor/Editor/RegisterEditorTypes.h>
 #include <MMORPGEngine/Commons/RegisterEngineTypes.h>
 
 int main( int argc, char* argv[] ) {
@@ -18,7 +18,7 @@ int main( int argc, char* argv[] ) {
     Engine::RegisterEngineTypes::registerTypes();
 
     // --- Register Types Editor
-    Editor::RegisterTypes::registerTypes();
+    Editor::RegisterEditorTypes::registerTypes();
 
     QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
     engine.loadFromModule( "MMORPGEditorComponents", "Main" );

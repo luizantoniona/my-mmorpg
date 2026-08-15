@@ -9,6 +9,7 @@
 #include <MMORPGServer/Server/Manager/DataManager.h>
 #include <MMORPGServer/Server/Manager/NetworkManager.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
+#include <MMORPGServer/Server/RegisterServerTypes.h>
 
 namespace {
 constexpr const char* DATABASE_PATH = "../../../Database/ServerDatabase";
@@ -27,6 +28,7 @@ int main( int argc, char* argv[] ) {
     Engine::RegisterEngineTypes::registerTypes();
 
     // --- Register Types Server
+    Server::RegisterServerTypes::registerTypes();
 
     qInfo() << "STARTING SERVER";
 

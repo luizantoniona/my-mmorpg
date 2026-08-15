@@ -5,7 +5,7 @@
 
 #include <MMORPGClient/Client/Manager/AccountManager.h>
 #include <MMORPGClient/Client/Manager/ServerManager.h>
-#include <MMORPGClient/Client/RegisterTypes.h>
+#include <MMORPGClient/Client/RegisterClientTypes.h>
 #include <MMORPGEngine/Commons/RegisterEngineTypes.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 
@@ -21,7 +21,7 @@ int main( int argc, char* argv[] ) {
     Engine::RegisterEngineTypes::registerTypes();
 
     // --- Register Types Client
-    Client::RegisterTypes::registerTypes();
+    Client::RegisterClientTypes::registerTypes();
 
     // --- Server configuration
     Engine::Singleton<ServerManager>::instance();

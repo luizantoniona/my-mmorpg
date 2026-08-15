@@ -1,4 +1,4 @@
-#include "RegisterTypes.h"
+#include "RegisterClientTypes.h"
 
 #include <QQmlEngine>
 
@@ -11,7 +11,7 @@
 
 namespace Client {
 
-void RegisterTypes::registerTypes() {
+void RegisterClientTypes::registerTypes() {
     // Page Controls
     qmlRegisterType<AccountPageControl>( "MMORPGClientControls", 1, 0, "AccountPageControl" );
     qmlRegisterType<GamePageControl>( "MMORPGClientControls", 1, 0, "GamePageControl" );

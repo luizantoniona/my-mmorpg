@@ -1,6 +1,6 @@
 set(PROJECT_SOURCES
-    RegisterTypes.cpp
-    RegisterTypes.h
+    RegisterClientTypes.cpp
+    RegisterClientTypes.h
     Application/Account/AccountPageControl.cpp
     Application/Account/AccountPageControl.h
     Application/Game/GamePageControl.cpp

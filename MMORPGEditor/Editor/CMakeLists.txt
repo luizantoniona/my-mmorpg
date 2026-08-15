@@ -1,6 +1,6 @@
 set(PROJECT_SOURCES
-    RegisterTypes.cpp
-    RegisterTypes.h
+    RegisterEditorTypes.cpp
+    RegisterEditorTypes.h
     Application/World/WorldPageControl.cpp
     Application/World/WorldPageControl.h)
 
