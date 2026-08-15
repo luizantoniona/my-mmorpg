@@ -10,12 +10,13 @@ class Camera {
 public:
     Camera();
 
-    void setPosition( const QPointF& position );
-    void setViewportSize( const QSizeF& size );
-    void setZoom( double zoom );
-
     const QPointF& position() const;
+    void setPosition( const QPointF& position );
+
     const QSizeF& viewportSize() const;
+    void setViewportSize( const QSizeF& size );
+
+    void setZoom( double zoom );
     double zoom() const;
 
     QPointF worldToScreen( const QPointF& worldPosition ) const;

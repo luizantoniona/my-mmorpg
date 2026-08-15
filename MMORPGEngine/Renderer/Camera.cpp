@@ -8,12 +8,24 @@ Camera::Camera() :
     _zoom( 1.0 ) {
 }
 
+const QPointF& Camera::position() const {
+    return _position;
+}
+
 void Camera::setPosition( const QPointF& position ) {
     _position = position;
 }
 
+const QSizeF& Camera::viewportSize() const {
+    return _viewportSize;
+}
+
 void Camera::setViewportSize( const QSizeF& size ) {
     _viewportSize = size;
+}
+
+double Camera::zoom() const {
+    return _zoom;
 }
 
 void Camera::setZoom( double zoom ) {
@@ -22,18 +34,6 @@ void Camera::setZoom( double zoom ) {
     }
 
     _zoom = zoom;
-}
-
-const QPointF& Camera::position() const {
-    return _position;
-}
-
-const QSizeF& Camera::viewportSize() const {
-    return _viewportSize;
-}
-
-double Camera::zoom() const {
-    return _zoom;
 }
 
 QPointF Camera::worldToScreen( const QPointF& worldPosition ) const {
