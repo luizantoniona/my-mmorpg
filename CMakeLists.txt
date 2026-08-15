@@ -17,13 +17,13 @@ option(BUILD_CLIENT "Build MMORPGClient" ON)
 option(BUILD_EDITOR "Build MMORPGEditor" ON)
 
 add_subdirectory(MMORPGEngine)
-add_subdirectory(MMORPGNetwork)
 
 add_subdirectory(MMORPGUI)
 list(APPEND QML_IMPORT_PATH "${CMAKE_BINARY_DIR}/MMORPGUI/UI")
 
 if(BUILD_SERVER)
   add_subdirectory(MMORPGServer)
+  list(APPEND QML_IMPORT_PATH "${CMAKE_BINARY_DIR}/MMORPGServer/Server")
 endif()
 
 if(BUILD_CLIENT)

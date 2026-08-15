@@ -1,17 +1,36 @@
-#include <drogon/drogon.h>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQuickStyle>
+#include <QSurfaceFormat>
 
+#include <MMORPGEngine/Commons/RegisterEngineTypes.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGServer/Server/Database/Database.h>
 #include <MMORPGServer/Server/Manager/DataManager.h>
+#include <MMORPGServer/Server/Manager/NetworkManager.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
+#include <MMORPGServer/Server/RegisterServerTypes.h>
 
 namespace {
-constexpr const char* DATABASE_PATH = "../../../../Database/ServerDatabase";
-constexpr const char* DATA_PATH = "../../../../Data/";
+constexpr const char* DATABASE_PATH = "../../../Database/ServerDatabase";
+constexpr const char* DATA_PATH = "../../../Data/";
 } // namespace
 
-int main() {
-    std::cout << "Starting Server" << std::endl;
+int main( int argc, char* argv[] ) {
+    QQuickStyle::setStyle( "Basic" );
+    QGuiApplication app( argc, argv );
+    QSurfaceFormat format;
+    format.setSamples( 8 );
+    QSurfaceFormat::setDefaultFormat( format );
+    QQmlApplicationEngine engine;
+
+    // --- Register Types Engine
+    Engine::RegisterEngineTypes::registerTypes();
+
+    // --- Register Types Server
+    Server::RegisterServerTypes::registerTypes();
+
+    qInfo() << "STARTING SERVER";
 
     // --- Database ---
     Engine::Singleton<Server::Database>::instance().initialize( DATABASE_PATH );
@@ -22,17 +41,27 @@ int main() {
     // --- World ---
     Engine::Singleton<Server::WorldManager>::instance().initialize( DATA_PATH );
 
-    drogon::app()
-        .addListener( "0.0.0.0", 8080 )
-        .setThreadNum( std::thread::hardware_concurrency() )
-        .registerPostHandlingAdvice( []( const drogon::HttpRequestPtr& request, const drogon::HttpResponsePtr& response ) {
-            response->addHeader( "Access-Control-Allow-Origin", "*" );
-            response->addHeader( "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS" );
-            response->addHeader( "Access-Control-Allow-Headers", "Content-Type, Authorization" );
-        } )
-        .run();
+    // --- Network ---
+    Engine::Singleton<Server::NetworkManager>::instance().initialize();
 
-    std::cout << "Ending Server" << std::endl;
+    QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
+    engine.loadFromModule( "MMORPGServerComponents", "Main" );
+
+    app.exec();
+
+    // --- Network ---
+    Engine::Singleton<Server::NetworkManager>::instance().finalize();
+
+    // --- World ---
+    Engine::Singleton<Server::WorldManager>::instance().finalize();
+
+    // --- Data ---
+    Engine::Singleton<Server::DataManager>::instance().finalize();
+
+    // --- Database ---
+    Engine::Singleton<Server::Database>::instance().finalize();
+
+    qInfo() << "ENDING SERVER";
 
     return 0;
 }

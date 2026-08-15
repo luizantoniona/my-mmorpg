@@ -5,7 +5,7 @@
 
 #include <QObject>
 
-#include <MMORPGEngine/Core/World/Model/WorldModel.h>
+#include <MMORPGEngine/World/WorldModel.h>
 
 class WorldPageControl : public QObject {
     Q_OBJECT

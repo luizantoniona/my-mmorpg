@@ -1,6 +1,6 @@
 #include "AccountRepository.h"
 
-#include <Database/Query.h>
+#include <MMORPGServer/Server/Database/Query.h>
 
 namespace Server {
 
@@ -69,6 +69,33 @@ std::unique_ptr<Engine::AccountModel> AccountRepository::findByUsernameAndPasswo
     }
 
     return nullptr;
+}
+
+std::vector<Engine::AccountCharacterModel> AccountRepository::findCharacters( const int idAccount ) {
+    const std::string sql = R"SQL(
+        SELECT
+            id_character,
+            ds_name
+        FROM character
+        WHERE id_account = ?
+    )SQL";
+
+    Query query( _db, sql );
+
+    query.bindInt( 1, idAccount );
+
+    std::vector<Engine::AccountCharacterModel> characters;
+
+    while ( query.step() ) {
+        Engine::AccountCharacterModel character;
+        character.setIdCharacter( query.getColumnInt( 0 ) );
+        character.setName( query.getColumnText( 1 ) );
+        character.setIdCharacter( idAccount );
+
+        characters.push_back( character );
+    }
+
+    return characters;
 }
 
 } // namespace Server

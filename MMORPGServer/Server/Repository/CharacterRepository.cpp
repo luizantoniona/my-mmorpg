@@ -1,6 +1,6 @@
 #include "CharacterRepository.h"
 
-#include <Database/Query.h>
+#include <MMORPGServer/Server/Database/Query.h>
 
 namespace Server {
 
@@ -57,33 +57,6 @@ bool CharacterRepository::updateCharacter( Engine::CharacterModel character ) {
     // success &= CharacterEquipmentRepository().updateEquipment( idCharacter, character.equipment() );
 
     return success;
-}
-
-std::vector<std::unique_ptr<Engine::CharacterModel>> CharacterRepository::findAllByIdAccount( const int idAccount ) {
-    const std::string sql = R"SQL(
-        SELECT
-            id_character,
-            id_account,
-            ds_name
-        FROM character
-        WHERE id_account = ?
-    )SQL";
-    Query query( _db, sql );
-
-    query.bindInt( 1, idAccount );
-
-    std::vector<std::unique_ptr<Engine::CharacterModel>> characters;
-
-    while ( query.step() ) {
-        auto character = std::make_unique<Engine::CharacterModel>();
-        character->setIdCharacter( query.getColumnInt( 0 ) );
-        character->setIdAccount( query.getColumnInt( 1 ) );
-        character->setName( query.getColumnText( 2 ) );
-
-        characters.push_back( std::move( character ) );
-    }
-
-    return characters;
 }
 
 std::unique_ptr<Engine::CharacterModel> CharacterRepository::findByIdAccountAndIdCharacter( const int idAccount, const int idCharacter ) {

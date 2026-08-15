@@ -37,7 +37,7 @@ Item {
             visible: root.vTextStatus.length > 0
             vProgress: 0.65
             vText: root.vTextStatus
-            vTextColor: Colors.accent2
+            vTextColor: Colors.info
             Layout.alignment: Qt.AlignHCenter
         }
 

@@ -13,6 +13,7 @@ public:
     ~Database();
 
     bool initialize( const std::string& databasePath );
+    void finalize();
 
     bool create();
     bool migrate();

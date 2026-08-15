@@ -1,6 +1,6 @@
 set(PROJECT_SOURCES
-    RegisterTypes.cpp
-    RegisterTypes.h
+    RegisterEditorTypes.cpp
+    RegisterEditorTypes.h
     Application/World/WorldPageControl.cpp
     Application/World/WorldPageControl.h)
 
@@ -14,7 +14,7 @@ qt_add_qml_module(
   1.0
   QML_FILES
   Main.qml
-  Application/MainWindow.qml
+  Application/EditorWindow.qml
   Application/World/WorldPage.qml
   Application/World/Component/WorldPageHeader.qml)
 

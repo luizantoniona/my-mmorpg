@@ -12,13 +12,13 @@ Rectangle {
 
     property string vText: ""
     property bool vEnabled: true
-    property color vBackgroundColor: Colors.primary1
-    property color vBorderColor: Colors.primary0
-    property color vHoverColor: Colors.primary2
-    property color vPressedColor: Colors.primary2
+    property color vBackgroundColor: Colors.primaryEnabled
+    property color vBorderColor: Colors.border
+    property color vHoverColor: Colors.primaryHovered
+    property color vPressedColor: Colors.primaryPressed
     property color vTextColor: Colors.text
     property int vRadius: Spaces.spacing8
-    property int vBorderWidth: Borders.borders2
+    property int vBorderWidth: Borders.borders1
 
     default property alias contentData: content.data
     readonly property alias contentItem: content

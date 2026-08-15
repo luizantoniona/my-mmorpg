@@ -1,8 +1,10 @@
 #include "CharacterWebSocket.h"
 
+#include <QDebug>
+
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <Manager/WorldManager.h>
-#include <Network/NetworkServer.h>
+#include <MMORPGServer/Server/Manager/WorldManager.h>
+#include <MMORPGServer/Server/Network/NetworkServer.h>
 
 namespace Server {
 
@@ -19,7 +21,7 @@ void CharacterWebSocket::handleNewMessage( const drogon::WebSocketConnectionPtr&
 }
 
 void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& request, const drogon::WebSocketConnectionPtr& connection ) {
-    std::cout << "[WebSocket] New connection: " << connection->peerAddr().toIp() << std::endl;
+    qInfo() << "[WebSocket] New connection: " << connection->peerAddr().toIp();
 
     std::string sessionId;
     const auto token = request->getHeader( "Authorization" );
@@ -65,7 +67,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 }
 
 void CharacterWebSocket::handleConnectionClosed( const drogon::WebSocketConnectionPtr& connection ) {
-    std::cout << "[WebSocket] Connection closed: " << connection->peerAddr().toIp() << std::endl;
+    qInfo() << "[WebSocket] Connection closed: " << connection->peerAddr().toIp();
 
     auto uuidPtr = connection->getContext<std::string>();
 

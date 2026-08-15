@@ -5,7 +5,7 @@
 #include <string>
 #include <thread>
 
-#include <MMORPGEngine/Core/World/Model/WorldModel.h>
+#include <MMORPGEngine/World/WorldModel.h>
 
 namespace Server {
 

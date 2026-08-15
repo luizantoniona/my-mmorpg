@@ -13,9 +13,9 @@ Item {
         id: background
 
         anchors.fill: parent
-        color: Colors.background2
-        border.color: Colors.background3
-        border.width: Borders.borders2
+        color: Colors.background1
+        border.color: Colors.border
+        border.width: Borders.borders1
     }
 
     RowLayout {

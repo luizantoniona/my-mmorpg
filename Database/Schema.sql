@@ -1,7 +1,7 @@
 CREATE TABLE account (
     id_account INTEGER PRIMARY KEY AUTOINCREMENT,
-    ds_username VARCHAR,
-    ds_password VARCHAR
+    ds_username VARCHAR NOT NULL UNIQUE,
+    ds_password VARCHAR NOT NULL
 );
 
 CREATE TABLE 'character' (

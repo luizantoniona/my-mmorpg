@@ -32,6 +32,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                color: Colors.background0
                 // TODO: Change Rectangle by LOGO / Background / Something
             }
 

@@ -4,8 +4,8 @@
 #include <memory>
 #include <string>
 
-#include <MMORPGEngine/Core/Account/AccountModel.h>
-#include <Repository/Repository.h>
+#include <MMORPGEngine/Account/AccountModel.h>
+#include <MMORPGServer/Server/Repository/Repository.h>
 
 namespace Server {
 
@@ -17,6 +17,8 @@ public:
 
     std::unique_ptr<Engine::AccountModel> findByUsername( const std::string& username );
     std::unique_ptr<Engine::AccountModel> findByUsernameAndPassword( const std::string& username, const std::string& password );
+
+    std::vector<Engine::AccountCharacterModel> findCharacters( const int idAccount );
 };
 
 } // namespace Server

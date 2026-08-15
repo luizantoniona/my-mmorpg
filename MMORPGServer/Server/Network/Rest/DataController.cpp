@@ -1,7 +1,9 @@
 #include "DataController.h"
 
+#include <QDebug>
+
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/ManifestDTO.h>
+#include <MMORPGEngine/Manifest/ManifestDTO.h>
 #include <MMORPGServer/Server/Manager/DataManager.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 
@@ -10,7 +12,7 @@ namespace Server {
 void DataController::downloadManifest( const drogon::HttpRequestPtr& request, std::function<void( const drogon::HttpResponsePtr& )>&& callback ) const {
     const NetworkSession& session = AuthFilter::session( request );
 
-    std::cout << "DataController::downloadManifest [ACCOUNT] " << session.idAccount() << std::endl;
+    qInfo() << "DataController::downloadManifest [ACCOUNT] " << session.idAccount();
 
     const Engine::ManifestModel& manifest = Engine::Singleton<DataManager>::instance().manifest();
 
@@ -24,10 +26,9 @@ void DataController::downloadManifest( const drogon::HttpRequestPtr& request, st
 void DataController::downloadData( const drogon::HttpRequestPtr& request, std::function<void( const drogon::HttpResponsePtr& )>&& callback, std::string path ) const {
     const NetworkSession& session = AuthFilter::session( request );
 
-    std::cout << "DataController::downloadData [ACCOUNT] " << session.idAccount() << " [PATH] " << path << std::endl;
+    qInfo() << "DataController::downloadData [ACCOUNT] " << session.idAccount() << " [PATH] " << path;
 
-    // TODO:
-    // DataManager::instance().data(path);
+    // TODO: DataManager::instance().data(path);
 
     auto response = drogon::HttpResponse::newHttpResponse();
     response->setStatusCode( drogon::k501NotImplemented );

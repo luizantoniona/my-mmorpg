@@ -1,7 +1,9 @@
 #include "AuthController.h"
 
+#include <QDebug>
+
+#include <MMORPGEngine/Account/AccountDTO.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Core/Account/AccountDTO.h>
 #include <MMORPGServer/Server/Database/Database.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
@@ -43,11 +45,13 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
         return;
     }
 
+    account->setCharacters( AccountRepository().findCharacters( account->idAccount() ) );
+
     std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
     Engine::AccountDTO accountDTO( *account, sessionId );
 
-    std::cout << "AuthController::login [Account] " << account->dsUsername() << " [UUID] " << sessionId << std::endl;
+    qInfo() << "AuthController::login [Account] " << account->dsUsername() << " [UUID] " << sessionId;
 
     auto response = drogon::HttpResponse::newHttpJsonResponse( accountDTO.toJson() );
     response->setStatusCode( drogon::k200OK );
@@ -69,9 +73,7 @@ void AuthController::logout( const drogon::HttpRequestPtr& request, std::functio
         return;
     }
 
-    std::cout << "AuthController::logout [UUID] "
-              << session.uuid()
-              << std::endl;
+    qInfo() << "AuthController::logout [UUID] " << session.uuid();
 
     auto response = drogon::HttpResponse::newHttpJsonResponse( responseJson );
     response->setStatusCode( drogon::k200OK );
@@ -138,11 +140,13 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
         return;
     }
 
+    account->setCharacters( AccountRepository().findCharacters( account->idAccount() ) );
+
     std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
     Engine::AccountDTO accountDTO( *account, sessionId );
 
-    std::cout << "AuthController::sign [Account] " << account->dsUsername() << " [UUID] " << sessionId << std::endl;
+    qInfo() << "AuthController::sign [Account] " << account->dsUsername() << " [UUID] " << sessionId;
 
     auto response = drogon::HttpResponse::newHttpJsonResponse( accountDTO.toJson() );
     response->setStatusCode( drogon::k201Created );

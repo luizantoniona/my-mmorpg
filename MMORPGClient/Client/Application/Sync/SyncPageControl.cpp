@@ -5,7 +5,7 @@
 #include <MMORPGClient/Client/Manager/ServerManager.h>
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/ManifestDTO.h>
+#include <MMORPGEngine/Manifest/ManifestDTO.h>
 
 SyncPageControl::SyncPageControl( QObject* parent ) :
     QObject( parent ) {

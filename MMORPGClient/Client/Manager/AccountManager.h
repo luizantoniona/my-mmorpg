@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include <MMORPGEngine/Core/Account/AccountDTO.h>
+#include <MMORPGEngine/Account/AccountDTO.h>
 
 class AccountManager : public QObject {
     Q_OBJECT
