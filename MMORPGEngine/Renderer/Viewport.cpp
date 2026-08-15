@@ -1,27 +1,42 @@
 #include "Viewport.h"
 
+#include <MMORPGEngine/Renderer/Camera.h>
+#include <MMORPGEngine/Renderer/Renderer.h>
+
 #include <QSGSimpleRectNode>
 
 namespace Engine {
 
 Viewport::Viewport( QQuickItem* parent ) :
-    QQuickItem( parent ) {
+    QQuickItem( parent ),
+    _renderer( nullptr ) {
 
     setFlag( ItemHasContents, true );
 }
 
-QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
-    auto* node = static_cast<QSGSimpleRectNode*>( oldNode );
+void Viewport::setRenderer( Renderer* renderer ) {
+    _renderer = renderer;
 
-    if ( !node ) {
-        node = new QSGSimpleRectNode();
+    if ( _renderer ) {
+        _renderer->initialize();
+        _renderer->resize( size() );
     }
 
-    node->setRect( boundingRect() );
+    update();
+}
 
-    node->setColor( Qt::red );
+QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
+    if ( oldNode ) {
+        delete oldNode;
+    }
 
-    return node;
+    auto* rootNode = new QSGNode();
+
+    if ( _renderer ) {
+        _renderer->render( rootNode );
+    }
+
+    return rootNode;
 }
 
 } // namespace Engine
