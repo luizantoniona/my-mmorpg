@@ -36,6 +36,13 @@ void Camera::setZoom( double zoom ) {
     _zoom = zoom;
 }
 
+QRectF Camera::visibleRect() const {
+    const double width = _viewportSize.width() / _zoom;
+    const double height = _viewportSize.height() / _zoom;
+
+    return QRectF( _position.x() - width / 2.0, _position.y() - height / 2.0, width, height );
+}
+
 QPointF Camera::worldToScreen( const QPointF& worldPosition ) const {
     const QPointF relativePosition = worldPosition - _position;
 

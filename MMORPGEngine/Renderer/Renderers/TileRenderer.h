@@ -9,7 +9,7 @@ class TileRenderer {
 public:
     TileRenderer();
 
-    void render( RenderScene& scene );
+    void render( RenderScene& scene, const Camera& camera );
 
 private:
     void renderTile( RenderScene& scene, int x, int y );

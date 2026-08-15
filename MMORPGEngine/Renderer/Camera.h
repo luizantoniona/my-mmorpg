@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include <QPointF>
+#include <QRectF>
 #include <QSizeF>
 
 namespace Engine {
@@ -18,6 +19,8 @@ public:
 
     void setZoom( double zoom );
     double zoom() const;
+
+    QRectF visibleRect() const;
 
     QPointF worldToScreen( const QPointF& worldPosition ) const;
 

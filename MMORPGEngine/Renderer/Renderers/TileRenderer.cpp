@@ -10,12 +10,19 @@ namespace Engine {
 TileRenderer::TileRenderer() {
 }
 
-void TileRenderer::render( RenderScene& scene ) {
-    constexpr int width = 10;
-    constexpr int height = 10;
+void TileRenderer::render( RenderScene& scene, const Camera& camera ) {
+    const QRectF visibleRect = camera.visibleRect();
 
-    for ( int y = 0; y < height; ++y ) {
-        for ( int x = 0; x < width; ++x ) {
+    const int startX = static_cast<int>( std::floor( visibleRect.left() / TILE_SIZE ) );
+
+    const int startY = static_cast<int>( std::floor( visibleRect.top() / TILE_SIZE ) );
+
+    const int endX = static_cast<int>( std::ceil( visibleRect.right() / TILE_SIZE ) );
+
+    const int endY = static_cast<int>( std::ceil( visibleRect.bottom() / TILE_SIZE ) );
+
+    for ( int y = startY; y <= endY; ++y ) {
+        for ( int x = startX; x <= endX; ++x ) {
             renderTile( scene, x, y );
         }
     }
