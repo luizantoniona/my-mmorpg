@@ -10,7 +10,7 @@ namespace Engine {
 class Viewport : public QQuickItem {
     Q_OBJECT
     Q_PROPERTY( QPointF cameraPosition READ cameraPosition WRITE setCameraPosition NOTIFY cameraPositionChanged )
-    Q_PROPERTY( QObject* renderWorld WRITE setRenderWorld )
+    Q_PROPERTY( RenderWorld* renderWorld READ renderWorld WRITE setRenderWorld )
 
 public:
     explicit Viewport( QQuickItem* parent = nullptr );
@@ -22,6 +22,7 @@ public:
 
     void setRenderer( Renderer* renderer );
 
+    RenderWorld* renderWorld() const;
     void setRenderWorld( RenderWorld* world );
 
 signals:

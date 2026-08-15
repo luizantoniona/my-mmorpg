@@ -5,15 +5,14 @@ import MMORPGEngine
 Item {
     id: root
 
+    ServerRenderWorld {
+        id: serverWorld
+    }
+
     Viewport {
         anchors.fill: parent
+        renderWorld: serverWorld
 
-        cameraPosition: Qt.point(100, 0)
-
-        Behavior on cameraPosition {
-            NumberAnimation {
-                duration: 1000
-            }
-        }
+        cameraPosition: Qt.point(0, 0)
     }
 }

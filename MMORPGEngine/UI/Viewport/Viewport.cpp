@@ -50,7 +50,15 @@ void Viewport::setRenderer( Renderer* renderer ) {
     update();
 }
 
+RenderWorld* Viewport::renderWorld() const {
+    return _world;
+}
+
 void Viewport::setRenderWorld( RenderWorld* world ) {
+    if ( _world == world ) {
+        return;
+    }
+
     _world = world;
 
     update();

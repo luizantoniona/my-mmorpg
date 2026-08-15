@@ -2,8 +2,8 @@
 
 namespace Engine {
 
-RenderWorld::RenderWorld() = default;
-
-RenderWorld::~RenderWorld() = default;
+RenderWorld::RenderWorld( QObject* parent ) :
+    QObject( parent ) {
+}
 
 } // namespace Engine
