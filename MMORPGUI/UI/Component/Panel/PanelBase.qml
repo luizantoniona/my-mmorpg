@@ -34,8 +34,8 @@ Item {
     PanelFrame {
         anchors.fill: parent
         vBackgroundColor: Colors.background1
-        vBorderColor: Colors.background2
-        vBorderWidth: Borders.borders2
+        vBorderColor: Colors.border
+        vBorderWidth: Borders.borders1
         vRadiusValue: Spaces.spacing8
 
         PanelHeader {

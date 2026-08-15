@@ -10,9 +10,9 @@ Item {
     property color vTextColor: Colors.text
     property font vTextFont: Fonts.bodyDefault
 
-    property color vBarColor: Colors.primary1
+    property color vBarColor: Colors.info
     property color vBackgroundColor: Colors.background2
-    property color vBorderColor: Colors.background3
+    property color vBorderColor: Colors.border
 
     property int vRadius: Spaces.spacing8
     property int vHeight: 12
@@ -43,7 +43,7 @@ Item {
             radius: root.vRadius
             color: root.vBackgroundColor
             border {
-                width: Borders.borders2
+                width: Borders.borders1
                 color: root.vBorderColor
             }
             clip: true
