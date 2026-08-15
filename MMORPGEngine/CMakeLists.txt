@@ -44,10 +44,10 @@ set(PROJECT_SOURCES
     Renderer/Camera/Camera.h
     Renderer/Scene/RenderScene.cpp
     Renderer/Scene/RenderScene.h
+    Renderer/World/RenderWorld.cpp
+    Renderer/World/RenderWorld.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
-    Renderer/Viewport.cpp
-    Renderer/Viewport.h
     World/FloorModel.cpp
     World/FloorModel.h
     World/GroundModel.cpp
@@ -56,6 +56,8 @@ set(PROJECT_SOURCES
     World/TileModel.h
     Renderer/TileRenderer.cpp
     Renderer/TileRenderer.h
+    UI/Viewport/Viewport.cpp
+    UI/Viewport/Viewport.h
     World/WorldModel.cpp
     World/WorldModel.h)
 

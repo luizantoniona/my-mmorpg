@@ -2,7 +2,7 @@
 
 #include <QQmlEngine>
 
-#include <MMORPGEngine/Renderer/Viewport.h>
+#include <MMORPGEngine/UI/Viewport/Viewport.h>
 
 namespace Engine {
 

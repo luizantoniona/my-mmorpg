@@ -1,6 +1,6 @@
 #include "Viewport.h"
 
-#include <MMORPGEngine/Renderer/Camera.h>
+#include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Renderer.h>
 
 #include <QSGSimpleRectNode>
@@ -10,7 +10,8 @@ namespace Engine {
 Viewport::Viewport( QQuickItem* parent ) :
     QQuickItem( parent ),
     _camera( new Camera() ),
-    _renderer( new Renderer() ) {
+    _renderer( new Renderer() ),
+    _world( nullptr ) {
 
     setFlag( ItemHasContents, true );
 
@@ -49,6 +50,12 @@ void Viewport::setRenderer( Renderer* renderer ) {
     update();
 }
 
+void Viewport::setRenderWorld( RenderWorld* world ) {
+    _world = world;
+
+    update();
+}
+
 void Viewport::geometryChange( const QRectF& newGeometry, const QRectF& oldGeometry ) {
     QQuickItem::geometryChange( newGeometry, oldGeometry );
     _camera->setViewportSize( newGeometry.size() );
@@ -62,7 +69,11 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
 
     RenderScene scene;
 
-    _renderer->render( scene, *_camera );
+    if ( !_renderer || !_world ) {
+        return rootNode;
+    }
+
+    _renderer->render( scene, *_camera, *_world );
 
     scene.build( rootNode, *_camera );
 

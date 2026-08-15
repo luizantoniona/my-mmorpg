@@ -14,8 +14,8 @@ void Renderer::resize( const QSizeF& size ) {
     _viewportSize = size;
 }
 
-void Renderer::render( RenderScene& scene, const Camera& camera ) {
-    _tileRenderer->render( scene, camera );
+void Renderer::render( RenderScene& scene, const Camera& camera, const RenderWorld& world ) {
+    _tileRenderer->render( scene, camera, world );
 }
 
 } // namespace Engine
