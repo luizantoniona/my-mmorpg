@@ -1,6 +1,7 @@
 #ifndef RENDERSCENE_H
 #define RENDERSCENE_H
 
+#include <QColor>
 #include <QList>
 
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
@@ -16,7 +17,7 @@ public:
 
     void clear();
 
-    void addRect( const QPointF& position, const QSizeF& size );
+    void addRect( const QPointF& position, const QSizeF& size, const QColor& color );
 
     void build( QSGNode* rootNode, const Camera& camera );
 
@@ -25,6 +26,7 @@ private:
     public:
         QPointF position;
         QSizeF size;
+        QColor color;
     };
 
     QList<Rect> _rects;

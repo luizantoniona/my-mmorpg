@@ -1,8 +1,28 @@
 #include "TileRenderer.h"
 
+#include <QColor>
+
 namespace {
 constexpr int TILE_SIZE = 10;
 constexpr int TILE_GAP = 2;
+
+QColor groundColor( uint16_t groundId ) {
+    switch ( groundId ) {
+    case 1:
+        return Qt::red;
+    case 2:
+        return Qt::green;
+    case 3:
+        return Qt::blue;
+    case 4:
+        return Qt::yellow;
+    case 5:
+        return Qt::cyan;
+    default:
+        return Qt::gray;
+    }
+}
+
 } // namespace
 
 namespace Engine {
@@ -39,6 +59,8 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
 void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const TileModel& tile ) {
     Q_UNUSED( z );
 
+    const uint16_t groundId = tile.groundId();
+
     if ( tile.groundId() == 0 ) {
         return;
     }
@@ -47,7 +69,7 @@ void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const Ti
 
     const QSizeF size( TILE_SIZE - TILE_GAP * 2, TILE_SIZE - TILE_GAP * 2 );
 
-    scene.addRect( position, size );
+    scene.addRect( position, size, groundColor( groundId ) );
 }
 
 } // namespace Engine

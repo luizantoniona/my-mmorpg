@@ -16,11 +16,12 @@ void RenderScene::clear() {
     _rects.clear();
 }
 
-void RenderScene::addRect( const QPointF& position, const QSizeF& size ) {
+void RenderScene::addRect( const QPointF& position, const QSizeF& size, const QColor& color ) {
     Rect rect;
 
     rect.position = position;
     rect.size = size;
+    rect.color = color;
 
     _rects.append( rect );
 }
@@ -35,13 +36,9 @@ void RenderScene::build( QSGNode* rootNode, const Camera& camera ) {
 
         auto* node = new QSGSimpleRectNode();
 
-        node->setRect(
-            screenPosition.x(),
-            screenPosition.y(),
-            rect.size.width(),
-            rect.size.height() );
-
-        node->setColor( Qt::red );
+        node->setRect( screenPosition.x(), screenPosition.y(),
+                       rect.size.width(), rect.size.height() );
+        node->setColor( rect.color );
 
         rootNode->appendChildNode( node );
     }
