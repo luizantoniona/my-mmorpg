@@ -1,7 +1,8 @@
 #ifndef DATAMANAGER_H
 #define DATAMANAGER_H
 
-#include <MMORPGEngine/Manifest/ManifestModel.h>
+#include <MMORPGEngine/Data/Ground/GroundCatalog.h>
+#include <MMORPGEngine/Data/Manifest/ManifestModel.h>
 
 namespace Server {
 
@@ -10,13 +11,15 @@ public:
     DataManager();
     ~DataManager();
 
-    void initialize();
+    void initialize( const std::string& worldPath );
     void finalize();
 
-    const Engine::ManifestModel& manifest();
+    const Engine::ManifestModel& manifest() const;
+    const Engine::GroundCatalog& groundCatalog() const;
 
 private:
     Engine::ManifestModel _manifest;
+    Engine::GroundCatalog _groundCatalog;
 };
 
 } // namespace Server

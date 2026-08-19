@@ -3,7 +3,7 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Manifest/ManifestDTO.h>
+#include <MMORPGEngine/Data/Manifest/ManifestDTO.h>
 #include <MMORPGServer/Server/Manager/DataManager.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 

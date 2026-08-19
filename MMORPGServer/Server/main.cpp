@@ -36,7 +36,7 @@ int main( int argc, char* argv[] ) {
     Engine::Singleton<Server::Database>::instance().initialize( DATABASE_PATH );
 
     // --- Data ---
-    Engine::Singleton<Server::DataManager>::instance().initialize();
+    Engine::Singleton<Server::DataManager>::instance().initialize( DATA_PATH );
 
     // --- World ---
     Engine::Singleton<Server::WorldManager>::instance().initialize( DATA_PATH );

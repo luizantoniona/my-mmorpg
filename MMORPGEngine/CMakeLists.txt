@@ -18,8 +18,10 @@ set(PROJECT_SOURCES
     Commons/RegisterEngineTypes.cpp
     Commons/RegisterEngineTypes.h
     Commons/Singleton.h
-    Data/Catalog/GroundCatalog.cpp
-    Data/Catalog/GroundCatalog.h
+    Data/Ground/GroundCatalog.cpp
+    Data/Ground/GroundCatalog.h
+    Data/Ground/GroundModel.cpp
+    Data/Ground/GroundModel.h
     Data/Manifest/ManifestDataDTO.cpp
     Data/Manifest/ManifestDataDTO.h
     Data/Manifest/ManifestDataModel.cpp
@@ -28,6 +30,8 @@ set(PROJECT_SOURCES
     Data/Manifest/ManifestDTO.h
     Data/Manifest/ManifestModel.cpp
     Data/Manifest/ManifestModel.h
+    Data/DataFactory.cpp
+    Data/DataFactory.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
@@ -52,8 +56,6 @@ set(PROJECT_SOURCES
     UI/Viewport/Viewport.h
     World/Chunk/ChunkModel.cpp
     World/Chunk/ChunkModel.h
-    World/Tile/GroundModel.cpp
-    World/Tile/GroundModel.h
     World/Tile/TileModel.cpp
     World/Tile/TileModel.h
     World/WorldFactory.cpp

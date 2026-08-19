@@ -3,6 +3,7 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Ground/GroundModel.h>
 
 namespace Engine {
 
@@ -30,45 +31,12 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
 
     qInfo() << "WorldFactory::createWorld" << "[MAP_SIZE]" << world->width() << "x" << world->height();
 
-    // --- Catalogs
-    qInfo() << "WorldFactory::createWorld" << "Creating catalogs";
-
-    createGroundCatalog( mapPath + mapJson[ "Catalogs" ][ "Grounds" ].asString(), world.get() );
-
     // --- Floors
     for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
         createFloor( mapPath + floorFile.asString(), world.get() );
     }
 
     return world;
-}
-
-void WorldFactory::createGroundCatalog( const std::string& groundsFile, WorldModel* world ) {
-    qInfo() << "WorldFactory::createGroundCatalog" << "[GROUND_FILE_PATH]" << groundsFile;
-
-    if ( !world ) {
-        qInfo() << "WorldFactory::createGroundCatalog" << "World is nullptr";
-        return;
-    }
-
-    Json::Value json = JsonHelper::loadJsonFile( groundsFile );
-
-    // GroundCatalog& groundCatalog = world->groundCatalog();
-
-    // const Json::Value& grounds = json[ "Grounds" ];
-
-    // for ( const Json::Value& groundJson : grounds ) {
-    //     GroundModel ground;
-
-    //     ground.setType( static_cast<uint16_t>( groundJson[ "Type" ].asUInt() ) );
-    //     ground.setWalkable( groundJson[ "Walkable" ].asBool() );
-    //     ground.setName( groundJson[ "Name" ].asString() );
-    //     ground.setFolder( groundJson[ "TextureFolder" ].asString() );
-
-    //     groundCatalog.addGround( ground );
-
-    //     qInfo() << "WorldFactory::createGroundCatalog" << "LOADED:" << ground.type() << ground.name();
-    // }
 }
 
 void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world ) {
@@ -99,6 +67,8 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
         for ( int x = 0; x < width; ++x ) {
             const uint16_t groundId = static_cast<uint16_t>( row[ x ].asUInt() );
+
+            // BEFORE CREATING WE NEED TO SEE IF THE GROUNDID EXIST IN DATA -> GroundCatalog -> if not. Log warning and put value to 0
 
             const int chunkX = x / ChunkModel::CHUNK_WIDTH;
 

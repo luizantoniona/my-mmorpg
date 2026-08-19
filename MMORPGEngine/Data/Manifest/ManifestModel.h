@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <MMORPGEngine/Manifest/ManifestDataModel.h>
+#include <MMORPGEngine/Data/Manifest/ManifestDataModel.h>
 
 namespace Engine {
 
