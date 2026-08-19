@@ -52,8 +52,8 @@ set(PROJECT_SOURCES
     Renderer/TileRenderer.h
     UI/Viewport/Viewport.cpp
     UI/Viewport/Viewport.h
-    World/Floor/FloorModel.cpp
-    World/Floor/FloorModel.h
+    World/Chunk/ChunkModel.cpp
+    World/Chunk/ChunkModel.h
     World/Tile/GroundModel.cpp
     World/Tile/GroundModel.h
     World/Tile/TileModel.cpp

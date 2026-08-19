@@ -2,11 +2,13 @@
 #define WORLDMODEL_H
 
 #include <cstdint>
-#include <unordered_map>
+#include <memory>
 
-// TODO: Remover catalogos daqui
-#include <MMORPGEngine/Catalog/GroundCatalog.h>
-#include <MMORPGEngine/World/Floor/FloorModel.h>
+#include <QMap>
+#include <QString>
+
+#include <MMORPGEngine/World/Chunk/ChunkModel.h>
+#include <MMORPGEngine/World/Tile/TileModel.h>
 
 namespace Engine {
 
@@ -14,34 +16,28 @@ class WorldModel {
 public:
     WorldModel();
 
-    std::string name() const;
-    void setName( const std::string& name );
+    QString name() const;
+    void setName( const QString& name );
 
-    uint16_t width() const;
-    void setWidth( uint16_t width );
+    uint32_t width() const;
+    void setWidth( uint32_t width );
 
-    uint16_t height() const;
-    void setHeight( uint16_t height );
+    uint32_t height() const;
+    void setHeight( uint32_t height );
 
-    const GroundCatalog& groundCatalog() const;
-    GroundCatalog& groundCatalog();
+    ChunkModel* chunk( int x, int y );
+    const ChunkModel* chunk( int x, int y ) const;
 
-    const std::unordered_map<int32_t, FloorModel>& floors() const;
-    std::unordered_map<int32_t, FloorModel>& floors();
-
-    FloorModel* floor( int32_t z );
-    const FloorModel* floor( int32_t z ) const;
+    const TileModel* tile( int x, int y, int z ) const;
 
 private:
-    std::string _name;
-    uint16_t _width;
-    uint16_t _height;
+    QString chunkKey( int x, int y ) const;
 
-    // --- Catalogs ---
-    GroundCatalog _groundCatalog;
-
-    // --- World structure ---
-    std::unordered_map<int32_t, FloorModel> _floors;
+private:
+    QString _name;
+    uint32_t _width;
+    uint32_t _height;
+    QMap<QString, std::unique_ptr<ChunkModel>> _chunks;
 };
 
 } // namespace Engine
