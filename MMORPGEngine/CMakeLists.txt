@@ -18,8 +18,16 @@ set(PROJECT_SOURCES
     Commons/RegisterEngineTypes.cpp
     Commons/RegisterEngineTypes.h
     Commons/Singleton.h
-    Catalog/GroundCatalog.cpp
-    Catalog/GroundCatalog.h
+    Data/Catalog/GroundCatalog.cpp
+    Data/Catalog/GroundCatalog.h
+    Data/Manifest/ManifestDataDTO.cpp
+    Data/Manifest/ManifestDataDTO.h
+    Data/Manifest/ManifestDataModel.cpp
+    Data/Manifest/ManifestDataModel.h
+    Data/Manifest/ManifestDTO.cpp
+    Data/Manifest/ManifestDTO.h
+    Data/Manifest/ManifestModel.cpp
+    Data/Manifest/ManifestModel.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
@@ -28,14 +36,6 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterModel.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
-    Manifest/ManifestDataDTO.cpp
-    Manifest/ManifestDataDTO.h
-    Manifest/ManifestDataModel.cpp
-    Manifest/ManifestDataModel.h
-    Manifest/ManifestDTO.cpp
-    Manifest/ManifestDTO.h
-    Manifest/ManifestModel.cpp
-    Manifest/ManifestModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
     Renderer/Camera/Camera.cpp
