@@ -20,8 +20,6 @@ public:
 
     Camera* camera() const;
 
-    void setRenderer( Renderer* renderer );
-
     RenderWorld* renderWorld() const;
     void setRenderWorld( RenderWorld* world );
 

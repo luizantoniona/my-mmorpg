@@ -20,13 +20,15 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
     Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
 
     // --- Name
-    world->setName( mapJson[ "Name" ].asString() );
+    world->setName( QString( mapJson[ "Name" ].asCString() ) );
 
     qInfo() << "WorldFactory::createWorld" << "[MAP_NAME]" << world->name();
 
     // --- Size
-    world->setWidth( static_cast<uint16_t>( mapJson[ "Width" ].asUInt() ) );
-    world->setHeight( static_cast<uint16_t>( mapJson[ "Height" ].asUInt() ) );
+    world->setWidth( mapJson[ "Width" ].asUInt() );
+    world->setHeight( mapJson[ "Height" ].asUInt() );
+
+    qInfo() << "WorldFactory::createWorld" << "[MAP_SIZE]" << world->width() << "x" << world->height();
 
     // --- Catalogs
     qInfo() << "WorldFactory::createWorld" << "Creating catalogs";
@@ -51,22 +53,22 @@ void WorldFactory::createGroundCatalog( const std::string& groundsFile, WorldMod
 
     Json::Value json = JsonHelper::loadJsonFile( groundsFile );
 
-    GroundCatalog& groundCatalog = world->groundCatalog();
+    // GroundCatalog& groundCatalog = world->groundCatalog();
 
-    const Json::Value& grounds = json[ "Grounds" ];
+    // const Json::Value& grounds = json[ "Grounds" ];
 
-    for ( const Json::Value& groundJson : grounds ) {
-        GroundModel ground;
+    // for ( const Json::Value& groundJson : grounds ) {
+    //     GroundModel ground;
 
-        ground.setType( static_cast<uint16_t>( groundJson[ "Type" ].asUInt() ) );
-        ground.setWalkable( groundJson[ "Walkable" ].asBool() );
-        ground.setName( groundJson[ "Name" ].asString() );
-        ground.setFolder( groundJson[ "TextureFolder" ].asString() );
+    //     ground.setType( static_cast<uint16_t>( groundJson[ "Type" ].asUInt() ) );
+    //     ground.setWalkable( groundJson[ "Walkable" ].asBool() );
+    //     ground.setName( groundJson[ "Name" ].asString() );
+    //     ground.setFolder( groundJson[ "TextureFolder" ].asString() );
 
-        groundCatalog.addGround( ground );
+    //     groundCatalog.addGround( ground );
 
-        qInfo() << "WorldFactory::createGroundCatalog" << "LOADED:" << ground.type() << ground.name();
-    }
+    //     qInfo() << "WorldFactory::createGroundCatalog" << "LOADED:" << ground.type() << ground.name();
+    // }
 }
 
 void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world ) {
@@ -79,7 +81,8 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
     Json::Value floorJson = JsonHelper::loadJsonFile( floorFile );
 
-    const int32_t z = floorJson[ "Z" ].asInt();
+    const int z = floorJson[ "Z" ].asInt();
+
     const Json::Value& groundRows = floorJson[ "Ground" ];
 
     if ( !groundRows.isArray() || groundRows.empty() ) {
@@ -87,33 +90,39 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
         return;
     }
 
-    uint16_t width = static_cast<uint16_t>( groundRows[ 0 ].size() );
-    uint16_t height = static_cast<uint16_t>( groundRows.size() );
+    const int height = static_cast<int>( groundRows.size() );
 
-    FloorModel floor;
-    floor.setZ( z );
-    floor.resize( width, height );
+    const int width = static_cast<int>( groundRows[ 0 ].size() );
 
-    const GroundCatalog& groundCatalog = world->groundCatalog();
-
-    for ( uint16_t y = 0; y < height; ++y ) {
+    for ( int y = 0; y < height; ++y ) {
         const Json::Value& row = groundRows[ y ];
 
-        for ( uint16_t x = 0; x < width; ++x ) {
-            uint16_t groundId = static_cast<uint16_t>( row[ x ].asUInt() );
+        for ( int x = 0; x < width; ++x ) {
+            const uint16_t groundId = static_cast<uint16_t>( row[ x ].asUInt() );
 
-            if ( !groundCatalog.ground( groundId ) ) {
-                groundId = 0;
+            const int chunkX = x / ChunkModel::CHUNK_WIDTH;
+
+            const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
+
+            const int localX = x % ChunkModel::CHUNK_WIDTH;
+
+            const int localY = y % ChunkModel::CHUNK_HEIGHT;
+
+            ChunkModel* chunk = world->chunk( chunkX, chunkY );
+
+            if ( !chunk ) {
+                continue;
             }
 
-            if ( TileModel* tile = floor.tile( x, y ) ) {
-                tile->setGroundId( groundId );
-                // TODO: Tile setters here
+            TileModel* tile = chunk->tile( localX, localY, z );
+
+            if ( !tile ) {
+                continue;
             }
+
+            tile->setGroundId( groundId );
         }
     }
-
-    world->floors()[ z ] = std::move( floor );
 }
 
 } // namespace Engine

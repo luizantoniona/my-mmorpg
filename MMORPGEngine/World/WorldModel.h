@@ -2,9 +2,9 @@
 #define WORLDMODEL_H
 
 #include <cstdint>
+#include <map>
 #include <memory>
 
-#include <QMap>
 #include <QString>
 
 #include <MMORPGEngine/World/Chunk/ChunkModel.h>
@@ -37,7 +37,7 @@ private:
     QString _name;
     uint32_t _width;
     uint32_t _height;
-    QMap<QString, std::unique_ptr<ChunkModel>> _chunks;
+    std::map<QString, std::unique_ptr<ChunkModel>> _chunks;
 };
 
 } // namespace Engine

@@ -17,6 +17,9 @@ public:
     void initialize( const std::string& worldPath );
     void finalize();
 
+    Engine::WorldModel* world();
+    const Engine::WorldModel* world() const;
+
 private:
     std::atomic<bool> _running;
     std::thread _thread;

@@ -31,14 +31,23 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
                 continue;
             }
 
-            renderTile( scene, x, y, z );
+            renderTile( scene, x, y, z, *tile );
         }
     }
 }
 
-void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z ) {
-    const QPointF position( x * TILE_SIZE, y * TILE_SIZE );
-    scene.addRect( position, QSizeF( TILE_SIZE - TILE_GAP, TILE_SIZE - TILE_GAP ) );
+void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const TileModel& tile ) {
+    Q_UNUSED( z );
+
+    if ( tile.groundId() == 0 ) {
+        return;
+    }
+
+    const QPointF position( x * TILE_SIZE + TILE_GAP, y * TILE_SIZE + TILE_GAP );
+
+    const QSizeF size( TILE_SIZE - TILE_GAP * 2, TILE_SIZE - TILE_GAP * 2 );
+
+    scene.addRect( position, size );
 }
 
 } // namespace Engine

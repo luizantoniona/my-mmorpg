@@ -1,10 +1,5 @@
 #include "WorldModel.h"
 
-namespace {
-constexpr int CHUNK_WIDTH = 32;
-constexpr int CHUNK_HEIGHT = 32;
-} // namespace
-
 namespace Engine {
 
 WorldModel::WorldModel() :
@@ -43,36 +38,39 @@ ChunkModel* WorldModel::chunk( int x, int y ) {
     auto iterator = _chunks.find( key );
 
     if ( iterator == _chunks.end() ) {
-        iterator = _chunks.insert( key, std::make_unique<ChunkModel>() );
+        iterator = _chunks.emplace( key, std::make_unique<ChunkModel>() ).first;
     }
 
-    return iterator.value().get();
+    return iterator->second.get();
 }
 
 const ChunkModel* WorldModel::chunk( int x, int y ) const {
-    const auto iterator = _chunks.constFind( chunkKey( x, y ) );
 
-    if ( iterator == _chunks.constEnd() ) {
+    const auto iterator = _chunks.find( chunkKey( x, y ) );
+
+    if ( iterator == _chunks.end() ) {
         return nullptr;
     }
 
-    return iterator.value().get();
+    return iterator->second.get();
 }
 
 const TileModel* WorldModel::tile( int x, int y, int z ) const {
-    const int chunkX = x / CHUNK_WIDTH;
-    const int chunkY = y / CHUNK_HEIGHT;
+    const int chunkX = x / ChunkModel::CHUNK_WIDTH;
 
-    const int localX = x % CHUNK_WIDTH;
-    const int localY = y % CHUNK_HEIGHT;
+    const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
 
-    const auto iterator = _chunks.constFind( chunkKey( chunkX, chunkY ) );
+    const int localX = x % ChunkModel::CHUNK_WIDTH;
 
-    if ( iterator == _chunks.constEnd() ) {
+    const int localY = y % ChunkModel::CHUNK_HEIGHT;
+
+    const auto iterator = _chunks.find( chunkKey( chunkX, chunkY ) );
+
+    if ( iterator == _chunks.end() ) {
         return nullptr;
     }
 
-    return iterator.value()->tile( localX, localY, z );
+    return iterator->second->tile( localX, localY, z );
 }
 
 QString WorldModel::chunkKey( int x, int y ) const {

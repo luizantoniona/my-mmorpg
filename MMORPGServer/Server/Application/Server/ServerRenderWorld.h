@@ -9,7 +9,10 @@ class ServerRenderWorld : public Engine::RenderWorld {
     Q_OBJECT
 
 public:
-    explicit ServerRenderWorld( Engine::WorldModel* world, QObject* parent = nullptr );
+    explicit ServerRenderWorld( QObject* parent = nullptr );
+
+    Engine::WorldModel* world() const;
+    void setWorld( Engine::WorldModel* world );
 
     const Engine::TileModel* tile( int x, int y, int z ) const override;
 
