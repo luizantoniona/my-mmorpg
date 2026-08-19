@@ -68,8 +68,6 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
         for ( int x = 0; x < width; ++x ) {
             const uint16_t groundId = static_cast<uint16_t>( row[ x ].asUInt() );
 
-            // BEFORE CREATING WE NEED TO SEE IF THE GROUNDID EXIST IN DATA -> GroundCatalog -> if not. Log warning and put value to 0
-
             const int chunkX = x / ChunkModel::CHUNK_WIDTH;
 
             const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
