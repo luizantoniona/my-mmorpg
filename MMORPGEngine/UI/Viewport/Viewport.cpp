@@ -16,6 +16,9 @@ Viewport::Viewport( QQuickItem* parent ) :
     setFlag( ItemHasContents, true );
 
     _renderer->initialize();
+    _renderer->resize( size() );
+
+    update();
 }
 
 QPointF Viewport::cameraPosition() const {
@@ -37,17 +40,6 @@ void Viewport::setCameraPosition(
 
 Camera* Viewport::camera() const {
     return _camera;
-}
-
-void Viewport::setRenderer( Renderer* renderer ) {
-    _renderer = renderer;
-
-    if ( _renderer ) {
-        _renderer->initialize();
-        _renderer->resize( size() );
-    }
-
-    update();
 }
 
 RenderWorld* Viewport::renderWorld() const {
@@ -77,13 +69,13 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
 
     RenderScene scene;
 
-    if ( !_renderer || !_world ) {
+    if ( !_world ) {
         return rootNode;
     }
 
     _renderer->render( scene, *_camera, *_world );
 
-    scene.build( rootNode, *_camera );
+    scene.build( rootNode, window(), *_camera );
 
     return rootNode;
 }

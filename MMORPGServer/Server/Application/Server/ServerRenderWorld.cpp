@@ -1,29 +1,30 @@
 #include "ServerRenderWorld.h"
 
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGServer/Server/Manager/WorldManager.h>
+
 ServerRenderWorld::ServerRenderWorld( QObject* parent ) :
-    Engine::RenderWorld( parent ) {
+    Engine::RenderWorld( parent ),
+    _data( Engine::Singleton<Engine::DataManager>::instance() ),
+    _world( Engine::Singleton<Server::WorldManager>::instance().world() ) {
+}
 
-    for ( int y = 0; y < 20; ++y ) {
-        for ( int x = 0; x < 20; ++x ) {
-            Engine::TileModel tile;
+Engine::WorldModel* ServerRenderWorld::world() const {
+    return _world;
+}
 
-            tile.setGroundId( 1 );
+void ServerRenderWorld::setWorld( Engine::WorldModel* world ) {
+    _world = world;
+}
 
-            _tiles.insert( key( x, y, 0 ), tile );
-        }
-    }
+const Engine::GroundModel* ServerRenderWorld::ground( uint32_t id ) const {
+    return _data.groundCatalog().ground( id );
 }
 
 const Engine::TileModel* ServerRenderWorld::tile( int x, int y, int z ) const {
-    const auto iterator = _tiles.constFind( key( x, y, z ) );
-
-    if ( iterator == _tiles.constEnd() ) {
+    if ( !_world ) {
         return nullptr;
     }
 
-    return &iterator.value();
-}
-
-QString ServerRenderWorld::key( int x, int y, int z ) const {
-    return QString( "%1:%2:%3" ).arg( x ).arg( y ).arg( z );
+    return _world->tile( x, y, z );
 }

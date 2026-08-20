@@ -1,8 +1,9 @@
 #include "TileRenderer.h"
 
+#include <QColor>
+
 namespace {
-constexpr int TILE_SIZE = 10;
-constexpr int TILE_GAP = 2;
+constexpr int TILE_SIZE = 32;
 } // namespace
 
 namespace Engine {
@@ -31,14 +32,29 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
                 continue;
             }
 
-            renderTile( scene, x, y, z );
+            const GroundModel* ground = world.ground( tile->groundId() );
+
+            if ( !ground ) {
+                continue;
+            }
+
+            renderTile( scene, x, y, z, *tile, *ground );
         }
     }
 }
 
-void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z ) {
+void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const TileModel& tile, const GroundModel& ground ) {
+    Q_UNUSED( z );
+
     const QPointF position( x * TILE_SIZE, y * TILE_SIZE );
-    scene.addRect( position, QSizeF( TILE_SIZE - TILE_GAP, TILE_SIZE - TILE_GAP ) );
+
+    const QSizeF size( TILE_SIZE, TILE_SIZE );
+
+    if ( ground.texture().isNull() ) {
+        return;
+    }
+
+    scene.addTexture( position, size, ground.texture() );
 }
 
 } // namespace Engine

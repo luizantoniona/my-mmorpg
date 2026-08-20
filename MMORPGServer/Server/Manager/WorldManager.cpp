@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Factory/WorldFactory.h>
+#include <MMORPGEngine/World/WorldFactory.h>
 
 namespace Server {
 
@@ -48,6 +48,14 @@ void WorldManager::finalize() {
     if ( _thread.joinable() ) {
         _thread.join();
     }
+}
+
+Engine::WorldModel* WorldManager::world() {
+    return _world.get();
+}
+
+const Engine::WorldModel* WorldManager::world() const {
+    return _world.get();
 }
 
 } // namespace Server

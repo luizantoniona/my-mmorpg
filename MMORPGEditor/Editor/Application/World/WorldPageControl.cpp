@@ -16,7 +16,7 @@ QString WorldPageControl::worldName() const {
         return "";
     }
 
-    return QString::fromStdString( _world->name() );
+    return _world->name();
 }
 
 int WorldPageControl::worldWidth() const {

@@ -18,8 +18,22 @@ set(PROJECT_SOURCES
     Commons/RegisterEngineTypes.cpp
     Commons/RegisterEngineTypes.h
     Commons/Singleton.h
-    Catalog/GroundCatalog.cpp
-    Catalog/GroundCatalog.h
+    Data/Ground/GroundCatalog.cpp
+    Data/Ground/GroundCatalog.h
+    Data/Ground/GroundModel.cpp
+    Data/Ground/GroundModel.h
+    Data/Manifest/ManifestDataDTO.cpp
+    Data/Manifest/ManifestDataDTO.h
+    Data/Manifest/ManifestDataModel.cpp
+    Data/Manifest/ManifestDataModel.h
+    Data/Manifest/ManifestDTO.cpp
+    Data/Manifest/ManifestDTO.h
+    Data/Manifest/ManifestModel.cpp
+    Data/Manifest/ManifestModel.h
+    Data/DataFactory.cpp
+    Data/DataFactory.h
+    Data/DataManager.cpp
+    Data/DataManager.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
@@ -28,22 +42,14 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterModel.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
-    Factory/WorldFactory.cpp
-    Factory/WorldFactory.h
-    Manifest/ManifestDataDTO.cpp
-    Manifest/ManifestDataDTO.h
-    Manifest/ManifestDataModel.cpp
-    Manifest/ManifestDataModel.h
-    Manifest/ManifestDTO.cpp
-    Manifest/ManifestDTO.h
-    Manifest/ManifestModel.cpp
-    Manifest/ManifestModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
     Renderer/Camera/Camera.cpp
     Renderer/Camera/Camera.h
     Renderer/Scene/RenderScene.cpp
     Renderer/Scene/RenderScene.h
+    Renderer/Scene/RenderSceneItem.cpp
+    Renderer/Scene/RenderSceneItem.h
     Renderer/World/RenderWorld.cpp
     Renderer/World/RenderWorld.h
     Renderer/Renderer.cpp
@@ -52,12 +58,12 @@ set(PROJECT_SOURCES
     Renderer/TileRenderer.h
     UI/Viewport/Viewport.cpp
     UI/Viewport/Viewport.h
-    World/Floor/FloorModel.cpp
-    World/Floor/FloorModel.h
-    World/Tile/GroundModel.cpp
-    World/Tile/GroundModel.h
+    World/Chunk/ChunkModel.cpp
+    World/Chunk/ChunkModel.h
     World/Tile/TileModel.cpp
     World/Tile/TileModel.h
+    World/WorldFactory.cpp
+    World/WorldFactory.h
     World/WorldModel.cpp
     World/WorldModel.h)
 

@@ -44,13 +44,6 @@ Item {
         anchors.fill: parent
         spacing: Spaces.spacing8
 
-        WorldPageHeader {
-            Layout.fillWidth: true
-            vWorldName: control.worldName
-            vWorldSize: control.worldWidth + " x " + control.worldHeight
-            }
-        }
-
         // TODO: Change for map view component
         Item {
             Layout.fillWidth: true

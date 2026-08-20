@@ -2,25 +2,21 @@
     "Grounds": [
         {
             "Type": 0,
-            "Walkable": false,
             "Name": "Void",
             "TextureFolder": "Textures/Void"
         },
         {
             "Type": 1,
-            "Walkable": false,
             "Name": "Water",
             "TextureFolder": "Textures/Water"
         },
         {
             "Type": 2,
-            "Walkable": true,
             "Name": "Grass",
             "TextureFolder": "Textures/Grass"
         },
         {
             "Type": 3,
-            "Walkable": true,
             "Name": "Sand",
             "TextureFolder": "Textures/Sand"
         }
