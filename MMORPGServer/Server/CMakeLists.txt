@@ -9,8 +9,6 @@ set(PROJECT_SOURCES
     Database/Query.h
     Database/QueryLoader.cpp
     Database/QueryLoader.h
-    Manager/DataManager.cpp
-    Manager/DataManager.h
     Manager/NetworkManager.cpp
     Manager/NetworkManager.h
     Manager/WorldManager.cpp

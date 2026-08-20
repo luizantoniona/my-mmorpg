@@ -3,8 +3,8 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Data/Manifest/ManifestDTO.h>
-#include <MMORPGServer/Server/Manager/DataManager.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 
 namespace Server {
@@ -14,7 +14,7 @@ void DataController::downloadManifest( const drogon::HttpRequestPtr& request, st
 
     qInfo() << "DataController::downloadManifest [ACCOUNT] " << session.idAccount();
 
-    const Engine::ManifestModel& manifest = Engine::Singleton<DataManager>::instance().manifest();
+    const Engine::ManifestModel& manifest = Engine::Singleton<Engine::DataManager>::instance().manifest();
 
     Engine::ManifestDTO manifestDTO( manifest );
 

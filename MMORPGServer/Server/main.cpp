@@ -5,8 +5,8 @@
 
 #include <MMORPGEngine/Commons/RegisterEngineTypes.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGServer/Server/Database/Database.h>
-#include <MMORPGServer/Server/Manager/DataManager.h>
 #include <MMORPGServer/Server/Manager/NetworkManager.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/RegisterServerTypes.h>
@@ -36,7 +36,7 @@ int main( int argc, char* argv[] ) {
     Engine::Singleton<Server::Database>::instance().initialize( DATABASE_PATH );
 
     // --- Data ---
-    Engine::Singleton<Server::DataManager>::instance().initialize( DATA_PATH );
+    Engine::Singleton<Engine::DataManager>::instance().initialize( DATA_PATH );
 
     // --- World ---
     Engine::Singleton<Server::WorldManager>::instance().initialize( DATA_PATH );
@@ -56,7 +56,7 @@ int main( int argc, char* argv[] ) {
     Engine::Singleton<Server::WorldManager>::instance().finalize();
 
     // --- Data ---
-    Engine::Singleton<Server::DataManager>::instance().finalize();
+    Engine::Singleton<Engine::DataManager>::instance().finalize();
 
     // --- Database ---
     Engine::Singleton<Server::Database>::instance().finalize();

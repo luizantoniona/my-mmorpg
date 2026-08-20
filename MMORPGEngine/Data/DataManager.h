@@ -4,24 +4,26 @@
 #include <MMORPGEngine/Data/Ground/GroundCatalog.h>
 #include <MMORPGEngine/Data/Manifest/ManifestModel.h>
 
-namespace Server {
+namespace Engine {
 
 class DataManager {
 public:
     DataManager();
     ~DataManager();
 
-    void initialize( const std::string& worldPath );
+    void initialize( const std::string& configPath );
     void finalize();
 
-    const Engine::ManifestModel& manifest() const;
-    const Engine::GroundCatalog& groundCatalog() const;
+    const ManifestModel& manifest() const;
+
+    const GroundCatalog& groundCatalog() const;
 
 private:
-    Engine::ManifestModel _manifest;
-    Engine::GroundCatalog _groundCatalog;
+    ManifestModel _manifest;
+
+    GroundCatalog _groundCatalog;
 };
 
-} // namespace Server
+} // namespace Engine
 
 #endif // DATAMANAGER_H

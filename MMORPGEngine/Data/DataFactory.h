@@ -9,7 +9,7 @@ namespace Engine {
 
 class DataFactory {
 public:
-    static void createGroundCatalog( const QString& groundsFile, GroundCatalog& groundCatalog );
+    static void createGroundCatalog( const QString& configPath, GroundCatalog& groundCatalog );
 };
 
 } // namespace Engine

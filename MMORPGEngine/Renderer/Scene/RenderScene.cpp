@@ -1,7 +1,6 @@
 #include "RenderScene.h"
 
-#include <QSGNode>
-#include <QSGSimpleRectNode>
+#include <QSGSimpleTextureNode>
 
 namespace Engine {
 
@@ -13,33 +12,40 @@ RenderScene::~RenderScene() {
 }
 
 void RenderScene::clear() {
-    _rects.clear();
+    _items.clear();
 }
 
-void RenderScene::addRect( const QPointF& position, const QSizeF& size, const QColor& color ) {
-    Rect rect;
-
-    rect.position = position;
-    rect.size = size;
-    rect.color = color;
-
-    _rects.append( rect );
+void RenderScene::addTexture( const QPointF& position, const QSizeF& size, const QImage& image ) {
+    RenderSceneItem item( position, size, image );
+    _items.append( item );
 }
 
-void RenderScene::build( QSGNode* rootNode, const Camera& camera ) {
-    if ( !rootNode ) {
+void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera ) {
+    if ( !rootNode || !window ) {
         return;
     }
 
-    for ( const Rect& rect : _rects ) {
-        const QPointF screenPosition = camera.worldToScreen( rect.position );
+    for ( const RenderSceneItem& item : _items ) {
+        if ( item.image().isNull() ) {
+            continue;
+        }
 
-        auto* node = new QSGSimpleRectNode();
+        const QPointF screenPosition = camera.worldToScreen( item.position() );
+
+        QSGTexture* texture = window->createTextureFromImage( item.image() );
+
+        if ( !texture ) {
+            continue;
+        }
+
+        auto* node = new QSGSimpleTextureNode();
+
+        node->setTexture( texture );
+
+        node->setOwnsTexture( true );
 
         node->setRect( screenPosition.x(), screenPosition.y(),
-                       rect.size.width(), rect.size.height() );
-        node->setColor( rect.color );
-
+                       item.size().width(), item.size().height() );
         rootNode->appendChildNode( node );
     }
 }

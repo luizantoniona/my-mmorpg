@@ -3,26 +3,7 @@
 #include <QColor>
 
 namespace {
-constexpr int TILE_SIZE = 10;
-constexpr int TILE_GAP = 2;
-
-QColor groundColor( uint16_t groundId ) {
-    switch ( groundId ) {
-    case 1:
-        return Qt::red;
-    case 2:
-        return Qt::green;
-    case 3:
-        return Qt::blue;
-    case 4:
-        return Qt::yellow;
-    case 5:
-        return Qt::cyan;
-    default:
-        return Qt::gray;
-    }
-}
-
+constexpr int TILE_SIZE = 32;
 } // namespace
 
 namespace Engine {
@@ -51,25 +32,29 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
                 continue;
             }
 
-            renderTile( scene, x, y, z, *tile );
+            const GroundModel* ground = world.ground( tile->groundId() );
+
+            if ( !ground ) {
+                continue;
+            }
+
+            renderTile( scene, x, y, z, *tile, *ground );
         }
     }
 }
 
-void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const TileModel& tile ) {
+void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const TileModel& tile, const GroundModel& ground ) {
     Q_UNUSED( z );
 
-    const uint16_t groundId = tile.groundId();
+    const QPointF position( x * TILE_SIZE, y * TILE_SIZE );
 
-    if ( tile.groundId() == 0 ) {
+    const QSizeF size( TILE_SIZE, TILE_SIZE );
+
+    if ( ground.texture().isNull() ) {
         return;
     }
 
-    const QPointF position( x * TILE_SIZE + TILE_GAP, y * TILE_SIZE + TILE_GAP );
-
-    const QSizeF size( TILE_SIZE - TILE_GAP * 2, TILE_SIZE - TILE_GAP * 2 );
-
-    scene.addRect( position, size, groundColor( groundId ) );
+    scene.addTexture( position, size, ground.texture() );
 }
 
 } // namespace Engine

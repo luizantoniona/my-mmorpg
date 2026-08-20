@@ -32,6 +32,8 @@ set(PROJECT_SOURCES
     Data/Manifest/ManifestModel.h
     Data/DataFactory.cpp
     Data/DataFactory.h
+    Data/DataManager.cpp
+    Data/DataManager.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
@@ -46,6 +48,8 @@ set(PROJECT_SOURCES
     Renderer/Camera/Camera.h
     Renderer/Scene/RenderScene.cpp
     Renderer/Scene/RenderScene.h
+    Renderer/Scene/RenderSceneItem.cpp
+    Renderer/Scene/RenderSceneItem.h
     Renderer/World/RenderWorld.cpp
     Renderer/World/RenderWorld.h
     Renderer/Renderer.cpp
