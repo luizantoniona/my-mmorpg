@@ -15,7 +15,7 @@ public:
     Engine::WorldModel* world() const;
     void setWorld( Engine::WorldModel* world );
 
-    const Engine::GroundModel* ground( uint32_t type ) const override;
+    const Engine::TileTextureModel* tileTexture( uint32_t id ) const override;
 
     const Engine::TileModel* tile( int x, int y, int z ) const override;
 

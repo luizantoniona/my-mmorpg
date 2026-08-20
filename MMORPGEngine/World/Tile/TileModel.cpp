@@ -3,15 +3,15 @@
 namespace Engine {
 
 TileModel::TileModel() :
-    _groundId( 0 ) {
+    _tileTextureId( 0 ) {
 }
 
-uint16_t TileModel::groundId() const {
-    return _groundId;
+uint32_t TileModel::tileTextureId() const {
+    return _tileTextureId;
 }
 
-void TileModel::setGroundId( uint16_t groundId ) {
-    _groundId = groundId;
+void TileModel::setTileTextureId( uint32_t tileTextureId ) {
+    _tileTextureId = tileTextureId;
 }
 
 } // namespace Engine

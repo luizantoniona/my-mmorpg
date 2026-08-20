@@ -1,5 +1,5 @@
-#ifndef GROUNDMODEL_H
-#define GROUNDMODEL_H
+#ifndef TILETEXTUREMODEL_H
+#define TILETEXTUREMODEL_H
 
 #include <cstdint>
 
@@ -8,9 +8,9 @@
 
 namespace Engine {
 
-class GroundModel {
+class TileTextureModel {
 public:
-    GroundModel();
+    TileTextureModel();
 
     uint32_t type() const;
     void setType( uint32_t type );
@@ -33,4 +33,4 @@ private:
 
 } // namespace Engine
 
-#endif // GROUNDMODEL_H
+#endif // TILETEXTUREMODEL_H

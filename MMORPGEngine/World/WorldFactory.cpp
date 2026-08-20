@@ -3,7 +3,6 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
-#include <MMORPGEngine/Data/Ground/GroundModel.h>
 
 namespace Engine {
 
@@ -33,7 +32,7 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
 
     // --- Floors
     for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
-        createFloor( mapPath + floorFile.asString(), world.get() );
+        createFloor( mapPath + "Floors/" + floorFile.asString(), world.get() );
     }
 
     return world;
@@ -51,10 +50,10 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
     const int z = floorJson[ "Z" ].asInt();
 
-    const Json::Value& groundRows = floorJson[ "Ground" ];
+    const Json::Value& groundRows = floorJson[ "Tiles" ];
 
     if ( !groundRows.isArray() || groundRows.empty() ) {
-        qInfo() << "WorldFactory::createFloor" << "Floor has no ground matrix";
+        qInfo() << "WorldFactory::createFloor" << "Floor has no tiles matrix";
         return;
     }
 
@@ -66,7 +65,7 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
         const Json::Value& row = groundRows[ y ];
 
         for ( int x = 0; x < width; ++x ) {
-            const uint16_t groundId = static_cast<uint16_t>( row[ x ].asUInt() );
+            const uint32_t tileTextureId = static_cast<uint16_t>( row[ x ].asUInt() );
 
             const int chunkX = x / ChunkModel::CHUNK_WIDTH;
 
@@ -88,7 +87,7 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
                 continue;
             }
 
-            tile->setGroundId( groundId );
+            tile->setTileTextureId( tileTextureId );
         }
     }
 }

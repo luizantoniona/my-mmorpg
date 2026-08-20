@@ -32,7 +32,7 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
                 continue;
             }
 
-            const GroundModel* ground = world.ground( tile->groundId() );
+            const TileTextureModel* ground = world.tileTexture( tile->tileTextureId() );
 
             if ( !ground ) {
                 continue;
@@ -43,18 +43,18 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
     }
 }
 
-void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const TileModel& tile, const GroundModel& ground ) {
+void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const TileModel& tile, const TileTextureModel& tileTexture ) {
     Q_UNUSED( z );
 
     const QPointF position( x * TILE_SIZE, y * TILE_SIZE );
 
     const QSizeF size( TILE_SIZE, TILE_SIZE );
 
-    if ( ground.texture().isNull() ) {
+    if ( tileTexture.texture().isNull() ) {
         return;
     }
 
-    scene.addTexture( position, size, ground.texture() );
+    scene.addTexture( position, size, tileTexture.texture() );
 }
 
 } // namespace Engine

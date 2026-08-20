@@ -5,11 +5,11 @@
 #include <json/json.h>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
-#include <MMORPGEngine/Data/Ground/GroundModel.h>
+#include <MMORPGEngine/Data/Tile/TileTextureModel.h>
 
 namespace Engine {
 
-void DataFactory::createGroundCatalog( const QString& configPath, GroundCatalog& groundCatalog ) {
+void DataFactory::createTileTextureCatalog( const QString& configPath, TileTextureCatalog& tileTextureCatalog ) {
     Json::Value configJson = JsonHelper::loadJsonFile( configPath + "Config.json" );
 
     const QString mapFolder = QString( configJson[ "ActiveFolder" ].asCString() );
@@ -18,34 +18,36 @@ void DataFactory::createGroundCatalog( const QString& configPath, GroundCatalog&
 
     Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
 
-    const QString groundFile = mapPath + QString( mapJson[ "Catalogs" ][ "Grounds" ].asCString() );
+    const QString tilesFile = mapPath + QString( mapJson[ "Catalogs" ][ "Tiles" ].asCString() );
 
-    qInfo() << "DataFactory::createGroundCatalog" << "[GROUND_FILE_PATH]" << groundFile;
+    qInfo() << "DataFactory::createTileTextureCatalog" << "[TILES_FILE_PATH]" << tilesFile;
 
-    Json::Value json = JsonHelper::loadJsonFile( groundFile );
+    Json::Value json = JsonHelper::loadJsonFile( tilesFile );
 
-    const Json::Value& grounds = json[ "Grounds" ];
+    const Json::Value& tiles = json[ "Tiles" ];
 
-    for ( const Json::Value& groundJson : grounds ) {
-        GroundModel ground;
-        ground.setType( static_cast<uint32_t>( groundJson[ "Type" ].asUInt() ) );
-        ground.setName( QString( groundJson[ "Name" ].asCString() ) );
-        ground.setFolder( QString( groundJson[ "TextureFolder" ].asCString() ) );
+    for ( const Json::Value& tileJson : tiles ) {
 
-        const QString texturePath = mapPath + ground.folder() + "/" + ground.name() + ".png";
-        QImage texture( texturePath );
-        if ( texture.isNull() ) {
-            qWarning() << "DataFactory::createGroundCatalog" << "Failed to load texture:" << texturePath;
+        TileTextureModel texture;
+        texture.setType( tileJson[ "Type" ].asUInt() );
+        texture.setName( QString( tileJson[ "Name" ].asCString() ) );
+        texture.setFolder( QString( tileJson[ "TextureFolder" ].asCString() ) );
+
+        const QString texturePath = mapPath + texture.folder() + "/" + texture.name() + ".png";
+
+        QImage textureImage( texturePath );
+        if ( textureImage.isNull() ) {
+            qWarning() << "DataFactory::createTileTextureCatalog" << "Failed to load texture:" << texturePath;
 
         } else {
-            ground.setTexture( texture );
-            qInfo() << "DataFactory::createGroundCatalog" << "Loaded texture:" << texturePath;
+            texture.setTexture( textureImage );
+            qInfo() << "DataFactory::createTileTextureCatalog" << "Loaded texture:" << texturePath;
         }
 
-        groundCatalog.addGround( std::move( ground ) );
+        tileTextureCatalog.addTexture( std::move( texture ) );
     }
 
-    qInfo() << "DataFactory::createGroundCatalog";
+    qInfo() << "DataFactory::createTileTextureCatalog";
 }
 
 } // namespace Engine

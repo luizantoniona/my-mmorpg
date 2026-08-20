@@ -9,11 +9,11 @@ class TileModel {
 public:
     TileModel();
 
-    uint16_t groundId() const;
-    void setGroundId( uint16_t groundId );
+    uint32_t tileTextureId() const;
+    void setTileTextureId( uint32_t tileTextureId );
 
 private:
-    uint16_t _groundId;
+    uint32_t _tileTextureId;
 };
 
 } // namespace Engine

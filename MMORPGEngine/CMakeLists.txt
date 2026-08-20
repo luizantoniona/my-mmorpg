@@ -18,10 +18,10 @@ set(PROJECT_SOURCES
     Commons/RegisterEngineTypes.cpp
     Commons/RegisterEngineTypes.h
     Commons/Singleton.h
-    Data/Ground/GroundCatalog.cpp
-    Data/Ground/GroundCatalog.h
-    Data/Ground/GroundModel.cpp
-    Data/Ground/GroundModel.h
+    Data/Tile/TileTextureCatalog.cpp
+    Data/Tile/TileTextureCatalog.h
+    Data/Tile/TileTextureModel.cpp
+    Data/Tile/TileTextureModel.h
     Data/Manifest/ManifestDataDTO.cpp
     Data/Manifest/ManifestDataDTO.h
     Data/Manifest/ManifestDataModel.cpp
