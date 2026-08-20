@@ -1,9 +1,11 @@
 #ifndef TILERENDERER_H
 #define TILERENDERER_H
 
+#include <MMORPGEngine/Data/Tile/TileTextureModel.h>
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Scene/RenderScene.h>
 #include <MMORPGEngine/Renderer/World/RenderWorld.h>
+#include <MMORPGEngine/World/Tile/TileModel.h>
 
 namespace Engine {
 

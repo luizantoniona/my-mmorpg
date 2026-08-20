@@ -15,9 +15,11 @@ public:
     Engine::WorldModel* world() const;
     void setWorld( Engine::WorldModel* world );
 
+    const Engine::TileModel* tile( int x, int y, int z ) const override;
     const Engine::TileTextureModel* tileTexture( uint32_t id ) const override;
 
-    const Engine::TileModel* tile( int x, int y, int z ) const override;
+    const Engine::ObjectModel* object( int x, int y, int z ) const override;
+    const Engine::ObjectTextureModel* objectTexture( uint32_t id ) const override;
 
 private:
     Engine::DataManager& _data;

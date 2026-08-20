@@ -50,4 +50,8 @@ void DataFactory::createTileTextureCatalog( const QString& configPath, TileTextu
     qInfo() << "DataFactory::createTileTextureCatalog";
 }
 
+void DataFactory::createObjectTextureCatalog( const QString& configPath, ObjectTextureCatalog& objectTextureCatalog ) {
+    // TODO: Load object textures
+}
+
 } // namespace Engine

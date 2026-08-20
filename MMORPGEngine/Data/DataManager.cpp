@@ -11,6 +11,7 @@ namespace Engine {
 
 DataManager::DataManager() :
     _manifest(),
+    _objectTextureCatalog(),
     _tileTextureCatalog() {
 }
 

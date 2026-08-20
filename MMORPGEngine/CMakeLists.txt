@@ -18,6 +18,10 @@ set(PROJECT_SOURCES
     Commons/RegisterEngineTypes.cpp
     Commons/RegisterEngineTypes.h
     Commons/Singleton.h
+    Data/Object/ObjectTextureCatalog.cpp
+    Data/Object/ObjectTextureCatalog.h
+    Data/Object/ObjectTextureModel.cpp
+    Data/Object/ObjectTextureModel.h
     Data/Tile/TileTextureCatalog.cpp
     Data/Tile/TileTextureCatalog.h
     Data/Tile/TileTextureModel.cpp
@@ -44,6 +48,14 @@ set(PROJECT_SOURCES
     Entity/EntityPositionModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
+    Object/ObjectModel.cpp
+    Object/ObjectModel.h
+    Object/ObjectOrientationModel.cpp
+    Object/ObjectOrientationModel.h
+    Object/ObjectPositionModel.cpp
+    Object/ObjectPositionModel.h
+    Object/ObjectSizeModel.cpp
+    Object/ObjectSizeModel.h
     Renderer/Camera/Camera.cpp
     Renderer/Camera/Camera.h
     Renderer/Scene/RenderScene.cpp
@@ -54,6 +66,8 @@ set(PROJECT_SOURCES
     Renderer/World/RenderWorld.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
+    Renderer/ObjectRenderer.cpp
+    Renderer/ObjectRenderer.h
     Renderer/TileRenderer.cpp
     Renderer/TileRenderer.h
     UI/Viewport/Viewport.cpp
