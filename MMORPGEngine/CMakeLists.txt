@@ -44,8 +44,12 @@ set(PROJECT_SOURCES
     Entity/Creature/CreatureModel.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
+    Entity/EntityOrientationModel.cpp
+    Entity/EntityOrientationModel.h
     Entity/EntityPositionModel.cpp
     Entity/EntityPositionModel.h
+    Entity/EntitySizeModel.cpp
+    Entity/EntitySizeModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
     Object/ObjectModel.cpp
