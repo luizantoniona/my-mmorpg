@@ -34,14 +34,14 @@ set(PROJECT_SOURCES
     Data/DataFactory.h
     Data/DataManager.cpp
     Data/DataManager.h
-    Entity/EntityModel.cpp
-    Entity/EntityModel.h
-    Entity/EntityPositionModel.cpp
-    Entity/EntityPositionModel.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
+    Entity/EntityModel.cpp
+    Entity/EntityModel.h
+    Entity/EntityPositionModel.cpp
+    Entity/EntityPositionModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
     Renderer/Camera/Camera.cpp
