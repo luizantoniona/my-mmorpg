@@ -18,14 +18,20 @@ set(PROJECT_SOURCES
     Commons/RegisterEngineTypes.cpp
     Commons/RegisterEngineTypes.h
     Commons/Singleton.h
-    Data/Object/ObjectTextureCatalog.cpp
-    Data/Object/ObjectTextureCatalog.h
-    Data/Object/ObjectTextureModel.cpp
-    Data/Object/ObjectTextureModel.h
-    Data/Tile/TileTextureCatalog.cpp
-    Data/Tile/TileTextureCatalog.h
-    Data/Tile/TileTextureModel.cpp
-    Data/Tile/TileTextureModel.h
+    Data/Object/ObjectCatalog.cpp
+    Data/Object/ObjectCatalog.h
+    Data/Object/ObjectModel.cpp
+    Data/Object/ObjectModel.h
+    Data/Object/ObjectOrientationModel.cpp
+    Data/Object/ObjectOrientationModel.h
+    Data/Object/ObjectPositionModel.cpp
+    Data/Object/ObjectPositionModel.h
+    Data/Object/ObjectSizeModel.cpp
+    Data/Object/ObjectSizeModel.h
+    Data/Tile/TileCatalog.cpp
+    Data/Tile/TileCatalog.h
+    Data/Tile/TileModel.cpp
+    Data/Tile/TileModel.h
     Data/Manifest/ManifestDataDTO.cpp
     Data/Manifest/ManifestDataDTO.h
     Data/Manifest/ManifestDataModel.cpp
@@ -52,14 +58,6 @@ set(PROJECT_SOURCES
     Entity/EntitySizeModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
-    Object/ObjectModel.cpp
-    Object/ObjectModel.h
-    Object/ObjectOrientationModel.cpp
-    Object/ObjectOrientationModel.h
-    Object/ObjectPositionModel.cpp
-    Object/ObjectPositionModel.h
-    Object/ObjectSizeModel.cpp
-    Object/ObjectSizeModel.h
     Renderer/Camera/Camera.cpp
     Renderer/Camera/Camera.h
     Renderer/Scene/RenderScene.cpp
@@ -78,8 +76,8 @@ set(PROJECT_SOURCES
     UI/Viewport/Viewport.h
     World/Chunk/ChunkModel.cpp
     World/Chunk/ChunkModel.h
-    World/Tile/TileModel.cpp
-    World/Tile/TileModel.h
+    World/Tile/WorldTileModel.cpp
+    World/Tile/WorldTileModel.h
     World/WorldFactory.cpp
     World/WorldFactory.h
     World/WorldModel.cpp

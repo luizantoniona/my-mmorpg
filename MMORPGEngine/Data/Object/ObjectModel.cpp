@@ -1,13 +1,18 @@
-#include "ObjectTextureModel.h"
+#include "ObjectModel.h"
 
 namespace Engine {
 
-ObjectTextureModel::ObjectTextureModel() :
+ObjectModel::ObjectModel() :
     _type( 0 ),
     _name( "" ),
     _folder( "" ),
-    _texture() {
+    _texture(),
+    _orientation(),
+    _position(),
+    _size() {
 }
+
+ObjectModel::~ObjectModel() = default;
 
 uint32_t ObjectTextureModel::type() const {
     return _type;
@@ -39,6 +44,30 @@ QImage ObjectTextureModel::texture() const {
 
 void ObjectTextureModel::setTexture( const QImage& texture ) {
     _texture = texture;
+}
+
+ObjectOrientationModel ObjectModel::orientation() const {
+    return _orientation;
+}
+
+void ObjectModel::setOrientation( const ObjectOrientationModel& orientation ) {
+    _orientation = orientation;
+}
+
+ObjectPositionModel ObjectModel::position() const {
+    return _position;
+}
+
+void ObjectModel::setPosition( const ObjectPositionModel& position ) {
+    _position = position;
+}
+
+ObjectSizeModel ObjectModel::size() const {
+    return _size;
+}
+
+void ObjectModel::setSize( const ObjectSizeModel& size ) {
+    _size = size;
 }
 
 } // namespace Engine

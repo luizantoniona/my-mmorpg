@@ -1,5 +1,5 @@
-#ifndef OBJECTTEXTUREMODEL_H
-#define OBJECTTEXTUREMODEL_H
+#ifndef TILEMODEL_H
+#define TILEMODEL_H
 
 #include <cstdint>
 
@@ -8,9 +8,9 @@
 
 namespace Engine {
 
-class ObjectTextureModel {
+class TileModel {
 public:
-    ObjectTextureModel();
+    TileModel();
 
     uint32_t type() const;
     void setType( uint32_t type );
@@ -33,4 +33,4 @@ private:
 
 } // namespace Engine
 
-#endif // OBJECTTEXTUREMODEL_H
+#endif // TILEMODEL_H
