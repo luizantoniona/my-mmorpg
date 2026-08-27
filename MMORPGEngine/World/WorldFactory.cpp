@@ -3,6 +3,8 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
 
 namespace Engine {
 
@@ -50,44 +52,97 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
     const int z = floorJson[ "Z" ].asInt();
 
-    const Json::Value& groundRows = floorJson[ "Tiles" ];
+    // -------------------------------------------------------------------------
+    // Tiles
+    // -------------------------------------------------------------------------
+    qInfo() << "WorldFactory::createFloor" << "Creating Tiles";
+    const Json::Value& tilesRows = floorJson[ "Tiles" ];
+    if ( tilesRows.isArray() && !tilesRows.empty() ) {
 
-    if ( !groundRows.isArray() || groundRows.empty() ) {
-        qInfo() << "WorldFactory::createFloor" << "Floor has no tiles matrix";
-        return;
+        const TileCatalog& tileCatalog = Singleton<DataManager>::instance().tileCatalog();
+
+        const int height = static_cast<int>( tilesRows.size() );
+        const int width = static_cast<int>( tilesRows[ 0 ].size() );
+
+        for ( int y = 0; y < height; ++y ) {
+            const Json::Value& row = tilesRows[ y ];
+            for ( int x = 0; x < width; ++x ) {
+
+                const uint32_t tileType = row[ x ].asUInt();
+
+                const TileModel* tileModel = tileCatalog.tile( tileType );
+
+                if ( !tileModel ) {
+                    qWarning() << "WorldFactory::createFloor" << "Unknown tile type:" << tileType << "at x y z:" << x << y << z;
+                    continue;
+                }
+
+                const int chunkX = x / ChunkModel::CHUNK_WIDTH;
+                const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
+
+                const int localX = x % ChunkModel::CHUNK_WIDTH;
+                const int localY = y % ChunkModel::CHUNK_HEIGHT;
+
+                ChunkModel* chunk = world->chunk( chunkX, chunkY );
+                if ( !chunk ) {
+                    continue;
+                }
+
+                auto worldTile = std::make_unique<WorldTileModel>();
+                worldTile->setTileModel( tileModel );
+                worldTile->setTileType( tileType );
+
+                chunk->setTile( localX, localY, z, std::move( worldTile ) );
+            }
+        }
     }
 
-    const int height = static_cast<int>( groundRows.size() );
+    // -------------------------------------------------------------------------
+    // Objects
+    // -------------------------------------------------------------------------
+    qInfo() << "WorldFactory::createFloor" << "Creating Objects";
+    const Json::Value& objectRows = floorJson[ "Objects" ];
+    if ( objectRows.isArray() && !objectRows.empty() ) {
 
-    const int width = static_cast<int>( groundRows[ 0 ].size() );
+        const ObjectCatalog& objectCatalog = Singleton<DataManager>::instance().objectCatalog();
 
-    for ( int y = 0; y < height; ++y ) {
-        const Json::Value& row = groundRows[ y ];
+        const int height = static_cast<int>( objectRows.size() );
+        const int width = static_cast<int>( objectRows[ 0 ].size() );
 
-        for ( int x = 0; x < width; ++x ) {
-            const uint32_t tileTextureId = static_cast<uint16_t>( row[ x ].asUInt() );
+        for ( int y = 0; y < height; ++y ) {
+            const Json::Value& row = objectRows[ y ];
+            for ( int x = 0; x < width; ++x ) {
 
-            const int chunkX = x / ChunkModel::CHUNK_WIDTH;
+                const uint32_t objectType = row[ x ].asUInt();
 
-            const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
+                if ( objectType == 0 ) {
+                    continue;
+                }
 
-            const int localX = x % ChunkModel::CHUNK_WIDTH;
+                const ObjectModel* objectModel = objectCatalog.object( objectType );
 
-            const int localY = y % ChunkModel::CHUNK_HEIGHT;
+                if ( !objectModel ) {
+                    qWarning() << "WorldFactory::createFloor" << "Unknown object type:" << objectType << "at x y z:" << x << y << z;
+                    continue;
+                }
 
-            ChunkModel* chunk = world->chunk( chunkX, chunkY );
+                const int chunkX = x / ChunkModel::CHUNK_WIDTH;
+                const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
 
-            if ( !chunk ) {
-                continue;
+                const int localX = x % ChunkModel::CHUNK_WIDTH;
+                const int localY = y % ChunkModel::CHUNK_HEIGHT;
+
+                ChunkModel* chunk = world->chunk( chunkX, chunkY );
+                if ( !chunk ) {
+                    continue;
+                }
+
+                auto worldObject = std::make_unique<WorldObjectModel>();
+                worldObject->setObjectModel( objectModel );
+                worldObject->setObjectType( objectType );
+
+                chunk->setObject( localX, localY, z, std::move( worldObject ) );
             }
-
-            TileModel* tile = chunk->tile( localX, localY, z );
-
-            if ( !tile ) {
-                continue;
-            }
-
-            tile->setTileTextureId( tileTextureId );
         }
     }
 }

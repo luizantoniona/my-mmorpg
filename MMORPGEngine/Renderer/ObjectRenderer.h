@@ -1,11 +1,10 @@
 #ifndef OBJECTRENDERER_H
 #define OBJECTRENDERER_H
 
-#include <MMORPGEngine/Data/Object/ObjectTextureModel.h>
-#include <MMORPGEngine/Object/ObjectModel.h>
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Scene/RenderScene.h>
 #include <MMORPGEngine/Renderer/World/RenderWorld.h>
+#include <MMORPGEngine/World/Object/WorldObjectModel.h>
 
 namespace Engine {
 
@@ -16,7 +15,7 @@ public:
     void render( RenderScene& scene, const Camera& camera, const RenderWorld& world );
 
 private:
-    void renderObject( RenderScene& scene, int x, int y, int z, const ObjectModel& object, const ObjectTextureModel& objectTexture );
+    void renderObject( RenderScene& scene, int x, int y, int z, const WorldObjectModel& worldObject );
 };
 
 } // namespace Engine

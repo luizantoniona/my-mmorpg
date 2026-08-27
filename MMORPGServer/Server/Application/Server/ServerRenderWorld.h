@@ -1,9 +1,7 @@
 #ifndef SERVERRENDERWORLD_H
 #define SERVERRENDERWORLD_H
 
-#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Renderer/World/RenderWorld.h>
-#include <MMORPGEngine/World/Tile/TileModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
 class ServerRenderWorld : public Engine::RenderWorld {
@@ -15,14 +13,11 @@ public:
     Engine::WorldModel* world() const;
     void setWorld( Engine::WorldModel* world );
 
-    const Engine::TileModel* tile( int x, int y, int z ) const override;
-    const Engine::TileTextureModel* tileTexture( uint32_t id ) const override;
+    const Engine::WorldObjectModel* object( int x, int y, int z ) const override;
 
-    const Engine::ObjectModel* object( int x, int y, int z ) const override;
-    const Engine::ObjectTextureModel* objectTexture( uint32_t id ) const override;
+    const Engine::WorldTileModel* tile( int x, int y, int z ) const override;
 
 private:
-    Engine::DataManager& _data;
     Engine::WorldModel* _world;
 };
 

@@ -5,11 +5,52 @@
 #include <json/json.h>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
-#include <MMORPGEngine/Data/Tile/TileTextureModel.h>
+#include <MMORPGEngine/Data/Object/ObjectModel.h>
+#include <MMORPGEngine/Data/Tile/TileModel.h>
 
 namespace Engine {
 
-void DataFactory::createTileTextureCatalog( const QString& configPath, TileTextureCatalog& tileTextureCatalog ) {
+void DataFactory::createObjectCatalog( const QString& configPath, ObjectCatalog& objectCatalog ) {
+    Json::Value configJson = JsonHelper::loadJsonFile( configPath + "Config.json" );
+
+    const QString mapFolder = QString( configJson[ "ActiveFolder" ].asCString() );
+
+    const QString mapPath = configPath + mapFolder + "/";
+
+    Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
+
+    const QString objectsFile = mapPath + QString( mapJson[ "Catalogs" ][ "Objects" ].asCString() );
+
+    qInfo() << "DataFactory::createObjectCatalog" << "[OBJECTS_FILE_PATH]" << objectsFile;
+
+    Json::Value json = JsonHelper::loadJsonFile( objectsFile );
+
+    const Json::Value& objects = json[ "Objects" ];
+
+    for ( const Json::Value& objectJson : objects ) {
+
+        ObjectModel object;
+        object.setType( objectJson[ "Type" ].asUInt() );
+        object.setName( QString( objectJson[ "Name" ].asCString() ) );
+
+        object.setFolder( QString( objectJson[ "TextureFolder" ].asCString() ) );
+        const QString texturePath = mapPath + object.folder() + "/" + object.name() + ".png";
+        QImage textureImage( texturePath );
+        if ( textureImage.isNull() ) {
+            qWarning() << "DataFactory::createObjectCatalog" << "Failed to load texture:" << texturePath;
+
+        } else {
+            object.setTexture( textureImage );
+            qInfo() << "DataFactory::createObjectCatalog" << "Loaded texture:" << texturePath;
+        }
+
+        objectCatalog.addObject( std::move( object ) );
+    }
+
+    qInfo() << "DataFactory::createObjectCatalog";
+}
+
+void DataFactory::createTileCatalog( const QString& configPath, TileCatalog& tileCatalog ) {
     Json::Value configJson = JsonHelper::loadJsonFile( configPath + "Config.json" );
 
     const QString mapFolder = QString( configJson[ "ActiveFolder" ].asCString() );
@@ -20,7 +61,7 @@ void DataFactory::createTileTextureCatalog( const QString& configPath, TileTextu
 
     const QString tilesFile = mapPath + QString( mapJson[ "Catalogs" ][ "Tiles" ].asCString() );
 
-    qInfo() << "DataFactory::createTileTextureCatalog" << "[TILES_FILE_PATH]" << tilesFile;
+    qInfo() << "DataFactory::createTileCatalog" << "[TILES_FILE_PATH]" << tilesFile;
 
     Json::Value json = JsonHelper::loadJsonFile( tilesFile );
 
@@ -28,30 +69,25 @@ void DataFactory::createTileTextureCatalog( const QString& configPath, TileTextu
 
     for ( const Json::Value& tileJson : tiles ) {
 
-        TileTextureModel texture;
-        texture.setType( tileJson[ "Type" ].asUInt() );
-        texture.setName( QString( tileJson[ "Name" ].asCString() ) );
-        texture.setFolder( QString( tileJson[ "TextureFolder" ].asCString() ) );
+        TileModel tile;
+        tile.setType( tileJson[ "Type" ].asUInt() );
+        tile.setName( QString( tileJson[ "Name" ].asCString() ) );
 
-        const QString texturePath = mapPath + texture.folder() + "/" + texture.name() + ".png";
-
+        tile.setFolder( QString( tileJson[ "TextureFolder" ].asCString() ) );
+        const QString texturePath = mapPath + tile.folder() + "/" + tile.name() + ".png";
         QImage textureImage( texturePath );
         if ( textureImage.isNull() ) {
-            qWarning() << "DataFactory::createTileTextureCatalog" << "Failed to load texture:" << texturePath;
+            qWarning() << "DataFactory::createTileCatalog" << "Failed to load texture:" << texturePath;
 
         } else {
-            texture.setTexture( textureImage );
-            qInfo() << "DataFactory::createTileTextureCatalog" << "Loaded texture:" << texturePath;
+            tile.setTexture( textureImage );
+            qInfo() << "DataFactory::createTileCatalog" << "Loaded texture:" << texturePath;
         }
 
-        tileTextureCatalog.addTexture( std::move( texture ) );
+        tileCatalog.addTile( std::move( tile ) );
     }
 
-    qInfo() << "DataFactory::createTileTextureCatalog";
-}
-
-void DataFactory::createObjectTextureCatalog( const QString& configPath, ObjectTextureCatalog& objectTextureCatalog ) {
-    // TODO: Load object textures
+    qInfo() << "DataFactory::createTileCatalog";
 }
 
 } // namespace Engine

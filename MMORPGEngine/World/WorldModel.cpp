@@ -55,17 +55,27 @@ const ChunkModel* WorldModel::chunk( int x, int y ) const {
     return iterator->second.get();
 }
 
-const TileModel* WorldModel::tile( int x, int y, int z ) const {
+const WorldObjectModel* WorldModel::object( int x, int y, int z ) const {
     const int chunkX = x / ChunkModel::CHUNK_WIDTH;
-
     const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
-
     const int localX = x % ChunkModel::CHUNK_WIDTH;
-
     const int localY = y % ChunkModel::CHUNK_HEIGHT;
 
     const auto iterator = _chunks.find( chunkKey( chunkX, chunkY ) );
+    if ( iterator == _chunks.end() ) {
+        return nullptr;
+    }
 
+    return iterator->second->object( localX, localY, z );
+}
+
+const WorldTileModel* WorldModel::tile( int x, int y, int z ) const {
+    const int chunkX = x / ChunkModel::CHUNK_WIDTH;
+    const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
+    const int localX = x % ChunkModel::CHUNK_WIDTH;
+    const int localY = y % ChunkModel::CHUNK_HEIGHT;
+
+    const auto iterator = _chunks.find( chunkKey( chunkX, chunkY ) );
     if ( iterator == _chunks.end() ) {
         return nullptr;
     }

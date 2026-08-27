@@ -3,15 +3,24 @@
 namespace Engine {
 
 WorldTileModel::WorldTileModel() :
-    _tileTextureId( 0 ) {
+    _tileModel( nullptr ),
+    _tileType( 0 ) {
 }
 
-uint32_t WorldTileModel::tileTextureId() const {
-    return _tileTextureId;
+const TileModel* WorldTileModel::tileModel() const {
+    return _tileModel;
 }
 
-void WorldTileModel::setTileTextureId( uint32_t tileTextureId ) {
-    _tileTextureId = tileTextureId;
+void WorldTileModel::setTileModel( const TileModel* tileModel ) {
+    _tileModel = tileModel;
+}
+
+uint32_t WorldTileModel::tileType() const {
+    return _tileType;
+}
+
+void WorldTileModel::setTileType( uint32_t tileType ) {
+    _tileType = tileType;
 }
 
 } // namespace Engine

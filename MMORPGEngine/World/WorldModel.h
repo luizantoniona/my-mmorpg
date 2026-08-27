@@ -8,7 +8,7 @@
 #include <QString>
 
 #include <MMORPGEngine/World/Chunk/ChunkModel.h>
-#include <MMORPGEngine/World/Tile/TileModel.h>
+#include <MMORPGEngine/World/Tile/WorldTileModel.h>
 
 namespace Engine {
 
@@ -28,7 +28,9 @@ public:
     ChunkModel* chunk( int x, int y );
     const ChunkModel* chunk( int x, int y ) const;
 
-    const TileModel* tile( int x, int y, int z ) const;
+    const WorldObjectModel* object( int x, int y, int z ) const;
+
+    const WorldTileModel* tile( int x, int y, int z ) const;
 
 private:
     QString chunkKey( int x, int y ) const;

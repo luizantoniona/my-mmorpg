@@ -1,27 +1,13 @@
 {
     "Objects": [
         {
-            "Type": 0,
-            "Name": "Void",
-            "TextureFolder": ""
-        },
-        {
             "Type": 1,
-            "Name": "Wooden Wall",
+            "Name": "StoneWall",
             "Footprint": {
                 "Width": 1,
                 "Height": 1
             },
-            "TextureFolder": "Textures/Wall"
-        },
-        {
-            "Type": 2,
-            "Name": "Stone Wall",
-            "Footprint": {
-                "Width": 1,
-                "Height": 1
-            },
-            "TextureFolder": "Textures/Wall"
+            "TextureFolder": "Textures/Objects/StoneWall"
         }
     ]
 }

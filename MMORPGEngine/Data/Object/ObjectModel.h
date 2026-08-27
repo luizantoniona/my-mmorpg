@@ -6,9 +6,7 @@
 #include <QImage>
 #include <QString>
 
-#include <MMORPGEngine/Object/ObjectOrientationModel.h>
-#include <MMORPGEngine/Object/ObjectPositionModel.h>
-#include <MMORPGEngine/Object/ObjectSizeModel.h>
+#include <MMORPGEngine/Data/Object/ObjectSizeModel.h>
 
 namespace Engine {
 
@@ -29,12 +27,6 @@ public:
     QImage texture() const;
     void setTexture( const QImage& texture );
 
-    ObjectOrientationModel orientation() const;
-    void setOrientation( const ObjectOrientationModel& orientation );
-
-    ObjectPositionModel position() const;
-    void setPosition( const ObjectPositionModel& position );
-
     ObjectSizeModel size() const;
     void setSize( const ObjectSizeModel& size );
 
@@ -43,8 +35,6 @@ private:
     QString _name;
     QString _folder;
     QImage _texture;
-    ObjectOrientationModel _orientation;
-    ObjectPositionModel _position;
     ObjectSizeModel _size;
 };
 

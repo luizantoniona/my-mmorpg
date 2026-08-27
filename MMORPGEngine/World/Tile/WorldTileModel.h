@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include <MMORPGEngine/Data/Tile/TileModel.h>
+
 namespace Engine {
 
 class WorldTileModel {
@@ -10,7 +12,7 @@ public:
     WorldTileModel();
 
     const TileModel* tileModel() const;
-    void setTileModel( TileModel* tileModel );
+    void setTileModel( const TileModel* tileModel );
 
     uint32_t tileType() const;
     void setTileType( uint32_t tileType );

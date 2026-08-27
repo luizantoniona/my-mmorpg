@@ -1,11 +1,10 @@
 #ifndef TILERENDERER_H
 #define TILERENDERER_H
 
-#include <MMORPGEngine/Data/Tile/TileTextureModel.h>
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Scene/RenderScene.h>
 #include <MMORPGEngine/Renderer/World/RenderWorld.h>
-#include <MMORPGEngine/World/Tile/TileModel.h>
+#include <MMORPGEngine/World/Tile/WorldTileModel.h>
 
 namespace Engine {
 
@@ -16,7 +15,7 @@ public:
     void render( RenderScene& scene, const Camera& camera, const RenderWorld& world );
 
 private:
-    void renderTile( RenderScene& scene, int x, int y, int z, const TileModel& tile, const TileTextureModel& tileTexture );
+    void renderTile( RenderScene& scene, int x, int y, int z, const WorldTileModel& worldTile );
 };
 
 } // namespace Engine

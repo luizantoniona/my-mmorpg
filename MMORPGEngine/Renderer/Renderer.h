@@ -3,6 +3,7 @@
 
 #include <QSizeF>
 
+#include <MMORPGEngine/Renderer/ObjectRenderer.h>
 #include <MMORPGEngine/Renderer/Scene/RenderScene.h>
 #include <MMORPGEngine/Renderer/TileRenderer.h>
 
@@ -20,7 +21,7 @@ public:
 
 private:
     QSizeF _viewportSize;
-
+    ObjectRenderer* _objectRenderer;
     TileRenderer* _tileRenderer;
 };
 

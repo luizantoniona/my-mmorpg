@@ -22,10 +22,6 @@ set(PROJECT_SOURCES
     Data/Object/ObjectCatalog.h
     Data/Object/ObjectModel.cpp
     Data/Object/ObjectModel.h
-    Data/Object/ObjectOrientationModel.cpp
-    Data/Object/ObjectOrientationModel.h
-    Data/Object/ObjectPositionModel.cpp
-    Data/Object/ObjectPositionModel.h
     Data/Object/ObjectSizeModel.cpp
     Data/Object/ObjectSizeModel.h
     Data/Tile/TileCatalog.cpp
@@ -76,6 +72,8 @@ set(PROJECT_SOURCES
     UI/Viewport/Viewport.h
     World/Chunk/ChunkModel.cpp
     World/Chunk/ChunkModel.h
+    World/Object/WorldObjectModel.cpp
+    World/Object/WorldObjectModel.h
     World/Tile/WorldTileModel.cpp
     World/Tile/WorldTileModel.h
     World/WorldFactory.cpp

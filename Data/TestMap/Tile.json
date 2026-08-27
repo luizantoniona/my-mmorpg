@@ -3,22 +3,22 @@
         {
             "Type": 0,
             "Name": "Void",
-            "TextureFolder": "Textures/Void"
+            "TextureFolder": "Textures/Tiles/Void"
         },
         {
             "Type": 1,
             "Name": "Water",
-            "TextureFolder": "Textures/Water"
+            "TextureFolder": "Textures/Tiles/Water"
         },
         {
             "Type": 2,
             "Name": "Grass",
-            "TextureFolder": "Textures/Grass"
+            "TextureFolder": "Textures/Tiles/Grass"
         },
         {
             "Type": 3,
             "Name": "Sand",
-            "TextureFolder": "Textures/Sand"
+            "TextureFolder": "Textures/Tiles/Sand"
         }
     ]
 }

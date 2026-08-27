@@ -2,8 +2,8 @@
 #define DATAMANAGER_H
 
 #include <MMORPGEngine/Data/Manifest/ManifestModel.h>
-#include <MMORPGEngine/Data/Object/ObjectTextureCatalog.h>
-#include <MMORPGEngine/Data/Tile/TileTextureCatalog.h>
+#include <MMORPGEngine/Data/Object/ObjectCatalog.h>
+#include <MMORPGEngine/Data/Tile/TileCatalog.h>
 
 namespace Engine {
 
@@ -17,14 +17,14 @@ public:
 
     const ManifestModel& manifest() const;
 
-    const ObjectTextureCatalog& objectTextureCatalog() const;
+    const ObjectCatalog& objectCatalog() const;
 
-    const TileTextureCatalog& tileTextureCatalog() const;
+    const TileCatalog& tileCatalog() const;
 
 private:
     ManifestModel _manifest;
-    ObjectTextureCatalog _objectTextureCatalog;
-    TileTextureCatalog _tileTextureCatalog;
+    ObjectCatalog _objectCatalog;
+    TileCatalog _tileCatalog;
 };
 
 } // namespace Engine

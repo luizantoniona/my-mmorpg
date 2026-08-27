@@ -3,15 +3,15 @@
 
 #include <QString>
 
-#include <MMORPGEngine/Data/Object/ObjectTextureCatalog.h>
-#include <MMORPGEngine/Data/Tile/TileTextureCatalog.h>
+#include <MMORPGEngine/Data/Object/ObjectCatalog.h>
+#include <MMORPGEngine/Data/Tile/TileCatalog.h>
 
 namespace Engine {
 
 class DataFactory {
 public:
-    static void createTileTextureCatalog( const QString& configPath, TileTextureCatalog& tileTextureCatalog );
-    static void createObjectTextureCatalog( const QString& configPath, ObjectTextureCatalog& objectTextureCatalog );
+    static void createObjectCatalog( const QString& configPath, ObjectCatalog& objectCatalog );
+    static void createTileCatalog( const QString& configPath, TileCatalog& tileCatalog );
 };
 
 } // namespace Engine

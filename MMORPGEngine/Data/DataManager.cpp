@@ -11,16 +11,16 @@ namespace Engine {
 
 DataManager::DataManager() :
     _manifest(),
-    _objectTextureCatalog(),
-    _tileTextureCatalog() {
+    _objectCatalog(),
+    _tileCatalog() {
 }
 
 DataManager::~DataManager() = default;
 
 void DataManager::initialize( const std::string& configPath ) {
     Engine::DataFactory factory;
-    factory.createObjectTextureCatalog( QString::fromStdString( configPath ), _objectTextureCatalog );
-    factory.createTileTextureCatalog( QString::fromStdString( configPath ), _tileTextureCatalog );
+    factory.createObjectCatalog( QString::fromStdString( configPath ), _objectCatalog );
+    factory.createTileCatalog( QString::fromStdString( configPath ), _tileCatalog );
 }
 
 void DataManager::finalize() {
@@ -30,12 +30,12 @@ const ManifestModel& DataManager::manifest() const {
     return _manifest;
 }
 
-const ObjectTextureCatalog& DataManager::objectTextureCatalog() const {
-    return _objectTextureCatalog;
+const ObjectCatalog& DataManager::objectCatalog() const {
+    return _objectCatalog;
 }
 
-const TileTextureCatalog& DataManager::tileTextureCatalog() const {
-    return _tileTextureCatalog;
+const TileCatalog& DataManager::tileCatalog() const {
+    return _tileCatalog;
 }
 
 } // namespace Engine

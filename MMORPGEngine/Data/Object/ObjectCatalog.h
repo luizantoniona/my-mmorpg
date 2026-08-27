@@ -11,9 +11,9 @@ class ObjectCatalog {
 public:
     ObjectCatalog();
 
-    const ObjectModel* texture( uint32_t type ) const;
-    const std::unordered_map<uint32_t, ObjectModel>& textures() const;
-    void addTexture( const ObjectModel& object );
+    const ObjectModel* object( uint32_t type ) const;
+    const std::unordered_map<uint32_t, ObjectModel>& objects() const;
+    void addObject( const ObjectModel& object );
 
 private:
     std::unordered_map<uint32_t, ObjectModel> _objects;
