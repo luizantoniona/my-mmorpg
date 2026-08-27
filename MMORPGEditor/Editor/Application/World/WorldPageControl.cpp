@@ -35,6 +35,10 @@ int WorldPageControl::worldHeight() const {
     return static_cast<int>( _world->height() );
 }
 
+Engine::WorldModel* WorldPageControl::world() const {
+    return _world.get();
+}
+
 void WorldPageControl::loadWorld() {
     _world = Engine::WorldFactory::createWorld( DATA_PATH );
 

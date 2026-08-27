@@ -12,6 +12,7 @@ class WorldPageControl : public QObject {
     Q_PROPERTY( QString worldName READ worldName NOTIFY worldChanged )
     Q_PROPERTY( int worldWidth READ worldWidth NOTIFY worldChanged )
     Q_PROPERTY( int worldHeight READ worldHeight NOTIFY worldChanged )
+    Q_PROPERTY( Engine::WorldModel* world READ world CONSTANT )
 
 public:
     explicit WorldPageControl( QObject* parent = nullptr );
@@ -19,6 +20,8 @@ public:
     QString worldName() const;
     int worldWidth() const;
     int worldHeight() const;
+
+    Engine::WorldModel* world() const;
 
 public slots:
     void loadWorld();
