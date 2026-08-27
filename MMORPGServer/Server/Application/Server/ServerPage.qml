@@ -1,6 +1,6 @@
 import QtQuick
-import MMORPGServerComponents
 import MMORPGEngine
+import MMORPGServerComponents
 
 Item {
     id: root
@@ -39,6 +39,5 @@ Item {
             viewport.moveCameraByTiles(1, 0)
             break
         }
-        event.accepted = true
     }
 }
