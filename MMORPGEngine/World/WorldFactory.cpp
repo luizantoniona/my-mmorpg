@@ -5,6 +5,7 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/World/WorldConstants.h>
 
 namespace Engine {
 
@@ -77,11 +78,11 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
                     continue;
                 }
 
-                const int chunkX = x / ChunkModel::CHUNK_WIDTH;
-                const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
+                const int chunkX = x / WorldConstants::CHUNK_SIZE;
+                const int chunkY = y / WorldConstants::CHUNK_SIZE;
 
-                const int localX = x % ChunkModel::CHUNK_WIDTH;
-                const int localY = y % ChunkModel::CHUNK_HEIGHT;
+                const int localX = x % WorldConstants::CHUNK_SIZE;
+                const int localY = y % WorldConstants::CHUNK_SIZE;
 
                 ChunkModel* chunk = world->chunk( chunkX, chunkY );
                 if ( !chunk ) {
@@ -126,11 +127,11 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
                     continue;
                 }
 
-                const int chunkX = x / ChunkModel::CHUNK_WIDTH;
-                const int chunkY = y / ChunkModel::CHUNK_HEIGHT;
+                const int chunkX = x / WorldConstants::CHUNK_SIZE;
+                const int chunkY = y / WorldConstants::CHUNK_SIZE;
 
-                const int localX = x % ChunkModel::CHUNK_WIDTH;
-                const int localY = y % ChunkModel::CHUNK_HEIGHT;
+                const int localX = x % WorldConstants::CHUNK_SIZE;
+                const int localY = y % WorldConstants::CHUNK_SIZE;
 
                 ChunkModel* chunk = world->chunk( chunkX, chunkY );
                 if ( !chunk ) {

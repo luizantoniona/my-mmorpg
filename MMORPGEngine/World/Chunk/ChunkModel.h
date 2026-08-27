@@ -15,9 +15,6 @@ public:
     ChunkModel();
     ~ChunkModel();
 
-    static constexpr int CHUNK_WIDTH = 32;
-    static constexpr int CHUNK_HEIGHT = 32;
-
     void setObject( int x, int y, int z, std::unique_ptr<WorldObjectModel> object );
     WorldObjectModel* object( int x, int y, int z );
     const WorldObjectModel* object( int x, int y, int z ) const;

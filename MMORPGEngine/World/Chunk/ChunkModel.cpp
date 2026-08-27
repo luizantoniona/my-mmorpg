@@ -1,5 +1,7 @@
 #include "ChunkModel.h"
 
+#include <MMORPGEngine/World/WorldConstants.h>
+
 namespace Engine {
 
 ChunkModel::ChunkModel() {
@@ -15,7 +17,7 @@ void ChunkModel::setObject( int x, int y, int z, std::unique_ptr<WorldObjectMode
     auto iterator = _objects.find( z );
 
     if ( iterator == _objects.end() ) {
-        iterator = _objects.emplace( z, std::vector<std::unique_ptr<WorldObjectModel>>( CHUNK_WIDTH * CHUNK_HEIGHT ) ).first;
+        iterator = _objects.emplace( z, std::vector<std::unique_ptr<WorldObjectModel>>( WorldConstants::CHUNK_SIZE * WorldConstants::CHUNK_SIZE ) ).first;
     }
 
     iterator->second[ index( x, y ) ] = std::move( object );
@@ -29,7 +31,7 @@ WorldObjectModel* ChunkModel::object( int x, int y, int z ) {
     auto iterator = _objects.find( z );
 
     if ( iterator == _objects.end() ) {
-        iterator = _objects.emplace( z, std::vector<std::unique_ptr<WorldObjectModel>>( CHUNK_WIDTH * CHUNK_HEIGHT ) ).first;
+        iterator = _objects.emplace( z, std::vector<std::unique_ptr<WorldObjectModel>>( WorldConstants::CHUNK_SIZE * WorldConstants::CHUNK_SIZE ) ).first;
     }
 
     const int position = index( x, y );
@@ -64,7 +66,7 @@ void ChunkModel::setTile( int x, int y, int z, std::unique_ptr<WorldTileModel> t
     auto iterator = _tiles.find( z );
 
     if ( iterator == _tiles.end() ) {
-        iterator = _tiles.emplace( z, std::vector<std::unique_ptr<WorldTileModel>>( CHUNK_WIDTH * CHUNK_HEIGHT ) ).first;
+        iterator = _tiles.emplace( z, std::vector<std::unique_ptr<WorldTileModel>>( WorldConstants::CHUNK_SIZE * WorldConstants::CHUNK_SIZE ) ).first;
     }
 
     iterator->second[ index( x, y ) ] = std::move( tile );
@@ -78,7 +80,7 @@ WorldTileModel* ChunkModel::tile( int x, int y, int z ) {
     auto iterator = _tiles.find( z );
 
     if ( iterator == _tiles.end() ) {
-        iterator = _tiles.emplace( z, std::vector<std::unique_ptr<WorldTileModel>>( CHUNK_WIDTH * CHUNK_HEIGHT ) ).first;
+        iterator = _tiles.emplace( z, std::vector<std::unique_ptr<WorldTileModel>>( WorldConstants::CHUNK_SIZE * WorldConstants::CHUNK_SIZE ) ).first;
     }
 
     const int position = index( x, y );
@@ -105,11 +107,11 @@ const WorldTileModel* ChunkModel::tile( int x, int y, int z ) const {
 }
 
 bool ChunkModel::validPosition( int x, int y ) const {
-    return x >= 0 && x < CHUNK_WIDTH && y >= 0 && y < CHUNK_HEIGHT;
+    return x >= 0 && x < WorldConstants::CHUNK_SIZE && y >= 0 && y < WorldConstants::CHUNK_SIZE;
 }
 
 int ChunkModel::index( int x, int y ) const {
-    return y * CHUNK_WIDTH + x;
+    return y * WorldConstants::CHUNK_SIZE + x;
 }
 
 } // namespace Engine

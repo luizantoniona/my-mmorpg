@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include <MMORPGEngine/World/WorldConstants.h>
+
 namespace Engine {
 
 Camera::Camera() :
@@ -14,6 +16,16 @@ const QPointF& Camera::position() const {
 
 void Camera::setPosition( const QPointF& position ) {
     _position = position;
+}
+
+void Camera::centerOnTile( int x, int y ) {
+    const double tileSize = WorldConstants::TILE_SIZE;
+    setPosition( QPointF( x * tileSize + tileSize / 2.0, y * tileSize + tileSize / 2.0 ) );
+}
+
+void Camera::moveByTiles( int dx, int dy ) {
+    const double tileSize = WorldConstants::TILE_SIZE;
+    _position += QPointF( dx * tileSize, dy * tileSize );
 }
 
 const QSizeF& Camera::viewportSize() const {

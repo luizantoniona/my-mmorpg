@@ -17,6 +17,8 @@ public:
 
     QPointF cameraPosition() const;
     void setCameraPosition( const QPointF& position );
+    Q_INVOKABLE void centerCameraOnTile( int x, int y );
+    Q_INVOKABLE void moveCameraByTiles( int dx, int dy );
 
     Camera* camera() const;
 

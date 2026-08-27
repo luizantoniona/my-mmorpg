@@ -38,6 +38,22 @@ void Viewport::setCameraPosition(
     update();
 }
 
+void Viewport::centerCameraOnTile( int x, int y ) {
+    _camera->centerOnTile( x, y );
+
+    emit cameraPositionChanged();
+
+    update();
+}
+
+void Viewport::moveCameraByTiles( int dx, int dy ) {
+    _camera->moveByTiles( dx, dy );
+
+    emit cameraPositionChanged();
+
+    update();
+}
+
 Camera* Viewport::camera() const {
     return _camera;
 }
