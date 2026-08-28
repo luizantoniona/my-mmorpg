@@ -1,4 +1,4 @@
-#include "WorldPageControl.h"
+#include "WorldControl.h"
 
 #include <MMORPGEngine/World/WorldFactory.h>
 
@@ -6,12 +6,12 @@ namespace {
 constexpr const char* DATA_PATH = "../../../Data/";
 }
 
-WorldPageControl::WorldPageControl( QObject* parent ) :
+WorldControl::WorldControl( QObject* parent ) :
     QObject( parent ),
     _world( nullptr ) {
 }
 
-QString WorldPageControl::worldName() const {
+QString WorldControl::worldName() const {
     if ( !_world ) {
         return "";
     }
@@ -19,7 +19,7 @@ QString WorldPageControl::worldName() const {
     return _world->name();
 }
 
-int WorldPageControl::worldWidth() const {
+int WorldControl::worldWidth() const {
     if ( !_world ) {
         return 0;
     }
@@ -27,7 +27,7 @@ int WorldPageControl::worldWidth() const {
     return static_cast<int>( _world->width() );
 }
 
-int WorldPageControl::worldHeight() const {
+int WorldControl::worldHeight() const {
     if ( !_world ) {
         return 0;
     }
@@ -35,11 +35,11 @@ int WorldPageControl::worldHeight() const {
     return static_cast<int>( _world->height() );
 }
 
-Engine::WorldModel* WorldPageControl::world() const {
+Engine::WorldModel* WorldControl::world() const {
     return _world.get();
 }
 
-void WorldPageControl::loadWorld() {
+void WorldControl::loadWorld() {
     _world = Engine::WorldFactory::createWorld( DATA_PATH );
 
     emit worldChanged();

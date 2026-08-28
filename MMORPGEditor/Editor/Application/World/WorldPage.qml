@@ -9,8 +9,12 @@ import MMORPGEditorControls
 Item {
     id: root
 
+    SelectionControl {
+        id: selectionControl
+    }
+
     WorldPageControl {
-        id: control
+        id: worldControl
     }
 
     EditorRenderWorld {
@@ -22,11 +26,15 @@ Item {
 
         anchors.fill: parent
         renderWorld: editorWorld
+
+        onTileClicked: function (x, y, z) {
+            selectionControl.selectTile(x, y, z)
+        }
     }
 
     Component.onCompleted: function () {
-        control.loadWorld()
-        editorWorld.world = control.world
+        worldControl.loadWorld()
+        editorWorld.world = worldControl.world
         forceActiveFocus()
         viewport.centerCameraOnTile(16, 16)
     }
@@ -46,6 +54,19 @@ Item {
         case Qt.Key_D:
             viewport.moveCameraByTiles(1, 0)
             break
+        }
+    }
+
+    Connections {
+        target: selectionControl
+
+        function onSelectionChanged() {
+            if (!selectionControl.hasSelection) {
+                console.log("Selection cleared")
+                return
+            }
+
+            console.log("Selected Tile:", selectionControl.x, selectionControl.y, selectionControl.z)
         }
     }
 }

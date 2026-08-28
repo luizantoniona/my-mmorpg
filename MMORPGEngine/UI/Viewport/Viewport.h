@@ -27,9 +27,12 @@ public:
 
 signals:
     void cameraPositionChanged();
+    void tileClicked( int x, int y, int z );
 
 protected:
     void geometryChange( const QRectF& newGeometry, const QRectF& oldGeometry ) override;
+
+    void mousePressEvent( QMouseEvent* event ) override;
 
     QSGNode* updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData ) override;
 

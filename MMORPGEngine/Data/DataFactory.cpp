@@ -33,6 +33,9 @@ void DataFactory::createObjectCatalog( const QString& configPath, ObjectCatalog&
         object.setType( objectJson[ "Type" ].asUInt() );
         object.setName( QString( objectJson[ "Name" ].asCString() ) );
 
+        // TODO: Setar coisas especificas do Object
+        // ObjectSizeModel
+
         object.setFolder( QString( objectJson[ "TextureFolder" ].asCString() ) );
         const QString texturePath = mapPath + object.folder() + "/" + object.name() + ".png";
         QImage textureImage( texturePath );
@@ -73,8 +76,9 @@ void DataFactory::createTileCatalog( const QString& configPath, TileCatalog& til
         tile.setType( tileJson[ "Type" ].asUInt() );
         tile.setName( QString( tileJson[ "Name" ].asCString() ) );
 
+        // TODO: In the future Tiles will have autotilling. So we must put more textures in each tile catalog and render them accordingly.
         tile.setFolder( QString( tileJson[ "TextureFolder" ].asCString() ) );
-        const QString texturePath = mapPath + tile.folder() + "/" + tile.name() + ".png";
+        const QString texturePath = mapPath + tile.folder() + "/5.png";
         QImage textureImage( texturePath );
         if ( textureImage.isNull() ) {
             qWarning() << "DataFactory::createTileCatalog" << "Failed to load texture:" << texturePath;
