@@ -1,8 +1,8 @@
 set(PROJECT_SOURCES
     RegisterEditorTypes.cpp
     RegisterEditorTypes.h
-    Application/World/EditorRenderWorld.cpp
-    Application/World/EditorRenderWorld.h
+    Application/EditorRenderWorld.cpp
+    Application/EditorRenderWorld.h
     Application/World/WorldPageControl.cpp
     Application/World/WorldPageControl.h)
 
