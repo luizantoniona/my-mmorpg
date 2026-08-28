@@ -1,5 +1,7 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
+import MMORPGEngine
 import MMORPGUIComponents
 import MMORPGEditorComponents
 import MMORPGEditorControls
@@ -7,52 +9,64 @@ import MMORPGEditorControls
 Item {
     id: root
 
+    SelectionControl {
+        id: selectionControl
+    }
+
     WorldPageControl {
-        id: control
+        id: worldControl
+    }
+
+    EditorRenderWorld {
+        id: editorWorld
+    }
+
+    Viewport {
+        id: viewport
+
+        anchors.fill: parent
+        renderWorld: editorWorld
+
+        onTileClicked: function (x, y, z) {
+            selectionControl.selectTile(x, y, z)
+        }
     }
 
     Component.onCompleted: function () {
-        control.loadWorld()
+        worldControl.loadWorld()
+        editorWorld.world = worldControl.world
+        forceActiveFocus()
+        viewport.centerCameraOnTile(16, 16)
     }
 
     Keys.onPressed: function (event) {
+        console.log("KEY:", event.key)
         switch (event.key) {
         case Qt.Key_W:
-            // TODO: Move up (Chunk or tile?)
-            break
-        case Qt.Key_A:
-            // TODO: Move left (Chunk or tile?)
+            viewport.moveCameraByTiles(0, -1)
             break
         case Qt.Key_S:
-            // TODO: Move down (Chunk or tile?)
+            viewport.moveCameraByTiles(0, 1)
+            break
+        case Qt.Key_A:
+            viewport.moveCameraByTiles(-1, 0)
             break
         case Qt.Key_D:
-            // TODO: Move right (Chunk or tile?)
-            break
-        case Qt.Key_E:
-            // TODO: Move floor up
-            break
-        case Qt.Key_Q:
-            // TODO: Move floor down
-            break
-        default:
+            viewport.moveCameraByTiles(1, 0)
             break
         }
     }
 
-    ColumnLayout {
-        anchors.fill: parent
-        spacing: Spaces.spacing8
+    Connections {
+        target: selectionControl
 
-        // TODO: Change for map view component
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-
-            Rectangle {
-                anchors.fill: parent
-                color: "blue"
+        function onSelectionChanged() {
+            if (!selectionControl.hasSelection) {
+                console.log("Selection cleared")
+                return
             }
+
+            console.log("Selected Tile:", selectionControl.x, selectionControl.y, selectionControl.z)
         }
     }
 }

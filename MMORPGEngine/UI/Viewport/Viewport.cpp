@@ -2,6 +2,7 @@
 
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Renderer.h>
+#include <MMORPGEngine/World/WorldConstants.h>
 
 #include <QSGSimpleRectNode>
 
@@ -14,6 +15,8 @@ Viewport::Viewport( QQuickItem* parent ) :
     _world( nullptr ) {
 
     setFlag( ItemHasContents, true );
+
+    setAcceptedMouseButtons( Qt::LeftButton );
 
     _renderer->initialize();
     _renderer->resize( size() );
@@ -32,6 +35,22 @@ void Viewport::setCameraPosition(
     }
 
     _camera->setPosition( position );
+
+    emit cameraPositionChanged();
+
+    update();
+}
+
+void Viewport::centerCameraOnTile( int x, int y ) {
+    _camera->centerOnTile( x, y );
+
+    emit cameraPositionChanged();
+
+    update();
+}
+
+void Viewport::moveCameraByTiles( int dx, int dy ) {
+    _camera->moveByTiles( dx, dy );
 
     emit cameraPositionChanged();
 
@@ -60,6 +79,34 @@ void Viewport::geometryChange( const QRectF& newGeometry, const QRectF& oldGeome
     QQuickItem::geometryChange( newGeometry, oldGeometry );
     _camera->setViewportSize( newGeometry.size() );
     _renderer->resize( newGeometry.size() );
+}
+
+void Viewport::mousePressEvent( QMouseEvent* event ) {
+    if ( !_world ) {
+        return;
+    }
+
+    // TODO: RightButton and WheelButton
+    if ( event->button() != Qt::LeftButton ) {
+        QQuickItem::mousePressEvent( event );
+        return;
+    }
+
+    const QPointF screenPosition = event->position();
+    const QPointF worldPosition = _camera->screenToWorld( screenPosition );
+
+    const double tileSize = WorldConstants::TILE_SIZE;
+
+    const int x = static_cast<int>( std::floor( worldPosition.x() / tileSize ) );
+    const int y = static_cast<int>( std::floor( worldPosition.y() / tileSize ) );
+    // TODO: Z
+    constexpr int z = 0;
+
+    if ( !_world->tile( x, y, z ) ) {
+        return;
+    }
+
+    emit tileClicked( x, y, z );
 }
 
 QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {

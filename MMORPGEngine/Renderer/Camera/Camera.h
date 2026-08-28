@@ -13,6 +13,8 @@ public:
 
     const QPointF& position() const;
     void setPosition( const QPointF& position );
+    void centerOnTile( int x, int y );
+    void moveByTiles( int dx, int dy );
 
     const QSizeF& viewportSize() const;
     void setViewportSize( const QSizeF& size );

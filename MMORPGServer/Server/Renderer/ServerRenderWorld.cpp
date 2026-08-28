@@ -5,7 +5,6 @@
 
 ServerRenderWorld::ServerRenderWorld( QObject* parent ) :
     Engine::RenderWorld( parent ),
-    _data( Engine::Singleton<Engine::DataManager>::instance() ),
     _world( Engine::Singleton<Server::WorldManager>::instance().world() ) {
 }
 
@@ -17,11 +16,15 @@ void ServerRenderWorld::setWorld( Engine::WorldModel* world ) {
     _world = world;
 }
 
-const Engine::GroundModel* ServerRenderWorld::ground( uint32_t id ) const {
-    return _data.groundCatalog().ground( id );
+const Engine::WorldObjectModel* ServerRenderWorld::object( int x, int y, int z ) const {
+    if ( !_world ) {
+        return nullptr;
+    }
+
+    return _world->object( x, y, z );
 }
 
-const Engine::TileModel* ServerRenderWorld::tile( int x, int y, int z ) const {
+const Engine::WorldTileModel* ServerRenderWorld::tile( int x, int y, int z ) const {
     if ( !_world ) {
         return nullptr;
     }

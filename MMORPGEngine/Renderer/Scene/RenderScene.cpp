@@ -39,13 +39,10 @@ void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& 
         }
 
         auto* node = new QSGSimpleTextureNode();
-
         node->setTexture( texture );
-
         node->setOwnsTexture( true );
+        node->setRect( screenPosition.x(), screenPosition.y(), item.size().width(), item.size().height() );
 
-        node->setRect( screenPosition.x(), screenPosition.y(),
-                       item.size().width(), item.size().height() );
         rootNode->appendChildNode( node );
     }
 }

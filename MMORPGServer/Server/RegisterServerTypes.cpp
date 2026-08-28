@@ -3,7 +3,7 @@
 #include <QQmlEngine>
 
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGServer/Server/Application/Server/ServerRenderWorld.h>
+#include <MMORPGServer/Server/Renderer/ServerRenderWorld.h>
 
 namespace Server {
 
