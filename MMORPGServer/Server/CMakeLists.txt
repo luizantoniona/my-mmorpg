@@ -1,8 +1,6 @@
 set(PROJECT_SOURCES
     RegisterServerTypes.cpp
     RegisterServerTypes.h
-    Application/ServerRenderWorld.cpp
-    Application/ServerRenderWorld.h
     Database/Database.cpp
     Database/Database.h
     Database/Query.cpp
@@ -31,6 +29,8 @@ set(PROJECT_SOURCES
     Network/WebSocket/CharacterWebSocket.h
     Network/WebSocket/MessageReceiver.cpp
     Network/WebSocket/MessageReceiver.h
+    Renderer/ServerRenderWorld.cpp
+    Renderer/ServerRenderWorld.h
     Repository/AccountRepository.cpp
     Repository/AccountRepository.h
     Repository/CharacterRepository.cpp

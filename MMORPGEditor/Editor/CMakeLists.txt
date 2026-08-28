@@ -1,10 +1,10 @@
 set(PROJECT_SOURCES
     RegisterEditorTypes.cpp
     RegisterEditorTypes.h
-    Application/EditorRenderWorld.cpp
-    Application/EditorRenderWorld.h
     Application/World/WorldPageControl.cpp
-    Application/World/WorldPageControl.h)
+    Application/World/WorldPageControl.h
+    Renderer/EditorRenderWorld.cpp
+    Renderer/EditorRenderWorld.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 
