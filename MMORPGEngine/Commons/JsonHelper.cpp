@@ -3,24 +3,18 @@
 #include <QDebug>
 
 #include <fstream>
+#include <memory>
 #include <sstream>
 
 namespace Engine {
 
 Json::Value JsonHelper::loadJsonFile( const QString& path ) {
-    std::ifstream file( path.toStdString() );
-    if ( !file.is_open() ) {
-        qWarning() << "JsonHelper::loadJsonFile Could not open file: " << path;
-        return Json::Value();
-    }
-
-    Json::Value jsonData;
-    file >> jsonData;
-    return jsonData;
+    return loadJsonFile( path.toStdString() );
 }
 
 Json::Value JsonHelper::loadJsonFile( const std::string& path ) {
     std::ifstream file( path );
+
     if ( !file.is_open() ) {
         qWarning() << "JsonHelper::loadJsonFile Could not open file: " << path;
         return Json::Value();
@@ -28,21 +22,37 @@ Json::Value JsonHelper::loadJsonFile( const std::string& path ) {
 
     Json::Value jsonData;
     file >> jsonData;
+
     return jsonData;
 }
 
-Json::Value JsonHelper::parseJsonString( const QString& content ) {
-    Json::Value jsonData;
-    Json::CharReaderBuilder builder;
-    std::string errs;
+bool JsonHelper::saveJsonFile( const QString& path, const Json::Value& value ) {
+    return saveJsonFile( path.toStdString(), value );
+}
 
-    std::istringstream s( content.toStdString() );
-    if ( !Json::parseFromStream( builder, s, &jsonData, &errs ) ) {
-        qWarning() << "JsonHelper::parseJsonString Error parsing JSON: " << errs;
-        return Json::Value();
+bool JsonHelper::saveJsonFile( const std::string& path, const Json::Value& value ) {
+    std::ofstream file( path );
+    if ( !file.is_open() ) {
+        qWarning() << "JsonHelper::saveJsonFile Could not open file: " << QString::fromStdString( path );
+        return false;
     }
 
-    return jsonData;
+    Json::StreamWriterBuilder builder;
+    builder[ "indentation" ] = "    ";
+
+    std::unique_ptr<Json::StreamWriter> writer( builder.newStreamWriter() );
+    writer->write( value, &file );
+
+    if ( file.fail() ) {
+        qWarning() << "JsonHelper::saveJsonFile Could not write file:" << QString::fromStdString( path );
+        return false;
+    }
+
+    return true;
+}
+
+Json::Value JsonHelper::parseJsonString( const QString& content ) {
+    return parseJsonString( content.toStdString() );
 }
 
 Json::Value JsonHelper::parseJsonString( const std::string& content ) {
@@ -50,9 +60,9 @@ Json::Value JsonHelper::parseJsonString( const std::string& content ) {
     Json::CharReaderBuilder builder;
     std::string errs;
 
-    std::istringstream s( content );
-    if ( !Json::parseFromStream( builder, s, &jsonData, &errs ) ) {
-        qWarning() << "JsonHelper::parseJsonString Error parsing JSON: " << errs;
+    std::istringstream stream( content );
+    if ( !Json::parseFromStream( builder, stream, &jsonData, &errs ) ) {
+        qWarning() << "JsonHelper::parseJsonString Error parsing JSON:" << QString::fromStdString( errs );
         return Json::Value();
     }
 
