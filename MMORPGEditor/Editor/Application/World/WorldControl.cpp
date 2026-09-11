@@ -44,3 +44,19 @@ void WorldControl::loadWorld() {
 
     emit worldChanged();
 }
+
+void WorldControl::paintTile( int x, int y, int z, int tileType ) {
+    if ( !_world ) {
+        return;
+    }
+
+    _world->setTile( x, y, z, static_cast<uint32_t>( tileType ) );
+}
+
+void WorldControl::paintObject( int x, int y, int z, int objectType ) {
+    if ( !_world ) {
+        return;
+    }
+
+    _world->setObject( x, y, z, static_cast<uint32_t>( objectType ) );
+}

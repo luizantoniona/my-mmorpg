@@ -26,6 +26,9 @@ public:
 public slots:
     void loadWorld();
 
+    void paintTile( int x, int y, int z, int tileType );
+    void paintObject( int x, int y, int z, int objectType );
+
 signals:
     void worldChanged();
 

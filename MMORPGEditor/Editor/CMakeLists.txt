@@ -1,10 +1,12 @@
 set(PROJECT_SOURCES
     RegisterEditorTypes.cpp
     RegisterEditorTypes.h
-    Application/World/SelectionControl.cpp
-    Application/World/SelectionControl.h
     Application/World/WorldControl.cpp
     Application/World/WorldControl.h
+    Application/World/Object/ObjectSelectionControl.cpp
+    Application/World/Object/ObjectSelectionControl.h
+    Application/World/Tile/TileSelectionControl.cpp
+    Application/World/Tile/TileSelectionControl.h
     Renderer/EditorRenderWorld.cpp
     Renderer/EditorRenderWorld.h)
 

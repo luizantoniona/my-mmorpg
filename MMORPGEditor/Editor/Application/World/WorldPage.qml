@@ -9,8 +9,12 @@ import MMORPGEditorControls
 Item {
     id: root
 
-    SelectionControl {
+    TileSelectionControl {
         id: selectionControl
+    }
+
+    ObjectSelectionControl {
+        id: objectSelectionControl
     }
 
     WorldPageControl {
