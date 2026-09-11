@@ -29,8 +29,10 @@ public:
     const ChunkModel* chunk( int x, int y ) const;
 
     const WorldObjectModel* object( int x, int y, int z ) const;
+    void setObject( int x, int y, int z, uint32_t objectType );
 
     const WorldTileModel* tile( int x, int y, int z ) const;
+    void setTile( int x, int y, int z, uint32_t tileType );
 
 private:
     QString chunkKey( int x, int y ) const;
