@@ -33,6 +33,21 @@ Item {
 
         onTileClicked: function (x, y, z) {
             selectionControl.selectTile(x, y, z)
+    ButtonBase {
+        id: saveButton
+
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: Spaces.spacing8
+
+        vText: "Save World"
+
+        onClicked: {
+            if (worldControl.saveWorld()) {
+                console.log("World saved")
+            } else {
+                console.log("Failed to save world")
+            }
         }
     }
 
