@@ -44,7 +44,7 @@ QVariant ObjectPaletteModel::data( const QModelIndex& index, int role ) const {
         case NameRole:
             return QStringLiteral( "None" );
         case IconSourceRole:
-            return QStringLiteral( "image://objecticon/0" );
+            return QStringLiteral( "image://EditorObjectIcon/0" );
         default:
             return QVariant();
         }
@@ -63,7 +63,7 @@ QVariant ObjectPaletteModel::data( const QModelIndex& index, int role ) const {
     case NameRole:
         return object->name();
     case IconSourceRole:
-        return QString( "image://objecticon/%1" ).arg( type );
+        return QString( "image://EditorObjectIcon/%1" ).arg( type );
     default:
         return QVariant();
     }

@@ -48,7 +48,7 @@ QVariant TilePaletteModel::data( const QModelIndex& index, int role ) const {
     case NameRole:
         return tile->name();
     case IconSourceRole:
-        return QString( "image://tileicon/%1" ).arg( type );
+        return QString( "image://EditorTileIcon/%1" ).arg( type );
     default:
         return QVariant();
     }

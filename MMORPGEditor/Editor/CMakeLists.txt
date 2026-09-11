@@ -3,10 +3,14 @@ set(PROJECT_SOURCES
     RegisterEditorTypes.h
     Application/World/WorldControl.cpp
     Application/World/WorldControl.h
+    Application/World/Object/ObjectIconProvider.cpp
+    Application/World/Object/ObjectIconProvider.h
     Application/World/Object/ObjectPaletteModel.cpp
     Application/World/Object/ObjectPaletteModel.h
     Application/World/Object/ObjectSelectionControl.cpp
     Application/World/Object/ObjectSelectionControl.h
+    Application/World/Tile/TileIconProvider.cpp
+    Application/World/Tile/TileIconProvider.h
     Application/World/Tile/TilePaletteModel.cpp
     Application/World/Tile/TilePaletteModel.h
     Application/World/Tile/TileSelectionControl.cpp
