@@ -117,21 +117,15 @@ Rectangle {
         anchors.fill: parent
     }
 
-    Row {
-        id: contentRow
+    Text {
+        id: label
 
         anchors.centerIn: parent
-        spacing: 8
         visible: root.vText !== ""
-
-        Text {
-            id: label
-
-            text: root.vText
-            color: root.vTextColor
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-            font: Fonts.bodyBold
-        }
+        text: root.vText
+        color: root.vTextColor
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        font: Fonts.bodyBold
     }
 }
