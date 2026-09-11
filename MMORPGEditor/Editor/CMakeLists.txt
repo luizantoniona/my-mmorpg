@@ -29,7 +29,10 @@ qt_add_qml_module(
   QML_FILES
   Main.qml
   Application/EditorWindow.qml
-  Application/World/WorldPage.qml)
+  Application/Navigation/NavigationBar.qml
+  Application/World/WorldPage.qml
+  Application/Tiles/TilesPage.qml
+  Application/Objects/ObjectsPage.qml)
 
 target_link_libraries(
   ${PROJECT_NAME}
