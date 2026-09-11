@@ -148,4 +148,25 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
     }
 }
 
+void WorldFactory::saveWorld( const std::string& worldPath, const WorldModel& world ) {
+    qInfo() << "WorldFactory::saveWorld";
+
+    Json::Value configJson = JsonHelper::loadJsonFile( worldPath + "Config.json" );
+
+    const std::string mapFolder = configJson[ "ActiveFolder" ].asString();
+
+    const std::string mapPath = worldPath + mapFolder + "/";
+
+    Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
+
+    // --- Floors
+    for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
+        saveFloor( mapPath + "Floors/" + floorFile.asString(), world );
+    }
+}
+
+void WorldFactory::saveFloor( const std::string& floorFile, const WorldModel& world ) {
+    qInfo() << "WorldFactory::saveFloor" << "[FLOOR_FILE_PATH]" << floorFile;
+}
+
 } // namespace Engine

@@ -45,6 +45,16 @@ void WorldControl::loadWorld() {
     emit worldChanged();
 }
 
+bool WorldControl::saveWorld() {
+    if ( !_world ) {
+        return false;
+    }
+
+    Engine::WorldFactory::saveWorld( DATA_PATH, *_world );
+
+    return true;
+}
+
 void WorldControl::paintTile( int x, int y, int z, int tileType ) {
     if ( !_world ) {
         return;

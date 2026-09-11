@@ -25,6 +25,7 @@ public:
 
 public slots:
     void loadWorld();
+    bool saveWorld();
 
     void paintTile( int x, int y, int z, int tileType );
     void paintObject( int x, int y, int z, int objectType );
