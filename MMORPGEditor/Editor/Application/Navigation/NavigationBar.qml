@@ -52,7 +52,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        height: Borders.borders1
+        height: Borders.border1
         color: Colors.border
     }
 }

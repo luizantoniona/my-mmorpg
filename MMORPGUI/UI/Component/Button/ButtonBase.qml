@@ -17,8 +17,8 @@ Rectangle {
     property color vHoverColor: Colors.primaryHovered
     property color vPressedColor: Colors.primaryPressed
     property color vTextColor: Colors.text
-    property int vRadius: Spaces.spacing8
-    property int vBorderWidth: Borders.borders1
+    property int vRadius: Radiuses.radius8
+    property int vBorderWidth: Borders.border1
 
     default property alias contentData: content.data
     readonly property alias contentItem: content

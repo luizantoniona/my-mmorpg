@@ -14,7 +14,7 @@ Item {
     property color vBackgroundColor: Colors.background2
     property color vBorderColor: Colors.border
 
-    property int vRadius: Spaces.spacing8
+    property int vRadius: Radiuses.radius8
     property int vHeight: 12
     property int vSpacing: Spaces.spacing8
 
@@ -43,7 +43,7 @@ Item {
             radius: root.vRadius
             color: root.vBackgroundColor
             border {
-                width: Borders.borders1
+                width: Borders.border1
                 color: root.vBorderColor
             }
             clip: true

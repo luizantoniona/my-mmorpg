@@ -28,7 +28,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             border.color: Colors.border
-            border.width: Borders.borders1
+            border.width: Borders.border1
             color: Colors.primaryEnabled
             implicitHeight: 40
             radius: 8

@@ -6,8 +6,13 @@ add_library(MMORPG::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC ON AUTORCC ON)
 
-set_source_files_properties(Theme/Borders.qml Theme/Colors.qml Theme/Fonts.qml Theme/Spaces.qml
-                            PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(
+  Theme/Borders.qml
+  Theme/Colors.qml
+  Theme/Fonts.qml
+  Theme/Radiuses.qml
+  Theme/Spaces.qml
+  PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(
   ${PROJECT_NAME}
@@ -33,6 +38,7 @@ qt_add_qml_module(
   Theme/Borders.qml
   Theme/Colors.qml
   Theme/Fonts.qml
+  Theme/Radiuses.qml
   Theme/Spaces.qml
   # SOURCES ButtonCustomControl.cpp ButtonCustomControl.h
 )
