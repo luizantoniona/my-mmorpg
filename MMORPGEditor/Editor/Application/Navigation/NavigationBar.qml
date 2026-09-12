@@ -22,27 +22,17 @@ Item {
         Repeater {
             model: root.pages
 
-            delegate: Rectangle {
+            delegate: ButtonToggle {
                 required property var modelData
 
-                border {
-                    color: Colors.border
-                    width: Borders.borders1
-                }
                 width: 120
                 height: parent.height
-                color: root.currentPage === modelData.name ? Colors.primaryPressed : "transparent"
+                vText: modelData.label
+                vSelected: root.currentPage === modelData.name
+                vBackgroundColor: "transparent"
 
-                Text {
-                    anchors.centerIn: parent
-                    text: modelData.label
-                    font: Fonts.bodyBold
-                    color: Colors.text
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: root.pageRequested(modelData.name)
+                onClicked: function () {
+                    root.pageRequested(modelData.name)
                 }
             }
         }

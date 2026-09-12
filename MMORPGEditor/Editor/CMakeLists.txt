@@ -1,8 +1,6 @@
 set(PROJECT_SOURCES
     RegisterEditorTypes.cpp
     RegisterEditorTypes.h
-    Application/World/WorldControl.cpp
-    Application/World/WorldControl.h
     Application/World/Object/ObjectIconProvider.cpp
     Application/World/Object/ObjectIconProvider.h
     Application/World/Object/ObjectPaletteModel.cpp
@@ -15,6 +13,8 @@ set(PROJECT_SOURCES
     Application/World/Tile/TilePaletteModel.h
     Application/World/Tile/TileSelectionControl.cpp
     Application/World/Tile/TileSelectionControl.h
+    Application/World/WorldControl.cpp
+    Application/World/WorldControl.h
     Renderer/EditorRenderWorld.cpp
     Renderer/EditorRenderWorld.h)
 
@@ -30,9 +30,9 @@ qt_add_qml_module(
   Main.qml
   Application/EditorWindow.qml
   Application/Navigation/NavigationBar.qml
-  Application/World/WorldPage.qml
+  Application/Objects/ObjectsPage.qml
   Application/Tiles/TilesPage.qml
-  Application/Objects/ObjectsPage.qml)
+  Application/World/WorldPage.qml)
 
 target_link_libraries(
   ${PROJECT_NAME}
