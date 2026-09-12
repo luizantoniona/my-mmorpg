@@ -78,6 +78,7 @@ Item {
                 id: toolBar
 
                 Layout.fillWidth: true
+                height: 40
                 mode: root.toolMode
                 floors: worldControl.floors
                 currentFloor: root.currentFloor

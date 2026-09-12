@@ -18,12 +18,14 @@ Item {
 
     signal modeRequested(int mode)
 
+    height: 40
+
     Rectangle {
         anchors.fill: parent
         color: Colors.background2
     }
 
-    RowLayout {
+    Row {
         anchors.fill: parent
         anchors.margins: Spaces.spacing8
         spacing: Spaces.spacing8
@@ -34,8 +36,8 @@ Item {
             delegate: ButtonToggle {
                 required property var modelData
 
-                width: 24
-                height: 24
+                width: 40
+                height: parent.height
                 vSelected: root.mode === modelData.mode
                 vRadius: Radiuses.radius8
 

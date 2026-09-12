@@ -33,16 +33,10 @@ Item {
                 vSelected: root.currentFloor === modelData
                 vRadius: Radiuses.radius8
 
-                onClicked: root.floorRequested(modelData)
+                onClicked: function () {
+                    root.floorRequested(modelData)
+                }
             }
         }
-    }
-
-    Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        height: Borders.border1
-        color: Colors.border
     }
 }
