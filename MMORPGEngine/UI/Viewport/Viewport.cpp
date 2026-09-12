@@ -8,11 +8,16 @@
 
 namespace Engine {
 
+namespace {
+constexpr int ANIMATION_INTERVAL_MS = 100;
+} // namespace
+
 Viewport::Viewport( QQuickItem* parent ) :
     QQuickItem( parent ),
     _camera( new Camera() ),
     _renderer( new Renderer() ),
     _world( nullptr ),
+    _animationTimer( new QTimer( this ) ),
     _activeFloor( 0 ) {
 
     setFlag( ItemHasContents, true );
@@ -21,6 +26,12 @@ Viewport::Viewport( QQuickItem* parent ) :
 
     _renderer->initialize();
     _renderer->resize( size() );
+
+    _animationTimer->setInterval( ANIMATION_INTERVAL_MS );
+    connect( _animationTimer, &QTimer::timeout, this, [ this ]() {
+        update();
+    } );
+    _animationTimer->start();
 
     update();
 }

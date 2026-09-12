@@ -3,6 +3,7 @@
 
 #include <QMetaObject>
 #include <QQuickItem>
+#include <QTimer>
 
 #include <MMORPGEngine/Renderer/Renderer.h>
 
@@ -51,6 +52,7 @@ private:
     Renderer* _renderer;
     RenderWorld* _world;
     QMetaObject::Connection _worldBoundsConnection;
+    QTimer* _animationTimer;
 
     int _activeFloor;
 };

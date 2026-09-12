@@ -6,6 +6,7 @@
 #include <QImage>
 #include <QString>
 
+#include <MMORPGEngine/Data/Animation/AnimationModel.h>
 #include <MMORPGEngine/Data/Object/ObjectSizeModel.h>
 
 namespace Engine {
@@ -27,6 +28,9 @@ public:
     QImage texture() const;
     void setTexture( const QImage& texture );
 
+    AnimationModel animation() const;
+    void setAnimation( const AnimationModel& animation );
+
     ObjectSizeModel size() const;
     void setSize( const ObjectSizeModel& size );
 
@@ -34,7 +38,7 @@ private:
     uint32_t _type;
     QString _name;
     QString _folder;
-    QImage _texture;
+    AnimationModel _animation;
     ObjectSizeModel _size;
 };
 

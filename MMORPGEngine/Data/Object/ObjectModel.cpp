@@ -6,7 +6,7 @@ ObjectModel::ObjectModel() :
     _type( 0 ),
     _name( "" ),
     _folder( "" ),
-    _texture(),
+    _animation(),
     _size() {
 }
 
@@ -37,11 +37,19 @@ void ObjectModel::setFolder( const QString& folder ) {
 }
 
 QImage ObjectModel::texture() const {
-    return _texture;
+    return _animation.firstFrame();
 }
 
 void ObjectModel::setTexture( const QImage& texture ) {
-    _texture = texture;
+    _animation = AnimationModel( { texture }, 100 );
+}
+
+AnimationModel ObjectModel::animation() const {
+    return _animation;
+}
+
+void ObjectModel::setAnimation( const AnimationModel& animation ) {
+    _animation = animation;
 }
 
 ObjectSizeModel ObjectModel::size() const {

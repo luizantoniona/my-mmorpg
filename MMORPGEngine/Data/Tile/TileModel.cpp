@@ -6,7 +6,7 @@ TileModel::TileModel() :
     _type( 0 ),
     _name( "" ),
     _folder( "" ),
-    _texture() {
+    _animation() {
 }
 
 uint32_t TileModel::type() const {
@@ -34,11 +34,19 @@ void TileModel::setFolder( const QString& folder ) {
 }
 
 QImage TileModel::texture() const {
-    return _texture;
+    return _animation.firstFrame();
 }
 
 void TileModel::setTexture( const QImage& texture ) {
-    _texture = texture;
+    _animation = AnimationModel( { texture }, 100 );
+}
+
+AnimationModel TileModel::animation() const {
+    return _animation;
+}
+
+void TileModel::setAnimation( const AnimationModel& animation ) {
+    _animation = animation;
 }
 
 } // namespace Engine

@@ -15,7 +15,7 @@ public:
     void render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z );
 
 private:
-    void renderTile( RenderScene& scene, int x, int y, int z, const WorldTileModel& worldTile );
+    void renderTile( RenderScene& scene, int x, int y, int z, const WorldTileModel& worldTile, qint64 elapsedMs );
 };
 
 } // namespace Engine

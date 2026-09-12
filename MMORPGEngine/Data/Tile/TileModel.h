@@ -6,6 +6,8 @@
 #include <QImage>
 #include <QString>
 
+#include <MMORPGEngine/Data/Animation/AnimationModel.h>
+
 namespace Engine {
 
 class TileModel {
@@ -24,11 +26,14 @@ public:
     QImage texture() const;
     void setTexture( const QImage& texture );
 
+    AnimationModel animation() const;
+    void setAnimation( const AnimationModel& animation );
+
 private:
     uint32_t _type;
     QString _name;
     QString _folder;
-    QImage _texture;
+    AnimationModel _animation;
 };
 
 } // namespace Engine

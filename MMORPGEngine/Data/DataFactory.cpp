@@ -1,21 +1,19 @@
 #include "DataFactory.h"
 
 #include <QDebug>
+#include <QImageReader>
 
 #include <json/json.h>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Animation/AnimationModel.h>
 #include <MMORPGEngine/Data/Object/ObjectModel.h>
 #include <MMORPGEngine/Data/Tile/TileModel.h>
 
 namespace Engine {
 
 void DataFactory::createObjectCatalog( const QString& configPath, ObjectCatalog& objectCatalog ) {
-    Json::Value configJson = JsonHelper::loadJsonFile( configPath + "Config.json" );
-
-    const QString mapFolder = QString( configJson[ "ActiveFolder" ].asCString() );
-
-    const QString mapPath = configPath + mapFolder + "/";
+    const QString mapPath = DataFactory::mapPath( configPath );
 
     Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
 
@@ -37,13 +35,18 @@ void DataFactory::createObjectCatalog( const QString& configPath, ObjectCatalog&
         // ObjectSizeModel
 
         object.setFolder( QString( objectJson[ "TextureFolder" ].asCString() ) );
-        const QString texturePath = mapPath + object.folder() + "/" + object.name() + ".png";
-        QImage textureImage( texturePath );
-        if ( textureImage.isNull() ) {
+
+        const bool isAnimated = objectJson.get( "IsAnimated", false ).asBool();
+        const int frameDurationMs = objectJson.get( "FrameDurationMs", 100 ).asInt();
+        const QString extension = isAnimated ? ".gif" : ".png";
+        const QString texturePath = mapPath + object.folder() + "/" + object.name() + extension;
+
+        const AnimationModel animation = loadAnimation( texturePath, isAnimated, frameDurationMs );
+        if ( animation.isNull() ) {
             qWarning() << "DataFactory::createObjectCatalog" << "Failed to load texture:" << texturePath;
 
         } else {
-            object.setTexture( textureImage );
+            object.setAnimation( animation );
             qInfo() << "DataFactory::createObjectCatalog" << "Loaded texture:" << texturePath;
         }
 
@@ -54,11 +57,7 @@ void DataFactory::createObjectCatalog( const QString& configPath, ObjectCatalog&
 }
 
 void DataFactory::createTileCatalog( const QString& configPath, TileCatalog& tileCatalog ) {
-    Json::Value configJson = JsonHelper::loadJsonFile( configPath + "Config.json" );
-
-    const QString mapFolder = QString( configJson[ "ActiveFolder" ].asCString() );
-
-    const QString mapPath = configPath + mapFolder + "/";
+    const QString mapPath = DataFactory::mapPath( configPath );
 
     Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
 
@@ -75,16 +74,19 @@ void DataFactory::createTileCatalog( const QString& configPath, TileCatalog& til
         TileModel tile;
         tile.setType( tileJson[ "Type" ].asUInt() );
         tile.setName( QString( tileJson[ "Name" ].asCString() ) );
-
-        // TODO: In the future Tiles will have autotilling. So we must put more textures in each tile catalog and render them accordingly.
         tile.setFolder( QString( tileJson[ "TextureFolder" ].asCString() ) );
-        const QString texturePath = mapPath + tile.folder() + "/5.png";
-        QImage textureImage( texturePath );
-        if ( textureImage.isNull() ) {
+
+        const bool isAnimated = tileJson.get( "IsAnimated", false ).asBool();
+        const int frameDurationMs = tileJson.get( "FrameDurationMs", 100 ).asInt();
+        const QString extension = isAnimated ? ".gif" : ".png";
+        const QString texturePath = mapPath + tile.folder() + "/" + tile.name() + extension;
+
+        const AnimationModel animation = loadAnimation( texturePath, isAnimated, frameDurationMs );
+        if ( animation.isNull() ) {
             qWarning() << "DataFactory::createTileCatalog" << "Failed to load texture:" << texturePath;
 
         } else {
-            tile.setTexture( textureImage );
+            tile.setAnimation( animation );
             qInfo() << "DataFactory::createTileCatalog" << "Loaded texture:" << texturePath;
         }
 
@@ -92,6 +94,29 @@ void DataFactory::createTileCatalog( const QString& configPath, TileCatalog& til
     }
 
     qInfo() << "DataFactory::createTileCatalog";
+}
+
+QString DataFactory::mapPath( const QString& configPath ) {
+    Json::Value configJson = JsonHelper::loadJsonFile( configPath + "Config.json" );
+
+    const QString mapFolder = QString( configJson[ "ActiveFolder" ].asCString() );
+
+    return configPath + mapFolder + "/";
+}
+
+AnimationModel DataFactory::loadAnimation( const QString& texturePath, bool isAnimated, int frameDurationMs ) {
+    if ( !isAnimated ) {
+        return AnimationModel( { QImage( texturePath ) }, frameDurationMs );
+    }
+
+    QImageReader reader( texturePath );
+
+    QList<QImage> frames;
+    while ( reader.canRead() ) {
+        frames.append( reader.read() );
+    }
+
+    return AnimationModel( frames, frameDurationMs );
 }
 
 } // namespace Engine

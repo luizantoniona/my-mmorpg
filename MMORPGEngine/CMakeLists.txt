@@ -18,6 +18,8 @@ set(PROJECT_SOURCES
     Commons/RegisterEngineTypes.cpp
     Commons/RegisterEngineTypes.h
     Commons/Singleton.h
+    Data/Animation/AnimationModel.cpp
+    Data/Animation/AnimationModel.h
     Data/Object/ObjectCatalog.cpp
     Data/Object/ObjectCatalog.h
     Data/Object/ObjectModel.cpp
