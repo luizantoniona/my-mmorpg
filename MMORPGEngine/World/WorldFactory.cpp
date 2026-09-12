@@ -53,6 +53,8 @@ void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
     const int z = floorJson[ "Z" ].asInt();
 
+    world->addFloor( z );
+
     // -------------------------------------------------------------------------
     // Tiles
     // -------------------------------------------------------------------------

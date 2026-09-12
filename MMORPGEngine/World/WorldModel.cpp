@@ -63,6 +63,14 @@ const ChunkModel* WorldModel::chunk( int x, int y ) const {
     return iterator->second.get();
 }
 
+std::vector<int> WorldModel::floors() const {
+    return std::vector<int>( _floors.begin(), _floors.end() );
+}
+
+void WorldModel::addFloor( int z ) {
+    _floors.insert( z );
+}
+
 const WorldObjectModel* WorldModel::object( int x, int y, int z ) const {
     const int chunkX = x / WorldConstants::CHUNK_SIZE;
     const int chunkY = y / WorldConstants::CHUNK_SIZE;

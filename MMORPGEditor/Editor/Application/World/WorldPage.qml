@@ -9,6 +9,8 @@ import MMORPGEditorControls
 Item {
     id: root
 
+    property int currentFloor: 0
+
     TileSelectionControl {
         id: selectionControl
     }

@@ -9,15 +9,13 @@ namespace Engine {
 ObjectRenderer::ObjectRenderer() {
 }
 
-void ObjectRenderer::render( RenderScene& scene, const Camera& camera, const RenderWorld& world ) {
+void ObjectRenderer::render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z ) {
     const QRectF visibleRect = camera.visibleRect();
 
     const int startX = static_cast<int>( std::floor( visibleRect.left() / WorldConstants::TILE_SIZE ) );
     const int startY = static_cast<int>( std::floor( visibleRect.top() / WorldConstants::TILE_SIZE ) );
     const int endX = static_cast<int>( std::ceil( visibleRect.right() / WorldConstants::TILE_SIZE ) );
     const int endY = static_cast<int>( std::ceil( visibleRect.bottom() / WorldConstants::TILE_SIZE ) );
-
-    constexpr int z = 0;
 
     for ( int y = startY; y <= endY; ++y ) {
         for ( int x = startX; x <= endX; ++x ) {

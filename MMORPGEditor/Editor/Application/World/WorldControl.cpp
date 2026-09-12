@@ -11,6 +11,24 @@ WorldControl::WorldControl( QObject* parent ) :
     _world( nullptr ) {
 }
 
+Engine::WorldModel* WorldControl::world() const {
+    return _world.get();
+}
+
+QVariantList WorldControl::floors() const {
+    QVariantList result;
+
+    if ( !_world ) {
+        return result;
+    }
+
+    for ( int z : _world->floors() ) {
+        result.append( z );
+    }
+
+    return result;
+}
+
 QString WorldControl::worldName() const {
     if ( !_world ) {
         return "";
@@ -33,10 +51,6 @@ int WorldControl::worldHeight() const {
     }
 
     return static_cast<int>( _world->height() );
-}
-
-Engine::WorldModel* WorldControl::world() const {
-    return _world.get();
 }
 
 void WorldControl::loadWorld() {

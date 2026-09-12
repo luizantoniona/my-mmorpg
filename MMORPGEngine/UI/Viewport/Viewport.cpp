@@ -12,7 +12,8 @@ Viewport::Viewport( QQuickItem* parent ) :
     QQuickItem( parent ),
     _camera( new Camera() ),
     _renderer( new Renderer() ),
-    _world( nullptr ) {
+    _world( nullptr ),
+    _activeFloor( 0 ) {
 
     setFlag( ItemHasContents, true );
 
@@ -75,6 +76,22 @@ void Viewport::setRenderWorld( RenderWorld* world ) {
     update();
 }
 
+int Viewport::activeFloor() const {
+    return _activeFloor;
+}
+
+void Viewport::setActiveFloor( int z ) {
+    if ( _activeFloor == z ) {
+        return;
+    }
+
+    _activeFloor = z;
+
+    emit activeFloorChanged();
+
+    update();
+}
+
 void Viewport::geometryChange( const QRectF& newGeometry, const QRectF& oldGeometry ) {
     QQuickItem::geometryChange( newGeometry, oldGeometry );
     _camera->setViewportSize( newGeometry.size() );
@@ -99,8 +116,7 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
 
     const int x = static_cast<int>( std::floor( worldPosition.x() / tileSize ) );
     const int y = static_cast<int>( std::floor( worldPosition.y() / tileSize ) );
-    // TODO: Z
-    constexpr int z = 0;
+    const int z = _activeFloor;
 
     if ( !_world->tile( x, y, z ) ) {
         return;
@@ -120,7 +136,7 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
         return rootNode;
     }
 
-    _renderer->render( scene, *_camera, *_world );
+    _renderer->render( scene, *_camera, *_world, _activeFloor );
 
     scene.build( rootNode, window(), *_camera );
 

@@ -4,24 +4,29 @@
 #include <memory>
 
 #include <QObject>
+#include <QVariantList>
 
 #include <MMORPGEngine/World/WorldModel.h>
 
 class WorldControl : public QObject {
     Q_OBJECT
+    Q_PROPERTY( Engine::WorldModel* world READ world CONSTANT )
+    Q_PROPERTY( QVariantList floors READ floors NOTIFY worldChanged )
     Q_PROPERTY( QString worldName READ worldName NOTIFY worldChanged )
     Q_PROPERTY( int worldWidth READ worldWidth NOTIFY worldChanged )
     Q_PROPERTY( int worldHeight READ worldHeight NOTIFY worldChanged )
-    Q_PROPERTY( Engine::WorldModel* world READ world CONSTANT )
 
 public:
     explicit WorldControl( QObject* parent = nullptr );
 
+    Engine::WorldModel* world() const;
+
+    QVariantList floors() const;
+
     QString worldName() const;
+
     int worldWidth() const;
     int worldHeight() const;
-
-    Engine::WorldModel* world() const;
 
 public slots:
     void loadWorld();
