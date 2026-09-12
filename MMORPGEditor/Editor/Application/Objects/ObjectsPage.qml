@@ -11,10 +11,8 @@ Item {
         color: Colors.background0
     }
 
-    Text {
+    TextTitle {
         anchors.centerIn: parent
-        text: "Object Creation — WIP"
-        font: Fonts.titleMedium
-        color: Colors.text
+        vText: "Object creation — WIP"
     }
 }

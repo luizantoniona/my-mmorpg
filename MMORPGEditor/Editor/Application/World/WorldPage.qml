@@ -8,14 +8,36 @@ import MMORPGEditorControls
 Item {
     id: root
 
+    property int activeTileType: -1
+    property int activeObjectType: -1
+
+    property int activeBrush: BrushMode.Tile
+    property int toolMode: ToolMode.Select
+
     property int currentFloor: 0
 
     TileSelectionControl {
         id: selectionControl
+
+        onSelectionChanged: function () {
+            if (!selectionControl.hasSelection) {
+                viewport.clearHighlight()
+                return
+            }
+            viewport.setHighlightedTile(selectionControl.x, selectionControl.y)
+        }
     }
 
     ObjectSelectionControl {
         id: objectSelectionControl
+
+        onSelectionChanged: function () {
+            if (!objectSelectionControl.hasSelection) {
+                viewport.clearHighlight()
+                return
+            }
+            viewport.setHighlightedTile(objectSelectionControl.x, objectSelectionControl.y)
+        }
     }
 
     WorldPageControl {
@@ -26,28 +48,94 @@ Item {
         id: editorWorld
     }
 
-    Viewport {
-        id: viewport
-
+    RowLayout {
         anchors.fill: parent
-        renderWorld: editorWorld
+        spacing: 0
 
-        onTileClicked: function (x, y, z) {
-            selectionControl.selectTile(x, y, z)
-    ButtonBase {
-        id: saveButton
+        EditorSidebar {
+            id: editorBar
 
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.margins: Spaces.spacing8
+            Layout.fillHeight: true
+            width: 220
 
-        vText: "Save World"
+            onTileSelected: function (type) {
+                root.activeTileType = type
+                root.activeBrush = BrushMode.Tile
+            }
 
-        onClicked: {
-            if (worldControl.saveWorld()) {
-                console.log("World saved")
-            } else {
-                console.log("Failed to save world")
+            onObjectSelected: function (type) {
+                root.activeObjectType = type
+                root.activeBrush = BrushMode.Object
+            }
+        }
+
+        ColumnLayout {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            spacing: 0
+
+            EditorTopBar {
+                id: toolBar
+
+                Layout.fillWidth: true
+                mode: root.toolMode
+                floors: worldControl.floors
+                currentFloor: root.currentFloor
+
+                onModeRequested: function (mode) {
+                    root.toolMode = mode
+
+                    if (mode === ToolMode.Paint) {
+                        selectionControl.clearSelection()
+                        objectSelectionControl.clearSelection()
+                    }
+                }
+
+                onFloorRequested: function (z) {
+                    root.currentFloor = z
+                    selectionControl.clearSelection()
+                    objectSelectionControl.clearSelection()
+                    viewport.clearHighlight()
+                    viewport.forceRedraw()
+                }
+
+                onSaveRequested: function () {
+                    if (worldControl.saveWorld()) {
+                        console.log("World saved")
+                    } else {
+                        console.log("Failed to save world")
+                    }
+                }
+            }
+
+            Viewport {
+                id: viewport
+
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                renderWorld: editorWorld
+                activeFloor: root.currentFloor
+
+                onTileClicked: function (x, y, z) {
+                    if (root.toolMode === ToolMode.Paint) {
+                        if (root.activeBrush === BrushMode.Tile && root.activeTileType >= 0) {
+                            worldControl.paintTile(x, y, z, root.activeTileType)
+                            viewport.forceRedraw()
+                        } else if (root.activeBrush === BrushMode.Object && root.activeObjectType >= 0) {
+                            worldControl.paintObject(x, y, z, root.activeObjectType)
+                            viewport.forceRedraw()
+                        }
+                        return
+                    }
+
+                    if (editorWorld.hasObject(x, y, z)) {
+                        selectionControl.clearSelection()
+                        objectSelectionControl.selectObject(x, y, z)
+                    } else {
+                        objectSelectionControl.clearSelection()
+                        selectionControl.selectTile(x, y, z)
+                    }
+                }
             }
         }
     }
@@ -56,11 +144,10 @@ Item {
         worldControl.loadWorld()
         editorWorld.world = worldControl.world
         forceActiveFocus()
-        viewport.centerCameraOnTile(16, 16)
+        viewport.centerCameraOnTile(0, 0)
     }
 
     Keys.onPressed: function (event) {
-        console.log("KEY:", event.key)
         switch (event.key) {
         case Qt.Key_W:
             viewport.moveCameraByTiles(0, -1)
@@ -74,19 +161,6 @@ Item {
         case Qt.Key_D:
             viewport.moveCameraByTiles(1, 0)
             break
-        }
-    }
-
-    Connections {
-        target: selectionControl
-
-        function onSelectionChanged() {
-            if (!selectionControl.hasSelection) {
-                console.log("Selection cleared")
-                return
-            }
-
-            console.log("Selected Tile:", selectionControl.x, selectionControl.y, selectionControl.z)
         }
     }
 }
