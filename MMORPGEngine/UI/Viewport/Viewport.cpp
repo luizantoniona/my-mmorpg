@@ -71,9 +71,25 @@ void Viewport::setRenderWorld( RenderWorld* world ) {
         return;
     }
 
+    QObject::disconnect( _worldBoundsConnection );
+
     _world = world;
 
+    if ( _world ) {
+        _worldBoundsConnection = connect( _world, &RenderWorld::boundsChanged, this, &Viewport::updateWorldBounds );
+    }
+
+    updateWorldBounds();
+
     update();
+}
+
+void Viewport::updateWorldBounds() {
+    const double tileSize = WorldConstants::TILE_SIZE;
+    _camera->setWorldSize( _world ? QSizeF( _world->width() * tileSize, _world->height() * tileSize )
+                                  : QSizeF( 0.0, 0.0 ) );
+
+    emit cameraPositionChanged();
 }
 
 int Viewport::activeFloor() const {
@@ -96,6 +112,8 @@ void Viewport::geometryChange( const QRectF& newGeometry, const QRectF& oldGeome
     QQuickItem::geometryChange( newGeometry, oldGeometry );
     _camera->setViewportSize( newGeometry.size() );
     _renderer->resize( newGeometry.size() );
+
+    emit cameraPositionChanged();
 }
 
 void Viewport::mousePressEvent( QMouseEvent* event ) {
@@ -132,7 +150,10 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
 
     RenderScene scene;
 
-    if ( !_world ) {
+    // Sem tamanho definido ainda, a câmera não tem como clampar a
+    // posição corretamente; evita desenhar um frame descentralizado
+    // antes do primeiro geometryChange real.
+    if ( !_world || width() <= 0.0 || height() <= 0.0 ) {
         return rootNode;
     }
 

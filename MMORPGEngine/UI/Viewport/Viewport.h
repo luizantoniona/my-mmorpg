@@ -1,6 +1,7 @@
 #ifndef VIEWPORT_H
 #define VIEWPORT_H
 
+#include <QMetaObject>
 #include <QQuickItem>
 
 #include <MMORPGEngine/Renderer/Renderer.h>
@@ -43,9 +44,13 @@ protected:
     QSGNode* updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData ) override;
 
 private:
+    void updateWorldBounds();
+
+private:
     Camera* _camera;
     Renderer* _renderer;
     RenderWorld* _world;
+    QMetaObject::Connection _worldBoundsConnection;
 
     int _activeFloor;
 };

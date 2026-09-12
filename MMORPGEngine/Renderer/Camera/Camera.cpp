@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include <QtGlobal>
+
 #include <MMORPGEngine/World/WorldConstants.h>
 
 namespace Engine {
@@ -7,6 +9,7 @@ namespace Engine {
 Camera::Camera() :
     _position( 0.0, 0.0 ),
     _viewportSize( 0.0, 0.0 ),
+    _worldSize( 0.0, 0.0 ),
     _zoom( 1.0 ) {
 }
 
@@ -16,6 +19,7 @@ const QPointF& Camera::position() const {
 
 void Camera::setPosition( const QPointF& position ) {
     _position = position;
+    clampPosition();
 }
 
 void Camera::centerOnTile( int x, int y ) {
@@ -25,7 +29,7 @@ void Camera::centerOnTile( int x, int y ) {
 
 void Camera::moveByTiles( int dx, int dy ) {
     const double tileSize = WorldConstants::TILE_SIZE;
-    _position += QPointF( dx * tileSize, dy * tileSize );
+    setPosition( _position + QPointF( dx * tileSize, dy * tileSize ) );
 }
 
 const QSizeF& Camera::viewportSize() const {
@@ -34,6 +38,7 @@ const QSizeF& Camera::viewportSize() const {
 
 void Camera::setViewportSize( const QSizeF& size ) {
     _viewportSize = size;
+    clampPosition();
 }
 
 double Camera::zoom() const {
@@ -46,6 +51,42 @@ void Camera::setZoom( double zoom ) {
     }
 
     _zoom = zoom;
+    clampPosition();
+}
+
+const QSizeF& Camera::worldSize() const {
+    return _worldSize;
+}
+
+void Camera::setWorldSize( const QSizeF& size ) {
+    _worldSize = size;
+    clampPosition();
+}
+
+void Camera::clampPosition() {
+    if ( _worldSize.isEmpty() || _viewportSize.isEmpty() ) {
+        return;
+    }
+
+    const double halfWidth = _viewportSize.width() / ( 2.0 * _zoom );
+    const double halfHeight = _viewportSize.height() / ( 2.0 * _zoom );
+
+    double x = _position.x();
+    double y = _position.y();
+
+    if ( _worldSize.width() <= halfWidth * 2.0 ) {
+        x = _worldSize.width() / 2.0;
+    } else {
+        x = qBound( halfWidth, x, _worldSize.width() - halfWidth );
+    }
+
+    if ( _worldSize.height() <= halfHeight * 2.0 ) {
+        y = _worldSize.height() / 2.0;
+    } else {
+        y = qBound( halfHeight, y, _worldSize.height() - halfHeight );
+    }
+
+    _position = QPointF( x, y );
 }
 
 QRectF Camera::visibleRect() const {
