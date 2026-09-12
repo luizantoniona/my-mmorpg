@@ -18,6 +18,9 @@ public:
 
     const Engine::WorldTileModel* tile( int x, int y, int z ) const override;
 
+    uint32_t width() const override;
+    uint32_t height() const override;
+
 private:
     Engine::WorldModel* _world;
 };

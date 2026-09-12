@@ -31,3 +31,19 @@ const Engine::WorldTileModel* EditorRenderWorld::tile( int x, int y, int z ) con
 
     return _world->tile( x, y, z );
 }
+
+uint32_t EditorRenderWorld::width() const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->width();
+}
+
+uint32_t EditorRenderWorld::height() const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->height();
+}
