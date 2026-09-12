@@ -29,6 +29,7 @@ QImage noneIcon() {
 
 ObjectIconProvider::ObjectIconProvider() :
     QQuickImageProvider( QQuickImageProvider::Image ) {
+    qInfo() << "ObjectIconProvider::ObjectIconProvider";
 }
 
 QImage ObjectIconProvider::requestImage( const QString& id, QSize* size, const QSize& ) {

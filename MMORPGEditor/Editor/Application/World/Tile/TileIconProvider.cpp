@@ -7,6 +7,7 @@
 
 TileIconProvider::TileIconProvider() :
     QQuickImageProvider( QQuickImageProvider::Image ) {
+    qInfo() << "TileIconProvider::TileIconProvider";
 }
 
 QImage TileIconProvider::requestImage( const QString& id, QSize* size, const QSize& ) {
