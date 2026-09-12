@@ -38,4 +38,8 @@ const TileCatalog& DataManager::tileCatalog() const {
     return _tileCatalog;
 }
 
+void DataManager::addTile( const TileModel& tile ) {
+    _tileCatalog.addTile( tile );
+}
+
 } // namespace Engine
