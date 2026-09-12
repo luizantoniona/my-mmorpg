@@ -11,14 +11,16 @@ Rectangle {
     signal exited
 
     property string vText: ""
+    property color vTextColor: Colors.text
+
+    property int vBorderWidth: Borders.border1
+    property color vBorderColor: Colors.border
+
     property bool vEnabled: true
     property color vBackgroundColor: Colors.primaryEnabled
-    property color vBorderColor: Colors.border
     property color vHoverColor: Colors.primaryHovered
     property color vPressedColor: Colors.primaryPressed
-    property color vTextColor: Colors.text
     property int vRadius: Radiuses.radius8
-    property int vBorderWidth: Borders.border1
 
     default property alias contentData: content.data
     readonly property alias contentItem: content
