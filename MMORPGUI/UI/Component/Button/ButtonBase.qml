@@ -28,7 +28,7 @@ Rectangle {
     readonly property bool vHovered: mouseArea.containsMouse
     readonly property bool vPressed: mouseArea.pressed
 
-    implicitWidth: 160
+    implicitWidth: 100
     implicitHeight: 40
     opacity: root.vEnabled ? 1.0 : 0.6
     color: root.vBackgroundColor
@@ -120,14 +120,12 @@ Rectangle {
     }
 
     Text {
-        id: label
-
         anchors.centerIn: parent
-        visible: root.vText !== ""
         text: root.vText
         color: root.vTextColor
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
         font: Fonts.bodyBold
+        visible: root.vText !== ""
     }
 }

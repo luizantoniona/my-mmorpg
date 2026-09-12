@@ -11,6 +11,6 @@ Item {
 
     TextTitle {
         anchors.centerIn: parent
-        vText: "Object creation — WIP"
+        vText: "Configuration — WIP"
     }
 }

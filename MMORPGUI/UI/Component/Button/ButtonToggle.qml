@@ -7,15 +7,17 @@ Rectangle {
     signal clicked
 
     property string vText: ""
+    property color vTextColor: Colors.text
+
+    property int vBorderWidth: Borders.border1
+    property color vBorderColor: Colors.border
+
     property bool vEnabled: true
     property bool vSelected: false
     property color vBackgroundColor: Colors.primaryEnabled
     property color vSelectedColor: Colors.primaryPressed
     property color vHoverColor: Colors.primaryHovered
-    property color vBorderColor: Colors.border
-    property color vTextColor: Colors.text
     property int vRadius: 0
-    property int vBorderWidth: Borders.border1
 
     default property alias contentData: content.data
     readonly property alias contentItem: content

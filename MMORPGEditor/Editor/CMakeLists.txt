@@ -18,6 +18,11 @@ set(PROJECT_SOURCES
     Renderer/EditorRenderWorld.cpp
     Renderer/EditorRenderWorld.h)
 
+set_source_files_properties(
+  Application/World/BrushMode.qml
+  Application/World/Tool/ToolMode.qml
+  PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 
 qt_add_qml_module(
@@ -29,9 +34,18 @@ qt_add_qml_module(
   QML_FILES
   Main.qml
   Application/EditorWindow.qml
-  Application/Navigation/NavigationBar.qml
+  Application/NavigationBar.qml
+  Application/Configuration/ConfigurationPage.qml
   Application/Objects/ObjectsPage.qml
   Application/Tiles/TilesPage.qml
+  Application/World/Tool/FloorSelector.qml
+  Application/World/Tool/ToolMode.qml
+  Application/World/Tool/ToolSelector.qml
+  Application/World/Object/ObjectPalette.qml
+  Application/World/Tile/TilePalette.qml
+  Application/World/BrushMode.qml
+  Application/World/EditorSidebar.qml
+  Application/World/EditorTopBar.qml
   Application/World/WorldPage.qml)
 
 target_link_libraries(

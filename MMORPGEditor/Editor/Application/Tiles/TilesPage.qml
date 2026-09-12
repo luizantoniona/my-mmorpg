@@ -1,8 +1,6 @@
 import QtQuick
 import MMORPGUIComponents
 
-// Cadastro de novos TileModel no catálogo (nome, textura, tipo) e geração
-// dos JSONs de dados. Ainda não implementado — placeholder de navegação.
 Item {
     id: root
 
