@@ -30,6 +30,7 @@ qt_add_qml_module(
   ${CMAKE_CURRENT_BINARY_DIR}/MMORPGUIComponents
   QML_FILES
   Component/Button/ButtonBase.qml
+  Component/Button/ButtonToggle.qml
   Component/Icon/IconBase.qml
   Component/Input/InputBase.qml
   Component/Loading/LoadingBase.qml
