@@ -8,7 +8,7 @@ Text {
     property color vTextColor: Colors.text
 
     color: root.vTextColor
-    font: Fonts.titleLarge
+    font: Fonts.titleMedium
     verticalAlignment: Text.AlignVCenter
     elide: Text.ElideRight
     text: vText

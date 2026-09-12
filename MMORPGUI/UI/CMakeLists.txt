@@ -40,6 +40,7 @@ qt_add_qml_module(
   Component/Panel/PanelHeader.qml
   Component/Spacer/SpacerHorizontal.qml
   Component/Spacer/SpacerVertical.qml
+  Component/Text/TextSubTitle.qml
   Component/Text/TextTitle.qml
   Theme/Borders.qml
   Theme/Colors.qml
