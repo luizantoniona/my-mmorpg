@@ -161,9 +161,6 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
 
     RenderScene scene;
 
-    // Sem tamanho definido ainda, a câmera não tem como clampar a
-    // posição corretamente; evita desenhar um frame descentralizado
-    // antes do primeiro geometryChange real.
     if ( !_world || width() <= 0.0 || height() <= 0.0 ) {
         return rootNode;
     }
