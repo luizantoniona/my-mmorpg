@@ -12,7 +12,9 @@ namespace Engine {
 class DataFactory {
 public:
     static void createObjectCatalog( const QString& configPath, ObjectCatalog& objectCatalog );
+
     static void createTileCatalog( const QString& configPath, TileCatalog& tileCatalog );
+    static void saveTileCatalog( const QString& configPath, const TileCatalog& tileCatalog );
 
     static QString mapPath( const QString& configPath );
 

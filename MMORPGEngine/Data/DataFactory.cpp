@@ -105,6 +105,43 @@ void DataFactory::createTileCatalog( const QString& configPath, TileCatalog& til
     qInfo() << "DataFactory::createTileCatalog";
 }
 
+void DataFactory::saveTileCatalog( const QString& configPath, const TileCatalog& tileCatalog ) {
+    const QString path = mapPath( configPath );
+
+    Json::Value mapJson = JsonHelper::loadJsonFile( path + "Map.json" );
+
+    const QString tilesFile = path + QString( mapJson[ "Catalogs" ][ "Tiles" ].asCString() );
+
+    Json::Value json;
+    json[ "Tiles" ] = Json::Value( Json::arrayValue );
+
+    for ( const auto& entry : tileCatalog.tiles() ) {
+        const TileModel& tile = entry.second;
+
+        Json::Value tileJson;
+        tileJson[ "Type" ] = tile.type();
+        tileJson[ "Name" ] = tile.name().toStdString();
+        tileJson[ "TextureFolder" ] = tile.folder().toStdString();
+
+        if ( tile.animation().isAnimated() ) {
+            tileJson[ "IsAnimated" ] = true;
+            tileJson[ "FrameDurationMs" ] = tile.animation().frameDurationMs();
+        }
+
+        Json::Value tagsJson( Json::arrayValue );
+        for ( const QString& tag : tile.tags() ) {
+            tagsJson.append( tag.toStdString() );
+        }
+        tileJson[ "Tags" ] = tagsJson;
+
+        json[ "Tiles" ].append( tileJson );
+    }
+
+    qInfo() << "DataFactory::saveTileCatalog" << "[TILES_FILE_PATH]" << tilesFile;
+
+    JsonHelper::saveJsonFile( tilesFile, json );
+}
+
 QString DataFactory::mapPath( const QString& configPath ) {
     Json::Value configJson = JsonHelper::loadJsonFile( configPath + "Config.json" );
 
