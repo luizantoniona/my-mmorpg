@@ -29,11 +29,15 @@ public:
     AnimationModel animation() const;
     void setAnimation( const AnimationModel& animation );
 
+    QList<QString> tags() const;
+    void setTags( const QList<QString>& tags );
+
 private:
     uint32_t _type;
     QString _name;
     QString _folder;
     AnimationModel _animation;
+    QList<QString> _tags;
 };
 
 } // namespace Engine

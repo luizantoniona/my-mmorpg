@@ -6,7 +6,8 @@ TileModel::TileModel() :
     _type( 0 ),
     _name( "" ),
     _folder( "" ),
-    _animation() {
+    _animation(),
+    _tags() {
 }
 
 uint32_t TileModel::type() const {
@@ -47,6 +48,14 @@ AnimationModel TileModel::animation() const {
 
 void TileModel::setAnimation( const AnimationModel& animation ) {
     _animation = animation;
+}
+
+QList<QString> TileModel::tags() const {
+    return _tags;
+}
+
+void TileModel::setTags( const QList<QString>& tags ) {
+    _tags = tags;
 }
 
 } // namespace Engine

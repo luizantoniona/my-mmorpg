@@ -76,6 +76,15 @@ void DataFactory::createTileCatalog( const QString& configPath, TileCatalog& til
         tile.setName( QString( tileJson[ "Name" ].asCString() ) );
         tile.setFolder( QString( tileJson[ "TextureFolder" ].asCString() ) );
 
+        QStringList tags;
+        const Json::Value& tagsJson = tileJson[ "Tags" ];
+        if ( tagsJson.isArray() ) {
+            for ( const Json::Value& tagJson : tagsJson ) {
+                tags.append( QString( tagJson.asCString() ) );
+            }
+        }
+        tile.setTags( tags );
+
         const bool isAnimated = tileJson.get( "IsAnimated", false ).asBool();
         const int frameDurationMs = tileJson.get( "FrameDurationMs", 100 ).asInt();
         const QString extension = isAnimated ? ".gif" : ".png";
