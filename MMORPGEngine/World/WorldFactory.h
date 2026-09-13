@@ -14,9 +14,9 @@ public:
 
     static void saveWorld( const std::string& worldPath, const WorldModel& world );
 
-private:
-    static void createFloor( const std::string& floorFile, WorldModel* world );
-    static void saveFloor( const std::string& floorFile, const WorldModel& world );
+    static bool addFloor( const std::string& worldPath, const WorldModel& world, bool above );
+
+    static bool resizeWorld( const std::string& worldPath, uint32_t newWidth, uint32_t newHeight );
 };
 
 } // namespace Engine

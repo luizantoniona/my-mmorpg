@@ -1,6 +1,8 @@
 set(PROJECT_SOURCES
     RegisterEditorTypes.cpp
     RegisterEditorTypes.h
+    Application/Configuration/ConfigurationControl.cpp
+    Application/Configuration/ConfigurationControl.h
     Application/Objects/ObjectCreationControl.cpp
     Application/Objects/ObjectCreationControl.h
     Application/Tiles/TileCreationControl.cpp

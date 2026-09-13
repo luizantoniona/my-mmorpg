@@ -84,6 +84,8 @@ set(PROJECT_SOURCES
     World/Object/WorldObjectModel.h
     World/Tile/WorldTileModel.cpp
     World/Tile/WorldTileModel.h
+    World/FloorFactory.cpp
+    World/FloorFactory.h
     World/WorldConstants.h
     World/WorldFactory.cpp
     World/WorldFactory.h

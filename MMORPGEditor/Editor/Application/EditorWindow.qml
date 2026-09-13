@@ -16,6 +16,9 @@ Item {
         }, {
             "name": "ObjectCreationPage",
             "label": "Objects"
+        }, {
+            "name": "ConfigurationPage",
+            "label": "Configuration"
         }]
 
     function updatePage(page) {
@@ -31,6 +34,8 @@ Item {
         case "ObjectCreationPage":
             stack.push(objectCreationPage)
             break
+        case "ConfigurationPage":
+            stack.push(configurationPage)
             break
         }
 
@@ -88,6 +93,14 @@ Item {
 
         ObjectCreationPage {
             id: objects
+        }
+    }
+
+    Component {
+        id: configurationPage
+
+        ConfigurationPage {
+            id: configuration
         }
     }
 

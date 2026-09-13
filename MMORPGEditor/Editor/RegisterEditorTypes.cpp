@@ -2,6 +2,8 @@
 
 #include <QQmlEngine>
 
+#include <MMORPGEditor/Editor/Application/Configuration/ConfigurationControl.h>
+#include <MMORPGEditor/Editor/Application/Objects/ObjectCreationControl.h>
 #include <MMORPGEditor/Editor/Application/Tiles/TileCreationControl.h>
 #include <MMORPGEditor/Editor/Application/World/Object/ObjectPaletteModel.h>
 #include <MMORPGEditor/Editor/Application/World/Object/ObjectSelectionControl.h>
@@ -14,9 +16,11 @@ namespace Editor {
 
 void RegisterEditorTypes::registerTypes() {
     // --- Controls
+    qmlRegisterType<ConfigurationControl>( "MMORPGEditorControls", 1, 0, "ConfigurationControl" );
+    qmlRegisterType<ObjectCreationControl>( "MMORPGEditorControls", 1, 0, "ObjectCreationControl" );
     qmlRegisterType<ObjectSelectionControl>( "MMORPGEditorControls", 1, 0, "ObjectSelectionControl" );
-    qmlRegisterType<TileSelectionControl>( "MMORPGEditorControls", 1, 0, "TileSelectionControl" );
     qmlRegisterType<TileCreationControl>( "MMORPGEditorControls", 1, 0, "TileCreationControl" );
+    qmlRegisterType<TileSelectionControl>( "MMORPGEditorControls", 1, 0, "TileSelectionControl" );
     qmlRegisterType<WorldControl>( "MMORPGEditorControls", 1, 0, "WorldPageControl" );
 
     // --- Models
