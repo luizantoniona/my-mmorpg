@@ -8,6 +8,7 @@
 
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Scene/RenderSceneItem.h>
+#include <MMORPGEngine/Renderer/Scene/TextureCache.h>
 
 namespace Engine {
 
@@ -20,7 +21,7 @@ public:
 
     void addTexture( const QPointF& position, const QSizeF& size, const QImage& image );
 
-    void build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera );
+    void build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera, TextureCache& textureCache );
 
 private:
     QList<RenderSceneItem> _items;

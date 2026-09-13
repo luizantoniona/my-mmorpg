@@ -167,7 +167,7 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
 
     _renderer->render( scene, *_camera, *_world, _activeFloor );
 
-    scene.build( rootNode, window(), *_camera );
+    scene.build( rootNode, window(), *_camera, _textureCache );
 
     return rootNode;
 }

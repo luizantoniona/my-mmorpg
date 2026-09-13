@@ -14,6 +14,8 @@ Engine::WorldModel* EditorRenderWorld::world() const {
 
 void EditorRenderWorld::setWorld( Engine::WorldModel* world ) {
     _world = world;
+
+    emit boundsChanged();
 }
 
 const Engine::WorldObjectModel* EditorRenderWorld::object( int x, int y, int z ) const {

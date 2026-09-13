@@ -62,6 +62,8 @@ set(PROJECT_SOURCES
     Renderer/Scene/RenderScene.h
     Renderer/Scene/RenderSceneItem.cpp
     Renderer/Scene/RenderSceneItem.h
+    Renderer/Scene/TextureCache.cpp
+    Renderer/Scene/TextureCache.h
     Renderer/World/RenderWorld.cpp
     Renderer/World/RenderWorld.h
     Renderer/Renderer.cpp

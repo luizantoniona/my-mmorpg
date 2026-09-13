@@ -20,7 +20,7 @@ void RenderScene::addTexture( const QPointF& position, const QSizeF& size, const
     _items.append( item );
 }
 
-void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera ) {
+void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera, TextureCache& textureCache ) {
     if ( !rootNode || !window ) {
         return;
     }
@@ -32,7 +32,7 @@ void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& 
 
         const QPointF screenPosition = camera.worldToScreen( item.position() );
 
-        QSGTexture* texture = window->createTextureFromImage( item.image() );
+        QSGTexture* texture = textureCache.texture( window, item.image() );
 
         if ( !texture ) {
             continue;
@@ -40,7 +40,7 @@ void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& 
 
         auto* node = new QSGSimpleTextureNode();
         node->setTexture( texture );
-        node->setOwnsTexture( true );
+        node->setOwnsTexture( false );
         node->setRect( screenPosition.x(), screenPosition.y(), item.size().width(), item.size().height() );
 
         rootNode->appendChildNode( node );

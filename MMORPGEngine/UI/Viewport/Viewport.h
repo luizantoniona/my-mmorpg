@@ -6,6 +6,7 @@
 #include <QTimer>
 
 #include <MMORPGEngine/Renderer/Renderer.h>
+#include <MMORPGEngine/Renderer/Scene/TextureCache.h>
 
 namespace Engine {
 
@@ -53,6 +54,7 @@ private:
     RenderWorld* _world;
     QMetaObject::Connection _worldBoundsConnection;
     QTimer* _animationTimer;
+    TextureCache _textureCache;
 
     int _activeFloor;
 };
