@@ -97,7 +97,6 @@ Item {
                     selectionControl.clearSelection()
                     objectSelectionControl.clearSelection()
                     viewport.clearHighlight()
-                    viewport.forceRedraw()
                 }
 
                 onSaveRequested: function () {
@@ -109,32 +108,43 @@ Item {
                 }
             }
 
-            Viewport {
-                id: viewport
+            Rectangle {
+                id: viewportFrame
 
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                renderWorld: editorWorld
-                activeFloor: root.currentFloor
+                color: "transparent"
+                border.color: Colors.border
+                border.width: Borders.border1
+                clip: true
 
-                onTileClicked: function (x, y, z) {
-                    if (root.toolMode === ToolMode.Paint) {
-                        if (root.activeBrush === BrushMode.Tile && root.activeTileType >= 0) {
-                            worldControl.paintTile(x, y, z, root.activeTileType)
-                            viewport.forceRedraw()
-                        } else if (root.activeBrush === BrushMode.Object && root.activeObjectType >= 0) {
-                            worldControl.paintObject(x, y, z, root.activeObjectType)
-                            viewport.forceRedraw()
+                Viewport {
+                    id: viewport
+
+                    anchors.fill: parent
+                    anchors.margins: Borders.border1
+                    renderWorld: editorWorld
+                    activeFloor: root.currentFloor
+
+                    onTileClicked: function (x, y, z) {
+                        if (root.toolMode === ToolMode.Paint) {
+                            if (root.activeBrush === BrushMode.Tile && root.activeTileType >= 0) {
+                                worldControl.paintTile(x, y, z, root.activeTileType)
+                                viewport.forceRedraw()
+                            } else if (root.activeBrush === BrushMode.Object && root.activeObjectType >= 0) {
+                                worldControl.paintObject(x, y, z, root.activeObjectType)
+                                viewport.forceRedraw()
+                            }
+                            return
                         }
-                        return
-                    }
 
-                    if (editorWorld.hasObject(x, y, z)) {
-                        selectionControl.clearSelection()
-                        objectSelectionControl.selectObject(x, y, z)
-                    } else {
-                        objectSelectionControl.clearSelection()
-                        selectionControl.selectTile(x, y, z)
+                        if (editorWorld.hasObject(x, y, z)) {
+                            selectionControl.clearSelection()
+                            objectSelectionControl.selectObject(x, y, z)
+                        } else {
+                            objectSelectionControl.clearSelection()
+                            selectionControl.selectTile(x, y, z)
+                        }
                     }
                 }
             }
@@ -145,7 +155,7 @@ Item {
         worldControl.loadWorld()
         editorWorld.world = worldControl.world
         forceActiveFocus()
-        viewport.centerCameraOnTile(0, 0)
+        viewport.centerCameraOnTile(worldControl.worldWidth / 2, worldControl.worldHeight / 2)
     }
 
     Keys.onPressed: function (event) {
