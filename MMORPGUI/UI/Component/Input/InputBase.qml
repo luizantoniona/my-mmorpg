@@ -19,10 +19,12 @@ Item {
         spacing: Spaces.spacing8
 
         Text {
+            Layout.fillWidth: true
             color: Colors.text
             text: root.vTitle
             visible: root.vTitle !== ""
             font: Fonts.bodyBold
+            elide: Text.ElideRight
         }
 
         Rectangle {
