@@ -20,6 +20,7 @@ public:
     const ObjectCatalog& objectCatalog() const;
 
     const TileCatalog& tileCatalog() const;
+    void addTile( const TileModel& tile );
 
 private:
     ManifestModel _manifest;
