@@ -11,10 +11,10 @@ Item {
             "name": "WorldPage",
             "label": "World"
         }, {
-            "name": "TilesPage",
+            "name": "TileCreationPage",
             "label": "Tiles"
         }, {
-            "name": "ObjectsPage",
+            "name": "ObjectCreationPage",
             "label": "Objects"
         }]
 
@@ -25,11 +25,12 @@ Item {
         case "WorldPage":
             stack.push(worldPage)
             break
-        case "TilesPage":
-            stack.push(tilesPage)
+        case "TileCreationPage":
+            stack.push(tileCreationPage)
             break
-        case "ObjectsPage":
-            stack.push(objectsPage)
+        case "ObjectCreationPage":
+            stack.push(objectCreationPage)
+            break
             break
         }
 
@@ -75,17 +76,17 @@ Item {
     }
 
     Component {
-        id: tilesPage
+        id: tileCreationPage
 
-        TilesPage {
+        TileCreationPage {
             id: tiles
         }
     }
 
     Component {
-        id: objectsPage
+        id: objectCreationPage
 
-        ObjectsPage {
+        ObjectCreationPage {
             id: objects
         }
     }

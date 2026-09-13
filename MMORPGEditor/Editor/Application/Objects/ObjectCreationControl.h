@@ -1,22 +1,22 @@
-#ifndef TILECREATIONCONTROL_H
-#define TILECREATIONCONTROL_H
+#ifndef OBJECTCREATIONCONTROL_H
+#define OBJECTCREATIONCONTROL_H
 
 #include <QObject>
 #include <QString>
 
-class TileCreationControl : public QObject {
+class ObjectCreationControl : public QObject {
     Q_OBJECT
     Q_PROPERTY( int nextType READ nextType NOTIFY catalogChanged )
     Q_PROPERTY( QString lastError READ lastError NOTIFY lastErrorChanged )
 
 public:
-    explicit TileCreationControl( QObject* parent = nullptr );
+    explicit ObjectCreationControl( QObject* parent = nullptr );
 
     int nextType() const;
     QString lastError() const;
 
 public slots:
-    bool createTile( const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs );
+    bool createObject( const QString& name, const QString& textureFile, int width, int height, int frameDurationMs );
 
 signals:
     void catalogChanged();
@@ -28,4 +28,4 @@ private:
     QString _lastError;
 };
 
-#endif // TILECREATIONCONTROL_H
+#endif // OBJECTCREATIONCONTROL_H

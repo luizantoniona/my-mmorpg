@@ -1,6 +1,10 @@
 set(PROJECT_SOURCES
     RegisterEditorTypes.cpp
     RegisterEditorTypes.h
+    Application/Objects/ObjectCreationControl.cpp
+    Application/Objects/ObjectCreationControl.h
+    Application/Tiles/TileCreationControl.cpp
+    Application/Tiles/TileCreationControl.h
     Application/World/Object/ObjectIconProvider.cpp
     Application/World/Object/ObjectIconProvider.h
     Application/World/Object/ObjectPaletteModel.cpp
@@ -36,8 +40,8 @@ qt_add_qml_module(
   Application/EditorWindow.qml
   Application/NavigationBar.qml
   Application/Configuration/ConfigurationPage.qml
-  Application/Objects/ObjectsPage.qml
-  Application/Tiles/TilesPage.qml
+  Application/Objects/ObjectCreationPage.qml
+  Application/Tiles/TileCreationPage.qml
   Application/World/Tool/FloorSelector.qml
   Application/World/Tool/ToolMode.qml
   Application/World/Tool/ToolSelector.qml
@@ -51,5 +55,6 @@ qt_add_qml_module(
 target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE Qt6::QuickControls2
+  PRIVATE Qt6::QuickDialogs2
   PRIVATE MMORPG::MMORPGEngine
   PRIVATE MMORPG::MMORPGUI)

@@ -1,4 +1,4 @@
-#include "TileCreationControl.h"
+#include "ObjectCreationControl.h"
 
 #include <algorithm>
 
@@ -10,8 +10,9 @@
 #include <MMORPGEngine/Data/Animation/AnimationModel.h>
 #include <MMORPGEngine/Data/DataFactory.h>
 #include <MMORPGEngine/Data/DataManager.h>
-#include <MMORPGEngine/Data/Tile/TileFactory.h>
-#include <MMORPGEngine/Data/Tile/TileModel.h>
+#include <MMORPGEngine/Data/Object/ObjectFactory.h>
+#include <MMORPGEngine/Data/Object/ObjectModel.h>
+#include <MMORPGEngine/Data/Object/ObjectSizeModel.h>
 
 namespace {
 constexpr const char* DATA_PATH = "../../../Data/";
@@ -23,53 +24,39 @@ QString toLocalFilePath( const QString& path ) {
 
     return path;
 }
-
-QStringList parseTags( const QString& tagsText ) {
-    QStringList tags;
-
-    for ( const QString& tag : tagsText.split( ",", Qt::SkipEmptyParts ) ) {
-        const QString trimmed = tag.trimmed();
-
-        if ( !trimmed.isEmpty() ) {
-            tags.append( trimmed );
-        }
-    }
-
-    return tags;
-}
 } // namespace
 
-TileCreationControl::TileCreationControl( QObject* parent ) :
+ObjectCreationControl::ObjectCreationControl( QObject* parent ) :
     QObject( parent ),
     _lastError() {
 }
 
-int TileCreationControl::nextType() const {
-    const Engine::TileCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().tileCatalog();
+int ObjectCreationControl::nextType() const {
+    const Engine::ObjectCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().objectCatalog();
 
     uint32_t maxType = 0;
-    for ( const auto& entry : catalog.tiles() ) {
+    for ( const auto& entry : catalog.objects() ) {
         maxType = std::max( maxType, entry.first );
     }
 
     return static_cast<int>( maxType ) + 1;
 }
 
-QString TileCreationControl::lastError() const {
+QString ObjectCreationControl::lastError() const {
     return _lastError;
 }
 
-void TileCreationControl::setLastError( const QString& error ) {
+void ObjectCreationControl::setLastError( const QString& error ) {
     _lastError = error;
 
     emit lastErrorChanged();
 }
 
-bool TileCreationControl::createTile( const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs ) {
+bool ObjectCreationControl::createObject( const QString& name, const QString& textureFile, int width, int height, int frameDurationMs ) {
     const QString trimmedName = name.trimmed();
 
     if ( trimmedName.isEmpty() ) {
-        setLastError( "Name the tile." );
+        setLastError( "Name the object." );
         return false;
     }
 
@@ -80,11 +67,16 @@ bool TileCreationControl::createTile( const QString& name, const QString& textur
         return false;
     }
 
+    if ( width < 1 || height < 1 ) {
+        setLastError( "Footprint must be at least 1x1." );
+        return false;
+    }
+
     const bool isAnimated = sourcePath.endsWith( ".gif", Qt::CaseInsensitive );
     const QString extension = isAnimated ? ".gif" : ".png";
 
     const QString mapPath = Engine::DataFactory::mapPath( DATA_PATH );
-    const QString folder = "Textures/Tiles/" + trimmedName;
+    const QString folder = "Textures/Objects/" + trimmedName;
     const QString destDir = mapPath + folder;
 
     QDir().mkpath( destDir );
@@ -106,15 +98,19 @@ bool TileCreationControl::createTile( const QString& name, const QString& textur
         return false;
     }
 
-    Engine::TileModel tile;
-    tile.setType( static_cast<uint32_t>( nextType() ) );
-    tile.setName( trimmedName );
-    tile.setFolder( folder );
-    tile.setAnimation( animation );
-    tile.setTags( parseTags( tagsText ) );
+    Engine::ObjectSizeModel size;
+    size.setWidth( width );
+    size.setHeight( height );
 
-    Engine::Singleton<Engine::DataManager>::instance().addTile( tile );
-    Engine::TileFactory::saveTileCatalog( DATA_PATH, Engine::Singleton<Engine::DataManager>::instance().tileCatalog() );
+    Engine::ObjectModel object;
+    object.setType( static_cast<uint32_t>( nextType() ) );
+    object.setName( trimmedName );
+    object.setFolder( folder );
+    object.setAnimation( animation );
+    object.setSize( size );
+
+    Engine::Singleton<Engine::DataManager>::instance().addObject( object );
+    Engine::ObjectFactory::saveObjectCatalog( DATA_PATH, Engine::Singleton<Engine::DataManager>::instance().objectCatalog() );
 
     setLastError( "" );
     emit catalogChanged();

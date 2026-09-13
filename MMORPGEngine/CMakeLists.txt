@@ -22,12 +22,16 @@ set(PROJECT_SOURCES
     Data/Animation/AnimationModel.h
     Data/Object/ObjectCatalog.cpp
     Data/Object/ObjectCatalog.h
+    Data/Object/ObjectFactory.cpp
+    Data/Object/ObjectFactory.h
     Data/Object/ObjectModel.cpp
     Data/Object/ObjectModel.h
     Data/Object/ObjectSizeModel.cpp
     Data/Object/ObjectSizeModel.h
     Data/Tile/TileCatalog.cpp
     Data/Tile/TileCatalog.h
+    Data/Tile/TileFactory.cpp
+    Data/Tile/TileFactory.h
     Data/Tile/TileModel.cpp
     Data/Tile/TileModel.h
     Data/Manifest/ManifestDataDTO.cpp

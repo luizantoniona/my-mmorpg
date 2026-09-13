@@ -13,11 +13,13 @@ public:
     ~DataManager();
 
     void initialize( const std::string& configPath );
+    void reload( const std::string& configPath );
     void finalize();
 
     const ManifestModel& manifest() const;
 
     const ObjectCatalog& objectCatalog() const;
+    void addObject( const ObjectModel& object );
 
     const TileCatalog& tileCatalog() const;
     void addTile( const TileModel& tile );
