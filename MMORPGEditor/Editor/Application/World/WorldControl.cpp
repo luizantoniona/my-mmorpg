@@ -69,6 +69,34 @@ bool WorldControl::saveWorld() {
     return true;
 }
 
+bool WorldControl::addFloor( bool above ) {
+    if ( !_world ) {
+        return false;
+    }
+
+    if ( !Engine::WorldFactory::addFloor( DATA_PATH, *_world, above ) ) {
+        return false;
+    }
+
+    loadWorld();
+
+    return true;
+}
+
+bool WorldControl::removeFloor( int z ) {
+    if ( !_world ) {
+        return false;
+    }
+
+    if ( !Engine::WorldFactory::removeFloor( DATA_PATH, z ) ) {
+        return false;
+    }
+
+    loadWorld();
+
+    return true;
+}
+
 void WorldControl::paintTile( int x, int y, int z, int tileType ) {
     if ( !_world ) {
         return;

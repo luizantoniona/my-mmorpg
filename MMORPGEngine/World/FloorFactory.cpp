@@ -1,5 +1,6 @@
 #include "FloorFactory.h"
 
+#include <cstdio>
 #include <fstream>
 #include <functional>
 
@@ -219,6 +220,13 @@ bool FloorFactory::createEmptyFloor( const std::string& floorFile, int z, uint32
     file << "}\n";
 
     return true;
+}
+
+void FloorFactory::deleteFloor( const std::string& floorFile ) {
+    qInfo() << "FloorFactory::deleteFloor"
+            << "[FLOOR_FILE_PATH]" << floorFile;
+
+    std::remove( floorFile.c_str() );
 }
 
 } // namespace Engine

@@ -12,6 +12,8 @@ Item {
 
     signal modeRequested(int mode)
     signal floorRequested(int z)
+    signal addFloorRequested(bool above)
+    signal removeFloorRequested(int z)
     signal saveRequested
 
     height: modeBar.height
@@ -23,7 +25,6 @@ Item {
         ToolSelector {
             id: modeBar
 
-            // Layout.fillHeight: true
             Layout.fillWidth: true
             mode: root.mode
 
@@ -44,6 +45,14 @@ Item {
 
             onFloorRequested: function (z) {
                 root.floorRequested(z)
+            }
+
+            onAddFloorRequested: function (above) {
+                root.addFloorRequested(above)
+            }
+
+            onRemoveFloorRequested: function (z) {
+                root.removeFloorRequested(z)
             }
         }
 

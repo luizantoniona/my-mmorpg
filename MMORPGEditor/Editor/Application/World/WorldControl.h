@@ -32,6 +32,9 @@ public slots:
     void loadWorld();
     bool saveWorld();
 
+    bool addFloor( bool above );
+    bool removeFloor( int z );
+
     void paintTile( int x, int y, int z, int tileType );
     void paintObject( int x, int y, int z, int objectType );
 

@@ -46,7 +46,7 @@ void ObjectRenderer::renderObject( RenderScene& scene, int x, int y, int z, cons
         return;
     }
 
-    const QPointF position( x * WorldConstants::TILE_SIZE, y * WorldConstants::TILE_SIZE );
+    const QPointF position( x * WorldConstants::TILE_SIZE, ( y + 1 ) * WorldConstants::TILE_SIZE - frame.height() );
     const QSizeF size( frame.width(), frame.height() );
 
     scene.addTexture( position, size, frame );

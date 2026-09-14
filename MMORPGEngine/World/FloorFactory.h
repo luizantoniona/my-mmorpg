@@ -14,6 +14,7 @@ public:
     static void saveFloor( const std::string& floorFile, const WorldModel& world );
 
     static bool createEmptyFloor( const std::string& floorFile, int z, uint32_t width, uint32_t height );
+    static void deleteFloor( const std::string& floorFile );
 };
 
 } // namespace Engine

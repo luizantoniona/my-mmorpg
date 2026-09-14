@@ -92,6 +92,50 @@ bool WorldFactory::addFloor( const std::string& worldPath, const WorldModel& wor
     return true;
 }
 
+bool WorldFactory::removeFloor( const std::string& worldPath, int z ) {
+    qInfo() << "WorldFactory::removeFloor";
+
+    Json::Value configJson = JsonHelper::loadJsonFile( worldPath + "Config.json" );
+
+    const std::string mapFolder = configJson[ "ActiveFolder" ].asString();
+
+    const std::string mapPath = worldPath + mapFolder + "/";
+
+    Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
+
+    if ( mapJson[ "Floors" ].size() <= 1 ) {
+        qWarning() << "WorldFactory::removeFloor"
+                   << "Cannot remove the last remaining floor.";
+        return false;
+    }
+
+    const std::string floorFileName = std::to_string( z ) + ".json";
+
+    Json::Value remainingFloors( Json::arrayValue );
+    bool found = false;
+    for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
+        if ( floorFile.asString() == floorFileName ) {
+            found = true;
+            continue;
+        }
+
+        remainingFloors.append( floorFile );
+    }
+
+    if ( !found ) {
+        qWarning() << "WorldFactory::removeFloor"
+                   << "Floor not found:" << z;
+        return false;
+    }
+
+    mapJson[ "Floors" ] = remainingFloors;
+    JsonHelper::saveJsonFile( mapPath + "Map.json", mapJson );
+
+    FloorFactory::deleteFloor( mapPath + "Floors/" + floorFileName );
+
+    return true;
+}
+
 bool WorldFactory::resizeWorld( const std::string& worldPath, uint32_t newWidth, uint32_t newHeight ) {
     qInfo() << "WorldFactory::resizeWorld";
 

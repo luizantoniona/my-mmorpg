@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import MMORPGEngine
 import MMORPGUIComponents
@@ -99,6 +100,24 @@ Item {
                     viewport.clearHighlight()
                 }
 
+                onAddFloorRequested: function (above) {
+                    const ok = worldControl.addFloor(above)
+
+                    if (ok) {
+                        editorWorld.world = worldControl.world
+                        const floors = worldControl.floors
+                        root.currentFloor = above ? Math.max(...floors) : Math.min(...floors)
+                        selectionControl.clearSelection()
+                        objectSelectionControl.clearSelection()
+                        viewport.clearHighlight()
+                    }
+                }
+
+                onRemoveFloorRequested: function (z) {
+                    removeFloorDialog.pendingZ = z
+                    removeFloorDialog.open()
+                }
+
                 onSaveRequested: function () {
                     if (worldControl.saveWorld()) {
                         console.log("World saved")
@@ -147,6 +166,36 @@ Item {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    Dialog {
+        id: removeFloorDialog
+
+        property int pendingZ: 0
+
+        anchors.centerIn: parent
+        modal: true
+        title: "Remove Floor"
+        standardButtons: Dialog.Yes | Dialog.No
+
+        Text {
+            color: Colors.text
+            font: Fonts.bodyBold
+            text: "Remove floor Z" + removeFloorDialog.pendingZ + "? This cannot be undone."
+        }
+
+        onAccepted: {
+            const ok = worldControl.removeFloor(removeFloorDialog.pendingZ)
+
+            if (ok) {
+                editorWorld.world = worldControl.world
+                const floors = worldControl.floors
+                root.currentFloor = floors.length > 0 ? floors[0] : 0
+                selectionControl.clearSelection()
+                objectSelectionControl.clearSelection()
+                viewport.clearHighlight()
             }
         }
     }
