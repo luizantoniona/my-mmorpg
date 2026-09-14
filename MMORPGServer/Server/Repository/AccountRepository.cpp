@@ -90,7 +90,7 @@ std::vector<Engine::AccountCharacterModel> AccountRepository::findCharacters( co
         Engine::AccountCharacterModel character;
         character.setIdCharacter( query.getColumnInt( 0 ) );
         character.setName( query.getColumnText( 1 ) );
-        character.setIdCharacter( idAccount );
+        character.setIdAccount( idAccount );
 
         characters.push_back( character );
     }
