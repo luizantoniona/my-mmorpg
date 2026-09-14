@@ -13,11 +13,6 @@ Item {
 
     height: 40
 
-    Rectangle {
-        anchors.fill: parent
-        color: Colors.background2
-    }
-
     Row {
         anchors.fill: parent
         anchors.margins: Spaces.spacing8

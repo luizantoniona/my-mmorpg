@@ -18,6 +18,11 @@ Item {
 
     height: modeBar.height
 
+    Rectangle {
+        anchors.fill: parent
+        color: Colors.background2
+    }
+
     RowLayout {
         anchors.fill: parent
         spacing: 0
