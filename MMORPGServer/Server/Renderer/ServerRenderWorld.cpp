@@ -14,6 +14,8 @@ Engine::WorldModel* ServerRenderWorld::world() const {
 
 void ServerRenderWorld::setWorld( Engine::WorldModel* world ) {
     _world = world;
+
+    emit boundsChanged();
 }
 
 const Engine::WorldObjectModel* ServerRenderWorld::object( int x, int y, int z ) const {
@@ -30,4 +32,20 @@ const Engine::WorldTileModel* ServerRenderWorld::tile( int x, int y, int z ) con
     }
 
     return _world->tile( x, y, z );
+}
+
+uint32_t ServerRenderWorld::width() const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->width();
+}
+
+uint32_t ServerRenderWorld::height() const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->height();
 }

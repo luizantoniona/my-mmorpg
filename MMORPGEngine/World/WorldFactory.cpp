@@ -1,11 +1,11 @@
 #include "WorldFactory.h"
 
+#include <algorithm>
+
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
-#include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Data/DataManager.h>
-#include <MMORPGEngine/World/WorldConstants.h>
+#include <MMORPGEngine/World/FloorFactory.h>
 
 namespace Engine {
 
@@ -25,127 +25,146 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
     // --- Name
     world->setName( QString( mapJson[ "Name" ].asCString() ) );
 
-    qInfo() << "WorldFactory::createWorld" << "[MAP_NAME]" << world->name();
+    qInfo() << "WorldFactory::createWorld"
+            << "[MAP_NAME]" << world->name();
 
     // --- Size
     world->setWidth( mapJson[ "Width" ].asUInt() );
     world->setHeight( mapJson[ "Height" ].asUInt() );
 
-    qInfo() << "WorldFactory::createWorld" << "[MAP_SIZE]" << world->width() << "x" << world->height();
+    qInfo() << "WorldFactory::createWorld"
+            << "[MAP_SIZE]" << world->width() << "x" << world->height();
 
     // --- Floors
     for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
-        createFloor( mapPath + "Floors/" + floorFile.asString(), world.get() );
+        FloorFactory::createFloor( mapPath + "Floors/" + floorFile.asString(), world.get() );
     }
 
     return world;
 }
 
-void WorldFactory::createFloor( const std::string& floorFile, WorldModel* world ) {
-    qInfo() << "WorldFactory::createFloor" << "[FLOOR_FILE_PATH]" << floorFile;
+void WorldFactory::saveWorld( const std::string& worldPath, const WorldModel& world ) {
+    qInfo() << "WorldFactory::saveWorld";
 
-    if ( !world ) {
-        qInfo() << "WorldFactory::createFloor" << "World is nullptr";
-        return;
+    Json::Value configJson = JsonHelper::loadJsonFile( worldPath + "Config.json" );
+
+    const std::string mapFolder = configJson[ "ActiveFolder" ].asString();
+
+    const std::string mapPath = worldPath + mapFolder + "/";
+
+    Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
+
+    // --- Floors
+    for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
+        FloorFactory::saveFloor( mapPath + "Floors/" + floorFile.asString(), world );
+    }
+}
+
+bool WorldFactory::addFloor( const std::string& worldPath, const WorldModel& world, bool above ) {
+    qInfo() << "WorldFactory::addFloor";
+
+    Json::Value configJson = JsonHelper::loadJsonFile( worldPath + "Config.json" );
+
+    const std::string mapFolder = configJson[ "ActiveFolder" ].asString();
+
+    const std::string mapPath = worldPath + mapFolder + "/";
+
+    Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
+
+    const std::vector<int> floors = world.floors();
+
+    int nextZ = 0;
+    if ( !floors.empty() ) {
+        const auto minMax = std::minmax_element( floors.begin(), floors.end() );
+        nextZ = above ? *minMax.second + 1 : *minMax.first - 1;
     }
 
-    Json::Value floorJson = JsonHelper::loadJsonFile( floorFile );
+    const std::string floorFileName = std::to_string( nextZ ) + ".json";
+    const std::string floorFile = mapPath + "Floors/" + floorFileName;
 
-    const int z = floorJson[ "Z" ].asInt();
+    if ( !FloorFactory::createEmptyFloor( floorFile, nextZ, world.width(), world.height() ) ) {
+        return false;
+    }
 
-    // -------------------------------------------------------------------------
-    // Tiles
-    // -------------------------------------------------------------------------
-    qInfo() << "WorldFactory::createFloor" << "Creating Tiles";
-    const Json::Value& tilesRows = floorJson[ "Tiles" ];
-    if ( tilesRows.isArray() && !tilesRows.empty() ) {
+    mapJson[ "Floors" ].append( floorFileName );
+    JsonHelper::saveJsonFile( mapPath + "Map.json", mapJson );
 
-        const TileCatalog& tileCatalog = Singleton<DataManager>::instance().tileCatalog();
+    return true;
+}
 
-        const int height = static_cast<int>( tilesRows.size() );
-        const int width = static_cast<int>( tilesRows[ 0 ].size() );
+bool WorldFactory::removeFloor( const std::string& worldPath, int z ) {
+    qInfo() << "WorldFactory::removeFloor";
 
-        for ( int y = 0; y < height; ++y ) {
-            const Json::Value& row = tilesRows[ y ];
-            for ( int x = 0; x < width; ++x ) {
+    Json::Value configJson = JsonHelper::loadJsonFile( worldPath + "Config.json" );
 
-                const uint32_t tileType = row[ x ].asUInt();
+    const std::string mapFolder = configJson[ "ActiveFolder" ].asString();
 
-                const TileModel* tileModel = tileCatalog.tile( tileType );
+    const std::string mapPath = worldPath + mapFolder + "/";
 
-                if ( !tileModel ) {
-                    qWarning() << "WorldFactory::createFloor" << "Unknown tile type:" << tileType << "at x y z:" << x << y << z;
-                    continue;
-                }
+    Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
 
-                const int chunkX = x / WorldConstants::CHUNK_SIZE;
-                const int chunkY = y / WorldConstants::CHUNK_SIZE;
+    if ( mapJson[ "Floors" ].size() <= 1 ) {
+        qWarning() << "WorldFactory::removeFloor"
+                   << "Cannot remove the last remaining floor.";
+        return false;
+    }
 
-                const int localX = x % WorldConstants::CHUNK_SIZE;
-                const int localY = y % WorldConstants::CHUNK_SIZE;
+    const std::string floorFileName = std::to_string( z ) + ".json";
 
-                ChunkModel* chunk = world->chunk( chunkX, chunkY );
-                if ( !chunk ) {
-                    continue;
-                }
-
-                auto worldTile = std::make_unique<WorldTileModel>();
-                worldTile->setTileModel( tileModel );
-                worldTile->setTileType( tileType );
-
-                chunk->setTile( localX, localY, z, std::move( worldTile ) );
-            }
+    Json::Value remainingFloors( Json::arrayValue );
+    bool found = false;
+    for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
+        if ( floorFile.asString() == floorFileName ) {
+            found = true;
+            continue;
         }
+
+        remainingFloors.append( floorFile );
     }
 
-    // -------------------------------------------------------------------------
-    // Objects
-    // -------------------------------------------------------------------------
-    qInfo() << "WorldFactory::createFloor" << "Creating Objects";
-    const Json::Value& objectRows = floorJson[ "Objects" ];
-    if ( objectRows.isArray() && !objectRows.empty() ) {
-
-        const ObjectCatalog& objectCatalog = Singleton<DataManager>::instance().objectCatalog();
-
-        const int height = static_cast<int>( objectRows.size() );
-        const int width = static_cast<int>( objectRows[ 0 ].size() );
-
-        for ( int y = 0; y < height; ++y ) {
-            const Json::Value& row = objectRows[ y ];
-            for ( int x = 0; x < width; ++x ) {
-
-                const uint32_t objectType = row[ x ].asUInt();
-
-                if ( objectType == 0 ) {
-                    continue;
-                }
-
-                const ObjectModel* objectModel = objectCatalog.object( objectType );
-
-                if ( !objectModel ) {
-                    qWarning() << "WorldFactory::createFloor" << "Unknown object type:" << objectType << "at x y z:" << x << y << z;
-                    continue;
-                }
-
-                const int chunkX = x / WorldConstants::CHUNK_SIZE;
-                const int chunkY = y / WorldConstants::CHUNK_SIZE;
-
-                const int localX = x % WorldConstants::CHUNK_SIZE;
-                const int localY = y % WorldConstants::CHUNK_SIZE;
-
-                ChunkModel* chunk = world->chunk( chunkX, chunkY );
-                if ( !chunk ) {
-                    continue;
-                }
-
-                auto worldObject = std::make_unique<WorldObjectModel>();
-                worldObject->setObjectModel( objectModel );
-                worldObject->setObjectType( objectType );
-
-                chunk->setObject( localX, localY, z, std::move( worldObject ) );
-            }
-        }
+    if ( !found ) {
+        qWarning() << "WorldFactory::removeFloor"
+                   << "Floor not found:" << z;
+        return false;
     }
+
+    mapJson[ "Floors" ] = remainingFloors;
+    JsonHelper::saveJsonFile( mapPath + "Map.json", mapJson );
+
+    FloorFactory::deleteFloor( mapPath + "Floors/" + floorFileName );
+
+    return true;
+}
+
+bool WorldFactory::resizeWorld( const std::string& worldPath, uint32_t newWidth, uint32_t newHeight ) {
+    qInfo() << "WorldFactory::resizeWorld";
+
+    std::unique_ptr<WorldModel> world = createWorld( worldPath );
+
+    if ( newWidth < world->width() || newHeight < world->height() ) {
+        qWarning() << "WorldFactory::resizeWorld"
+                   << "New size must be greater than or equal to the current size.";
+        return false;
+    }
+
+    world->setWidth( newWidth );
+    world->setHeight( newHeight );
+
+    saveWorld( worldPath, *world );
+
+    Json::Value configJson = JsonHelper::loadJsonFile( worldPath + "Config.json" );
+
+    const std::string mapFolder = configJson[ "ActiveFolder" ].asString();
+
+    const std::string mapPath = worldPath + mapFolder + "/";
+
+    Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
+    mapJson[ "Width" ] = newWidth;
+    mapJson[ "Height" ] = newHeight;
+
+    JsonHelper::saveJsonFile( mapPath + "Map.json", mapJson );
+
+    return true;
 }
 
 } // namespace Engine

@@ -11,14 +11,16 @@ Rectangle {
     signal exited
 
     property string vText: ""
+    property color vTextColor: Colors.text
+
+    property int vBorderWidth: Borders.border1
+    property color vBorderColor: Colors.border
+
     property bool vEnabled: true
     property color vBackgroundColor: Colors.primaryEnabled
-    property color vBorderColor: Colors.border
     property color vHoverColor: Colors.primaryHovered
     property color vPressedColor: Colors.primaryPressed
-    property color vTextColor: Colors.text
-    property int vRadius: Spaces.spacing8
-    property int vBorderWidth: Borders.borders1
+    property int vRadius: Radiuses.radius8
 
     default property alias contentData: content.data
     readonly property alias contentItem: content
@@ -26,7 +28,7 @@ Rectangle {
     readonly property bool vHovered: mouseArea.containsMouse
     readonly property bool vPressed: mouseArea.pressed
 
-    implicitWidth: 160
+    implicitWidth: 100
     implicitHeight: 40
     opacity: root.vEnabled ? 1.0 : 0.6
     color: root.vBackgroundColor
@@ -117,21 +119,13 @@ Rectangle {
         anchors.fill: parent
     }
 
-    Row {
-        id: contentRow
-
+    Text {
         anchors.centerIn: parent
-        spacing: 8
+        text: root.vText
+        color: root.vTextColor
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        font: Fonts.bodyBold
         visible: root.vText !== ""
-
-        Text {
-            id: label
-
-            text: root.vText
-            color: root.vTextColor
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-            font: Fonts.bodyBold
-        }
     }
 }

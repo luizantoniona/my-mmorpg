@@ -17,7 +17,7 @@ public:
 
     void resize( const QSizeF& size );
 
-    void render( RenderScene& scene, const Camera& camera, const RenderWorld& world );
+    void render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z );
 
 private:
     QSizeF _viewportSize;

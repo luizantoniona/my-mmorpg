@@ -22,6 +22,9 @@ public:
     void setZoom( double zoom );
     double zoom() const;
 
+    const QSizeF& worldSize() const;
+    void setWorldSize( const QSizeF& size );
+
     QRectF visibleRect() const;
 
     QPointF worldToScreen( const QPointF& worldPosition ) const;
@@ -29,8 +32,12 @@ public:
     QPointF screenToWorld( const QPointF& screenPosition ) const;
 
 private:
+    void clampPosition();
+
+private:
     QPointF _position;
     QSizeF _viewportSize;
+    QSizeF _worldSize;
     double _zoom;
 };
 

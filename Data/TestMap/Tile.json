@@ -1,24 +1,40 @@
 {
-    "Tiles": [
+    "Tiles" : 
+    [
         {
-            "Type": 0,
-            "Name": "Void",
-            "TextureFolder": "Textures/Tiles/Void"
+            "Name" : "Void",
+            "Tags" : [],
+            "TextureFolder" : "Textures/Tiles/Void",
+            "Type" : 0
         },
         {
-            "Type": 1,
-            "Name": "Water",
-            "TextureFolder": "Textures/Tiles/Water"
+            "Name" : "Water",
+            "Tags" : [],
+            "TextureFolder" : "Textures/Tiles/Water",
+            "Type" : 1
         },
         {
-            "Type": 2,
-            "Name": "Grass",
-            "TextureFolder": "Textures/Tiles/Grass"
+            "Name" : "Grass",
+            "Tags" : [],
+            "TextureFolder" : "Textures/Tiles/Grass",
+            "Type" : 2
         },
         {
-            "Type": 3,
-            "Name": "Sand",
-            "TextureFolder": "Textures/Tiles/Sand"
+            "Name" : "Sand",
+            "Tags" : [],
+            "TextureFolder" : "Textures/Tiles/Sand",
+            "Type" : 3
+        },
+        {
+            "FrameDurationMs" : 100,
+            "IsAnimated" : true,
+            "Name" : "Lava",
+            "Tags" : 
+            [
+                "lava"
+            ],
+            "TextureFolder" : "Textures/Tiles/Lava",
+            "Type" : 4
         }
     ]
 }

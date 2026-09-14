@@ -12,8 +12,12 @@ class WorldFactory {
 public:
     static std::unique_ptr<WorldModel> createWorld( const std::string& worldPath );
 
-private:
-    static void createFloor( const std::string& floorFile, WorldModel* world );
+    static void saveWorld( const std::string& worldPath, const WorldModel& world );
+
+    static bool addFloor( const std::string& worldPath, const WorldModel& world, bool above );
+    static bool removeFloor( const std::string& worldPath, int z );
+
+    static bool resizeWorld( const std::string& worldPath, uint32_t newWidth, uint32_t newHeight );
 };
 
 } // namespace Engine

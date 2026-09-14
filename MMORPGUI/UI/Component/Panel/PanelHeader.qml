@@ -15,7 +15,7 @@ Item {
         anchors.fill: parent
         color: Colors.background1
         border.color: Colors.border
-        border.width: Borders.borders1
+        border.width: Borders.border1
     }
 
     RowLayout {

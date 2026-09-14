@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(MMORPGEDITOR_BUILD_TESTS "Build tests" OFF)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Qml Quick QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Core Qml Quick QuickControls2 QuickDialogs2)
 
 qt_standard_project_setup(REQUIRES 6.8)
 

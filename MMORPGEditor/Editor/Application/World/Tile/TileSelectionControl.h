@@ -1,9 +1,9 @@
-#ifndef SELECTIONCONTROL_H
-#define SELECTIONCONTROL_H
+#ifndef TILESELECTIONCONTROL_H
+#define TILESELECTIONCONTROL_H
 
 #include <QObject>
 
-class SelectionControl : public QObject {
+class TileSelectionControl : public QObject {
     Q_OBJECT
     Q_PROPERTY( bool hasSelection READ hasSelection NOTIFY selectionChanged )
     Q_PROPERTY( int x READ x NOTIFY selectionChanged )
@@ -11,7 +11,7 @@ class SelectionControl : public QObject {
     Q_PROPERTY( int z READ z NOTIFY selectionChanged )
 
 public:
-    explicit SelectionControl( QObject* parent = nullptr );
+    explicit TileSelectionControl( QObject* parent = nullptr );
 
     bool hasSelection() const;
 
@@ -33,4 +33,4 @@ private:
     int _z;
 };
 
-#endif // SELECTIONCONTROL_H
+#endif // TILESELECTIONCONTROL_H

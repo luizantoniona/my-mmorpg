@@ -1,13 +1,18 @@
 {
-    "Name": "Mapa Teste",
-    "Width": 64,
-    "Height": 64,
-    "Catalogs": {
-        "Objects": "Object.json",
-        "Tiles": "Tile.json"
+    "Catalogs" : 
+    {
+        "Objects" : "Object.json",
+        "Tiles" : "Tile.json"
     },
-    "Floors": [
+    "Floors" : 
+    [
         "0.json",
-        "1.json"
-    ]
+        "1.json",
+        "2.json",
+        "3.json",
+        "-1.json"
+    ],
+    "Height" : 64,
+    "Name" : "Test Map",
+    "Width" : 64
 }

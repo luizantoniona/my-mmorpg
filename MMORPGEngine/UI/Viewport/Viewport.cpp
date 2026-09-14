@@ -8,11 +8,17 @@
 
 namespace Engine {
 
+namespace {
+constexpr int ANIMATION_INTERVAL_MS = 100;
+} // namespace
+
 Viewport::Viewport( QQuickItem* parent ) :
     QQuickItem( parent ),
     _camera( new Camera() ),
     _renderer( new Renderer() ),
-    _world( nullptr ) {
+    _world( nullptr ),
+    _animationTimer( new QTimer( this ) ),
+    _activeFloor( 0 ) {
 
     setFlag( ItemHasContents, true );
 
@@ -20,6 +26,12 @@ Viewport::Viewport( QQuickItem* parent ) :
 
     _renderer->initialize();
     _renderer->resize( size() );
+
+    _animationTimer->setInterval( ANIMATION_INTERVAL_MS );
+    connect( _animationTimer, &QTimer::timeout, this, [ this ]() {
+        update();
+    } );
+    _animationTimer->start();
 
     update();
 }
@@ -70,7 +82,39 @@ void Viewport::setRenderWorld( RenderWorld* world ) {
         return;
     }
 
+    QObject::disconnect( _worldBoundsConnection );
+
     _world = world;
+
+    if ( _world ) {
+        _worldBoundsConnection = connect( _world, &RenderWorld::boundsChanged, this, &Viewport::updateWorldBounds );
+    }
+
+    updateWorldBounds();
+
+    update();
+}
+
+void Viewport::updateWorldBounds() {
+    const double tileSize = WorldConstants::TILE_SIZE;
+    _camera->setWorldSize( _world ? QSizeF( _world->width() * tileSize, _world->height() * tileSize )
+                                  : QSizeF( 0.0, 0.0 ) );
+
+    emit cameraPositionChanged();
+}
+
+int Viewport::activeFloor() const {
+    return _activeFloor;
+}
+
+void Viewport::setActiveFloor( int z ) {
+    if ( _activeFloor == z ) {
+        return;
+    }
+
+    _activeFloor = z;
+
+    emit activeFloorChanged();
 
     update();
 }
@@ -79,6 +123,8 @@ void Viewport::geometryChange( const QRectF& newGeometry, const QRectF& oldGeome
     QQuickItem::geometryChange( newGeometry, oldGeometry );
     _camera->setViewportSize( newGeometry.size() );
     _renderer->resize( newGeometry.size() );
+
+    emit cameraPositionChanged();
 }
 
 void Viewport::mousePressEvent( QMouseEvent* event ) {
@@ -99,8 +145,7 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
 
     const int x = static_cast<int>( std::floor( worldPosition.x() / tileSize ) );
     const int y = static_cast<int>( std::floor( worldPosition.y() / tileSize ) );
-    // TODO: Z
-    constexpr int z = 0;
+    const int z = _activeFloor;
 
     if ( !_world->tile( x, y, z ) ) {
         return;
@@ -116,13 +161,13 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
 
     RenderScene scene;
 
-    if ( !_world ) {
+    if ( !_world || width() <= 0.0 || height() <= 0.0 ) {
         return rootNode;
     }
 
-    _renderer->render( scene, *_camera, *_world );
+    _renderer->render( scene, *_camera, *_world, _activeFloor );
 
-    scene.build( rootNode, window(), *_camera );
+    scene.build( rootNode, window(), *_camera, _textureCache );
 
     return rootNode;
 }

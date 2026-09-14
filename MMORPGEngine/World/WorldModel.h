@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <set>
+#include <vector>
 
 #include <QString>
 
@@ -28,9 +30,14 @@ public:
     ChunkModel* chunk( int x, int y );
     const ChunkModel* chunk( int x, int y ) const;
 
+    std::vector<int> floors() const;
+    void addFloor( int z );
+
     const WorldObjectModel* object( int x, int y, int z ) const;
+    void setObject( int x, int y, int z, uint32_t objectType );
 
     const WorldTileModel* tile( int x, int y, int z ) const;
+    void setTile( int x, int y, int z, uint32_t tileType );
 
 private:
     QString chunkKey( int x, int y ) const;
@@ -40,6 +47,7 @@ private:
     uint32_t _width;
     uint32_t _height;
     std::map<QString, std::unique_ptr<ChunkModel>> _chunks;
+    std::set<int> _floors;
 };
 
 } // namespace Engine

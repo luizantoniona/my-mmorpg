@@ -1,6 +1,6 @@
-#include "SelectionControl.h"
+#include "ObjectSelectionControl.h"
 
-SelectionControl::SelectionControl( QObject* parent ) :
+ObjectSelectionControl::ObjectSelectionControl( QObject* parent ) :
     QObject( parent ),
     _hasSelection( false ),
     _x( 0 ),
@@ -8,23 +8,23 @@ SelectionControl::SelectionControl( QObject* parent ) :
     _z( 0 ) {
 }
 
-bool SelectionControl::hasSelection() const {
+bool ObjectSelectionControl::hasSelection() const {
     return _hasSelection;
 }
 
-int SelectionControl::x() const {
+int ObjectSelectionControl::x() const {
     return _x;
 }
 
-int SelectionControl::y() const {
+int ObjectSelectionControl::y() const {
     return _y;
 }
 
-int SelectionControl::z() const {
+int ObjectSelectionControl::z() const {
     return _z;
 }
 
-void SelectionControl::selectTile( int x, int y, int z ) {
+void ObjectSelectionControl::selectObject( int x, int y, int z ) {
     if ( _hasSelection && _x == x && _y == y && _z == z ) {
         return;
     }
@@ -38,7 +38,7 @@ void SelectionControl::selectTile( int x, int y, int z ) {
     emit selectionChanged();
 }
 
-void SelectionControl::clearSelection() {
+void ObjectSelectionControl::clearSelection() {
     if ( !_hasSelection ) {
         return;
     }

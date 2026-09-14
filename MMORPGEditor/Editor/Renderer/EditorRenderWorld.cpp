@@ -14,6 +14,8 @@ Engine::WorldModel* EditorRenderWorld::world() const {
 
 void EditorRenderWorld::setWorld( Engine::WorldModel* world ) {
     _world = world;
+
+    emit boundsChanged();
 }
 
 const Engine::WorldObjectModel* EditorRenderWorld::object( int x, int y, int z ) const {
@@ -30,4 +32,20 @@ const Engine::WorldTileModel* EditorRenderWorld::tile( int x, int y, int z ) con
     }
 
     return _world->tile( x, y, z );
+}
+
+uint32_t EditorRenderWorld::width() const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->width();
+}
+
+uint32_t EditorRenderWorld::height() const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->height();
 }

@@ -1,5 +1,11 @@
 #include "WorldModel.h"
 
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/Data/Object/ObjectCatalog.h>
+#include <MMORPGEngine/Data/Object/ObjectModel.h>
+#include <MMORPGEngine/Data/Tile/TileCatalog.h>
+#include <MMORPGEngine/Data/Tile/TileModel.h>
 #include <MMORPGEngine/World/WorldConstants.h>
 
 namespace Engine {
@@ -57,6 +63,14 @@ const ChunkModel* WorldModel::chunk( int x, int y ) const {
     return iterator->second.get();
 }
 
+std::vector<int> WorldModel::floors() const {
+    return std::vector<int>( _floors.begin(), _floors.end() );
+}
+
+void WorldModel::addFloor( int z ) {
+    _floors.insert( z );
+}
+
 const WorldObjectModel* WorldModel::object( int x, int y, int z ) const {
     const int chunkX = x / WorldConstants::CHUNK_SIZE;
     const int chunkY = y / WorldConstants::CHUNK_SIZE;
@@ -71,6 +85,35 @@ const WorldObjectModel* WorldModel::object( int x, int y, int z ) const {
     return iterator->second->object( localX, localY, z );
 }
 
+void WorldModel::setObject( int x, int y, int z, uint32_t objectType ) {
+    const int chunkX = x / WorldConstants::CHUNK_SIZE;
+    const int chunkY = y / WorldConstants::CHUNK_SIZE;
+    const int localX = x % WorldConstants::CHUNK_SIZE;
+    const int localY = y % WorldConstants::CHUNK_SIZE;
+
+    ChunkModel* chunkModel = chunk( chunkX, chunkY );
+
+    if ( objectType == 0 ) {
+        chunkModel->setObject( localX, localY, z, nullptr );
+        return;
+    }
+
+    const ObjectCatalog& catalog = Singleton<DataManager>::instance().objectCatalog();
+    const ObjectModel* objectModel = catalog.object( objectType );
+
+    if ( !objectModel ) {
+        return;
+    }
+
+    WorldObjectModel* worldObject = chunkModel->object( localX, localY, z );
+
+    worldObject->setObjectModel( objectModel );
+    worldObject->setObjectType( objectType );
+    worldObject->setX( x );
+    worldObject->setY( y );
+    worldObject->setZ( z );
+}
+
 const WorldTileModel* WorldModel::tile( int x, int y, int z ) const {
     const int chunkX = x / WorldConstants::CHUNK_SIZE;
     const int chunkY = y / WorldConstants::CHUNK_SIZE;
@@ -83,6 +126,26 @@ const WorldTileModel* WorldModel::tile( int x, int y, int z ) const {
     }
 
     return iterator->second->tile( localX, localY, z );
+}
+
+void WorldModel::setTile( int x, int y, int z, uint32_t tileType ) {
+    const TileCatalog& catalog = Singleton<DataManager>::instance().tileCatalog();
+    const TileModel* tileModel = catalog.tile( tileType );
+
+    if ( !tileModel ) {
+        return;
+    }
+
+    const int chunkX = x / WorldConstants::CHUNK_SIZE;
+    const int chunkY = y / WorldConstants::CHUNK_SIZE;
+    const int localX = x % WorldConstants::CHUNK_SIZE;
+    const int localY = y % WorldConstants::CHUNK_SIZE;
+
+    ChunkModel* chunkModel = chunk( chunkX, chunkY );
+    WorldTileModel* worldTile = chunkModel->tile( localX, localY, z );
+
+    worldTile->setTileModel( tileModel );
+    worldTile->setTileType( tileType );
 }
 
 QString WorldModel::chunkKey( int x, int y ) const {

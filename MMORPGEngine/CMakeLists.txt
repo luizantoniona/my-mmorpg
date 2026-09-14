@@ -18,14 +18,20 @@ set(PROJECT_SOURCES
     Commons/RegisterEngineTypes.cpp
     Commons/RegisterEngineTypes.h
     Commons/Singleton.h
+    Data/Animation/AnimationModel.cpp
+    Data/Animation/AnimationModel.h
     Data/Object/ObjectCatalog.cpp
     Data/Object/ObjectCatalog.h
+    Data/Object/ObjectFactory.cpp
+    Data/Object/ObjectFactory.h
     Data/Object/ObjectModel.cpp
     Data/Object/ObjectModel.h
     Data/Object/ObjectSizeModel.cpp
     Data/Object/ObjectSizeModel.h
     Data/Tile/TileCatalog.cpp
     Data/Tile/TileCatalog.h
+    Data/Tile/TileFactory.cpp
+    Data/Tile/TileFactory.h
     Data/Tile/TileModel.cpp
     Data/Tile/TileModel.h
     Data/Manifest/ManifestDataDTO.cpp
@@ -60,6 +66,8 @@ set(PROJECT_SOURCES
     Renderer/Scene/RenderScene.h
     Renderer/Scene/RenderSceneItem.cpp
     Renderer/Scene/RenderSceneItem.h
+    Renderer/Scene/TextureCache.cpp
+    Renderer/Scene/TextureCache.h
     Renderer/World/RenderWorld.cpp
     Renderer/World/RenderWorld.h
     Renderer/Renderer.cpp
@@ -76,6 +84,8 @@ set(PROJECT_SOURCES
     World/Object/WorldObjectModel.h
     World/Tile/WorldTileModel.cpp
     World/Tile/WorldTileModel.h
+    World/FloorFactory.cpp
+    World/FloorFactory.h
     World/WorldConstants.h
     World/WorldFactory.cpp
     World/WorldFactory.h

@@ -7,6 +7,20 @@ import MMORPGEditorComponents
 Item {
     id: root
 
+    readonly property var pages: [{
+            "name": "WorldPage",
+            "label": "World"
+        }, {
+            "name": "TileCreationPage",
+            "label": "Tiles"
+        }, {
+            "name": "ObjectCreationPage",
+            "label": "Objects"
+        }, {
+            "name": "ConfigurationPage",
+            "label": "Configuration"
+        }]
+
     function updatePage(page) {
         stack.clear()
 
@@ -14,7 +28,18 @@ Item {
         case "WorldPage":
             stack.push(worldPage)
             break
+        case "TileCreationPage":
+            stack.push(tileCreationPage)
+            break
+        case "ObjectCreationPage":
+            stack.push(objectCreationPage)
+            break
+        case "ConfigurationPage":
+            stack.push(configurationPage)
+            break
         }
+
+        navigationBar.currentPage = page
     }
 
     Rectangle {
@@ -24,10 +49,27 @@ Item {
         color: Colors.background0
     }
 
-    StackView {
-        id: stack
-
+    ColumnLayout {
         anchors.fill: parent
+        spacing: 0
+
+        NavigationBar {
+            id: navigationBar
+
+            Layout.fillWidth: true
+            pages: root.pages
+
+            onPageRequested: function (page) {
+                root.updatePage(page)
+            }
+        }
+
+        StackView {
+            id: stack
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+        }
     }
 
     Component {
@@ -35,6 +77,30 @@ Item {
 
         WorldPage {
             id: world
+        }
+    }
+
+    Component {
+        id: tileCreationPage
+
+        TileCreationPage {
+            id: tiles
+        }
+    }
+
+    Component {
+        id: objectCreationPage
+
+        ObjectCreationPage {
+            id: objects
+        }
+    }
+
+    Component {
+        id: configurationPage
+
+        ConfigurationPage {
+            id: configuration
         }
     }
 

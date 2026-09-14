@@ -15,10 +15,10 @@ void Renderer::resize( const QSizeF& size ) {
     _viewportSize = size;
 }
 
-void Renderer::render( RenderScene& scene, const Camera& camera, const RenderWorld& world ) {
+void Renderer::render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z ) {
     // TODO: Order is important here, see if we can structure it in a better way
-    _tileRenderer->render( scene, camera, world );
-    _objectRenderer->render( scene, camera, world );
+    _tileRenderer->render( scene, camera, world, z );
+    _objectRenderer->render( scene, camera, world, z );
 }
 
 } // namespace Engine

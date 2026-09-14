@@ -3,6 +3,8 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
+#include <MMORPGEditor/Editor/Application/World/Object/ObjectIconProvider.h>
+#include <MMORPGEditor/Editor/Application/World/Tile/TileIconProvider.h>
 #include <MMORPGEditor/Editor/RegisterEditorTypes.h>
 #include <MMORPGEngine/Commons/RegisterEngineTypes.h>
 #include <MMORPGEngine/Commons/Singleton.h>
@@ -30,6 +32,10 @@ int main( int argc, char* argv[] ) {
 
     // --- Data ---
     Engine::Singleton<Engine::DataManager>::instance().initialize( DATA_PATH );
+
+    // --- Palette Icon Providers ---
+    engine.addImageProvider( "EditorObjectIcon", new ObjectIconProvider() );
+    engine.addImageProvider( "EditorTileIcon", new TileIconProvider() );
 
     QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
     engine.loadFromModule( "MMORPGEditorComponents", "Main" );
