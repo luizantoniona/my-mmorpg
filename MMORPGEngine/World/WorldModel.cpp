@@ -13,7 +13,10 @@ namespace Engine {
 WorldModel::WorldModel() :
     _name( "" ),
     _width( 0 ),
-    _height( 0 ) {
+    _height( 0 ),
+    _spawnX( 0 ),
+    _spawnY( 0 ),
+    _spawnZ( 0 ) {
 }
 
 QString WorldModel::name() const {
@@ -38,6 +41,30 @@ uint32_t WorldModel::height() const {
 
 void WorldModel::setHeight( uint32_t height ) {
     _height = height;
+}
+
+int WorldModel::spawnX() const {
+    return _spawnX;
+}
+
+void WorldModel::setSpawnX( int spawnX ) {
+    _spawnX = spawnX;
+}
+
+int WorldModel::spawnY() const {
+    return _spawnY;
+}
+
+void WorldModel::setSpawnY( int spawnY ) {
+    _spawnY = spawnY;
+}
+
+int WorldModel::spawnZ() const {
+    return _spawnZ;
+}
+
+void WorldModel::setSpawnZ( int spawnZ ) {
+    _spawnZ = spawnZ;
 }
 
 ChunkModel* WorldModel::chunk( int x, int y ) {

@@ -1,6 +1,7 @@
 #include "CharacterRepository.h"
 
 #include <MMORPGServer/Server/Database/Query.h>
+#include <MMORPGServer/Server/Repository/CharacterPositionRepository.h>
 
 namespace Server {
 
@@ -8,7 +9,7 @@ CharacterRepository::CharacterRepository() :
     Repository() {
 }
 
-int CharacterRepository::createCharacter( const int idAccount, const std::string& dsName ) {
+int CharacterRepository::createCharacter( const int idAccount, const std::string& dsName, const Engine::EntityPositionModel& spawnPosition ) {
     const std::string sql = R"SQL(
         INSERT INTO character (
             id_account,
@@ -27,6 +28,8 @@ int CharacterRepository::createCharacter( const int idAccount, const std::string
     int idCharacter = static_cast<int>( sqlite3_last_insert_rowid( _db ) );
 
     bool success = true;
+
+    success &= CharacterPositionRepository().create( idCharacter, spawnPosition );
 
     // TODO: Create future derivations
     // Example:
@@ -51,6 +54,8 @@ bool CharacterRepository::updateCharacter( Engine::CharacterModel character ) {
     const int idCharacter = character.idCharacter();
 
     bool success = true;
+
+    success &= CharacterPositionRepository().save( idCharacter, character.position() );
 
     // TODO: Update future derivations
     // Example:
@@ -78,6 +83,11 @@ std::unique_ptr<Engine::CharacterModel> CharacterRepository::findByIdAccountAndI
         character->setIdCharacter( query.getColumnInt( 0 ) );
         character->setIdAccount( query.getColumnInt( 1 ) );
         character->setName( query.getColumnText( 2 ) );
+
+        auto position = CharacterPositionRepository().find( character->idCharacter() );
+        if ( position ) {
+            character->setPosition( position->position() );
+        }
 
         // TODO: Get future derivations
         // Example:

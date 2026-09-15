@@ -7,6 +7,7 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGServer/Server/Database/Database.h>
+#include <MMORPGServer/Server/Manager/EntityBroadcaster.h>
 #include <MMORPGServer/Server/Manager/NetworkManager.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/RegisterServerTypes.h>
@@ -40,6 +41,9 @@ int main( int argc, char* argv[] ) {
 
     // --- World ---
     Engine::Singleton<Server::WorldManager>::instance().initialize( DATA_PATH );
+
+    // --- Entity broadcast ---
+    Engine::Singleton<Server::EntityBroadcaster>::instance();
 
     // --- Network ---
     Engine::Singleton<Server::NetworkManager>::instance().initialize();

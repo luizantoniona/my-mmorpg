@@ -7,6 +7,15 @@ set(PROJECT_SOURCES
     Database/Query.h
     Database/QueryLoader.cpp
     Database/QueryLoader.h
+    Event/EventBus.cpp
+    Event/EventBus.h
+    Event/WorldEvent.cpp
+    Event/WorldEvent.h
+    Event/WorldEventType.h
+    Manager/ChunkCoordinate.cpp
+    Manager/ChunkCoordinate.h
+    Manager/EntityBroadcaster.cpp
+    Manager/EntityBroadcaster.h
     Manager/NetworkManager.cpp
     Manager/NetworkManager.h
     Manager/WorldManager.cpp
@@ -27,6 +36,8 @@ set(PROJECT_SOURCES
     Network/Rest/StatusController.h
     Network/WebSocket/CharacterConnectionContext.cpp
     Network/WebSocket/CharacterConnectionContext.h
+    Network/WebSocket/CharacterConnectionRegistry.cpp
+    Network/WebSocket/CharacterConnectionRegistry.h
     Network/WebSocket/CharacterWebSocket.cpp
     Network/WebSocket/CharacterWebSocket.h
     Network/WebSocket/MessageReceiver.cpp

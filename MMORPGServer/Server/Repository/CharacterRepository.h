@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
+#include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGServer/Server/Repository/Repository.h>
 
 namespace Server {
@@ -12,7 +13,7 @@ class CharacterRepository : public Repository {
 public:
     explicit CharacterRepository();
 
-    int createCharacter( const int idAccount, const std::string& dsName );
+    int createCharacter( const int idAccount, const std::string& dsName, const Engine::EntityPositionModel& spawnPosition );
     bool deleteCharacter( int idCharacter );
     bool updateCharacter( Engine::CharacterModel character );
 

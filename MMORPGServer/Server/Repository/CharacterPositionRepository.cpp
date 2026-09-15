@@ -9,6 +9,25 @@ CharacterPositionRepository::CharacterPositionRepository() :
     Repository() {
 }
 
+bool CharacterPositionRepository::create( int idCharacter, const Engine::EntityPositionModel& position ) {
+    const std::string sql = R"SQL(
+        INSERT INTO character_position (
+            id_character,
+            x,
+            y,
+            z
+        ) VALUES (?, ?, ?, ?)
+    )SQL";
+    Query query( _db, sql );
+
+    query.bindInt( 1, idCharacter );
+    query.bindInt( 2, position.x() );
+    query.bindInt( 3, position.y() );
+    query.bindInt( 4, position.z() );
+
+    return query.exec();
+}
+
 std::unique_ptr<Engine::CharacterPositionModel> CharacterPositionRepository::find( int idCharacter ) {
     const std::string sql = R"SQL(
         SELECT
@@ -39,7 +58,7 @@ std::unique_ptr<Engine::CharacterPositionModel> CharacterPositionRepository::fin
     return characterPosition;
 }
 
-bool CharacterPositionRepository::save( const Engine::CharacterPositionModel& position ) {
+bool CharacterPositionRepository::save( int idCharacter, const Engine::EntityPositionModel& position ) {
     const std::string sql = R"SQL(
         INSERT INTO character_position (
             id_character,
@@ -54,10 +73,10 @@ bool CharacterPositionRepository::save( const Engine::CharacterPositionModel& po
     )SQL";
     Query query( _db, sql );
 
-    query.bindInt( 1, position.idCharacter() );
-    query.bindInt( 2, position.position().x() );
-    query.bindInt( 3, position.position().y() );
-    query.bindInt( 4, position.position().z() );
+    query.bindInt( 1, idCharacter );
+    query.bindInt( 2, position.x() );
+    query.bindInt( 3, position.y() );
+    query.bindInt( 4, position.z() );
 
     return query.exec();
 }

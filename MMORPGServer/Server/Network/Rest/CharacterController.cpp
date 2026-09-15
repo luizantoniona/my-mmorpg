@@ -2,7 +2,11 @@
 
 #include <QDebug>
 
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/EntityPositionModel.h>
+#include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Database/Database.h>
+#include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 #include <MMORPGServer/Server/Repository/CharacterRepository.h>
 
@@ -23,9 +27,17 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
 
     int idAccount = session.idAccount();
 
-    qInfo() << "CharacterController::create" << " [ACCOUNT] " << idAccount << " [NAME] " << name;
+    qInfo() << "CharacterController::create"
+            << " [ACCOUNT] " << idAccount << " [NAME] " << name;
 
-    int idCharacter = CharacterRepository().createCharacter( idAccount, name );
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().world();
+
+    Engine::EntityPositionModel spawnPosition;
+    spawnPosition.setX( world ? world->spawnX() : 0 );
+    spawnPosition.setY( world ? world->spawnY() : 0 );
+    spawnPosition.setZ( world ? world->spawnZ() : 0 );
+
+    int idCharacter = CharacterRepository().createCharacter( idAccount, name, spawnPosition );
 
     if ( idCharacter == 0 ) {
         auto response = drogon::HttpResponse::newHttpResponse();

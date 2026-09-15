@@ -49,6 +49,9 @@ signals:
     void worldEntryReceived();
     void worldEntryFailed( const QString& error );
 
+    void entityStateReceived( int idCharacter, int x, int y, int z );
+    void entityLeftReceived( int idCharacter );
+
 private:
     void onMessageReceived( const QString& message );
 
@@ -56,6 +59,7 @@ private:
     std::unique_ptr<Engine::WorldModel> _world;
     Engine::WebSocketClient _webSocket;
 
+    int _idCharacter;
     int _spawnFloor;
     int _spawnX;
     int _spawnY;

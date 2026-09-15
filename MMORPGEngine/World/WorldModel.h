@@ -27,6 +27,15 @@ public:
     uint32_t height() const;
     void setHeight( uint32_t height );
 
+    int spawnX() const;
+    void setSpawnX( int spawnX );
+
+    int spawnY() const;
+    void setSpawnY( int spawnY );
+
+    int spawnZ() const;
+    void setSpawnZ( int spawnZ );
+
     ChunkModel* chunk( int x, int y );
     const ChunkModel* chunk( int x, int y ) const;
 
@@ -46,6 +55,9 @@ private:
     QString _name;
     uint32_t _width;
     uint32_t _height;
+    int _spawnX;
+    int _spawnY;
+    int _spawnZ;
     std::map<QString, std::unique_ptr<ChunkModel>> _chunks;
     std::set<int> _floors;
 };

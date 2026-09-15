@@ -17,10 +17,15 @@ Item {
         onWorldEntryReceived: function () {
             root.currentFloor = control.spawnFloor
             viewport.centerCameraOnTile(control.spawnX, control.spawnY)
-            clientWorld.setEntity(root.idCharacter, control.spawnX, control.spawnY, control.spawnFloor)
         }
         onWorldEntryFailed: function (error) {
             root.vTextError = error
+        }
+        onEntityStateReceived: function (idCharacter, x, y, z) {
+            clientWorld.setEntity(idCharacter, x, y, z)
+        }
+        onEntityLeftReceived: function (idCharacter) {
+            clientWorld.removeEntity(idCharacter)
         }
     }
 

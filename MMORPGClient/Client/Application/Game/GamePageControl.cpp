@@ -13,6 +13,7 @@ GamePageControl::GamePageControl( QObject* parent ) :
     QObject( parent ),
     _world( nullptr ),
     _webSocket( this ),
+    _idCharacter( -1 ),
     _spawnFloor( 0 ),
     _spawnX( 0 ),
     _spawnY( 0 ) {
@@ -86,6 +87,8 @@ void GamePageControl::loadWorld() {
 }
 
 void GamePageControl::connectToWorld( int idCharacter ) {
+    _idCharacter = idCharacter;
+
     ServerManager& serverManager = Engine::Singleton<ServerManager>::instance();
 
     if ( serverManager.connectionState() != ServerManager::ConnectionState::Connected ) {
@@ -125,7 +128,18 @@ void GamePageControl::onMessageReceived( const QString& message ) {
         return;
     }
 
+    if ( json.get( "type", "" ).asString() == "leave" ) {
+        emit entityLeftReceived( json.get( "idCharacter", -1 ).asInt() );
+        return;
+    }
+
     Engine::EntityStateDTO state = Engine::EntityStateDTO::fromJson( json );
+
+    emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z() );
+
+    if ( state.idCharacter() != _idCharacter ) {
+        return;
+    }
 
     _spawnFloor = state.z();
     _spawnX = state.x();

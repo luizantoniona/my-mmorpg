@@ -10,7 +10,7 @@
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
 #include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionContext.h>
-#include <MMORPGServer/Server/Repository/CharacterPositionRepository.h>
+#include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionRegistry.h>
 #include <MMORPGServer/Server/Repository/CharacterRepository.h>
 
 namespace Server {
@@ -79,26 +79,15 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     auto& worldManager = Engine::Singleton<WorldManager>::instance();
     const Engine::WorldModel* world = worldManager.world();
-    const std::vector<int> floors = world->floors();
 
-    Engine::EntityPositionModel position;
-    auto persistedPosition = CharacterPositionRepository().find( idCharacter );
+    const Engine::EntityPositionModel position = character->position();
+    qInfo() << "[WebSocket] Character position [CHARACTER]" << idCharacter << "[X]" << position.x() << "[Y]" << position.y() << "[Z]" << position.z();
 
-    if ( persistedPosition ) {
-        position = persistedPosition->position();
-        qInfo() << "[WebSocket] Loaded persisted position [CHARACTER]" << idCharacter << "[X]" << position.x() << "[Y]" << position.y() << "[Z]" << position.z();
-
-    } else {
-        position.setX( static_cast<int>( world->width() / 2 ) );
-        position.setY( static_cast<int>( world->height() / 2 ) );
-        position.setZ( floors.empty() ? 0 : floors.front() );
-        qInfo() << "[WebSocket] No persisted position, using spawn point [CHARACTER]" << idCharacter << "[X]" << position.x() << "[Y]" << position.y() << "[Z]" << position.z();
-    }
-
-    character->setPosition( position );
     worldManager.addCharacter( std::move( character ) );
 
     connection->setContext( std::make_shared<CharacterConnectionContext>( sessionId, idCharacter ) );
+
+    Engine::Singleton<CharacterConnectionRegistry>::instance().registerConnection( idCharacter, connection );
 
     Engine::EntityStateDTO state;
     state.setIdCharacter( idCharacter );
@@ -108,6 +97,24 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
     state.setWorldName( world->name().toStdString() );
 
     connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
+
+    for ( int nearbyIdCharacter : worldManager.charactersNear( idCharacter ) ) {
+        Engine::CharacterModel* nearbyCharacter = worldManager.character( nearbyIdCharacter );
+        if ( !nearbyCharacter ) {
+            continue;
+        }
+
+        const Engine::EntityPositionModel& nearbyPosition = nearbyCharacter->position();
+
+        Engine::EntityStateDTO nearbyState;
+        nearbyState.setIdCharacter( nearbyIdCharacter );
+        nearbyState.setX( nearbyPosition.x() );
+        nearbyState.setY( nearbyPosition.y() );
+        nearbyState.setZ( nearbyPosition.z() );
+        nearbyState.setWorldName( world->name().toStdString() );
+
+        connection->send( Engine::JsonHelper::writeJsonString( nearbyState.toJson() ) );
+    }
 
     qInfo() << "[WebSocket] Character entered world [CHARACTER]" << idCharacter;
 }
@@ -125,18 +132,16 @@ void CharacterWebSocket::handleConnectionClosed( const drogon::WebSocketConnecti
     Engine::CharacterModel* character = worldManager.character( contextPtr->idCharacter() );
 
     if ( character ) {
-        Engine::CharacterPositionModel characterPosition;
-        characterPosition.setIdCharacter( character->idCharacter() );
-        characterPosition.setPosition( character->position() );
+        qInfo() << "[WebSocket] Saving character on disconnect [CHARACTER]" << character->idCharacter();
 
-        qInfo() << "[WebSocket] Saving position on disconnect [CHARACTER]" << character->idCharacter();
-
-        if ( !CharacterPositionRepository().save( characterPosition ) ) {
-            qWarning() << "[WebSocket] Failed to save position [CHARACTER]" << character->idCharacter();
+        if ( !CharacterRepository().updateCharacter( *character ) ) {
+            qWarning() << "[WebSocket] Failed to save character [CHARACTER]" << character->idCharacter();
         }
     }
 
     worldManager.removeCharacter( contextPtr->idCharacter() );
+
+    Engine::Singleton<CharacterConnectionRegistry>::instance().unregisterConnection( contextPtr->idCharacter() );
 
     qInfo() << "[WebSocket] Character left world [CHARACTER]" << contextPtr->idCharacter();
 }
