@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
     Network/Rest/DataController.h
     Network/Rest/StatusController.cpp
     Network/Rest/StatusController.h
+    Network/WebSocket/CharacterConnectionContext.cpp
+    Network/WebSocket/CharacterConnectionContext.h
     Network/WebSocket/CharacterWebSocket.cpp
     Network/WebSocket/CharacterWebSocket.h
     Network/WebSocket/MessageReceiver.cpp
@@ -33,6 +35,8 @@ set(PROJECT_SOURCES
     Renderer/ServerRenderWorld.h
     Repository/AccountRepository.cpp
     Repository/AccountRepository.h
+    Repository/CharacterPositionRepository.cpp
+    Repository/CharacterPositionRepository.h
     Repository/CharacterRepository.cpp
     Repository/CharacterRepository.h
     Repository/Repository.cpp

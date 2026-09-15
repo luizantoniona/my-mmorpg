@@ -3,7 +3,10 @@
 
 #include <string>
 
-#include <Manager/WorldManager.h>
+#include <drogon/WebSocketController.h>
+#include <json/json.h>
+
+#include <MMORPGServer/Server/Manager/WorldManager.h>
 
 namespace Server {
 
@@ -11,7 +14,10 @@ class MessageReceiver {
 public:
     MessageReceiver();
 
-    void receive( const std::string& sessionId, const std::string& message );
+    void receive( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const std::string& message );
+
+private:
+    void receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson );
 
 private:
     WorldManager* _worldManager;

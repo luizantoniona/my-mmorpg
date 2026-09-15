@@ -1,7 +1,13 @@
 #include "MessageReceiver.h"
 
+#include <cstdlib>
+
+#include <QDebug>
+
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/EntityStateDTO.h>
+#include <MMORPGEngine/World/WorldModel.h>
 
 namespace Server {
 
@@ -9,7 +15,7 @@ MessageReceiver::MessageReceiver() {
     _worldManager = &Engine::Singleton<WorldManager>::instance();
 }
 
-void MessageReceiver::receive( const std::string& sessionId, const std::string& message ) {
+void MessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const std::string& message ) {
     if ( message.empty() ) {
         return;
     }
@@ -19,7 +25,59 @@ void MessageReceiver::receive( const std::string& sessionId, const std::string& 
         return;
     }
 
-    // _worldManager->handleMessage( sessionId, messageJson );
+    const std::string type = messageJson.get( "type", "" ).asString();
+
+    if ( type == "move" ) {
+        receiveMove( connection, idCharacter, messageJson );
+    }
+}
+
+void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
+    Engine::CharacterModel* character = _worldManager->character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    const int dx = messageJson.get( "dx", 0 ).asInt();
+    const int dy = messageJson.get( "dy", 0 ).asInt();
+
+    if ( std::abs( dx ) > 1 || std::abs( dy ) > 1 ) {
+        qWarning() << "[MessageReceiver] Rejected move: out-of-range step [CHARACTER]" << idCharacter << "[DX]" << dx << "[DY]" << dy;
+        return;
+    }
+
+    const Engine::EntityPositionModel currentPosition = character->position();
+    const int newX = currentPosition.x() + dx;
+    const int newY = currentPosition.y() + dy;
+    const int z = currentPosition.z();
+
+    const Engine::WorldModel* world = _worldManager->world();
+    const Engine::WorldTileModel* worldTile = world ? world->tile( newX, newY, z ) : nullptr;
+
+    if ( worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable() ) {
+        Engine::EntityPositionModel newPosition;
+        newPosition.setX( newX );
+        newPosition.setY( newY );
+        newPosition.setZ( z );
+
+        character->setPosition( newPosition );
+
+        qInfo() << "[MessageReceiver] Character moved [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
+
+    } else {
+        qInfo() << "[MessageReceiver] Move blocked [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
+    }
+
+    const Engine::EntityPositionModel finalPosition = character->position();
+
+    Engine::EntityStateDTO state;
+    state.setIdCharacter( idCharacter );
+    state.setX( finalPosition.x() );
+    state.setY( finalPosition.y() );
+    state.setZ( finalPosition.z() );
+    state.setWorldName( world ? world->name().toStdString() : "" );
+
+    connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
 }
 
 } // namespace Server

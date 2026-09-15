@@ -48,6 +48,8 @@ set(PROJECT_SOURCES
     Data/DataManager.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
+    Entity/Character/CharacterPositionModel.cpp
+    Entity/Character/CharacterPositionModel.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
     Entity/EntityModel.cpp
@@ -58,8 +60,12 @@ set(PROJECT_SOURCES
     Entity/EntityPositionModel.h
     Entity/EntitySizeModel.cpp
     Entity/EntitySizeModel.h
+    Entity/EntityStateDTO.cpp
+    Entity/EntityStateDTO.h
     Network/HttpClient.cpp
     Network/HttpClient.h
+    Network/WebSocketClient.cpp
+    Network/WebSocketClient.h
     Renderer/Camera/Camera.cpp
     Renderer/Camera/Camera.h
     Renderer/Scene/RenderScene.cpp
@@ -72,6 +78,8 @@ set(PROJECT_SOURCES
     Renderer/World/RenderWorld.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
+    Renderer/EntityRenderer.cpp
+    Renderer/EntityRenderer.h
     Renderer/ObjectRenderer.cpp
     Renderer/ObjectRenderer.h
     Renderer/TileRenderer.cpp
@@ -96,7 +104,7 @@ add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
 find_package(jsoncpp CONFIG REQUIRED)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network Qml Quick)
+find_package(Qt6 REQUIRED COMPONENTS Core Network Qml Quick WebSockets)
 
 target_link_libraries(
   ${PROJECT_NAME}
@@ -104,7 +112,8 @@ target_link_libraries(
   PUBLIC Qt6::Core
   PUBLIC Qt6::Network
   PUBLIC Qt6::Qml
-  PUBLIC Qt6::Quick)
+  PUBLIC Qt6::Quick
+  PUBLIC Qt6::WebSockets)
 
 add_library(MMORPG::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
