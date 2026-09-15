@@ -19,6 +19,8 @@ public:
 
     bool isValid();
 
+    const std::vector<ManifestDataDTO>& data() const;
+
 private:
     std::vector<ManifestDataDTO> _data;
 };

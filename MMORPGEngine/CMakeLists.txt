@@ -40,6 +40,8 @@ set(PROJECT_SOURCES
     Data/Manifest/ManifestDataModel.h
     Data/Manifest/ManifestDTO.cpp
     Data/Manifest/ManifestDTO.h
+    Data/Manifest/ManifestFactory.cpp
+    Data/Manifest/ManifestFactory.h
     Data/Manifest/ManifestModel.cpp
     Data/Manifest/ManifestModel.h
     Data/DataFactory.cpp

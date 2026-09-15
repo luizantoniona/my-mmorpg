@@ -19,6 +19,8 @@ public:
 
     static Json::Value parseJsonString( const QString& content );
     static Json::Value parseJsonString( const std::string& content );
+
+    static std::string writeJsonString( const Json::Value& value );
 };
 
 } // namespace Engine

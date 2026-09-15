@@ -5,13 +5,14 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Manifest/ManifestFactory.h>
 #include <MMORPGEngine/Data/Object/ObjectFactory.h>
 #include <MMORPGEngine/Data/Tile/TileFactory.h>
 
 namespace Engine {
 
 DataManager::DataManager() :
-    _manifest(),
+    _configPath(),
     _objectCatalog(),
     _tileCatalog() {
 }
@@ -19,6 +20,8 @@ DataManager::DataManager() :
 DataManager::~DataManager() = default;
 
 void DataManager::initialize( const std::string& configPath ) {
+    _configPath = configPath;
+
     ObjectFactory::createObjectCatalog( QString::fromStdString( configPath ), _objectCatalog );
     TileFactory::createTileCatalog( QString::fromStdString( configPath ), _tileCatalog );
 }
@@ -33,8 +36,12 @@ void DataManager::reload( const std::string& configPath ) {
 void DataManager::finalize() {
 }
 
-const ManifestModel& DataManager::manifest() const {
-    return _manifest;
+const std::string& DataManager::configPath() const {
+    return _configPath;
+}
+
+ManifestModel DataManager::manifest() const {
+    return ManifestFactory::createManifest( _configPath );
 }
 
 const ObjectCatalog& DataManager::objectCatalog() const {

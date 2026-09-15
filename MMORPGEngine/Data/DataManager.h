@@ -1,6 +1,8 @@
 #ifndef DATAMANAGER_H
 #define DATAMANAGER_H
 
+#include <string>
+
 #include <MMORPGEngine/Data/Manifest/ManifestModel.h>
 #include <MMORPGEngine/Data/Object/ObjectCatalog.h>
 #include <MMORPGEngine/Data/Tile/TileCatalog.h>
@@ -16,7 +18,9 @@ public:
     void reload( const std::string& configPath );
     void finalize();
 
-    const ManifestModel& manifest() const;
+    const std::string& configPath() const;
+
+    ManifestModel manifest() const;
 
     const ObjectCatalog& objectCatalog() const;
     void addObject( const ObjectModel& object );
@@ -25,7 +29,7 @@ public:
     void addTile( const TileModel& tile );
 
 private:
-    ManifestModel _manifest;
+    std::string _configPath;
     ObjectCatalog _objectCatalog;
     TileCatalog _tileCatalog;
 };
