@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
@@ -10,6 +11,9 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 
 int main( int argc, char* argv[] ) {
+    QCoreApplication::setOrganizationName( "MMORPG" );
+    QCoreApplication::setApplicationName( "Client" );
+
     QQuickStyle::setStyle( "Basic" );
     QGuiApplication app( argc, argv );
     QSurfaceFormat format;

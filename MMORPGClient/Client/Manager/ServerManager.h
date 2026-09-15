@@ -24,6 +24,8 @@ public:
 
     QString serverAddress() const;
 
+    QString dataDirectory() const;
+
     ConnectionState connectionState() const;
 
     QNetworkReply* get( const QString& endpoint );
