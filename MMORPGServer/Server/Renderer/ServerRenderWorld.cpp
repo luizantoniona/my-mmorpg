@@ -34,6 +34,24 @@ const Engine::WorldTileModel* ServerRenderWorld::tile( int x, int y, int z ) con
     return _world->tile( x, y, z );
 }
 
+QList<Engine::RenderWorld::Entity> ServerRenderWorld::entities( int z ) const {
+    QList<Engine::RenderWorld::Entity> result;
+
+    const std::map<int, Engine::EntityPositionModel> positions = Engine::Singleton<Server::WorldManager>::instance().characterPositions();
+
+    for ( const auto& entry : positions ) {
+        const Engine::EntityPositionModel& position = entry.second;
+
+        if ( position.z() != z ) {
+            continue;
+        }
+
+        result.append( Engine::RenderWorld::Entity{ entry.first, position.x(), position.y() } );
+    }
+
+    return result;
+}
+
 uint32_t ServerRenderWorld::width() const {
     if ( !_world ) {
         return 0;
