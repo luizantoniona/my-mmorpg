@@ -21,6 +21,15 @@ CREATE TABLE character_inventory (
     FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
 );
 
+CREATE TABLE character_position (
+    id_character INTEGER PRIMARY KEY,
+    x INTEGER NOT NULL,
+    y INTEGER NOT NULL,
+    z INTEGER NOT NULL,
+
+    FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
+);
+
 CREATE TABLE character_vitals (
     id_character INTEGER PRIMARY KEY,
     health NUMERIC DEFAULT 0.0,
