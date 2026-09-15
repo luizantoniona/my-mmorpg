@@ -40,6 +40,7 @@ void TileFactory::createTileCatalog( const QString& configPath, TileCatalog& til
             }
         }
         tile.setTags( tags );
+        tile.setIsWalkable( tileJson.get( "IsWalkable", true ).asBool() );
 
         const bool isAnimated = tileJson.get( "IsAnimated", false ).asBool();
         const int frameDurationMs = tileJson.get( "FrameDurationMs", 100 ).asInt();
@@ -80,6 +81,7 @@ void TileFactory::saveTileCatalog( const QString& configPath, const TileCatalog&
         tileJson[ "Type" ] = tile.type();
         tileJson[ "Name" ] = tile.name().toStdString();
         tileJson[ "TextureFolder" ] = tile.folder().toStdString();
+        tileJson[ "IsWalkable" ] = tile.isWalkable();
 
         if ( tile.animation().isAnimated() ) {
             tileJson[ "IsAnimated" ] = true;

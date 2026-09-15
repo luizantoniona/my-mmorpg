@@ -1,25 +1,29 @@
 {
-    "Tiles" : 
+    "Tiles" :
     [
         {
+            "IsWalkable" : true,
             "Name" : "Void",
             "Tags" : [],
             "TextureFolder" : "Textures/Tiles/Void",
             "Type" : 0
         },
         {
+            "IsWalkable" : true,
             "Name" : "Water",
             "Tags" : [],
             "TextureFolder" : "Textures/Tiles/Water",
             "Type" : 1
         },
         {
+            "IsWalkable" : true,
             "Name" : "Grass",
             "Tags" : [],
             "TextureFolder" : "Textures/Tiles/Grass",
             "Type" : 2
         },
         {
+            "IsWalkable" : true,
             "Name" : "Sand",
             "Tags" : [],
             "TextureFolder" : "Textures/Tiles/Sand",
@@ -28,8 +32,9 @@
         {
             "FrameDurationMs" : 100,
             "IsAnimated" : true,
+            "IsWalkable" : true,
             "Name" : "Lava",
-            "Tags" : 
+            "Tags" :
             [
                 "lava"
             ],

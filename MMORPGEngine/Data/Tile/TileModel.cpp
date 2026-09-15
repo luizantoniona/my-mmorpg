@@ -3,11 +3,12 @@
 namespace Engine {
 
 TileModel::TileModel() :
-    _type( 0 ),
     _name( "" ),
     _folder( "" ),
     _animation(),
-    _tags() {
+    _tags(),
+    _type( 0 ),
+    _isWalkable( true ) {
 }
 
 uint32_t TileModel::type() const {
@@ -56,6 +57,14 @@ QList<QString> TileModel::tags() const {
 
 void TileModel::setTags( const QList<QString>& tags ) {
     _tags = tags;
+}
+
+bool TileModel::isWalkable() const {
+    return _isWalkable;
+}
+
+void TileModel::setIsWalkable( bool isWalkable ) {
+    _isWalkable = isWalkable;
 }
 
 } // namespace Engine

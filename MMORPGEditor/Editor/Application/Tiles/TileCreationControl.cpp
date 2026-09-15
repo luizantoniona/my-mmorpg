@@ -65,7 +65,7 @@ void TileCreationControl::setLastError( const QString& error ) {
     emit lastErrorChanged();
 }
 
-bool TileCreationControl::createTile( const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs ) {
+bool TileCreationControl::createTile( const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable ) {
     const QString trimmedName = name.trimmed();
 
     if ( trimmedName.isEmpty() ) {
@@ -112,6 +112,7 @@ bool TileCreationControl::createTile( const QString& name, const QString& textur
     tile.setFolder( folder );
     tile.setAnimation( animation );
     tile.setTags( parseTags( tagsText ) );
+    tile.setIsWalkable( isWalkable );
 
     Engine::Singleton<Engine::DataManager>::instance().addTile( tile );
     Engine::TileFactory::saveTileCatalog( DATA_PATH, Engine::Singleton<Engine::DataManager>::instance().tileCatalog() );

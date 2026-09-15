@@ -84,6 +84,15 @@ Item {
                     vPlaceholder: "e.g. ground, grass"
                 }
 
+                ButtonToggle {
+                    id: walkableToggle
+                    Layout.preferredWidth: 160
+                    vText: walkableToggle.vSelected ? "Walkable" : "Not Walkable"
+                    vSelected: true
+
+                    onClicked: walkableToggle.vSelected = !walkableToggle.vSelected
+                }
+
                 Text {
                     color: Colors.text
                     font: Fonts.bodyBold
@@ -115,6 +124,7 @@ Item {
                             textureInput.vText = ""
                             tagsInput.vText = ""
                             frameDurationInput.vText = "100"
+                            walkableToggle.vSelected = true
                             statusText.text = ""
                         }
                     }
@@ -126,7 +136,7 @@ Item {
 
                         onClicked: {
                             const frameDurationMs = root.isAnimated ? (parseInt(frameDurationInput.vText, 10) || 100) : 100
-                            const ok = creationControl.createTile(nameInput.vText, textureInput.vText, tagsInput.vText, frameDurationMs)
+                            const ok = creationControl.createTile(nameInput.vText, textureInput.vText, tagsInput.vText, frameDurationMs, walkableToggle.vSelected)
 
                             if (ok) {
                                 statusText.text = "Tile created successfully."
@@ -135,6 +145,7 @@ Item {
                                 textureInput.vText = ""
                                 tagsInput.vText = ""
                                 frameDurationInput.vText = "100"
+                                walkableToggle.vSelected = true
                             } else {
                                 statusText.text = creationControl.lastError
                                 statusText.color = Colors.error

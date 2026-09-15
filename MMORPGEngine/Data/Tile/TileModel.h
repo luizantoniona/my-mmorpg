@@ -32,12 +32,16 @@ public:
     QList<QString> tags() const;
     void setTags( const QList<QString>& tags );
 
+    bool isWalkable() const;
+    void setIsWalkable( bool isWalkable );
+
 private:
-    uint32_t _type;
     QString _name;
     QString _folder;
     AnimationModel _animation;
     QList<QString> _tags;
+    uint32_t _type;
+    bool _isWalkable;
 };
 
 } // namespace Engine
