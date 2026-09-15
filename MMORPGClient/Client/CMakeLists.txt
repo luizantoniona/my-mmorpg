@@ -12,7 +12,9 @@ set(PROJECT_SOURCES
     Manager/AccountManager.cpp
     Manager/AccountManager.h
     Manager/ServerManager.cpp
-    Manager/ServerManager.h)
+    Manager/ServerManager.h
+    Renderer/ClientRenderWorld.cpp
+    Renderer/ClientRenderWorld.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 

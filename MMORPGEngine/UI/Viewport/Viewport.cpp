@@ -1,10 +1,10 @@
 #include "Viewport.h"
 
+#include <QSGSimpleRectNode>
+
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Renderer.h>
 #include <MMORPGEngine/World/WorldConstants.h>
-
-#include <QSGSimpleRectNode>
 
 namespace Engine {
 

@@ -7,6 +7,8 @@ import MMORPGClientComponents
 Item {
     id: root
 
+    property int selectedIdCharacter: -1
+
     function updatePage(page) {
         stack.clear()
 
@@ -72,6 +74,10 @@ Item {
             onLogoutSuccess: function () {
                 root.updatePage("LoginPage")
             }
+            onEnterWorldRequested: function (idCharacter) {
+                root.selectedIdCharacter = idCharacter
+                root.updatePage("GamePage")
+            }
         }
     }
 
@@ -80,6 +86,8 @@ Item {
 
         GamePage {
             id: game
+
+            idCharacter: root.selectedIdCharacter
         }
     }
 
