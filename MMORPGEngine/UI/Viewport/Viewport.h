@@ -33,6 +33,9 @@ public:
     int activeFloor() const;
     void setActiveFloor( int z );
 
+    // TODO: See if we can remove this method
+    Q_INVOKABLE void forceRedraw();
+
 signals:
     void cameraPositionChanged();
     void activeFloorChanged();

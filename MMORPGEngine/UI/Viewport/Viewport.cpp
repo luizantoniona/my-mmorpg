@@ -119,6 +119,10 @@ void Viewport::setActiveFloor( int z ) {
     update();
 }
 
+void Viewport::forceRedraw() {
+    update();
+}
+
 void Viewport::geometryChange( const QRectF& newGeometry, const QRectF& oldGeometry ) {
     QQuickItem::geometryChange( newGeometry, oldGeometry );
     _camera->setViewportSize( newGeometry.size() );
