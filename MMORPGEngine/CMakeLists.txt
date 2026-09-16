@@ -56,6 +56,7 @@ set(PROJECT_SOURCES
     Entity/Creature/CreatureModel.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
+    Entity/EntityOrientationEnum.h
     Entity/EntityOrientationModel.cpp
     Entity/EntityOrientationModel.h
     Entity/EntityPositionModel.cpp

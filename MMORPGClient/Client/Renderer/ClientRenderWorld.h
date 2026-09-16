@@ -2,6 +2,7 @@
 #define CLIENTRENDERWORLD_H
 
 #include <QHash>
+#include <QString>
 
 #include <MMORPGEngine/Renderer/World/RenderWorld.h>
 #include <MMORPGEngine/World/WorldModel.h>
@@ -25,7 +26,7 @@ public:
     uint32_t width() const override;
     uint32_t height() const override;
 
-    Q_INVOKABLE void setEntity( int idEntity, int x, int y, int z );
+    Q_INVOKABLE void setEntity( int idEntity, int x, int y, int z, const QString& orientation );
     Q_INVOKABLE void removeEntity( int idEntity );
     Q_INVOKABLE void clearEntities();
 
@@ -35,6 +36,7 @@ private:
         int x;
         int y;
         int z;
+        QString orientation;
     };
 
     Engine::WorldModel* _world;

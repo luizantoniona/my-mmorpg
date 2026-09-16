@@ -5,6 +5,8 @@
 
 #include <json/json.h>
 
+#include <MMORPGEngine/Entity/EntityOrientationEnum.h>
+
 namespace Engine {
 
 class EntityStateDTO {
@@ -27,6 +29,9 @@ public:
     int z() const;
     void setZ( int z );
 
+    EntityOrientationEnum orientation() const;
+    void setOrientation( EntityOrientationEnum orientation );
+
     std::string worldName() const;
     void setWorldName( const std::string& worldName );
 
@@ -35,6 +40,7 @@ private:
     int _x;
     int _y;
     int _z;
+    EntityOrientationEnum _orientation;
     std::string _worldName;
 };
 

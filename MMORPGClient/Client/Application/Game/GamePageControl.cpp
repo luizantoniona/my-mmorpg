@@ -6,6 +6,7 @@
 #include <MMORPGClient/Client/Manager/ServerManager.h>
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/EntityOrientationModel.h>
 #include <MMORPGEngine/Entity/EntityStateDTO.h>
 #include <MMORPGEngine/World/WorldFactory.h>
 
@@ -13,10 +14,9 @@ GamePageControl::GamePageControl( QObject* parent ) :
     QObject( parent ),
     _world( nullptr ),
     _webSocket( this ),
-    _idCharacter( -1 ),
-    _spawnFloor( 0 ),
-    _spawnX( 0 ),
-    _spawnY( 0 ) {
+    _character() {
+
+    _character.setIdCharacter( -1 );
 
     connect( &_webSocket, &Engine::WebSocketClient::messageReceived, this, &GamePageControl::onMessageReceived );
     connect( &_webSocket, &Engine::WebSocketClient::errorOccurred, this, &GamePageControl::worldEntryFailed );
@@ -67,15 +67,15 @@ int GamePageControl::worldHeight() const {
 }
 
 int GamePageControl::spawnFloor() const {
-    return _spawnFloor;
+    return _character.position().z();
 }
 
 int GamePageControl::spawnX() const {
-    return _spawnX;
+    return _character.position().x();
 }
 
 int GamePageControl::spawnY() const {
-    return _spawnY;
+    return _character.position().y();
 }
 
 void GamePageControl::loadWorld() {
@@ -87,7 +87,7 @@ void GamePageControl::loadWorld() {
 }
 
 void GamePageControl::connectToWorld( int idCharacter ) {
-    _idCharacter = idCharacter;
+    _character.setIdCharacter( idCharacter );
 
     ServerManager& serverManager = Engine::Singleton<ServerManager>::instance();
 
@@ -134,16 +134,23 @@ void GamePageControl::onMessageReceived( const QString& message ) {
     }
 
     Engine::EntityStateDTO state = Engine::EntityStateDTO::fromJson( json );
+    const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
-    emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z() );
+    emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), orientation );
 
-    if ( state.idCharacter() != _idCharacter ) {
+    if ( state.idCharacter() != _character.idCharacter() ) {
         return;
     }
 
-    _spawnFloor = state.z();
-    _spawnX = state.x();
-    _spawnY = state.y();
+    Engine::EntityPositionModel position = _character.position();
+    position.setX( state.x() );
+    position.setY( state.y() );
+    position.setZ( state.z() );
+    _character.setPosition( position );
+
+    Engine::EntityOrientationModel orientationModel = _character.orientation();
+    orientationModel.setDirection( state.orientation() );
+    _character.setOrientation( orientationModel );
 
     emit worldEntryReceived();
 }

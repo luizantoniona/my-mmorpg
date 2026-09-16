@@ -4,6 +4,7 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/EntityOrientationEnum.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntityStateDTO.h>
 #include <MMORPGEngine/World/WorldModel.h>
@@ -81,6 +82,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
     const Engine::WorldModel* world = worldManager.world();
 
     const Engine::EntityPositionModel position = character->position();
+    const Engine::EntityOrientationEnum orientation = character->orientation().direction();
     qInfo() << "[WebSocket] Character position [CHARACTER]" << idCharacter << "[X]" << position.x() << "[Y]" << position.y() << "[Z]" << position.z();
 
     worldManager.addCharacter( std::move( character ) );
@@ -94,6 +96,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
     state.setX( position.x() );
     state.setY( position.y() );
     state.setZ( position.z() );
+    state.setOrientation( orientation );
     state.setWorldName( world->name().toStdString() );
 
     connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
@@ -111,6 +114,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
         nearbyState.setX( nearbyPosition.x() );
         nearbyState.setY( nearbyPosition.y() );
         nearbyState.setZ( nearbyPosition.z() );
+        nearbyState.setOrientation( nearbyCharacter->orientation().direction() );
         nearbyState.setWorldName( world->name().toStdString() );
 
         connection->send( Engine::JsonHelper::writeJsonString( nearbyState.toJson() ) );

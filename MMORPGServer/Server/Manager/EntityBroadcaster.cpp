@@ -2,6 +2,7 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/EntityOrientationEnum.h>
 #include <MMORPGEngine/Entity/EntityStateDTO.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
@@ -71,12 +72,14 @@ void EntityBroadcaster::broadcastPosition( const WorldEvent& event ) {
     }
 
     const Engine::WorldModel* world = worldManager.world();
+    const Engine::CharacterModel* character = worldManager.character( idCharacter );
 
     Engine::EntityStateDTO state;
     state.setIdCharacter( idCharacter );
     state.setX( x );
     state.setY( y );
     state.setZ( z );
+    state.setOrientation( character ? character->orientation().direction() : Engine::EntityOrientationEnum::SOUTH );
     state.setWorldName( world ? world->name().toStdString() : "" );
 
     const std::string message = Engine::JsonHelper::writeJsonString( state.toJson() );

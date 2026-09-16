@@ -7,6 +7,7 @@ EntityStateDTO::EntityStateDTO() :
     _x( 0 ),
     _y( 0 ),
     _z( 0 ),
+    _orientation( EntityOrientationEnum::SOUTH ),
     _worldName( "" ) {
 }
 
@@ -31,6 +32,10 @@ EntityStateDTO EntityStateDTO::fromJson( const Json::Value& json ) {
         dto._z = json[ "z" ].asInt();
     }
 
+    if ( json.isMember( "orientation" ) && json[ "orientation" ].isInt() ) {
+        dto._orientation = static_cast<EntityOrientationEnum>( json[ "orientation" ].asInt() );
+    }
+
     if ( json.isMember( "worldName" ) && json[ "worldName" ].isString() ) {
         dto._worldName = json[ "worldName" ].asString();
     }
@@ -45,6 +50,7 @@ Json::Value EntityStateDTO::toJson() const {
     json[ "x" ] = _x;
     json[ "y" ] = _y;
     json[ "z" ] = _z;
+    json[ "orientation" ] = static_cast<int>( _orientation );
     json[ "worldName" ] = _worldName;
 
     return json;
@@ -80,6 +86,14 @@ int EntityStateDTO::z() const {
 
 void EntityStateDTO::setZ( int z ) {
     _z = z;
+}
+
+EntityOrientationEnum EntityStateDTO::orientation() const {
+    return _orientation;
+}
+
+void EntityStateDTO::setOrientation( EntityOrientationEnum orientation ) {
+    _orientation = orientation;
 }
 
 std::string EntityStateDTO::worldName() const {

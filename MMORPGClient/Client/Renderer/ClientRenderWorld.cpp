@@ -62,8 +62,8 @@ uint32_t ClientRenderWorld::height() const {
     return _world->height();
 }
 
-void ClientRenderWorld::setEntity( int idEntity, int x, int y, int z ) {
-    _entities.insert( idEntity, EntityPosition{ x, y, z } );
+void ClientRenderWorld::setEntity( int idEntity, int x, int y, int z, const QString& orientation ) {
+    _entities.insert( idEntity, EntityPosition{ x, y, z, orientation } );
 }
 
 void ClientRenderWorld::removeEntity( int idEntity ) {

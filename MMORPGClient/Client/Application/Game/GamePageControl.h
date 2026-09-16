@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QVariantList>
 
+#include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Network/WebSocketClient.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
@@ -49,7 +50,7 @@ signals:
     void worldEntryReceived();
     void worldEntryFailed( const QString& error );
 
-    void entityStateReceived( int idCharacter, int x, int y, int z );
+    void entityStateReceived( int idCharacter, int x, int y, int z, const QString& orientation );
     void entityLeftReceived( int idCharacter );
 
 private:
@@ -59,10 +60,7 @@ private:
     std::unique_ptr<Engine::WorldModel> _world;
     Engine::WebSocketClient _webSocket;
 
-    int _idCharacter;
-    int _spawnFloor;
-    int _spawnX;
-    int _spawnY;
+    Engine::CharacterModel _character;
 };
 
 #endif // GAMEPAGECONTROL_H

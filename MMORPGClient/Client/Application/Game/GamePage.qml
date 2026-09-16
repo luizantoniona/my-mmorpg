@@ -21,8 +21,8 @@ Item {
         onWorldEntryFailed: function (error) {
             root.vTextError = error
         }
-        onEntityStateReceived: function (idCharacter, x, y, z) {
-            clientWorld.setEntity(idCharacter, x, y, z)
+        onEntityStateReceived: function (idCharacter, x, y, z, orientation) {
+            clientWorld.setEntity(idCharacter, x, y, z, orientation)
         }
         onEntityLeftReceived: function (idCharacter) {
             clientWorld.removeEntity(idCharacter)
