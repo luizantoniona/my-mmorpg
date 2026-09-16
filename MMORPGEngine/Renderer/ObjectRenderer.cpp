@@ -46,8 +46,10 @@ void ObjectRenderer::renderObject( RenderScene& scene, int x, int y, int z, cons
         return;
     }
 
-    const QPointF position( x * WorldConstants::TILE_SIZE, ( y + 1 ) * WorldConstants::TILE_SIZE - frame.height() );
-    const QSizeF size( frame.width(), frame.height() );
+    const ObjectSizeModel footprint = objectModel->size();
+    const qreal scale = ( footprint.width() * WorldConstants::TILE_SIZE ) / static_cast<qreal>( frame.width() );
+    const QSizeF size( frame.width() * scale, frame.height() * scale );
+    const QPointF position( x * WorldConstants::TILE_SIZE, ( y + 1 ) * WorldConstants::TILE_SIZE - size.height() );
 
     scene.addTexture( position, size, frame );
 }
