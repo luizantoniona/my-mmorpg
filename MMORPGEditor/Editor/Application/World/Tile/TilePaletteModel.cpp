@@ -11,6 +11,8 @@ TilePaletteModel::TilePaletteModel( QObject* parent ) :
     QAbstractListModel( parent ),
     _types() {
 
+    _types.append( 0 );
+
     const Engine::TileCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().tileCatalog();
 
     for ( const auto& entry : catalog.tiles() ) {
@@ -34,6 +36,19 @@ QVariant TilePaletteModel::data( const QModelIndex& index, int role ) const {
     }
 
     const uint32_t type = _types.at( index.row() );
+
+    if ( type == 0 ) {
+        switch ( role ) {
+        case TypeRole:
+            return type;
+        case NameRole:
+            return QStringLiteral( "Empty" );
+        case IconSourceRole:
+            return QStringLiteral( "image://EditorTileIcon/0" );
+        default:
+            return QVariant();
+        }
+    }
 
     const Engine::TileCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().tileCatalog();
     const Engine::TileModel* tile = catalog.tile( type );
