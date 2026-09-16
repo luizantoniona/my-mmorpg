@@ -1,6 +1,8 @@
 set(PROJECT_SOURCES
     RegisterServerTypes.cpp
     RegisterServerTypes.h
+    Application/Server/ServerPageControl.cpp
+    Application/Server/ServerPageControl.h
     Database/Database.cpp
     Database/Database.h
     Database/Query.cpp

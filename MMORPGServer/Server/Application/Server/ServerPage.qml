@@ -1,43 +1,66 @@
 import QtQuick
+import QtQuick.Layouts
 import MMORPGEngine
+import MMORPGUIComponents
 import MMORPGServerComponents
 
 Item {
     id: root
 
-    focus: true
+    property int currentFloor: 0
+
+    ServerPageControl {
+        id: control
+    }
 
     ServerRenderWorld {
         id: serverWorld
     }
 
-    Viewport {
-        id: viewport
-
+    RowLayout {
         anchors.fill: parent
-        renderWorld: serverWorld
+        spacing: 0
+            Rectangle {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                color: "transparent"
+                border.color: Colors.border
+                border.width: Borders.border1
+                clip: true
+
+                Viewport {
+                    id: viewport
+
+                    anchors.fill: parent
+                    anchors.margins: Borders.border1
+                    renderWorld: serverWorld
+                    activeFloor: root.currentFloor
+                }
+            }
+        }
     }
 
     Component.onCompleted: {
-        forceActiveFocus()
-        viewport.centerCameraOnTile(16, 16)
+        viewport.centerCameraOnTile(control.worldWidth / 2, control.worldHeight / 2)
     }
 
-    Keys.onPressed: function (event) {
-        console.log("KEY:", event.key)
-        switch (event.key) {
-        case Qt.Key_W:
-            viewport.moveCameraByTiles(0, -1)
-            break
-        case Qt.Key_S:
-            viewport.moveCameraByTiles(0, 1)
-            break
-        case Qt.Key_A:
-            viewport.moveCameraByTiles(-1, 0)
-            break
-        case Qt.Key_D:
-            viewport.moveCameraByTiles(1, 0)
-            break
-        }
+    Shortcut {
+        sequence: "W"
+        onActivated: viewport.moveCameraByTiles(0, -1)
+    }
+
+    Shortcut {
+        sequence: "S"
+        onActivated: viewport.moveCameraByTiles(0, 1)
+    }
+
+    Shortcut {
+        sequence: "A"
+        onActivated: viewport.moveCameraByTiles(-1, 0)
+    }
+
+    Shortcut {
+        sequence: "D"
+        onActivated: viewport.moveCameraByTiles(1, 0)
     }
 }
