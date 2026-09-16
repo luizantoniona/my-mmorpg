@@ -20,6 +20,8 @@ public:
 
     QList<Engine::RenderWorld::Entity> entities( int z ) const override;
 
+    std::vector<int> floors() const override;
+
     uint32_t width() const override;
     uint32_t height() const override;
 

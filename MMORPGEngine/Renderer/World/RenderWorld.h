@@ -2,6 +2,7 @@
 #define RENDERWORLD_H
 
 #include <cstdint>
+#include <vector>
 
 #include <QList>
 #include <QObject>
@@ -29,6 +30,8 @@ public:
     virtual const WorldTileModel* tile( int x, int y, int z ) const = 0;
 
     virtual QList<Entity> entities( int z ) const = 0;
+
+    virtual std::vector<int> floors() const = 0;
 
     virtual uint32_t width() const = 0;
     virtual uint32_t height() const = 0;

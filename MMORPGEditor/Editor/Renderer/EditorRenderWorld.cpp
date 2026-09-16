@@ -40,6 +40,14 @@ QList<Engine::RenderWorld::Entity> EditorRenderWorld::entities( int z ) const {
     return {};
 }
 
+std::vector<int> EditorRenderWorld::floors() const {
+    if ( !_world ) {
+        return {};
+    }
+
+    return _world->floors();
+}
+
 uint32_t EditorRenderWorld::width() const {
     if ( !_world ) {
         return 0;

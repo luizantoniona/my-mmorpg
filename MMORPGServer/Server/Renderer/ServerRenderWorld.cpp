@@ -46,7 +46,7 @@ QList<Engine::RenderWorld::Entity> ServerRenderWorld::entities( int z ) const {
             continue;
         }
 
-        result.append( Engine::RenderWorld::Entity{ entry.first, position.x(), position.y() } );
+        result.append( Engine::RenderWorld::Entity( entry.first, position.x(), position.y() ) );
     }
 
     return result;

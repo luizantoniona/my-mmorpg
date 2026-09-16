@@ -40,10 +40,18 @@ QList<Engine::RenderWorld::Entity> ClientRenderWorld::entities( int z ) const {
             continue;
         }
 
-        result.append( Engine::RenderWorld::Entity{ it.key(), it->x, it->y } );
+        result.append( Engine::RenderWorld::Entity( it.key(), it->x, it->y ) );
     }
 
     return result;
+}
+
+std::vector<int> ClientRenderWorld::floors() const {
+    if ( !_world ) {
+        return {};
+    }
+
+    return _world->floors();
 }
 
 uint32_t ClientRenderWorld::width() const {
@@ -63,7 +71,7 @@ uint32_t ClientRenderWorld::height() const {
 }
 
 void ClientRenderWorld::setEntity( int idEntity, int x, int y, int z, const QString& orientation ) {
-    _entities.insert( idEntity, EntityPosition{ x, y, z, orientation } );
+    _entities.insert( idEntity, EntityPosition( x, y, z, orientation ) );
 }
 
 void ClientRenderWorld::removeEntity( int idEntity ) {
