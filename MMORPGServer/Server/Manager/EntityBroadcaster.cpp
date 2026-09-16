@@ -4,6 +4,8 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/EntityOrientationEnum.h>
 #include <MMORPGEngine/Entity/EntityStateDTO.h>
+#include <MMORPGEngine/Entity/EntityVitalsDTO.h>
+#include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionRegistry.h>
@@ -28,6 +30,7 @@ EntityBroadcaster::EntityBroadcaster() {
 
 void EntityBroadcaster::onEntityEntered( const WorldEvent& event ) {
     broadcastPosition( event );
+    broadcastVitals( event );
 }
 
 void EntityBroadcaster::onEntityMoved( const WorldEvent& event ) {
@@ -81,6 +84,47 @@ void EntityBroadcaster::broadcastPosition( const WorldEvent& event ) {
     state.setZ( z );
     state.setOrientation( character ? character->orientation().direction() : Engine::EntityOrientationEnum::SOUTH );
     state.setWorldName( world ? world->name().toStdString() : "" );
+
+    const std::string message = Engine::JsonHelper::writeJsonString( state.toJson() );
+
+    auto& connectionRegistry = Engine::Singleton<CharacterConnectionRegistry>::instance();
+
+    for ( int nearbyIdCharacter : nearbyCharacters ) {
+        drogon::WebSocketConnectionPtr connection = connectionRegistry.connection( nearbyIdCharacter );
+
+        if ( connection ) {
+            connection->send( message );
+        }
+    }
+}
+
+void EntityBroadcaster::broadcastVitals( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    auto& worldManager = Engine::Singleton<WorldManager>::instance();
+    const std::vector<int> nearbyCharacters = worldManager.charactersNear( idCharacter );
+
+    if ( nearbyCharacters.empty() ) {
+        return;
+    }
+
+    const Engine::CharacterModel* character = worldManager.character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    const Engine::EntityVitalsModel& vitals = character->vitals();
+
+    Engine::EntityVitalsDTO state;
+    state.setIdCharacter( idCharacter );
+    state.setHealth( vitals.health() );
+    state.setMaxHealth( vitals.maxHealth() );
+    state.setMana( vitals.mana() );
+    state.setMaxMana( vitals.maxMana() );
+    state.setStamina( vitals.stamina() );
+    state.setMaxStamina( vitals.maxStamina() );
 
     const std::string message = Engine::JsonHelper::writeJsonString( state.toJson() );
 

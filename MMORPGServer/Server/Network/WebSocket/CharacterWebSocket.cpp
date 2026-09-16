@@ -7,6 +7,8 @@
 #include <MMORPGEngine/Entity/EntityOrientationEnum.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntityStateDTO.h>
+#include <MMORPGEngine/Entity/EntityVitalsDTO.h>
+#include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
@@ -83,6 +85,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     const Engine::EntityPositionModel position = character->position();
     const Engine::EntityOrientationEnum orientation = character->orientation().direction();
+    const Engine::EntityVitalsModel vitals = character->vitals();
     qInfo() << "[WebSocket] Character position [CHARACTER]" << idCharacter << "[X]" << position.x() << "[Y]" << position.y() << "[Z]" << position.z();
 
     worldManager.addCharacter( std::move( character ) );
@@ -101,6 +104,17 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
 
+    Engine::EntityVitalsDTO vitalsState;
+    vitalsState.setIdCharacter( idCharacter );
+    vitalsState.setHealth( vitals.health() );
+    vitalsState.setMaxHealth( vitals.maxHealth() );
+    vitalsState.setMana( vitals.mana() );
+    vitalsState.setMaxMana( vitals.maxMana() );
+    vitalsState.setStamina( vitals.stamina() );
+    vitalsState.setMaxStamina( vitals.maxStamina() );
+
+    connection->send( Engine::JsonHelper::writeJsonString( vitalsState.toJson() ) );
+
     for ( int nearbyIdCharacter : worldManager.charactersNear( idCharacter ) ) {
         Engine::CharacterModel* nearbyCharacter = worldManager.character( nearbyIdCharacter );
         if ( !nearbyCharacter ) {
@@ -108,6 +122,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
         }
 
         const Engine::EntityPositionModel& nearbyPosition = nearbyCharacter->position();
+        const Engine::EntityVitalsModel& nearbyVitals = nearbyCharacter->vitals();
 
         Engine::EntityStateDTO nearbyState;
         nearbyState.setIdCharacter( nearbyIdCharacter );
@@ -118,6 +133,17 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
         nearbyState.setWorldName( world->name().toStdString() );
 
         connection->send( Engine::JsonHelper::writeJsonString( nearbyState.toJson() ) );
+
+        Engine::EntityVitalsDTO nearbyVitalsState;
+        nearbyVitalsState.setIdCharacter( nearbyIdCharacter );
+        nearbyVitalsState.setHealth( nearbyVitals.health() );
+        nearbyVitalsState.setMaxHealth( nearbyVitals.maxHealth() );
+        nearbyVitalsState.setMana( nearbyVitals.mana() );
+        nearbyVitalsState.setMaxMana( nearbyVitals.maxMana() );
+        nearbyVitalsState.setStamina( nearbyVitals.stamina() );
+        nearbyVitalsState.setMaxStamina( nearbyVitals.maxStamina() );
+
+        connection->send( Engine::JsonHelper::writeJsonString( nearbyVitalsState.toJson() ) );
     }
 
     qInfo() << "[WebSocket] Character entered world [CHARACTER]" << idCharacter;

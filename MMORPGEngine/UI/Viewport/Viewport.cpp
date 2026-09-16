@@ -151,7 +151,7 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
     const int y = static_cast<int>( std::floor( worldPosition.y() / tileSize ) );
     const int z = _activeFloor;
 
-    if ( !_world->tile( x, y, z ) ) {
+    if ( x < 0 || y < 0 || x >= static_cast<int>( _world->width() ) || y >= static_cast<int>( _world->height() ) ) {
         return;
     }
 
