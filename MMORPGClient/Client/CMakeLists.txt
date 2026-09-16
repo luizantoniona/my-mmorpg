@@ -29,6 +29,8 @@ qt_add_qml_module(
   Application/ClientWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
+  Application/Game/Component/CharacterHud.qml
+  Application/Game/Component/StatBar.qml
   Application/Login/LoginPage.qml
   Application/Login/Component/AccountPanel.qml
   Application/Login/Component/ServerPanel.qml

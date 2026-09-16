@@ -20,6 +20,12 @@ class GamePageControl : public QObject {
     Q_PROPERTY( int spawnFloor READ spawnFloor NOTIFY worldEntryReceived )
     Q_PROPERTY( int spawnX READ spawnX NOTIFY worldEntryReceived )
     Q_PROPERTY( int spawnY READ spawnY NOTIFY worldEntryReceived )
+    Q_PROPERTY( double health READ health NOTIFY vitalsChanged )
+    Q_PROPERTY( double maxHealth READ maxHealth NOTIFY vitalsChanged )
+    Q_PROPERTY( double mana READ mana NOTIFY vitalsChanged )
+    Q_PROPERTY( double maxMana READ maxMana NOTIFY vitalsChanged )
+    Q_PROPERTY( double stamina READ stamina NOTIFY vitalsChanged )
+    Q_PROPERTY( double maxStamina READ maxStamina NOTIFY vitalsChanged )
 
 public:
     explicit GamePageControl( QObject* parent = nullptr );
@@ -38,6 +44,13 @@ public:
     int spawnX() const;
     int spawnY() const;
 
+    double health() const;
+    double maxHealth() const;
+    double mana() const;
+    double maxMana() const;
+    double stamina() const;
+    double maxStamina() const;
+
 public slots:
     void loadWorld();
     void connectToWorld( int idCharacter );
@@ -52,6 +65,8 @@ signals:
 
     void entityStateReceived( int idCharacter, int x, int y, int z, const QString& orientation );
     void entityLeftReceived( int idCharacter );
+
+    void vitalsChanged();
 
 private:
     void onMessageReceived( const QString& message );

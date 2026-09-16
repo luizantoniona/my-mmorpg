@@ -8,6 +8,8 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/EntityOrientationModel.h>
 #include <MMORPGEngine/Entity/EntityStateDTO.h>
+#include <MMORPGEngine/Entity/EntityVitalsDTO.h>
+#include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/World/WorldFactory.h>
 
 GamePageControl::GamePageControl( QObject* parent ) :
@@ -78,6 +80,30 @@ int GamePageControl::spawnY() const {
     return _character.position().y();
 }
 
+double GamePageControl::health() const {
+    return _character.vitals().health();
+}
+
+double GamePageControl::maxHealth() const {
+    return _character.vitals().maxHealth();
+}
+
+double GamePageControl::mana() const {
+    return _character.vitals().mana();
+}
+
+double GamePageControl::maxMana() const {
+    return _character.vitals().maxMana();
+}
+
+double GamePageControl::stamina() const {
+    return _character.vitals().stamina();
+}
+
+double GamePageControl::maxStamina() const {
+    return _character.vitals().maxStamina();
+}
+
 void GamePageControl::loadWorld() {
     ServerManager& serverManager = Engine::Singleton<ServerManager>::instance();
 
@@ -130,6 +156,26 @@ void GamePageControl::onMessageReceived( const QString& message ) {
 
     if ( json.get( "type", "" ).asString() == "leave" ) {
         emit entityLeftReceived( json.get( "idCharacter", -1 ).asInt() );
+        return;
+    }
+
+    if ( json.get( "type", "" ).asString() == "vitals" ) {
+        Engine::EntityVitalsDTO vitals = Engine::EntityVitalsDTO::fromJson( json );
+
+        if ( vitals.idCharacter() != _character.idCharacter() ) {
+            return;
+        }
+
+        Engine::EntityVitalsModel vitalsModel = _character.vitals();
+        vitalsModel.setHealth( vitals.health() );
+        vitalsModel.setMaxHealth( vitals.maxHealth() );
+        vitalsModel.setMana( vitals.mana() );
+        vitalsModel.setMaxMana( vitals.maxMana() );
+        vitalsModel.setStamina( vitals.stamina() );
+        vitalsModel.setMaxStamina( vitals.maxStamina() );
+        _character.setVitals( vitalsModel );
+
+        emit vitalsChanged();
         return;
     }
 

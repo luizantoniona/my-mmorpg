@@ -3,6 +3,7 @@ import MMORPGEngine
 import MMORPGUIComponents
 import MMORPGClientComponents
 import MMORPGClientControls
+import MMORPGClientManagers
 
 Item {
     id: root
@@ -10,6 +11,15 @@ Item {
     property int idCharacter: -1
     property int currentFloor: 0
     property string vTextError: ""
+
+    property string characterName: {
+        for (var i = 0; i < AccountManager.characters.length; i++) {
+            if (AccountManager.characters[i].idCharacter === root.idCharacter) {
+                return AccountManager.characters[i].name
+            }
+        }
+        return ""
+    }
 
     GamePageControl {
         id: control
@@ -39,6 +49,21 @@ Item {
         anchors.fill: parent
         renderWorld: clientWorld
         activeFloor: root.currentFloor
+    }
+
+    CharacterHud {
+        anchors {
+            top: parent.top
+            left: parent.left
+            margins: Spaces.spacing8
+        }
+        vCharacterName: root.characterName
+        vHealth: control.health
+        vMaxHealth: control.maxHealth
+        vMana: control.mana
+        vMaxMana: control.maxMana
+        vStamina: control.stamina
+        vMaxStamina: control.maxStamina
     }
 
     Text {
