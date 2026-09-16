@@ -52,6 +52,14 @@ QList<Engine::RenderWorld::Entity> ServerRenderWorld::entities( int z ) const {
     return result;
 }
 
+std::vector<int> ServerRenderWorld::floors() const {
+    if ( !_world ) {
+        return {};
+    }
+
+    return _world->floors();
+}
+
 uint32_t ServerRenderWorld::width() const {
     if ( !_world ) {
         return 0;
