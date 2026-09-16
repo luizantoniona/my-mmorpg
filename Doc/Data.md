@@ -24,7 +24,8 @@ Data/
 ## Rules
 
 - `Type` is the numeric identifier used in the floor matrices.
-  `0` in `Tiles` is the `Void` tile; `0` in `Objects` means "no object".
+  `0` means "empty" in both `Tiles` and `Objects` — no catalog lookup, no
+  texture. There is no `Void` tile entry in `Tile.json`.
 - `TextureFolder` is relative to the map folder.
 - `IsWalkable` (default `true`) controls whether the server allows moving
   onto that tile. Always written explicitly by `TileFactory` — avoid
