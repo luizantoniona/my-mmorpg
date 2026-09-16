@@ -52,6 +52,8 @@ set(PROJECT_SOURCES
     Repository/CharacterPositionRepository.h
     Repository/CharacterRepository.cpp
     Repository/CharacterRepository.h
+    Repository/CharacterVitalsRepository.cpp
+    Repository/CharacterVitalsRepository.h
     Repository/Repository.cpp
     Repository/Repository.h)
 

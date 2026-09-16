@@ -2,6 +2,7 @@
 
 #include <MMORPGServer/Server/Database/Query.h>
 #include <MMORPGServer/Server/Repository/CharacterPositionRepository.h>
+#include <MMORPGServer/Server/Repository/CharacterVitalsRepository.h>
 
 namespace Server {
 
@@ -9,7 +10,7 @@ CharacterRepository::CharacterRepository() :
     Repository() {
 }
 
-int CharacterRepository::createCharacter( const int idAccount, const std::string& dsName, const Engine::EntityPositionModel& spawnPosition ) {
+int CharacterRepository::createCharacter( const int idAccount, const std::string& dsName, const Engine::EntityPositionModel& spawnPosition, const Engine::EntityVitalsModel& spawnVitals ) {
     const std::string sql = R"SQL(
         INSERT INTO character (
             id_account,
@@ -30,6 +31,7 @@ int CharacterRepository::createCharacter( const int idAccount, const std::string
     bool success = true;
 
     success &= CharacterPositionRepository().create( idCharacter, spawnPosition );
+    success &= CharacterVitalsRepository().create( idCharacter, spawnVitals );
 
     // TODO: Create future derivations
     // Example:
@@ -56,6 +58,7 @@ bool CharacterRepository::updateCharacter( Engine::CharacterModel character ) {
     bool success = true;
 
     success &= CharacterPositionRepository().save( idCharacter, character.position() );
+    success &= CharacterVitalsRepository().save( idCharacter, character.vitals() );
 
     // TODO: Update future derivations
     // Example:
@@ -87,6 +90,11 @@ std::unique_ptr<Engine::CharacterModel> CharacterRepository::findByIdAccountAndI
         auto position = CharacterPositionRepository().find( character->idCharacter() );
         if ( position ) {
             character->setPosition( position->position() );
+        }
+
+        auto vitals = CharacterVitalsRepository().find( character->idCharacter() );
+        if ( vitals ) {
+            character->setVitals( vitals->vitals() );
         }
 
         // TODO: Get future derivations

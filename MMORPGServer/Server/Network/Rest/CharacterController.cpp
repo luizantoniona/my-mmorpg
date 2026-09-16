@@ -4,6 +4,7 @@
 
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
+#include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Database/Database.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
@@ -37,7 +38,16 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
     spawnPosition.setY( world ? world->spawnY() : 0 );
     spawnPosition.setZ( world ? world->spawnZ() : 0 );
 
-    int idCharacter = CharacterRepository().createCharacter( idAccount, name, spawnPosition );
+    // TODO: Derive from the attribute system once it exists; flat baseline for now.
+    Engine::EntityVitalsModel spawnVitals;
+    spawnVitals.setHealth( 100.0 );
+    spawnVitals.setMaxHealth( 100.0 );
+    spawnVitals.setMana( 50.0 );
+    spawnVitals.setMaxMana( 50.0 );
+    spawnVitals.setStamina( 50.0 );
+    spawnVitals.setMaxStamina( 50.0 );
+
+    int idCharacter = CharacterRepository().createCharacter( idAccount, name, spawnPosition, spawnVitals );
 
     if ( idCharacter == 0 ) {
         auto response = drogon::HttpResponse::newHttpResponse();
