@@ -1,13 +1,3 @@
 {
-    "Objects": [
-        {
-            "Type": 1,
-            "Name": "StoneWall",
-            "Footprint": {
-                "Width": 1,
-                "Height": 1
-            },
-            "TextureFolder": "Textures/Objects/StoneWall"
-        }
-    ]
+    "Objects": []
 }
