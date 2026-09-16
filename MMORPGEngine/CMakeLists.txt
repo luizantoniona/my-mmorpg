@@ -4,6 +4,8 @@ project(MMORPGEngine LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 
+option(MMORPGENGINE_BUILD_TESTS "Build tests" OFF)
+
 set(PROJECT_SOURCES
     Account/AccountCharacterDTO.cpp
     Account/AccountCharacterDTO.h
@@ -123,3 +125,8 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>)
+
+if(MMORPGENGINE_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(Test)
+endif()
