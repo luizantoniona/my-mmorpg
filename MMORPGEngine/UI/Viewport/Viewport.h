@@ -33,6 +33,9 @@ public:
     int activeFloor() const;
     void setActiveFloor( int z );
 
+    Q_INVOKABLE void setHighlightedTile( int x, int y );
+    Q_INVOKABLE void clearHighlight();
+
     // TODO: See if we can remove this method
     Q_INVOKABLE void forceRedraw();
 
@@ -60,6 +63,10 @@ private:
     TextureCache _textureCache;
 
     int _activeFloor;
+    int _highlightX;
+    int _highlightY;
+
+    bool _hasHighlight;
 };
 
 } // namespace Engine

@@ -1,5 +1,6 @@
 #include "Viewport.h"
 
+#include <QColor>
 #include <QSGSimpleRectNode>
 
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
@@ -18,7 +19,10 @@ Viewport::Viewport( QQuickItem* parent ) :
     _renderer( new Renderer() ),
     _world( nullptr ),
     _animationTimer( new QTimer( this ) ),
-    _activeFloor( 0 ) {
+    _activeFloor( 0 ),
+    _highlightX( 0 ),
+    _highlightY( 0 ),
+    _hasHighlight( false ) {
 
     setFlag( ItemHasContents, true );
 
@@ -119,6 +123,28 @@ void Viewport::setActiveFloor( int z ) {
     update();
 }
 
+void Viewport::setHighlightedTile( int x, int y ) {
+    if ( _hasHighlight && _highlightX == x && _highlightY == y ) {
+        return;
+    }
+
+    _hasHighlight = true;
+    _highlightX = x;
+    _highlightY = y;
+
+    update();
+}
+
+void Viewport::clearHighlight() {
+    if ( !_hasHighlight ) {
+        return;
+    }
+
+    _hasHighlight = false;
+
+    update();
+}
+
 void Viewport::forceRedraw() {
     update();
 }
@@ -172,6 +198,19 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
     _renderer->render( scene, *_camera, *_world, _activeFloor );
 
     scene.build( rootNode, window(), *_camera, _textureCache );
+
+    if ( _hasHighlight ) {
+        const double tileSize = WorldConstants::TILE_SIZE;
+
+        const QPointF worldPosition( _highlightX * tileSize, _highlightY * tileSize );
+        const QPointF screenPosition = _camera->worldToScreen( worldPosition );
+
+        auto* highlightNode = new QSGSimpleRectNode();
+        highlightNode->setColor( QColor( 255, 255, 255, 70 ) );
+        highlightNode->setRect( screenPosition.x(), screenPosition.y(), tileSize, tileSize );
+
+        rootNode->appendChildNode( highlightNode );
+    }
 
     return rootNode;
 }
