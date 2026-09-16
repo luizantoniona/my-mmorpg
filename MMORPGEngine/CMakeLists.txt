@@ -52,8 +52,6 @@ set(PROJECT_SOURCES
     Data/DataManager.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
-    Entity/Character/CharacterPositionModel.cpp
-    Entity/Character/CharacterPositionModel.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
     Entity/EntityModel.cpp
@@ -66,6 +64,8 @@ set(PROJECT_SOURCES
     Entity/EntitySizeModel.h
     Entity/EntityStateDTO.cpp
     Entity/EntityStateDTO.h
+    Entity/EntityVitalsModel.cpp
+    Entity/EntityVitalsModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
     Network/WebSocketClient.cpp

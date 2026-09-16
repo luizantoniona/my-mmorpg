@@ -3,7 +3,6 @@
 
 #include <memory>
 
-#include <MMORPGEngine/Entity/Character/CharacterVitalsModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGServer/Server/Repository/Repository.h>
 
@@ -15,7 +14,7 @@ public:
 
     bool create( int idCharacter, const Engine::EntityVitalsModel& vitals );
 
-    std::unique_ptr<Engine::CharacterVitalsModel> find( int idCharacter );
+    std::unique_ptr<Engine::EntityVitalsModel> find( int idCharacter );
 
     bool save( int idCharacter, const Engine::EntityVitalsModel& vitals );
 };

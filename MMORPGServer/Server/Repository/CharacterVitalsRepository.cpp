@@ -33,10 +33,9 @@ bool CharacterVitalsRepository::create( int idCharacter, const Engine::EntityVit
     return query.exec();
 }
 
-std::unique_ptr<Engine::CharacterVitalsModel> CharacterVitalsRepository::find( int idCharacter ) {
+std::unique_ptr<Engine::EntityVitalsModel> CharacterVitalsRepository::find( int idCharacter ) {
     const std::string sql = R"SQL(
         SELECT
-            id_character,
             health,
             max_health,
             mana,
@@ -54,19 +53,15 @@ std::unique_ptr<Engine::CharacterVitalsModel> CharacterVitalsRepository::find( i
         return nullptr;
     }
 
-    Engine::EntityVitalsModel vitals;
-    vitals.setHealth( query.getColumnDouble( 1 ) );
-    vitals.setMaxHealth( query.getColumnDouble( 2 ) );
-    vitals.setMana( query.getColumnDouble( 3 ) );
-    vitals.setMaxMana( query.getColumnDouble( 4 ) );
-    vitals.setStamina( query.getColumnDouble( 5 ) );
-    vitals.setMaxStamina( query.getColumnDouble( 6 ) );
+    auto vitals = std::make_unique<Engine::EntityVitalsModel>();
+    vitals->setHealth( query.getColumnDouble( 0 ) );
+    vitals->setMaxHealth( query.getColumnDouble( 1 ) );
+    vitals->setMana( query.getColumnDouble( 2 ) );
+    vitals->setMaxMana( query.getColumnDouble( 3 ) );
+    vitals->setStamina( query.getColumnDouble( 4 ) );
+    vitals->setMaxStamina( query.getColumnDouble( 5 ) );
 
-    auto characterVitals = std::make_unique<Engine::CharacterVitalsModel>();
-    characterVitals->setIdCharacter( query.getColumnInt( 0 ) );
-    characterVitals->setVitals( vitals );
-
-    return characterVitals;
+    return vitals;
 }
 
 bool CharacterVitalsRepository::save( int idCharacter, const Engine::EntityVitalsModel& vitals ) {

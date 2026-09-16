@@ -28,10 +28,9 @@ bool CharacterPositionRepository::create( int idCharacter, const Engine::EntityP
     return query.exec();
 }
 
-std::unique_ptr<Engine::CharacterPositionModel> CharacterPositionRepository::find( int idCharacter ) {
+std::unique_ptr<Engine::EntityPositionModel> CharacterPositionRepository::find( int idCharacter ) {
     const std::string sql = R"SQL(
         SELECT
-            id_character,
             x,
             y,
             z
@@ -46,16 +45,12 @@ std::unique_ptr<Engine::CharacterPositionModel> CharacterPositionRepository::fin
         return nullptr;
     }
 
-    Engine::EntityPositionModel position;
-    position.setX( query.getColumnInt( 1 ) );
-    position.setY( query.getColumnInt( 2 ) );
-    position.setZ( query.getColumnInt( 3 ) );
+    auto position = std::make_unique<Engine::EntityPositionModel>();
+    position->setX( query.getColumnInt( 0 ) );
+    position->setY( query.getColumnInt( 1 ) );
+    position->setZ( query.getColumnInt( 2 ) );
 
-    auto characterPosition = std::make_unique<Engine::CharacterPositionModel>();
-    characterPosition->setIdCharacter( query.getColumnInt( 0 ) );
-    characterPosition->setPosition( position );
-
-    return characterPosition;
+    return position;
 }
 
 bool CharacterPositionRepository::save( int idCharacter, const Engine::EntityPositionModel& position ) {

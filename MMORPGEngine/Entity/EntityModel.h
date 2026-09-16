@@ -4,6 +4,7 @@
 #include <MMORPGEngine/Entity/EntityOrientationModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntitySizeModel.h>
+#include <MMORPGEngine/Entity/EntityVitalsModel.h>
 
 namespace Engine {
 
@@ -21,10 +22,14 @@ public:
     EntitySizeModel size() const;
     void setSize( const EntitySizeModel& size );
 
+    EntityVitalsModel vitals() const;
+    void setVitals( const EntityVitalsModel& vitals );
+
 private:
     EntityOrientationModel _orientation;
     EntityPositionModel _position;
     EntitySizeModel _size;
+    EntityVitalsModel _vitals;
 };
 
 } // namespace Engine

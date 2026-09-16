@@ -3,7 +3,6 @@
 
 #include <memory>
 
-#include <MMORPGEngine/Entity/Character/CharacterPositionModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGServer/Server/Repository/Repository.h>
 
@@ -15,7 +14,7 @@ public:
 
     bool create( int idCharacter, const Engine::EntityPositionModel& position );
 
-    std::unique_ptr<Engine::CharacterPositionModel> find( int idCharacter );
+    std::unique_ptr<Engine::EntityPositionModel> find( int idCharacter );
 
     bool save( int idCharacter, const Engine::EntityPositionModel& position );
 };
