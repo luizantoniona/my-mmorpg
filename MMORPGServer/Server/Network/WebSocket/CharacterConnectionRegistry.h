@@ -14,6 +14,7 @@ public:
 
     void registerConnection( int idCharacter, const drogon::WebSocketConnectionPtr& connection );
     void unregisterConnection( int idCharacter );
+
     drogon::WebSocketConnectionPtr connection( int idCharacter );
 
 private:

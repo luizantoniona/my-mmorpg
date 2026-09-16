@@ -68,7 +68,11 @@ qt_add_qml_module(
   QML_FILES
   Main.qml
   Application/ServerWindow.qml
-  Application/Server/ServerPage.qml)
+  Application/Server/ServerPage.qml
+  Application/Server/ServerSidebar.qml
+  Application/Server/FloorSelector.qml
+  Application/Server/CharacterListPanel.qml
+  Application/Server/CharacterCard.qml)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

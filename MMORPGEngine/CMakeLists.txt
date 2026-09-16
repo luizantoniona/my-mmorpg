@@ -65,6 +65,8 @@ set(PROJECT_SOURCES
     Entity/EntitySizeModel.h
     Entity/EntityStateDTO.cpp
     Entity/EntityStateDTO.h
+    Entity/EntityVitalsDTO.cpp
+    Entity/EntityVitalsDTO.h
     Entity/EntityVitalsModel.cpp
     Entity/EntityVitalsModel.h
     Network/HttpClient.cpp

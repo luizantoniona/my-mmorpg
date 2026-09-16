@@ -33,8 +33,13 @@ public:
     Engine::CharacterModel* addCharacter( std::unique_ptr<Engine::CharacterModel> character );
     void removeCharacter( int idCharacter );
     Engine::CharacterModel* character( int idCharacter );
+
     std::map<int, Engine::EntityPositionModel> characterPositions();
+
+    std::vector<Engine::CharacterModel> connectedCharacters();
+
     void moveCharacter( int idCharacter, int x, int y, int z );
+
     std::vector<int> charactersNear( int idCharacter );
 
 private:

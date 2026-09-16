@@ -152,6 +152,19 @@ std::map<int, Engine::EntityPositionModel> WorldManager::characterPositions() {
     return positions;
 }
 
+std::vector<Engine::CharacterModel> WorldManager::connectedCharacters() {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    std::vector<Engine::CharacterModel> result;
+    result.reserve( _characters.size() );
+
+    for ( const auto& entry : _characters ) {
+        result.push_back( *entry.second );
+    }
+
+    return result;
+}
+
 void WorldManager::moveCharacter( int idCharacter, int x, int y, int z ) {
     {
         std::lock_guard<std::mutex> lock( _mutex );

@@ -20,6 +20,46 @@ Item {
     RowLayout {
         anchors.fill: parent
         spacing: 0
+
+        ServerSidebar {
+            id: sidebar
+
+            Layout.fillHeight: true
+            width: 280
+
+            control: control
+            worldName: control.worldName
+            worldWidth: control.worldWidth
+            worldHeight: control.worldHeight
+            currentFloor: root.currentFloor
+
+            onCharacterCenterRequested: function (x, y, z) {
+                root.currentFloor = z
+                viewport.centerCameraOnTile(x, y)
+            }
+        }
+
+        ColumnLayout {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            spacing: 0
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 40
+                color: Colors.background2
+
+                FloorSelector {
+                    anchors.fill: parent
+                    floors: control.floors
+                    currentFloor: root.currentFloor
+
+                    onFloorRequested: function (z) {
+                        root.currentFloor = z
+                    }
+                }
+            }
+
             Rectangle {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
