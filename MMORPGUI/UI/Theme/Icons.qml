@@ -3,6 +3,9 @@ pragma Singleton
 import QtQuick
 
 QtObject {
+    readonly property string adjustments: "qrc:/Assets/Icons/adjustments.svg"
+    readonly property string backpack: "qrc:/Assets/Icons/backpack.svg"
+    readonly property string bolt: "qrc:/Assets/Icons/bolt.svg"
     readonly property string brush: "qrc:/Assets/Icons/brush.svg"
     readonly property string minus: "qrc:/Assets/Icons/minus.svg"
     readonly property string plus: "qrc:/Assets/Icons/plus.svg"
