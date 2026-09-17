@@ -11,8 +11,7 @@
 namespace Server {
 
 WorldRuntime::WorldRuntime( std::unique_ptr<Engine::WorldModel> world ) :
-    _world( std::move( world ) ),
-    _nextIdCreature( 1 ) {
+    _world( std::move( world ) ) {
 
     if ( !_world ) {
         return;
@@ -172,31 +171,6 @@ std::vector<int> WorldRuntime::charactersNear( int idCharacter ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
     return charactersNearLocked( idCharacter );
-}
-
-Engine::CreatureModel* WorldRuntime::addCreature( std::unique_ptr<Engine::CreatureModel> creature ) {
-    std::lock_guard<std::mutex> lock( _mutex );
-
-    creature->setIdCreature( _nextIdCreature++ );
-
-    auto creatureRuntime = std::make_unique<CreatureRuntime>( std::move( creature ) );
-    Engine::CreatureModel* creaturePtr = creatureRuntime->creature();
-    _creatures.push_back( std::move( creatureRuntime ) );
-
-    return creaturePtr;
-}
-
-std::vector<Engine::CreatureModel> WorldRuntime::creatures() {
-    std::lock_guard<std::mutex> lock( _mutex );
-
-    std::vector<Engine::CreatureModel> result;
-    result.reserve( _creatures.size() );
-
-    for ( const auto& creatureRuntime : _creatures ) {
-        result.push_back( *creatureRuntime->creature() );
-    }
-
-    return result;
 }
 
 void WorldRuntime::tick() {
