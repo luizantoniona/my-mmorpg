@@ -54,12 +54,16 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterDTO.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
+    Entity/Character/CharacterMoveDTO.cpp
+    Entity/Character/CharacterMoveDTO.h
     Entity/Character/OwnCharacterDTO.cpp
     Entity/Character/OwnCharacterDTO.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
     Entity/Creature/CreatureDTO.cpp
     Entity/Creature/CreatureDTO.h
+    Entity/EntityLeftDTO.cpp
+    Entity/EntityLeftDTO.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityPositionModel.cpp
@@ -70,9 +74,12 @@ set(PROJECT_SOURCES
     Entity/EntityVitalsModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
-    Network/WebSocket/NetworkMessageTypeEnum.h
-    Network/WebSocket/NetworkMessageTypeHelper.cpp
-    Network/WebSocket/NetworkMessageTypeHelper.h
+    Network/WebSocket/ClientMessageTypeEnum.h
+    Network/WebSocket/ClientMessageTypeHelper.cpp
+    Network/WebSocket/ClientMessageTypeHelper.h
+    Network/WebSocket/ServerMessageTypeEnum.h
+    Network/WebSocket/ServerMessageTypeHelper.cpp
+    Network/WebSocket/ServerMessageTypeHelper.h
     Network/WebSocketClient.cpp
     Network/WebSocketClient.h
     Renderer/Camera/Camera.cpp

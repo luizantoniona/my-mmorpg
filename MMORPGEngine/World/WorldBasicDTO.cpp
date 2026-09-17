@@ -1,5 +1,7 @@
 #include "WorldBasicDTO.h"
 
+#include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
+
 namespace Engine {
 
 WorldBasicDTO::WorldBasicDTO() :
@@ -29,7 +31,7 @@ WorldBasicDTO WorldBasicDTO::fromJson( const Json::Value& json ) {
 Json::Value WorldBasicDTO::toJson() const {
     Json::Value json;
 
-    json[ "type" ] = "world";
+    json[ "type" ] = ServerMessageTypeHelper::toString( ServerMessageType::WORLD_BASIC );
     json[ "worldName" ] = _worldName;
 
     return json;

@@ -74,13 +74,13 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     qInfo() << "[WebSocket] Character entering world [ACCOUNT]" << session->idAccount() << "[CHARACTER]" << idCharacter;
 
-    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
-
-    worldRuntime.addCharacter( std::move( character ) );
-
     connection->setContext( std::make_shared<CharacterConnectionContext>( sessionId, idCharacter ) );
 
     Engine::Singleton<CharacterConnectionRegistry>::instance().registerConnection( idCharacter, connection );
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    worldRuntime.addCharacter( std::move( character ) );
 
     qInfo() << "[WebSocket] Character entered world [CHARACTER]" << idCharacter;
 }

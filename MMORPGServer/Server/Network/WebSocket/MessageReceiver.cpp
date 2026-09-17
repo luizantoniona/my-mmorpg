@@ -6,10 +6,9 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Entity/Character/MoveInputDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterMoveDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
-#include <MMORPGEngine/Entity/EntityVitalsModel.h>
-#include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
+#include <MMORPGEngine/Network/WebSocket/ClientMessageTypeHelper.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 
@@ -29,10 +28,10 @@ void MessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection,
         return;
     }
 
-    const Engine::NetworkMessageType type = Engine::NetworkMessageTypeHelper::fromMessage( messageJson );
+    const Engine::ClientMessageType type = Engine::ClientMessageTypeHelper::fromMessage( messageJson );
 
     switch ( type ) {
-    case Engine::NetworkMessageType::MOVE:
+    case Engine::ClientMessageType::CHARACTER_MOVE:
         receiveMove( connection, idCharacter, messageJson );
         break;
     default:
@@ -46,7 +45,7 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
         return;
     }
 
-    const Engine::MoveInputDTO input = Engine::MoveInputDTO::fromJson( messageJson );
+    const Engine::CharacterMoveDTO input = Engine::CharacterMoveDTO::fromJson( messageJson );
     const int dx = input.dx();
     const int dy = input.dy();
 
@@ -72,22 +71,7 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
         qInfo() << "[MessageReceiver] Move blocked [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
     }
 
-    const Engine::EntityPositionModel finalPosition = character->position();
-    const Engine::EntityVitalsModel& vitals = character->vitals();
-
-    Engine::OwnCharacterDTO state;
-    state.setIdCharacter( idCharacter );
-    state.setX( finalPosition.x() );
-    state.setY( finalPosition.y() );
-    state.setZ( finalPosition.z() );
-    state.setHealth( vitals.health() );
-    state.setMaxHealth( vitals.maxHealth() );
-    state.setMana( vitals.mana() );
-    state.setMaxMana( vitals.maxMana() );
-    state.setStamina( vitals.stamina() );
-    state.setMaxStamina( vitals.maxStamina() );
-
-    connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
+    connection->send( Engine::JsonHelper::writeJsonString( Engine::OwnCharacterDTO::fromModel( character ).toJson() ) );
 }
 
 } // namespace Server

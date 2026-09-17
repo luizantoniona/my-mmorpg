@@ -7,12 +7,12 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
-#include <MMORPGEngine/Entity/Character/MoveInputDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterMoveDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
-#include <MMORPGEngine/Entity/Creature/CreatureStateDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
 #include <MMORPGEngine/Entity/EntityLeftDTO.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
-#include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
+#include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
 #include <MMORPGEngine/World/WorldFactory.h>
 
 GamePageControl::GamePageControl( QObject* parent ) :
@@ -136,7 +136,7 @@ void GamePageControl::connectToWorld( int idCharacter ) {
 }
 
 void GamePageControl::move( int dx, int dy ) {
-    Engine::MoveInputDTO input;
+    Engine::CharacterMoveDTO input;
     input.setDx( dx );
     input.setDy( dy );
 
@@ -156,16 +156,16 @@ void GamePageControl::onMessageReceived( const QString& message ) {
         return;
     }
 
-    const Engine::NetworkMessageType type = Engine::NetworkMessageTypeHelper::fromMessage( json );
+    const Engine::ServerMessageType type = Engine::ServerMessageTypeHelper::fromMessage( json );
 
     switch ( type ) {
-    case Engine::NetworkMessageType::ENTITY_LEFT: {
+    case Engine::ServerMessageType::ENTITY_LEFT: {
         const Engine::EntityLeftDTO entityLeft = Engine::EntityLeftDTO::fromJson( json );
         emit entityLeftReceived( entityLeft.idCharacter() );
         return;
     }
 
-    case Engine::NetworkMessageType::OWN_CHARACTER: {
+    case Engine::ServerMessageType::OWN_CHARACTER: {
         Engine::OwnCharacterDTO state = Engine::OwnCharacterDTO::fromJson( json );
 
         emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z() );
@@ -190,22 +190,22 @@ void GamePageControl::onMessageReceived( const QString& message ) {
         return;
     }
 
-    case Engine::NetworkMessageType::CHARACTER: {
+    case Engine::ServerMessageType::CHARACTER: {
         Engine::CharacterDTO state = Engine::CharacterDTO::fromJson( json );
 
         emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z() );
         return;
     }
 
-    case Engine::NetworkMessageType::CREATURE_STATE: {
-        Engine::CreatureStateDTO state = Engine::CreatureStateDTO::fromJson( json );
+    case Engine::ServerMessageType::CREATURE: {
+        Engine::CreatureDTO state = Engine::CreatureDTO::fromJson( json );
 
         emit entityStateReceived( state.idCreature(), state.x(), state.y(), state.z() );
         return;
     }
 
-    case Engine::NetworkMessageType::MOVE:
-    case Engine::NetworkMessageType::UNKNOWN:
+    case Engine::ServerMessageType::WORLD_BASIC:
+    case Engine::ServerMessageType::UNKNOWN:
         return;
     }
 }

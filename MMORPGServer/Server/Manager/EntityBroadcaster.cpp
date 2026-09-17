@@ -4,9 +4,9 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
 #include <MMORPGEngine/Entity/EntityLeftDTO.h>
-#include <MMORPGEngine/Entity/EntityPositionModel.h>
-#include <MMORPGEngine/Entity/EntityVitalsModel.h>
+#include <MMORPGEngine/World/WorldBasicDTO.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionRegistry.h>
 
@@ -33,6 +33,10 @@ EntityBroadcaster::EntityBroadcaster() {
 }
 
 void EntityBroadcaster::onEntityEntered( const WorldEvent& event ) {
+    sendWorldBasic( event );
+    sendOwnCharacter( event );
+    sendNearbyCharacters( event );
+    sendCreatures( event );
     broadcastCharacter( event );
 }
 
@@ -66,6 +70,82 @@ void EntityBroadcaster::onEntityVitalsChanged( const WorldEvent& event ) {
     broadcastCharacter( event );
 }
 
+void EntityBroadcaster::sendWorldBasic( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    drogon::WebSocketConnectionPtr connection = Engine::Singleton<CharacterConnectionRegistry>::instance().connection( idCharacter );
+    if ( !connection ) {
+        return;
+    }
+
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
+    if ( !world ) {
+        return;
+    }
+
+    connection->send( Engine::JsonHelper::writeJsonString( Engine::WorldBasicDTO::fromModel( world ).toJson() ) );
+}
+
+void EntityBroadcaster::sendOwnCharacter( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    drogon::WebSocketConnectionPtr connection = Engine::Singleton<CharacterConnectionRegistry>::instance().connection( idCharacter );
+    if ( !connection ) {
+        return;
+    }
+
+    const Engine::CharacterModel* character = Engine::Singleton<WorldManager>::instance().runtime().character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    connection->send( Engine::JsonHelper::writeJsonString( Engine::OwnCharacterDTO::fromModel( character ).toJson() ) );
+}
+
+void EntityBroadcaster::sendNearbyCharacters( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    drogon::WebSocketConnectionPtr connection = Engine::Singleton<CharacterConnectionRegistry>::instance().connection( idCharacter );
+    if ( !connection ) {
+        return;
+    }
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    for ( int nearbyIdCharacter : worldRuntime.charactersNear( idCharacter ) ) {
+        const Engine::CharacterModel* nearbyCharacter = worldRuntime.character( nearbyIdCharacter );
+        if ( !nearbyCharacter ) {
+            continue;
+        }
+
+        connection->send( Engine::JsonHelper::writeJsonString( Engine::CharacterDTO::fromModel( nearbyCharacter ).toJson() ) );
+    }
+}
+
+void EntityBroadcaster::sendCreatures( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    drogon::WebSocketConnectionPtr connection = Engine::Singleton<CharacterConnectionRegistry>::instance().connection( idCharacter );
+    if ( !connection ) {
+        return;
+    }
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Monstros")
+    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+        connection->send( Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( &creature ).toJson() ) );
+    }
+}
+
 void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
     const Json::Value& payload = event.payload();
 
@@ -83,22 +163,7 @@ void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
         return;
     }
 
-    const Engine::EntityPositionModel& position = character->position();
-    const Engine::EntityVitalsModel& vitals = character->vitals();
-
-    Engine::CharacterDTO state;
-    state.setIdCharacter( idCharacter );
-    state.setX( position.x() );
-    state.setY( position.y() );
-    state.setZ( position.z() );
-    state.setHealth( vitals.health() );
-    state.setMaxHealth( vitals.maxHealth() );
-    state.setMana( vitals.mana() );
-    state.setMaxMana( vitals.maxMana() );
-    state.setStamina( vitals.stamina() );
-    state.setMaxStamina( vitals.maxStamina() );
-
-    const std::string message = Engine::JsonHelper::writeJsonString( state.toJson() );
+    const std::string message = Engine::JsonHelper::writeJsonString( Engine::CharacterDTO::fromModel( character ).toJson() );
 
     auto& connectionRegistry = Engine::Singleton<CharacterConnectionRegistry>::instance();
 
@@ -109,40 +174,6 @@ void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
             connection->send( message );
         }
     }
-}
-
-void EntityBroadcaster::sendOwnCharacter( const WorldEvent& event ) {
-    const Json::Value& payload = event.payload();
-
-    const int idCharacter = payload[ "idCharacter" ].asInt();
-
-    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
-    const Engine::CharacterModel* character = worldRuntime.character( idCharacter );
-    if ( !character ) {
-        return;
-    }
-
-    drogon::WebSocketConnectionPtr connection = Engine::Singleton<CharacterConnectionRegistry>::instance().connection( idCharacter );
-    if ( !connection ) {
-        return;
-    }
-
-    const Engine::EntityPositionModel& position = character->position();
-    const Engine::EntityVitalsModel& vitals = character->vitals();
-
-    Engine::OwnCharacterDTO state;
-    state.setIdCharacter( idCharacter );
-    state.setX( position.x() );
-    state.setY( position.y() );
-    state.setZ( position.z() );
-    state.setHealth( vitals.health() );
-    state.setMaxHealth( vitals.maxHealth() );
-    state.setMana( vitals.mana() );
-    state.setMaxMana( vitals.maxMana() );
-    state.setStamina( vitals.stamina() );
-    state.setMaxStamina( vitals.maxStamina() );
-
-    connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
 }
 
 } // namespace Server

@@ -1,7 +1,7 @@
 #include "CreatureDTO.h"
 
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
-#include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
+#include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
 
 namespace Engine {
 
@@ -52,7 +52,7 @@ CreatureDTO CreatureDTO::fromJson( const Json::Value& json ) {
 Json::Value CreatureDTO::toJson() const {
     Json::Value json;
 
-    json[ "type" ] = NetworkMessageTypeHelper::toString( NetworkMessageType::CREATURE );
+    json[ "type" ] = ServerMessageTypeHelper::toString( ServerMessageType::CREATURE );
     json[ "idCreature" ] = _idCreature;
     json[ "x" ] = _x;
     json[ "y" ] = _y;

@@ -7,6 +7,7 @@ enum class WorldEventType {
     ENTITY_ENTERED,
     ENTITY_MOVED,
     ENTITY_LEFT,
+    ENTITY_VITALS_CHANGED,
 };
 
 } // namespace Server

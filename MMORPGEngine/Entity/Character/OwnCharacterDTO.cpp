@@ -2,7 +2,7 @@
 
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
-#include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
+#include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
 
 namespace Engine {
 
@@ -90,7 +90,7 @@ OwnCharacterDTO OwnCharacterDTO::fromJson( const Json::Value& json ) {
 Json::Value OwnCharacterDTO::toJson() const {
     Json::Value json;
 
-    json[ "type" ] = NetworkMessageTypeHelper::toString( NetworkMessageType::OWN_CHARACTER );
+    json[ "type" ] = ServerMessageTypeHelper::toString( ServerMessageType::OWN_CHARACTER );
     json[ "idCharacter" ] = _idCharacter;
     json[ "x" ] = _x;
     json[ "y" ] = _y;
