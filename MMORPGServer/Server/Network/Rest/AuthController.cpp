@@ -7,7 +7,7 @@
 #include <MMORPGServer/Server/Database/Database.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
-#include <MMORPGServer/Server/Repository/AccountRepository.h>
+#include <MMORPGServer/Server/Repository/Account/AccountRepository.h>
 
 namespace Server {
 

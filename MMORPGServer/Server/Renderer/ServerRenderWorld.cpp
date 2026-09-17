@@ -51,15 +51,15 @@ QList<Engine::RenderWorld::Entity> ServerRenderWorld::entities( int z ) const {
         result.append( Engine::RenderWorld::Entity( entry.first, position.x(), position.y() ) );
     }
 
-    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
-        const Engine::EntityPositionModel& position = creature.position();
+    // for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+    //     const Engine::EntityPositionModel& position = creature.position();
 
-        if ( position.z() != z ) {
-            continue;
-        }
+    //     if ( position.z() != z ) {
+    //         continue;
+    //     }
 
-        result.append( Engine::RenderWorld::Entity( creature.idCreature(), position.x(), position.y() ) );
-    }
+    //     result.append( Engine::RenderWorld::Entity( creature.idCreature(), position.x(), position.y() ) );
+    // }
 
     return result;
 }

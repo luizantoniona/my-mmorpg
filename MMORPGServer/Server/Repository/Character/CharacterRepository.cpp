@@ -1,8 +1,8 @@
 #include "CharacterRepository.h"
 
 #include <MMORPGServer/Server/Database/Query.h>
-#include <MMORPGServer/Server/Repository/CharacterPositionRepository.h>
-#include <MMORPGServer/Server/Repository/CharacterVitalsRepository.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterPositionRepository.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterVitalsRepository.h>
 
 namespace Server {
 

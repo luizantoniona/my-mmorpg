@@ -141,9 +141,9 @@ void EntityBroadcaster::sendCreatures( const WorldEvent& event ) {
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
     // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Monstros")
-    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
-        connection->send( Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( &creature ).toJson() ) );
-    }
+    // for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+    //     connection->send( Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( &creature ).toJson() ) );
+    // }
 }
 
 void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {

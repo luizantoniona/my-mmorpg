@@ -9,7 +9,7 @@
 #include <MMORPGServer/Server/Database/Database.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
-#include <MMORPGServer/Server/Repository/CharacterRepository.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterRepository.h>
 
 namespace Server {
 
