@@ -50,20 +50,20 @@ set(PROJECT_SOURCES
     Data/DataFactory.h
     Data/DataManager.cpp
     Data/DataManager.h
+    Entity/Character/CharacterDTO.cpp
+    Entity/Character/CharacterDTO.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
-    Entity/Character/CharacterStateDTO.cpp
-    Entity/Character/CharacterStateDTO.h
-    Entity/Character/CharacterVitalsDTO.cpp
-    Entity/Character/CharacterVitalsDTO.h
-    Entity/Character/OwnCharacterStateDTO.cpp
-    Entity/Character/OwnCharacterStateDTO.h
-    Entity/Character/OwnCharacterVitalsDTO.cpp
-    Entity/Character/OwnCharacterVitalsDTO.h
+    Entity/Character/MoveInputDTO.cpp
+    Entity/Character/MoveInputDTO.h
+    Entity/Character/OwnCharacterDTO.cpp
+    Entity/Character/OwnCharacterDTO.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
     Entity/Creature/CreatureStateDTO.cpp
     Entity/Creature/CreatureStateDTO.h
+    Entity/EntityLeftDTO.cpp
+    Entity/EntityLeftDTO.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityOrientationEnum.h
@@ -77,6 +77,9 @@ set(PROJECT_SOURCES
     Entity/EntityVitalsModel.h
     Network/HttpClient.cpp
     Network/HttpClient.h
+    Network/WebSocket/NetworkMessageTypeEnum.h
+    Network/WebSocket/NetworkMessageTypeHelper.cpp
+    Network/WebSocket/NetworkMessageTypeHelper.h
     Network/WebSocketClient.cpp
     Network/WebSocketClient.h
     Renderer/Camera/Camera.cpp

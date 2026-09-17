@@ -6,12 +6,14 @@
 #include <MMORPGClient/Client/Manager/ServerManager.h>
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Entity/Character/CharacterStateDTO.h>
-#include <MMORPGEngine/Entity/Character/OwnCharacterStateDTO.h>
-#include <MMORPGEngine/Entity/Character/OwnCharacterVitalsDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterDTO.h>
+#include <MMORPGEngine/Entity/Character/MoveInputDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureStateDTO.h>
+#include <MMORPGEngine/Entity/EntityLeftDTO.h>
 #include <MMORPGEngine/Entity/EntityOrientationModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
+#include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
 #include <MMORPGEngine/World/WorldFactory.h>
 
 GamePageControl::GamePageControl( QObject* parent ) :
@@ -135,12 +137,11 @@ void GamePageControl::connectToWorld( int idCharacter ) {
 }
 
 void GamePageControl::move( int dx, int dy ) {
-    Json::Value json;
-    json[ "type" ] = "move";
-    json[ "dx" ] = dx;
-    json[ "dy" ] = dy;
+    Engine::MoveInputDTO input;
+    input.setDx( dx );
+    input.setDy( dy );
 
-    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( json ) ) );
+    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
 }
 
 void GamePageControl::onMessageReceived( const QString& message ) {
@@ -156,31 +157,17 @@ void GamePageControl::onMessageReceived( const QString& message ) {
         return;
     }
 
-    const std::string type = json.get( "type", "" ).asString();
+    const Engine::NetworkMessageType type = Engine::NetworkMessageTypeHelper::fromMessage( json );
 
-    if ( type == "leave" ) {
-        emit entityLeftReceived( json.get( "idCharacter", -1 ).asInt() );
+    switch ( type ) {
+    case Engine::NetworkMessageType::ENTITY_LEFT: {
+        const Engine::EntityLeftDTO entityLeft = Engine::EntityLeftDTO::fromJson( json );
+        emit entityLeftReceived( entityLeft.idCharacter() );
         return;
     }
 
-    if ( type == "own_character_vitals" ) {
-        Engine::OwnCharacterVitalsDTO vitals = Engine::OwnCharacterVitalsDTO::fromJson( json );
-
-        Engine::EntityVitalsModel vitalsModel = _character.vitals();
-        vitalsModel.setHealth( vitals.health() );
-        vitalsModel.setMaxHealth( vitals.maxHealth() );
-        vitalsModel.setMana( vitals.mana() );
-        vitalsModel.setMaxMana( vitals.maxMana() );
-        vitalsModel.setStamina( vitals.stamina() );
-        vitalsModel.setMaxStamina( vitals.maxStamina() );
-        _character.setVitals( vitalsModel );
-
-        emit vitalsChanged();
-        return;
-    }
-
-    if ( type == "own_character_state" ) {
-        Engine::OwnCharacterStateDTO state = Engine::OwnCharacterStateDTO::fromJson( json );
+    case Engine::NetworkMessageType::OWN_CHARACTER: {
+        Engine::OwnCharacterDTO state = Engine::OwnCharacterDTO::fromJson( json );
         const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
         emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), orientation );
@@ -195,23 +182,38 @@ void GamePageControl::onMessageReceived( const QString& message ) {
         orientationModel.setDirection( state.orientation() );
         _character.setOrientation( orientationModel );
 
+        Engine::EntityVitalsModel vitalsModel = _character.vitals();
+        vitalsModel.setHealth( state.health() );
+        vitalsModel.setMaxHealth( state.maxHealth() );
+        vitalsModel.setMana( state.mana() );
+        vitalsModel.setMaxMana( state.maxMana() );
+        vitalsModel.setStamina( state.stamina() );
+        vitalsModel.setMaxStamina( state.maxStamina() );
+        _character.setVitals( vitalsModel );
+
+        emit vitalsChanged();
         emit worldEntryReceived();
         return;
     }
 
-    if ( type == "character_state" ) {
-        Engine::CharacterStateDTO state = Engine::CharacterStateDTO::fromJson( json );
+    case Engine::NetworkMessageType::CHARACTER: {
+        Engine::CharacterDTO state = Engine::CharacterDTO::fromJson( json );
         const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
         emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), orientation );
         return;
     }
 
-    if ( type == "creature_state" ) {
+    case Engine::NetworkMessageType::CREATURE_STATE: {
         Engine::CreatureStateDTO state = Engine::CreatureStateDTO::fromJson( json );
         const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
         emit entityStateReceived( state.idCreature(), state.x(), state.y(), state.z(), orientation );
+        return;
+    }
+
+    case Engine::NetworkMessageType::MOVE:
+    case Engine::NetworkMessageType::UNKNOWN:
         return;
     }
 }

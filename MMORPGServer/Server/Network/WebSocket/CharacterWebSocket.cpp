@@ -104,25 +104,20 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     connection->send( Engine::JsonHelper::writeJsonString( worldBasic.toJson() ) );
 
-    Engine::OwnCharacterStateDTO state;
+    Engine::OwnCharacterDTO state;
     state.setIdCharacter( idCharacter );
     state.setX( position.x() );
     state.setY( position.y() );
     state.setZ( position.z() );
     state.setOrientation( orientation );
+    state.setHealth( vitals.health() );
+    state.setMaxHealth( vitals.maxHealth() );
+    state.setMana( vitals.mana() );
+    state.setMaxMana( vitals.maxMana() );
+    state.setStamina( vitals.stamina() );
+    state.setMaxStamina( vitals.maxStamina() );
 
     connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
-
-    Engine::OwnCharacterVitalsDTO vitalsState;
-    vitalsState.setIdCharacter( idCharacter );
-    vitalsState.setHealth( vitals.health() );
-    vitalsState.setMaxHealth( vitals.maxHealth() );
-    vitalsState.setMana( vitals.mana() );
-    vitalsState.setMaxMana( vitals.maxMana() );
-    vitalsState.setStamina( vitals.stamina() );
-    vitalsState.setMaxStamina( vitals.maxStamina() );
-
-    connection->send( Engine::JsonHelper::writeJsonString( vitalsState.toJson() ) );
 
     for ( int nearbyIdCharacter : worldRuntime.charactersNear( idCharacter ) ) {
         Engine::CharacterModel* nearbyCharacter = worldRuntime.character( nearbyIdCharacter );
@@ -133,25 +128,20 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
         const Engine::EntityPositionModel& nearbyPosition = nearbyCharacter->position();
         const Engine::EntityVitalsModel& nearbyVitals = nearbyCharacter->vitals();
 
-        Engine::CharacterStateDTO nearbyState;
+        Engine::CharacterDTO nearbyState;
         nearbyState.setIdCharacter( nearbyIdCharacter );
         nearbyState.setX( nearbyPosition.x() );
         nearbyState.setY( nearbyPosition.y() );
         nearbyState.setZ( nearbyPosition.z() );
         nearbyState.setOrientation( nearbyCharacter->orientation().direction() );
+        nearbyState.setHealth( nearbyVitals.health() );
+        nearbyState.setMaxHealth( nearbyVitals.maxHealth() );
+        nearbyState.setMana( nearbyVitals.mana() );
+        nearbyState.setMaxMana( nearbyVitals.maxMana() );
+        nearbyState.setStamina( nearbyVitals.stamina() );
+        nearbyState.setMaxStamina( nearbyVitals.maxStamina() );
 
         connection->send( Engine::JsonHelper::writeJsonString( nearbyState.toJson() ) );
-
-        Engine::CharacterVitalsDTO nearbyVitalsState;
-        nearbyVitalsState.setIdCharacter( nearbyIdCharacter );
-        nearbyVitalsState.setHealth( nearbyVitals.health() );
-        nearbyVitalsState.setMaxHealth( nearbyVitals.maxHealth() );
-        nearbyVitalsState.setMana( nearbyVitals.mana() );
-        nearbyVitalsState.setMaxMana( nearbyVitals.maxMana() );
-        nearbyVitalsState.setStamina( nearbyVitals.stamina() );
-        nearbyVitalsState.setMaxStamina( nearbyVitals.maxStamina() );
-
-        connection->send( Engine::JsonHelper::writeJsonString( nearbyVitalsState.toJson() ) );
     }
 
     // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Monstros")

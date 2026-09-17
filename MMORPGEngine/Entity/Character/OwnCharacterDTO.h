@@ -1,20 +1,34 @@
-#ifndef CHARACTERVITALSDTO_H
-#define CHARACTERVITALSDTO_H
+#ifndef OWNCHARACTERDTO_H
+#define OWNCHARACTERDTO_H
 
 #include <json/json.h>
 
+#include <MMORPGEngine/Entity/EntityOrientationEnum.h>
+
 namespace Engine {
 
-class CharacterVitalsDTO {
+class OwnCharacterDTO {
 public:
-    CharacterVitalsDTO();
-    ~CharacterVitalsDTO();
+    OwnCharacterDTO();
+    ~OwnCharacterDTO();
 
-    static CharacterVitalsDTO fromJson( const Json::Value& json );
+    static OwnCharacterDTO fromJson( const Json::Value& json );
     Json::Value toJson() const;
 
     int idCharacter() const;
     void setIdCharacter( int idCharacter );
+
+    int x() const;
+    void setX( int x );
+
+    int y() const;
+    void setY( int y );
+
+    int z() const;
+    void setZ( int z );
+
+    EntityOrientationEnum orientation() const;
+    void setOrientation( EntityOrientationEnum orientation );
 
     double health() const;
     void setHealth( double health );
@@ -42,8 +56,12 @@ private:
     double _stamina;
     double _maxStamina;
     int _idCharacter;
+    int _x;
+    int _y;
+    int _z;
+    EntityOrientationEnum _orientation;
 };
 
 } // namespace Engine
 
-#endif // CHARACTERVITALSDTO_H
+#endif // OWNCHARACTERDTO_H

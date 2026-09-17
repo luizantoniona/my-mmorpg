@@ -2,10 +2,10 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Entity/Character/CharacterStateDTO.h>
-#include <MMORPGEngine/Entity/Character/CharacterVitalsDTO.h>
-#include <MMORPGEngine/Entity/Character/OwnCharacterVitalsDTO.h>
-#include <MMORPGEngine/Entity/EntityOrientationEnum.h>
+#include <MMORPGEngine/Entity/Character/CharacterDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
+#include <MMORPGEngine/Entity/EntityLeftDTO.h>
+#include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionRegistry.h>
@@ -33,12 +33,11 @@ EntityBroadcaster::EntityBroadcaster() {
 }
 
 void EntityBroadcaster::onEntityEntered( const WorldEvent& event ) {
-    broadcastPosition( event );
-    broadcastVitals( event );
+    broadcastCharacter( event );
 }
 
 void EntityBroadcaster::onEntityMoved( const WorldEvent& event ) {
-    broadcastPosition( event );
+    broadcastCharacter( event );
 }
 
 void EntityBroadcaster::onEntityLeft( const WorldEvent& event ) {
@@ -46,11 +45,10 @@ void EntityBroadcaster::onEntityLeft( const WorldEvent& event ) {
 
     const int idCharacter = payload[ "idCharacter" ].asInt();
 
-    Json::Value message;
-    message[ "type" ] = "leave";
-    message[ "idCharacter" ] = idCharacter;
+    Engine::EntityLeftDTO message;
+    message.setIdCharacter( idCharacter );
 
-    const std::string serialized = Engine::JsonHelper::writeJsonString( message );
+    const std::string serialized = Engine::JsonHelper::writeJsonString( message.toJson() );
 
     auto& connectionRegistry = Engine::Singleton<CharacterConnectionRegistry>::instance();
 
@@ -64,48 +62,11 @@ void EntityBroadcaster::onEntityLeft( const WorldEvent& event ) {
 }
 
 void EntityBroadcaster::onEntityVitalsChanged( const WorldEvent& event ) {
-    sendOwnVitals( event );
-    broadcastVitals( event );
+    sendOwnCharacter( event );
+    broadcastCharacter( event );
 }
 
-void EntityBroadcaster::broadcastPosition( const WorldEvent& event ) {
-    const Json::Value& payload = event.payload();
-
-    const int idCharacter = payload[ "idCharacter" ].asInt();
-    const int x = payload[ "x" ].asInt();
-    const int y = payload[ "y" ].asInt();
-    const int z = payload[ "z" ].asInt();
-
-    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
-    const std::vector<int> nearbyCharacters = worldRuntime.charactersNear( idCharacter );
-
-    if ( nearbyCharacters.empty() ) {
-        return;
-    }
-
-    const Engine::CharacterModel* character = worldRuntime.character( idCharacter );
-
-    Engine::CharacterStateDTO state;
-    state.setIdCharacter( idCharacter );
-    state.setX( x );
-    state.setY( y );
-    state.setZ( z );
-    state.setOrientation( character ? character->orientation().direction() : Engine::EntityOrientationEnum::SOUTH );
-
-    const std::string message = Engine::JsonHelper::writeJsonString( state.toJson() );
-
-    auto& connectionRegistry = Engine::Singleton<CharacterConnectionRegistry>::instance();
-
-    for ( int nearbyIdCharacter : nearbyCharacters ) {
-        drogon::WebSocketConnectionPtr connection = connectionRegistry.connection( nearbyIdCharacter );
-
-        if ( connection ) {
-            connection->send( message );
-        }
-    }
-}
-
-void EntityBroadcaster::broadcastVitals( const WorldEvent& event ) {
+void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
     const Json::Value& payload = event.payload();
 
     const int idCharacter = payload[ "idCharacter" ].asInt();
@@ -122,10 +83,15 @@ void EntityBroadcaster::broadcastVitals( const WorldEvent& event ) {
         return;
     }
 
+    const Engine::EntityPositionModel& position = character->position();
     const Engine::EntityVitalsModel& vitals = character->vitals();
 
-    Engine::CharacterVitalsDTO state;
+    Engine::CharacterDTO state;
     state.setIdCharacter( idCharacter );
+    state.setX( position.x() );
+    state.setY( position.y() );
+    state.setZ( position.z() );
+    state.setOrientation( character->orientation().direction() );
     state.setHealth( vitals.health() );
     state.setMaxHealth( vitals.maxHealth() );
     state.setMana( vitals.mana() );
@@ -146,7 +112,7 @@ void EntityBroadcaster::broadcastVitals( const WorldEvent& event ) {
     }
 }
 
-void EntityBroadcaster::sendOwnVitals( const WorldEvent& event ) {
+void EntityBroadcaster::sendOwnCharacter( const WorldEvent& event ) {
     const Json::Value& payload = event.payload();
 
     const int idCharacter = payload[ "idCharacter" ].asInt();
@@ -162,10 +128,15 @@ void EntityBroadcaster::sendOwnVitals( const WorldEvent& event ) {
         return;
     }
 
+    const Engine::EntityPositionModel& position = character->position();
     const Engine::EntityVitalsModel& vitals = character->vitals();
 
-    Engine::OwnCharacterVitalsDTO state;
+    Engine::OwnCharacterDTO state;
     state.setIdCharacter( idCharacter );
+    state.setX( position.x() );
+    state.setY( position.y() );
+    state.setZ( position.z() );
+    state.setOrientation( character->orientation().direction() );
     state.setHealth( vitals.health() );
     state.setMaxHealth( vitals.maxHealth() );
     state.setMana( vitals.mana() );

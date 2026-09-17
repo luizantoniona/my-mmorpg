@@ -1,5 +1,7 @@
 #include "CreatureStateDTO.h"
 
+#include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
+
 namespace Engine {
 
 CreatureStateDTO::CreatureStateDTO() :
@@ -41,7 +43,7 @@ CreatureStateDTO CreatureStateDTO::fromJson( const Json::Value& json ) {
 Json::Value CreatureStateDTO::toJson() const {
     Json::Value json;
 
-    json[ "type" ] = "creature_state";
+    json[ "type" ] = NetworkMessageTypeHelper::toString( NetworkMessageType::CREATURE_STATE );
     json[ "idCreature" ] = _idCreature;
     json[ "x" ] = _x;
     json[ "y" ] = _y;
