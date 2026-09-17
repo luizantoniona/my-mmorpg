@@ -1,7 +1,5 @@
 #include "CharacterRuntime.h"
 
-#include <MMORPGServer/Server/Runtime/CharacterVitalsSystem.h>
-
 namespace Server {
 
 CharacterRuntime::CharacterRuntime( std::unique_ptr<Engine::CharacterModel> character, EventBus& worldEventBus ) :

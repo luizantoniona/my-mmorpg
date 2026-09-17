@@ -13,8 +13,8 @@
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Event/EventBus.h>
 #include <MMORPGServer/Server/Manager/ChunkCoordinate.h>
-#include <MMORPGServer/Server/Runtime/CharacterRuntime.h>
-#include <MMORPGServer/Server/Runtime/CreatureRuntime.h>
+#include <MMORPGServer/Server/Runtime/Character/CharacterRuntime.h>
+#include <MMORPGServer/Server/Runtime/Creature/CreatureRuntime.h>
 
 namespace Server {
 
@@ -39,9 +39,6 @@ public:
 
     std::vector<int> charactersNear( int idCharacter );
 
-    Engine::CreatureModel* addCreature( std::unique_ptr<Engine::CreatureModel> creature );
-    std::vector<Engine::CreatureModel> creatures();
-
     void tick();
 
 private:
@@ -52,10 +49,8 @@ private:
     std::mutex _mutex;
     std::unique_ptr<Engine::WorldModel> _world;
     std::map<int, std::unique_ptr<CharacterRuntime>> _characters;
-    std::vector<std::unique_ptr<CreatureRuntime>> _creatures;
     std::unordered_map<ChunkCoordinate, std::vector<Engine::CharacterModel*>, ChunkCoordinateHash> _charactersByChunk;
     EventBus _eventBus;
-    int _nextIdCreature;
 };
 
 } // namespace Server

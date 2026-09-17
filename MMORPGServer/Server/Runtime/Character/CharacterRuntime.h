@@ -6,7 +6,7 @@
 
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGServer/Server/Event/EventBus.h>
-#include <MMORPGServer/Server/Runtime/CharacterSystem.h>
+#include <MMORPGServer/Server/Runtime/Character/System/CharacterSystem.h>
 
 namespace Server {
 

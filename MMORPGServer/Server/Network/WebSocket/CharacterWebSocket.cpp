@@ -4,21 +4,11 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Entity/Character/CharacterStateDTO.h>
-#include <MMORPGEngine/Entity/Character/CharacterVitalsDTO.h>
-#include <MMORPGEngine/Entity/Character/OwnCharacterStateDTO.h>
-#include <MMORPGEngine/Entity/Character/OwnCharacterVitalsDTO.h>
-#include <MMORPGEngine/Entity/Creature/CreatureStateDTO.h>
-#include <MMORPGEngine/Entity/EntityOrientationEnum.h>
-#include <MMORPGEngine/Entity/EntityPositionModel.h>
-#include <MMORPGEngine/Entity/EntityVitalsModel.h>
-#include <MMORPGEngine/World/WorldBasicDTO.h>
-#include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
 #include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionContext.h>
 #include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionRegistry.h>
-#include <MMORPGServer/Server/Repository/CharacterRepository.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterRepository.h>
 
 namespace Server {
 
@@ -85,78 +75,12 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
     qInfo() << "[WebSocket] Character entering world [ACCOUNT]" << session->idAccount() << "[CHARACTER]" << idCharacter;
 
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
-    const Engine::WorldModel* world = worldRuntime.world();
-
-    const Engine::EntityPositionModel position = character->position();
-    const Engine::EntityOrientationEnum orientation = character->orientation().direction();
-    const Engine::EntityVitalsModel vitals = character->vitals();
-
-    qInfo() << "[WebSocket] Character position [CHARACTER]" << idCharacter << "[X]" << position.x() << "[Y]" << position.y() << "[Z]" << position.z();
 
     worldRuntime.addCharacter( std::move( character ) );
 
     connection->setContext( std::make_shared<CharacterConnectionContext>( sessionId, idCharacter ) );
 
     Engine::Singleton<CharacterConnectionRegistry>::instance().registerConnection( idCharacter, connection );
-
-    Engine::WorldBasicDTO worldBasic;
-    worldBasic.setWorldName( world->name().toStdString() );
-
-    connection->send( Engine::JsonHelper::writeJsonString( worldBasic.toJson() ) );
-
-    Engine::OwnCharacterDTO state;
-    state.setIdCharacter( idCharacter );
-    state.setX( position.x() );
-    state.setY( position.y() );
-    state.setZ( position.z() );
-    state.setOrientation( orientation );
-    state.setHealth( vitals.health() );
-    state.setMaxHealth( vitals.maxHealth() );
-    state.setMana( vitals.mana() );
-    state.setMaxMana( vitals.maxMana() );
-    state.setStamina( vitals.stamina() );
-    state.setMaxStamina( vitals.maxStamina() );
-
-    connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
-
-    for ( int nearbyIdCharacter : worldRuntime.charactersNear( idCharacter ) ) {
-        Engine::CharacterModel* nearbyCharacter = worldRuntime.character( nearbyIdCharacter );
-        if ( !nearbyCharacter ) {
-            continue;
-        }
-
-        const Engine::EntityPositionModel& nearbyPosition = nearbyCharacter->position();
-        const Engine::EntityVitalsModel& nearbyVitals = nearbyCharacter->vitals();
-
-        Engine::CharacterDTO nearbyState;
-        nearbyState.setIdCharacter( nearbyIdCharacter );
-        nearbyState.setX( nearbyPosition.x() );
-        nearbyState.setY( nearbyPosition.y() );
-        nearbyState.setZ( nearbyPosition.z() );
-        nearbyState.setOrientation( nearbyCharacter->orientation().direction() );
-        nearbyState.setHealth( nearbyVitals.health() );
-        nearbyState.setMaxHealth( nearbyVitals.maxHealth() );
-        nearbyState.setMana( nearbyVitals.mana() );
-        nearbyState.setMaxMana( nearbyVitals.maxMana() );
-        nearbyState.setStamina( nearbyVitals.stamina() );
-        nearbyState.setMaxStamina( nearbyVitals.maxStamina() );
-
-        connection->send( Engine::JsonHelper::writeJsonString( nearbyState.toJson() ) );
-    }
-
-    // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Monstros")
-    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
-        const Engine::EntityPositionModel& creaturePosition = creature.position();
-
-        Engine::CreatureStateDTO creatureState;
-        creatureState.setIdCreature( creature.idCreature() );
-        creatureState.setX( creaturePosition.x() );
-        creatureState.setY( creaturePosition.y() );
-        creatureState.setZ( creaturePosition.z() );
-        creatureState.setOrientation( creature.orientation().direction() );
-
-        connection->send( Engine::JsonHelper::writeJsonString( creatureState.toJson() ) );
-    }
 
     qInfo() << "[WebSocket] Character entered world [CHARACTER]" << idCharacter;
 }

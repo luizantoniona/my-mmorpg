@@ -46,24 +46,28 @@ set(PROJECT_SOURCES
     Network/WebSocket/MessageReceiver.h
     Renderer/ServerRenderWorld.cpp
     Renderer/ServerRenderWorld.h
-    Repository/AccountRepository.cpp
-    Repository/AccountRepository.h
-    Repository/CharacterPositionRepository.cpp
-    Repository/CharacterPositionRepository.h
-    Repository/CharacterRepository.cpp
-    Repository/CharacterRepository.h
-    Repository/CharacterVitalsRepository.cpp
-    Repository/CharacterVitalsRepository.h
+    Repository/Account/AccountRepository.cpp
+    Repository/Account/AccountRepository.h
+    Repository/Character/CharacterPositionRepository.cpp
+    Repository/Character/CharacterPositionRepository.h
+    Repository/Character/CharacterRepository.cpp
+    Repository/Character/CharacterRepository.h
+    Repository/Character/CharacterVitalsRepository.cpp
+    Repository/Character/CharacterVitalsRepository.h
     Repository/Repository.cpp
     Repository/Repository.h
-    Runtime/CharacterRuntime.cpp
-    Runtime/CharacterRuntime.h
-    Runtime/CharacterSystem.cpp
-    Runtime/CharacterSystem.h
-    Runtime/CreatureRuntime.cpp
-    Runtime/CreatureRuntime.h
-    Runtime/WorldRuntime.cpp
-    Runtime/WorldRuntime.h)
+    Runtime/Character/CharacterRuntime.cpp
+    Runtime/Character/CharacterRuntime.h
+    Runtime/Character/System/CharacterSystem.cpp
+    Runtime/Character/System/CharacterSystem.h
+    Runtime/Character/System/CharacterVitalsSystem.cpp
+    Runtime/Character/System/CharacterVitalsSystem.h
+    Runtime/Creature/CreatureRuntime.cpp
+    Runtime/Creature/CreatureRuntime.h
+    Runtime/World/System/WorldSystem.cpp
+    Runtime/World/System/WorldSystem.h
+    Runtime/World/WorldRuntime.cpp
+    Runtime/World/WorldRuntime.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 

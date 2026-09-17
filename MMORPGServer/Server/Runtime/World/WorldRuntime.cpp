@@ -17,17 +17,6 @@ WorldRuntime::WorldRuntime( std::unique_ptr<Engine::WorldModel> world ) :
     if ( !_world ) {
         return;
     }
-
-    // TODO: Replace with monster catalog + spawn areas (Backlog "Monstros")
-    auto creature = std::make_unique<Engine::CreatureModel>();
-
-    Engine::EntityPositionModel position;
-    position.setX( _world->spawnX() + 2 );
-    position.setY( _world->spawnY() );
-    position.setZ( _world->spawnZ() );
-    creature->setPosition( position );
-
-    addCreature( std::move( creature ) );
 }
 
 Engine::WorldModel* WorldRuntime::world() {
