@@ -11,7 +11,6 @@
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureStateDTO.h>
 #include <MMORPGEngine/Entity/EntityLeftDTO.h>
-#include <MMORPGEngine/Entity/EntityOrientationModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
 #include <MMORPGEngine/World/WorldFactory.h>
@@ -168,19 +167,14 @@ void GamePageControl::onMessageReceived( const QString& message ) {
 
     case Engine::NetworkMessageType::OWN_CHARACTER: {
         Engine::OwnCharacterDTO state = Engine::OwnCharacterDTO::fromJson( json );
-        const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
-        emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), orientation );
+        emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z() );
 
         Engine::EntityPositionModel position = _character.position();
         position.setX( state.x() );
         position.setY( state.y() );
         position.setZ( state.z() );
         _character.setPosition( position );
-
-        Engine::EntityOrientationModel orientationModel = _character.orientation();
-        orientationModel.setDirection( state.orientation() );
-        _character.setOrientation( orientationModel );
 
         Engine::EntityVitalsModel vitalsModel = _character.vitals();
         vitalsModel.setHealth( state.health() );
@@ -198,17 +192,15 @@ void GamePageControl::onMessageReceived( const QString& message ) {
 
     case Engine::NetworkMessageType::CHARACTER: {
         Engine::CharacterDTO state = Engine::CharacterDTO::fromJson( json );
-        const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
-        emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), orientation );
+        emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z() );
         return;
     }
 
     case Engine::NetworkMessageType::CREATURE_STATE: {
         Engine::CreatureStateDTO state = Engine::CreatureStateDTO::fromJson( json );
-        const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
-        emit entityStateReceived( state.idCreature(), state.x(), state.y(), state.z(), orientation );
+        emit entityStateReceived( state.idCreature(), state.x(), state.y(), state.z() );
         return;
     }
 

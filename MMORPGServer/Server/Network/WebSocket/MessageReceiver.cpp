@@ -8,7 +8,6 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/MoveInputDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
-#include <MMORPGEngine/Entity/EntityOrientationModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
 #include <MMORPGEngine/World/WorldModel.h>
@@ -56,12 +55,6 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
         return;
     }
 
-    if ( dx != 0 || dy != 0 ) {
-        Engine::EntityOrientationModel orientation = character->orientation();
-        orientation.setDirection( Engine::EntityOrientationModel::fromMovement( dx, dy ) );
-        character->setOrientation( orientation );
-    }
-
     const Engine::EntityPositionModel currentPosition = character->position();
     const int newX = currentPosition.x() + dx;
     const int newY = currentPosition.y() + dy;
@@ -87,7 +80,6 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
     state.setX( finalPosition.x() );
     state.setY( finalPosition.y() );
     state.setZ( finalPosition.z() );
-    state.setOrientation( character->orientation().direction() );
     state.setHealth( vitals.health() );
     state.setMaxHealth( vitals.maxHealth() );
     state.setMana( vitals.mana() );

@@ -1,5 +1,7 @@
 #include "CharacterDTO.h"
 
+#include <MMORPGEngine/Entity/EntityPositionModel.h>
+#include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/Network/WebSocket/NetworkMessageTypeHelper.h>
 
 namespace Engine {
@@ -14,11 +16,30 @@ CharacterDTO::CharacterDTO() :
     _idCharacter( 0 ),
     _x( 0 ),
     _y( 0 ),
-    _z( 0 ),
-    _orientation( EntityOrientationEnum::SOUTH ) {
+    _z( 0 ) {
 }
 
 CharacterDTO::~CharacterDTO() = default;
+
+CharacterDTO CharacterDTO::fromModel( const CharacterModel* character ) {
+    CharacterDTO dto;
+
+    const EntityPositionModel& position = character->position();
+    const EntityVitalsModel& vitals = character->vitals();
+
+    dto._idCharacter = character->idCharacter();
+    dto._x = position.x();
+    dto._y = position.y();
+    dto._z = position.z();
+    dto._health = vitals.health();
+    dto._maxHealth = vitals.maxHealth();
+    dto._mana = vitals.mana();
+    dto._maxMana = vitals.maxMana();
+    dto._stamina = vitals.stamina();
+    dto._maxStamina = vitals.maxStamina();
+
+    return dto;
+}
 
 CharacterDTO CharacterDTO::fromJson( const Json::Value& json ) {
     CharacterDTO dto;
@@ -37,10 +58,6 @@ CharacterDTO CharacterDTO::fromJson( const Json::Value& json ) {
 
     if ( json.isMember( "z" ) && json[ "z" ].isInt() ) {
         dto._z = json[ "z" ].asInt();
-    }
-
-    if ( json.isMember( "orientation" ) && json[ "orientation" ].isInt() ) {
-        dto._orientation = static_cast<EntityOrientationEnum>( json[ "orientation" ].asInt() );
     }
 
     if ( json.isMember( "health" ) && json[ "health" ].isNumeric() ) {
@@ -78,7 +95,6 @@ Json::Value CharacterDTO::toJson() const {
     json[ "x" ] = _x;
     json[ "y" ] = _y;
     json[ "z" ] = _z;
-    json[ "orientation" ] = static_cast<int>( _orientation );
     json[ "health" ] = _health;
     json[ "maxHealth" ] = _maxHealth;
     json[ "mana" ] = _mana;
@@ -119,14 +135,6 @@ int CharacterDTO::z() const {
 
 void CharacterDTO::setZ( int z ) {
     _z = z;
-}
-
-EntityOrientationEnum CharacterDTO::orientation() const {
-    return _orientation;
-}
-
-void CharacterDTO::setOrientation( EntityOrientationEnum orientation ) {
-    _orientation = orientation;
 }
 
 double CharacterDTO::health() const {

@@ -3,7 +3,7 @@
 
 #include <json/json.h>
 
-#include <MMORPGEngine/Entity/EntityOrientationEnum.h>
+#include <MMORPGEngine/Entity/Character/CharacterModel.h>
 
 namespace Engine {
 
@@ -12,6 +12,7 @@ public:
     CharacterDTO();
     ~CharacterDTO();
 
+    static CharacterDTO fromModel( const CharacterModel* character );
     static CharacterDTO fromJson( const Json::Value& json );
     Json::Value toJson() const;
 
@@ -26,9 +27,6 @@ public:
 
     int z() const;
     void setZ( int z );
-
-    EntityOrientationEnum orientation() const;
-    void setOrientation( EntityOrientationEnum orientation );
 
     double health() const;
     void setHealth( double health );
@@ -59,7 +57,6 @@ private:
     int _x;
     int _y;
     int _z;
-    EntityOrientationEnum _orientation;
 };
 
 } // namespace Engine

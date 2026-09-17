@@ -60,8 +60,6 @@ set(PROJECT_SOURCES
     Runtime/Character/CharacterRuntime.h
     Runtime/Character/System/CharacterSystem.cpp
     Runtime/Character/System/CharacterSystem.h
-    Runtime/Character/System/CharacterVitalsSystem.cpp
-    Runtime/Character/System/CharacterVitalsSystem.h
     Runtime/Creature/CreatureRuntime.cpp
     Runtime/Creature/CreatureRuntime.h
     Runtime/World/System/WorldSystem.cpp

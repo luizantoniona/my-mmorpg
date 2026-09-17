@@ -59,23 +59,21 @@ public slots:
 
 signals:
     void worldChanged();
+    void vitalsChanged();
 
     void worldEntryReceived();
     void worldEntryFailed( const QString& error );
 
-    void entityStateReceived( int idCharacter, int x, int y, int z, const QString& orientation );
+    void entityStateReceived( int idCharacter, int x, int y, int z );
     void entityLeftReceived( int idCharacter );
-
-    void vitalsChanged();
 
 private:
     void onMessageReceived( const QString& message );
 
 private:
     std::unique_ptr<Engine::WorldModel> _world;
-    Engine::WebSocketClient _webSocket;
-
     Engine::CharacterModel _character;
+    Engine::WebSocketClient _webSocket;
 };
 
 #endif // GAMEPAGECONTROL_H

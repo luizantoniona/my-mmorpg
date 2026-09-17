@@ -54,21 +54,14 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterDTO.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
-    Entity/Character/MoveInputDTO.cpp
-    Entity/Character/MoveInputDTO.h
     Entity/Character/OwnCharacterDTO.cpp
     Entity/Character/OwnCharacterDTO.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
-    Entity/Creature/CreatureStateDTO.cpp
-    Entity/Creature/CreatureStateDTO.h
-    Entity/EntityLeftDTO.cpp
-    Entity/EntityLeftDTO.h
+    Entity/Creature/CreatureDTO.cpp
+    Entity/Creature/CreatureDTO.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
-    Entity/EntityOrientationEnum.h
-    Entity/EntityOrientationModel.cpp
-    Entity/EntityOrientationModel.h
     Entity/EntityPositionModel.cpp
     Entity/EntityPositionModel.h
     Entity/EntitySizeModel.cpp

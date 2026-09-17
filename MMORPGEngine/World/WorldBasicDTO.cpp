@@ -8,6 +8,14 @@ WorldBasicDTO::WorldBasicDTO() :
 
 WorldBasicDTO::~WorldBasicDTO() = default;
 
+WorldBasicDTO WorldBasicDTO::fromModel( const WorldModel* world ) {
+    WorldBasicDTO dto;
+
+    dto._worldName = world->name().toStdString();
+
+    return dto;
+}
+
 WorldBasicDTO WorldBasicDTO::fromJson( const Json::Value& json ) {
     WorldBasicDTO dto;
 

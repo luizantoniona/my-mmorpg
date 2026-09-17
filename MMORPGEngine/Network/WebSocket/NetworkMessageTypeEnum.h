@@ -5,11 +5,9 @@ namespace Engine {
 
 enum class NetworkMessageType {
     UNKNOWN,
-    MOVE,
     OWN_CHARACTER,
     CHARACTER,
-    CREATURE_STATE,
-    ENTITY_LEFT,
+    CREATURE,
 };
 
 } // namespace Engine

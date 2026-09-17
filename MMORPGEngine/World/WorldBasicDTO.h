@@ -5,6 +5,8 @@
 
 #include <json/json.h>
 
+#include <MMORPGEngine/World/WorldModel.h>
+
 namespace Engine {
 
 class WorldBasicDTO {
@@ -12,6 +14,7 @@ public:
     WorldBasicDTO();
     ~WorldBasicDTO();
 
+    static WorldBasicDTO fromModel( const WorldModel* world );
     static WorldBasicDTO fromJson( const Json::Value& json );
     Json::Value toJson() const;
 

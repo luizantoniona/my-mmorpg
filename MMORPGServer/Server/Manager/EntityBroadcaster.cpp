@@ -91,7 +91,6 @@ void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
     state.setX( position.x() );
     state.setY( position.y() );
     state.setZ( position.z() );
-    state.setOrientation( character->orientation().direction() );
     state.setHealth( vitals.health() );
     state.setMaxHealth( vitals.maxHealth() );
     state.setMana( vitals.mana() );
@@ -136,7 +135,6 @@ void EntityBroadcaster::sendOwnCharacter( const WorldEvent& event ) {
     state.setX( position.x() );
     state.setY( position.y() );
     state.setZ( position.z() );
-    state.setOrientation( character->orientation().direction() );
     state.setHealth( vitals.health() );
     state.setMaxHealth( vitals.maxHealth() );
     state.setMana( vitals.mana() );
