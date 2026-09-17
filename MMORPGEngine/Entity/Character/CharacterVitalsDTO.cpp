@@ -1,21 +1,21 @@
-#include "EntityVitalsDTO.h"
+#include "CharacterVitalsDTO.h"
 
 namespace Engine {
 
-EntityVitalsDTO::EntityVitalsDTO() :
-    _idCharacter( 0 ),
+CharacterVitalsDTO::CharacterVitalsDTO() :
     _health( 0.0 ),
     _maxHealth( 0.0 ),
     _mana( 0.0 ),
     _maxMana( 0.0 ),
     _stamina( 0.0 ),
-    _maxStamina( 0.0 ) {
+    _maxStamina( 0.0 ),
+    _idCharacter( 0 ) {
 }
 
-EntityVitalsDTO::~EntityVitalsDTO() = default;
+CharacterVitalsDTO::~CharacterVitalsDTO() = default;
 
-EntityVitalsDTO EntityVitalsDTO::fromJson( const Json::Value& json ) {
-    EntityVitalsDTO dto;
+CharacterVitalsDTO CharacterVitalsDTO::fromJson( const Json::Value& json ) {
+    CharacterVitalsDTO dto;
 
     if ( json.isMember( "idCharacter" ) && json[ "idCharacter" ].isInt() ) {
         dto._idCharacter = json[ "idCharacter" ].asInt();
@@ -48,10 +48,10 @@ EntityVitalsDTO EntityVitalsDTO::fromJson( const Json::Value& json ) {
     return dto;
 }
 
-Json::Value EntityVitalsDTO::toJson() const {
+Json::Value CharacterVitalsDTO::toJson() const {
     Json::Value json;
 
-    json[ "type" ] = "vitals";
+    json[ "type" ] = "character_vitals";
     json[ "idCharacter" ] = _idCharacter;
     json[ "health" ] = _health;
     json[ "maxHealth" ] = _maxHealth;
@@ -63,59 +63,59 @@ Json::Value EntityVitalsDTO::toJson() const {
     return json;
 }
 
-int EntityVitalsDTO::idCharacter() const {
+int CharacterVitalsDTO::idCharacter() const {
     return _idCharacter;
 }
 
-void EntityVitalsDTO::setIdCharacter( int idCharacter ) {
+void CharacterVitalsDTO::setIdCharacter( int idCharacter ) {
     _idCharacter = idCharacter;
 }
 
-double EntityVitalsDTO::health() const {
+double CharacterVitalsDTO::health() const {
     return _health;
 }
 
-void EntityVitalsDTO::setHealth( double health ) {
+void CharacterVitalsDTO::setHealth( double health ) {
     _health = health;
 }
 
-double EntityVitalsDTO::maxHealth() const {
+double CharacterVitalsDTO::maxHealth() const {
     return _maxHealth;
 }
 
-void EntityVitalsDTO::setMaxHealth( double maxHealth ) {
+void CharacterVitalsDTO::setMaxHealth( double maxHealth ) {
     _maxHealth = maxHealth;
 }
 
-double EntityVitalsDTO::mana() const {
+double CharacterVitalsDTO::mana() const {
     return _mana;
 }
 
-void EntityVitalsDTO::setMana( double mana ) {
+void CharacterVitalsDTO::setMana( double mana ) {
     _mana = mana;
 }
 
-double EntityVitalsDTO::maxMana() const {
+double CharacterVitalsDTO::maxMana() const {
     return _maxMana;
 }
 
-void EntityVitalsDTO::setMaxMana( double maxMana ) {
+void CharacterVitalsDTO::setMaxMana( double maxMana ) {
     _maxMana = maxMana;
 }
 
-double EntityVitalsDTO::stamina() const {
+double CharacterVitalsDTO::stamina() const {
     return _stamina;
 }
 
-void EntityVitalsDTO::setStamina( double stamina ) {
+void CharacterVitalsDTO::setStamina( double stamina ) {
     _stamina = stamina;
 }
 
-double EntityVitalsDTO::maxStamina() const {
+double CharacterVitalsDTO::maxStamina() const {
     return _maxStamina;
 }
 
-void EntityVitalsDTO::setMaxStamina( double maxStamina ) {
+void CharacterVitalsDTO::setMaxStamina( double maxStamina ) {
     _maxStamina = maxStamina;
 }
 

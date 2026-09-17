@@ -15,24 +15,24 @@ ServerPageControl::ServerPageControl( QObject* parent ) :
 }
 
 QString ServerPageControl::worldName() const {
-    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().world();
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
     return world ? world->name() : "";
 }
 
 int ServerPageControl::worldWidth() const {
-    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().world();
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
     return world ? static_cast<int>( world->width() ) : 0;
 }
 
 int ServerPageControl::worldHeight() const {
-    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().world();
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
     return world ? static_cast<int>( world->height() ) : 0;
 }
 
 QVariantList ServerPageControl::floors() const {
     QVariantList result;
 
-    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().world();
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
     if ( !world ) {
         return result;
     }
@@ -47,7 +47,7 @@ QVariantList ServerPageControl::floors() const {
 QVariantList ServerPageControl::connectedCharacters() const {
     QVariantList result;
 
-    for ( const Engine::CharacterModel& character : Engine::Singleton<WorldManager>::instance().connectedCharacters() ) {
+    for ( const Engine::CharacterModel& character : Engine::Singleton<WorldManager>::instance().runtime().connectedCharacters() ) {
         QVariantMap entry;
         entry[ "idCharacter" ] = character.idCharacter();
         entry[ "name" ] = QString::fromStdString( character.name() );

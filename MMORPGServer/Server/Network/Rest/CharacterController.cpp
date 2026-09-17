@@ -31,7 +31,7 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
     qInfo() << "CharacterController::create"
             << " [ACCOUNT] " << idAccount << " [NAME] " << name;
 
-    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().world();
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
 
     Engine::EntityPositionModel spawnPosition;
     spawnPosition.setX( world ? world->spawnX() : 0 );

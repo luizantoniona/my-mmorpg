@@ -55,7 +55,15 @@ set(PROJECT_SOURCES
     Repository/CharacterVitalsRepository.cpp
     Repository/CharacterVitalsRepository.h
     Repository/Repository.cpp
-    Repository/Repository.h)
+    Repository/Repository.h
+    Runtime/CharacterRuntime.cpp
+    Runtime/CharacterRuntime.h
+    Runtime/CharacterSystem.cpp
+    Runtime/CharacterSystem.h
+    Runtime/CreatureRuntime.cpp
+    Runtime/CreatureRuntime.h
+    Runtime/WorldRuntime.cpp
+    Runtime/WorldRuntime.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 

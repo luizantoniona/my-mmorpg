@@ -6,14 +6,15 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/Character/OwnCharacterStateDTO.h>
 #include <MMORPGEngine/Entity/EntityOrientationModel.h>
-#include <MMORPGEngine/Entity/EntityStateDTO.h>
 #include <MMORPGEngine/World/WorldModel.h>
+#include <MMORPGServer/Server/Manager/WorldManager.h>
 
 namespace Server {
 
 MessageReceiver::MessageReceiver() {
-    _worldManager = &Engine::Singleton<WorldManager>::instance();
+    _worldRuntime = &Engine::Singleton<WorldManager>::instance().runtime();
 }
 
 void MessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const std::string& message ) {
@@ -34,7 +35,7 @@ void MessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection,
 }
 
 void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
-    Engine::CharacterModel* character = _worldManager->character( idCharacter );
+    Engine::CharacterModel* character = _worldRuntime->character( idCharacter );
     if ( !character ) {
         return;
     }
@@ -58,11 +59,11 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
     const int newY = currentPosition.y() + dy;
     const int z = currentPosition.z();
 
-    const Engine::WorldModel* world = _worldManager->world();
+    const Engine::WorldModel* world = _worldRuntime->world();
     const Engine::WorldTileModel* worldTile = world ? world->tile( newX, newY, z ) : nullptr;
 
     if ( worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable() ) {
-        _worldManager->moveCharacter( idCharacter, newX, newY, z );
+        _worldRuntime->moveCharacter( idCharacter, newX, newY, z );
 
         qInfo() << "[MessageReceiver] Character moved [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
 
@@ -72,13 +73,12 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
 
     const Engine::EntityPositionModel finalPosition = character->position();
 
-    Engine::EntityStateDTO state;
+    Engine::OwnCharacterStateDTO state;
     state.setIdCharacter( idCharacter );
     state.setX( finalPosition.x() );
     state.setY( finalPosition.y() );
     state.setZ( finalPosition.z() );
     state.setOrientation( character->orientation().direction() );
-    state.setWorldName( world ? world->name().toStdString() : "" );
 
     connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
 }

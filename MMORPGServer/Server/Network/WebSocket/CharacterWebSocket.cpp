@@ -4,11 +4,15 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/Character/CharacterStateDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterVitalsDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCharacterStateDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCharacterVitalsDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureStateDTO.h>
 #include <MMORPGEngine/Entity/EntityOrientationEnum.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
-#include <MMORPGEngine/Entity/EntityStateDTO.h>
-#include <MMORPGEngine/Entity/EntityVitalsDTO.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
+#include <MMORPGEngine/World/WorldBasicDTO.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
@@ -80,31 +84,36 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     qInfo() << "[WebSocket] Character entering world [ACCOUNT]" << session->idAccount() << "[CHARACTER]" << idCharacter;
 
-    auto& worldManager = Engine::Singleton<WorldManager>::instance();
-    const Engine::WorldModel* world = worldManager.world();
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+    const Engine::WorldModel* world = worldRuntime.world();
 
     const Engine::EntityPositionModel position = character->position();
     const Engine::EntityOrientationEnum orientation = character->orientation().direction();
     const Engine::EntityVitalsModel vitals = character->vitals();
+
     qInfo() << "[WebSocket] Character position [CHARACTER]" << idCharacter << "[X]" << position.x() << "[Y]" << position.y() << "[Z]" << position.z();
 
-    worldManager.addCharacter( std::move( character ) );
+    worldRuntime.addCharacter( std::move( character ) );
 
     connection->setContext( std::make_shared<CharacterConnectionContext>( sessionId, idCharacter ) );
 
     Engine::Singleton<CharacterConnectionRegistry>::instance().registerConnection( idCharacter, connection );
 
-    Engine::EntityStateDTO state;
+    Engine::WorldBasicDTO worldBasic;
+    worldBasic.setWorldName( world->name().toStdString() );
+
+    connection->send( Engine::JsonHelper::writeJsonString( worldBasic.toJson() ) );
+
+    Engine::OwnCharacterStateDTO state;
     state.setIdCharacter( idCharacter );
     state.setX( position.x() );
     state.setY( position.y() );
     state.setZ( position.z() );
     state.setOrientation( orientation );
-    state.setWorldName( world->name().toStdString() );
 
     connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
 
-    Engine::EntityVitalsDTO vitalsState;
+    Engine::OwnCharacterVitalsDTO vitalsState;
     vitalsState.setIdCharacter( idCharacter );
     vitalsState.setHealth( vitals.health() );
     vitalsState.setMaxHealth( vitals.maxHealth() );
@@ -115,8 +124,8 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     connection->send( Engine::JsonHelper::writeJsonString( vitalsState.toJson() ) );
 
-    for ( int nearbyIdCharacter : worldManager.charactersNear( idCharacter ) ) {
-        Engine::CharacterModel* nearbyCharacter = worldManager.character( nearbyIdCharacter );
+    for ( int nearbyIdCharacter : worldRuntime.charactersNear( idCharacter ) ) {
+        Engine::CharacterModel* nearbyCharacter = worldRuntime.character( nearbyIdCharacter );
         if ( !nearbyCharacter ) {
             continue;
         }
@@ -124,17 +133,16 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
         const Engine::EntityPositionModel& nearbyPosition = nearbyCharacter->position();
         const Engine::EntityVitalsModel& nearbyVitals = nearbyCharacter->vitals();
 
-        Engine::EntityStateDTO nearbyState;
+        Engine::CharacterStateDTO nearbyState;
         nearbyState.setIdCharacter( nearbyIdCharacter );
         nearbyState.setX( nearbyPosition.x() );
         nearbyState.setY( nearbyPosition.y() );
         nearbyState.setZ( nearbyPosition.z() );
         nearbyState.setOrientation( nearbyCharacter->orientation().direction() );
-        nearbyState.setWorldName( world->name().toStdString() );
 
         connection->send( Engine::JsonHelper::writeJsonString( nearbyState.toJson() ) );
 
-        Engine::EntityVitalsDTO nearbyVitalsState;
+        Engine::CharacterVitalsDTO nearbyVitalsState;
         nearbyVitalsState.setIdCharacter( nearbyIdCharacter );
         nearbyVitalsState.setHealth( nearbyVitals.health() );
         nearbyVitalsState.setMaxHealth( nearbyVitals.maxHealth() );
@@ -144,6 +152,20 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
         nearbyVitalsState.setMaxStamina( nearbyVitals.maxStamina() );
 
         connection->send( Engine::JsonHelper::writeJsonString( nearbyVitalsState.toJson() ) );
+    }
+
+    // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Monstros")
+    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+        const Engine::EntityPositionModel& creaturePosition = creature.position();
+
+        Engine::CreatureStateDTO creatureState;
+        creatureState.setIdCreature( creature.idCreature() );
+        creatureState.setX( creaturePosition.x() );
+        creatureState.setY( creaturePosition.y() );
+        creatureState.setZ( creaturePosition.z() );
+        creatureState.setOrientation( creature.orientation().direction() );
+
+        connection->send( Engine::JsonHelper::writeJsonString( creatureState.toJson() ) );
     }
 
     qInfo() << "[WebSocket] Character entered world [CHARACTER]" << idCharacter;
@@ -158,8 +180,8 @@ void CharacterWebSocket::handleConnectionClosed( const drogon::WebSocketConnecti
         return;
     }
 
-    auto& worldManager = Engine::Singleton<WorldManager>::instance();
-    Engine::CharacterModel* character = worldManager.character( contextPtr->idCharacter() );
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+    Engine::CharacterModel* character = worldRuntime.character( contextPtr->idCharacter() );
 
     if ( character ) {
         qInfo() << "[WebSocket] Saving character on disconnect [CHARACTER]" << character->idCharacter();
@@ -169,7 +191,7 @@ void CharacterWebSocket::handleConnectionClosed( const drogon::WebSocketConnecti
         }
     }
 
-    worldManager.removeCharacter( contextPtr->idCharacter() );
+    worldRuntime.removeCharacter( contextPtr->idCharacter() );
 
     Engine::Singleton<CharacterConnectionRegistry>::instance().unregisterConnection( contextPtr->idCharacter() );
 

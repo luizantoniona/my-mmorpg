@@ -1,20 +1,19 @@
-#include "EntityStateDTO.h"
+#include "OwnCharacterStateDTO.h"
 
 namespace Engine {
 
-EntityStateDTO::EntityStateDTO() :
+OwnCharacterStateDTO::OwnCharacterStateDTO() :
     _idCharacter( 0 ),
     _x( 0 ),
     _y( 0 ),
     _z( 0 ),
-    _orientation( EntityOrientationEnum::SOUTH ),
-    _worldName( "" ) {
+    _orientation( EntityOrientationEnum::SOUTH ) {
 }
 
-EntityStateDTO::~EntityStateDTO() = default;
+OwnCharacterStateDTO::~OwnCharacterStateDTO() = default;
 
-EntityStateDTO EntityStateDTO::fromJson( const Json::Value& json ) {
-    EntityStateDTO dto;
+OwnCharacterStateDTO OwnCharacterStateDTO::fromJson( const Json::Value& json ) {
+    OwnCharacterStateDTO dto;
 
     if ( json.isMember( "idCharacter" ) && json[ "idCharacter" ].isInt() ) {
         dto._idCharacter = json[ "idCharacter" ].asInt();
@@ -36,72 +35,60 @@ EntityStateDTO EntityStateDTO::fromJson( const Json::Value& json ) {
         dto._orientation = static_cast<EntityOrientationEnum>( json[ "orientation" ].asInt() );
     }
 
-    if ( json.isMember( "worldName" ) && json[ "worldName" ].isString() ) {
-        dto._worldName = json[ "worldName" ].asString();
-    }
-
     return dto;
 }
 
-Json::Value EntityStateDTO::toJson() const {
+Json::Value OwnCharacterStateDTO::toJson() const {
     Json::Value json;
 
+    json[ "type" ] = "own_character_state";
     json[ "idCharacter" ] = _idCharacter;
     json[ "x" ] = _x;
     json[ "y" ] = _y;
     json[ "z" ] = _z;
     json[ "orientation" ] = static_cast<int>( _orientation );
-    json[ "worldName" ] = _worldName;
 
     return json;
 }
 
-int EntityStateDTO::idCharacter() const {
+int OwnCharacterStateDTO::idCharacter() const {
     return _idCharacter;
 }
 
-void EntityStateDTO::setIdCharacter( int idCharacter ) {
+void OwnCharacterStateDTO::setIdCharacter( int idCharacter ) {
     _idCharacter = idCharacter;
 }
 
-int EntityStateDTO::x() const {
+int OwnCharacterStateDTO::x() const {
     return _x;
 }
 
-void EntityStateDTO::setX( int x ) {
+void OwnCharacterStateDTO::setX( int x ) {
     _x = x;
 }
 
-int EntityStateDTO::y() const {
+int OwnCharacterStateDTO::y() const {
     return _y;
 }
 
-void EntityStateDTO::setY( int y ) {
+void OwnCharacterStateDTO::setY( int y ) {
     _y = y;
 }
 
-int EntityStateDTO::z() const {
+int OwnCharacterStateDTO::z() const {
     return _z;
 }
 
-void EntityStateDTO::setZ( int z ) {
+void OwnCharacterStateDTO::setZ( int z ) {
     _z = z;
 }
 
-EntityOrientationEnum EntityStateDTO::orientation() const {
+EntityOrientationEnum OwnCharacterStateDTO::orientation() const {
     return _orientation;
 }
 
-void EntityStateDTO::setOrientation( EntityOrientationEnum orientation ) {
+void OwnCharacterStateDTO::setOrientation( EntityOrientationEnum orientation ) {
     _orientation = orientation;
-}
-
-std::string EntityStateDTO::worldName() const {
-    return _worldName;
-}
-
-void EntityStateDTO::setWorldName( const std::string& worldName ) {
-    _worldName = worldName;
 }
 
 } // namespace Engine

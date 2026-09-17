@@ -1,7 +1,5 @@
-#ifndef ENTITYSTATEDTO_H
-#define ENTITYSTATEDTO_H
-
-#include <string>
+#ifndef OWNCHARACTERSTATEDTO_H
+#define OWNCHARACTERSTATEDTO_H
 
 #include <json/json.h>
 
@@ -9,12 +7,12 @@
 
 namespace Engine {
 
-class EntityStateDTO {
+class OwnCharacterStateDTO {
 public:
-    EntityStateDTO();
-    ~EntityStateDTO();
+    OwnCharacterStateDTO();
+    ~OwnCharacterStateDTO();
 
-    static EntityStateDTO fromJson( const Json::Value& json );
+    static OwnCharacterStateDTO fromJson( const Json::Value& json );
     Json::Value toJson() const;
 
     int idCharacter() const;
@@ -32,18 +30,14 @@ public:
     EntityOrientationEnum orientation() const;
     void setOrientation( EntityOrientationEnum orientation );
 
-    std::string worldName() const;
-    void setWorldName( const std::string& worldName );
-
 private:
     int _idCharacter;
     int _x;
     int _y;
     int _z;
     EntityOrientationEnum _orientation;
-    std::string _worldName;
 };
 
 } // namespace Engine
 
-#endif // ENTITYSTATEDTO_H
+#endif // OWNCHARACTERSTATEDTO_H

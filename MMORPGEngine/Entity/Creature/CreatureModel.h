@@ -8,6 +8,12 @@ namespace Engine {
 class CreatureModel : public EntityModel {
 public:
     CreatureModel();
+
+    int idCreature() const;
+    void setIdCreature( int idCreature );
+
+private:
+    int _idCreature;
 };
 
 } // namespace Engine

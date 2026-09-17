@@ -1,16 +1,16 @@
-#ifndef ENTITYVITALSDTO_H
-#define ENTITYVITALSDTO_H
+#ifndef CHARACTERVITALSDTO_H
+#define CHARACTERVITALSDTO_H
 
 #include <json/json.h>
 
 namespace Engine {
 
-class EntityVitalsDTO {
+class CharacterVitalsDTO {
 public:
-    EntityVitalsDTO();
-    ~EntityVitalsDTO();
+    CharacterVitalsDTO();
+    ~CharacterVitalsDTO();
 
-    static EntityVitalsDTO fromJson( const Json::Value& json );
+    static CharacterVitalsDTO fromJson( const Json::Value& json );
     Json::Value toJson() const;
 
     int idCharacter() const;
@@ -35,15 +35,15 @@ public:
     void setMaxStamina( double maxStamina );
 
 private:
-    int _idCharacter;
     double _health;
     double _maxHealth;
     double _mana;
     double _maxMana;
     double _stamina;
     double _maxStamina;
+    int _idCharacter;
 };
 
 } // namespace Engine
 
-#endif // ENTITYVITALSDTO_H
+#endif // CHARACTERVITALSDTO_H

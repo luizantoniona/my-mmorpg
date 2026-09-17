@@ -6,7 +6,7 @@
 #include <drogon/WebSocketController.h>
 #include <json/json.h>
 
-#include <MMORPGServer/Server/Manager/WorldManager.h>
+#include <MMORPGServer/Server/Runtime/WorldRuntime.h>
 
 namespace Server {
 
@@ -20,7 +20,7 @@ private:
     void receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson );
 
 private:
-    WorldManager* _worldManager;
+    WorldRuntime* _worldRuntime;
 };
 
 } // namespace Server

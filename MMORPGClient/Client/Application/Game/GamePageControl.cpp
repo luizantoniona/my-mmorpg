@@ -6,9 +6,11 @@
 #include <MMORPGClient/Client/Manager/ServerManager.h>
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/Character/CharacterStateDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCharacterStateDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCharacterVitalsDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureStateDTO.h>
 #include <MMORPGEngine/Entity/EntityOrientationModel.h>
-#include <MMORPGEngine/Entity/EntityStateDTO.h>
-#include <MMORPGEngine/Entity/EntityVitalsDTO.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/World/WorldFactory.h>
 
@@ -154,17 +156,15 @@ void GamePageControl::onMessageReceived( const QString& message ) {
         return;
     }
 
-    if ( json.get( "type", "" ).asString() == "leave" ) {
+    const std::string type = json.get( "type", "" ).asString();
+
+    if ( type == "leave" ) {
         emit entityLeftReceived( json.get( "idCharacter", -1 ).asInt() );
         return;
     }
 
-    if ( json.get( "type", "" ).asString() == "vitals" ) {
-        Engine::EntityVitalsDTO vitals = Engine::EntityVitalsDTO::fromJson( json );
-
-        if ( vitals.idCharacter() != _character.idCharacter() ) {
-            return;
-        }
+    if ( type == "own_character_vitals" ) {
+        Engine::OwnCharacterVitalsDTO vitals = Engine::OwnCharacterVitalsDTO::fromJson( json );
 
         Engine::EntityVitalsModel vitalsModel = _character.vitals();
         vitalsModel.setHealth( vitals.health() );
@@ -179,24 +179,39 @@ void GamePageControl::onMessageReceived( const QString& message ) {
         return;
     }
 
-    Engine::EntityStateDTO state = Engine::EntityStateDTO::fromJson( json );
-    const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
+    if ( type == "own_character_state" ) {
+        Engine::OwnCharacterStateDTO state = Engine::OwnCharacterStateDTO::fromJson( json );
+        const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
-    emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), orientation );
+        emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), orientation );
 
-    if ( state.idCharacter() != _character.idCharacter() ) {
+        Engine::EntityPositionModel position = _character.position();
+        position.setX( state.x() );
+        position.setY( state.y() );
+        position.setZ( state.z() );
+        _character.setPosition( position );
+
+        Engine::EntityOrientationModel orientationModel = _character.orientation();
+        orientationModel.setDirection( state.orientation() );
+        _character.setOrientation( orientationModel );
+
+        emit worldEntryReceived();
         return;
     }
 
-    Engine::EntityPositionModel position = _character.position();
-    position.setX( state.x() );
-    position.setY( state.y() );
-    position.setZ( state.z() );
-    _character.setPosition( position );
+    if ( type == "character_state" ) {
+        Engine::CharacterStateDTO state = Engine::CharacterStateDTO::fromJson( json );
+        const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
 
-    Engine::EntityOrientationModel orientationModel = _character.orientation();
-    orientationModel.setDirection( state.orientation() );
-    _character.setOrientation( orientationModel );
+        emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), orientation );
+        return;
+    }
 
-    emit worldEntryReceived();
+    if ( type == "creature_state" ) {
+        Engine::CreatureStateDTO state = Engine::CreatureStateDTO::fromJson( json );
+        const QString orientation = QString::fromStdString( Engine::EntityOrientationModel::toString( state.orientation() ) );
+
+        emit entityStateReceived( state.idCreature(), state.x(), state.y(), state.z(), orientation );
+        return;
+    }
 }

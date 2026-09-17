@@ -52,8 +52,18 @@ set(PROJECT_SOURCES
     Data/DataManager.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
+    Entity/Character/CharacterStateDTO.cpp
+    Entity/Character/CharacterStateDTO.h
+    Entity/Character/CharacterVitalsDTO.cpp
+    Entity/Character/CharacterVitalsDTO.h
+    Entity/Character/OwnCharacterStateDTO.cpp
+    Entity/Character/OwnCharacterStateDTO.h
+    Entity/Character/OwnCharacterVitalsDTO.cpp
+    Entity/Character/OwnCharacterVitalsDTO.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
+    Entity/Creature/CreatureStateDTO.cpp
+    Entity/Creature/CreatureStateDTO.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityOrientationEnum.h
@@ -63,10 +73,6 @@ set(PROJECT_SOURCES
     Entity/EntityPositionModel.h
     Entity/EntitySizeModel.cpp
     Entity/EntitySizeModel.h
-    Entity/EntityStateDTO.cpp
-    Entity/EntityStateDTO.h
-    Entity/EntityVitalsDTO.cpp
-    Entity/EntityVitalsDTO.h
     Entity/EntityVitalsModel.cpp
     Entity/EntityVitalsModel.h
     Network/HttpClient.cpp
@@ -101,6 +107,8 @@ set(PROJECT_SOURCES
     World/Tile/WorldTileModel.h
     World/FloorFactory.cpp
     World/FloorFactory.h
+    World/WorldBasicDTO.cpp
+    World/WorldBasicDTO.h
     World/WorldConstants.h
     World/WorldFactory.cpp
     World/WorldFactory.h

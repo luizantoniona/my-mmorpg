@@ -2,29 +2,33 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/Character/CharacterStateDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterVitalsDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCharacterVitalsDTO.h>
 #include <MMORPGEngine/Entity/EntityOrientationEnum.h>
-#include <MMORPGEngine/Entity/EntityStateDTO.h>
-#include <MMORPGEngine/Entity/EntityVitalsDTO.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
-#include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionRegistry.h>
 
 namespace Server {
 
 EntityBroadcaster::EntityBroadcaster() {
-    auto& worldManager = Engine::Singleton<WorldManager>::instance();
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
-    worldManager.eventBus().subscribe( WorldEventType::ENTITY_ENTERED, [ this ]( const WorldEvent& event ) {
+    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_ENTERED, [ this ]( const WorldEvent& event ) {
         onEntityEntered( event );
     } );
 
-    worldManager.eventBus().subscribe( WorldEventType::ENTITY_MOVED, [ this ]( const WorldEvent& event ) {
+    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_MOVED, [ this ]( const WorldEvent& event ) {
         onEntityMoved( event );
     } );
 
-    worldManager.eventBus().subscribe( WorldEventType::ENTITY_LEFT, [ this ]( const WorldEvent& event ) {
+    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_LEFT, [ this ]( const WorldEvent& event ) {
         onEntityLeft( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_VITALS_CHANGED, [ this ]( const WorldEvent& event ) {
+        onEntityVitalsChanged( event );
     } );
 }
 
@@ -59,6 +63,11 @@ void EntityBroadcaster::onEntityLeft( const WorldEvent& event ) {
     }
 }
 
+void EntityBroadcaster::onEntityVitalsChanged( const WorldEvent& event ) {
+    sendOwnVitals( event );
+    broadcastVitals( event );
+}
+
 void EntityBroadcaster::broadcastPosition( const WorldEvent& event ) {
     const Json::Value& payload = event.payload();
 
@@ -67,23 +76,21 @@ void EntityBroadcaster::broadcastPosition( const WorldEvent& event ) {
     const int y = payload[ "y" ].asInt();
     const int z = payload[ "z" ].asInt();
 
-    auto& worldManager = Engine::Singleton<WorldManager>::instance();
-    const std::vector<int> nearbyCharacters = worldManager.charactersNear( idCharacter );
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+    const std::vector<int> nearbyCharacters = worldRuntime.charactersNear( idCharacter );
 
     if ( nearbyCharacters.empty() ) {
         return;
     }
 
-    const Engine::WorldModel* world = worldManager.world();
-    const Engine::CharacterModel* character = worldManager.character( idCharacter );
+    const Engine::CharacterModel* character = worldRuntime.character( idCharacter );
 
-    Engine::EntityStateDTO state;
+    Engine::CharacterStateDTO state;
     state.setIdCharacter( idCharacter );
     state.setX( x );
     state.setY( y );
     state.setZ( z );
     state.setOrientation( character ? character->orientation().direction() : Engine::EntityOrientationEnum::SOUTH );
-    state.setWorldName( world ? world->name().toStdString() : "" );
 
     const std::string message = Engine::JsonHelper::writeJsonString( state.toJson() );
 
@@ -103,21 +110,21 @@ void EntityBroadcaster::broadcastVitals( const WorldEvent& event ) {
 
     const int idCharacter = payload[ "idCharacter" ].asInt();
 
-    auto& worldManager = Engine::Singleton<WorldManager>::instance();
-    const std::vector<int> nearbyCharacters = worldManager.charactersNear( idCharacter );
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+    const std::vector<int> nearbyCharacters = worldRuntime.charactersNear( idCharacter );
 
     if ( nearbyCharacters.empty() ) {
         return;
     }
 
-    const Engine::CharacterModel* character = worldManager.character( idCharacter );
+    const Engine::CharacterModel* character = worldRuntime.character( idCharacter );
     if ( !character ) {
         return;
     }
 
     const Engine::EntityVitalsModel& vitals = character->vitals();
 
-    Engine::EntityVitalsDTO state;
+    Engine::CharacterVitalsDTO state;
     state.setIdCharacter( idCharacter );
     state.setHealth( vitals.health() );
     state.setMaxHealth( vitals.maxHealth() );
@@ -137,6 +144,36 @@ void EntityBroadcaster::broadcastVitals( const WorldEvent& event ) {
             connection->send( message );
         }
     }
+}
+
+void EntityBroadcaster::sendOwnVitals( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+    const Engine::CharacterModel* character = worldRuntime.character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    drogon::WebSocketConnectionPtr connection = Engine::Singleton<CharacterConnectionRegistry>::instance().connection( idCharacter );
+    if ( !connection ) {
+        return;
+    }
+
+    const Engine::EntityVitalsModel& vitals = character->vitals();
+
+    Engine::OwnCharacterVitalsDTO state;
+    state.setIdCharacter( idCharacter );
+    state.setHealth( vitals.health() );
+    state.setMaxHealth( vitals.maxHealth() );
+    state.setMana( vitals.mana() );
+    state.setMaxMana( vitals.maxMana() );
+    state.setStamina( vitals.stamina() );
+    state.setMaxStamina( vitals.maxStamina() );
+
+    connection->send( Engine::JsonHelper::writeJsonString( state.toJson() ) );
 }
 
 } // namespace Server
