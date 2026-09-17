@@ -2,7 +2,9 @@
 #define RENDERWORLD_H
 
 #include <cstdint>
+#include <vector>
 
+#include <QList>
 #include <QObject>
 
 #include <MMORPGEngine/World/Object/WorldObjectModel.h>
@@ -14,17 +16,31 @@ class RenderWorld : public QObject {
     Q_OBJECT
 
 public:
+    class Entity {
+    public:
+        int idEntity;
+        int x;
+        int y;
+    };
+
     explicit RenderWorld( QObject* parent = nullptr );
 
     virtual const WorldObjectModel* object( int x, int y, int z ) const = 0;
 
     virtual const WorldTileModel* tile( int x, int y, int z ) const = 0;
 
+    virtual QList<Entity> entities( int z ) const = 0;
+
+    virtual std::vector<int> floors() const = 0;
+
     virtual uint32_t width() const = 0;
     virtual uint32_t height() const = 0;
 
     Q_INVOKABLE bool hasObject( int x, int y, int z ) const;
     Q_INVOKABLE bool hasTile( int x, int y, int z ) const;
+
+    int resolveFloor( int x, int y, int z ) const;
+    int resolveFloor( int x, int y, int z, const std::vector<int>& loadedFloors ) const;
 
 signals:
     void boundsChanged();

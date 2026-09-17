@@ -9,37 +9,22 @@ AccountDTO::AccountDTO() :
     _characters() {
 }
 
-AccountDTO::AccountDTO( const AccountModel& account, const std::string& sessionId ) :
-    _idAccount( account.idAccount() ),
-    _username( account.dsUsername() ),
-    _sessionId( sessionId ) {
-
-    _characters.reserve( account.characters().size() );
-
-    for ( const auto& character : account.characters() ) {
-        _characters.emplace_back( character );
-    }
-}
-
 AccountDTO::~AccountDTO() = default;
 
-Json::Value AccountDTO::toJson() const {
-    Json::Value json;
+AccountDTO AccountDTO::fromModel( const AccountModel* account, const std::string& sessionId ) {
+    AccountDTO dto;
 
-    json[ "idAccount" ] = _idAccount;
-    json[ "username" ] = _username;
-    json[ "sessionId" ] = _sessionId;
+    dto._idAccount = account->idAccount();
+    dto._username = account->dsUsername();
+    dto._sessionId = sessionId;
 
-    Json::Value charactersJson( Json::arrayValue );
+    dto._characters.reserve( account->characters().size() );
 
-    for ( const auto& character : _characters ) {
-        AccountCharacterDTO characterDTO( character );
-        charactersJson.append( characterDTO.toJson() );
+    for ( const auto& character : account->characters() ) {
+        dto._characters.push_back( AccountCharacterDTO::fromModel( &character ) );
     }
 
-    json[ "characters" ] = charactersJson;
-
-    return json;
+    return dto;
 }
 
 AccountDTO AccountDTO::fromJson( const Json::Value& json ) {
@@ -64,6 +49,24 @@ AccountDTO AccountDTO::fromJson( const Json::Value& json ) {
     }
 
     return accountDTO;
+}
+
+Json::Value AccountDTO::toJson() const {
+    Json::Value json;
+
+    json[ "idAccount" ] = _idAccount;
+    json[ "username" ] = _username;
+    json[ "sessionId" ] = _sessionId;
+
+    Json::Value charactersJson( Json::arrayValue );
+
+    for ( const auto& character : _characters ) {
+        charactersJson.append( character.toJson() );
+    }
+
+    json[ "characters" ] = charactersJson;
+
+    return json;
 }
 
 int AccountDTO::idAccount() const {

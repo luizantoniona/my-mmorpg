@@ -69,4 +69,11 @@ Json::Value JsonHelper::parseJsonString( const std::string& content ) {
     return jsonData;
 }
 
+std::string JsonHelper::writeJsonString( const Json::Value& value ) {
+    Json::StreamWriterBuilder builder;
+    builder[ "indentation" ] = "";
+
+    return Json::writeString( builder, value );
+}
+
 } // namespace Engine

@@ -1,10 +1,11 @@
 #include "Viewport.h"
 
+#include <QColor>
+#include <QSGSimpleRectNode>
+
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Renderer.h>
 #include <MMORPGEngine/World/WorldConstants.h>
-
-#include <QSGSimpleRectNode>
 
 namespace Engine {
 
@@ -18,7 +19,10 @@ Viewport::Viewport( QQuickItem* parent ) :
     _renderer( new Renderer() ),
     _world( nullptr ),
     _animationTimer( new QTimer( this ) ),
-    _activeFloor( 0 ) {
+    _activeFloor( 0 ),
+    _highlightX( 0 ),
+    _highlightY( 0 ),
+    _hasHighlight( false ) {
 
     setFlag( ItemHasContents, true );
 
@@ -119,6 +123,32 @@ void Viewport::setActiveFloor( int z ) {
     update();
 }
 
+void Viewport::setHighlightedTile( int x, int y ) {
+    if ( _hasHighlight && _highlightX == x && _highlightY == y ) {
+        return;
+    }
+
+    _hasHighlight = true;
+    _highlightX = x;
+    _highlightY = y;
+
+    update();
+}
+
+void Viewport::clearHighlight() {
+    if ( !_hasHighlight ) {
+        return;
+    }
+
+    _hasHighlight = false;
+
+    update();
+}
+
+void Viewport::forceRedraw() {
+    update();
+}
+
 void Viewport::geometryChange( const QRectF& newGeometry, const QRectF& oldGeometry ) {
     QQuickItem::geometryChange( newGeometry, oldGeometry );
     _camera->setViewportSize( newGeometry.size() );
@@ -147,7 +177,7 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
     const int y = static_cast<int>( std::floor( worldPosition.y() / tileSize ) );
     const int z = _activeFloor;
 
-    if ( !_world->tile( x, y, z ) ) {
+    if ( x < 0 || y < 0 || x >= static_cast<int>( _world->width() ) || y >= static_cast<int>( _world->height() ) ) {
         return;
     }
 
@@ -168,6 +198,19 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
     _renderer->render( scene, *_camera, *_world, _activeFloor );
 
     scene.build( rootNode, window(), *_camera, _textureCache );
+
+    if ( _hasHighlight ) {
+        const double tileSize = WorldConstants::TILE_SIZE;
+
+        const QPointF worldPosition( _highlightX * tileSize, _highlightY * tileSize );
+        const QPointF screenPosition = _camera->worldToScreen( worldPosition );
+
+        auto* highlightNode = new QSGSimpleRectNode();
+        highlightNode->setColor( QColor( 255, 255, 255, 70 ) );
+        highlightNode->setRect( screenPosition.x(), screenPosition.y(), tileSize, tileSize );
+
+        rootNode->appendChildNode( highlightNode );
+    }
 
     return rootNode;
 }

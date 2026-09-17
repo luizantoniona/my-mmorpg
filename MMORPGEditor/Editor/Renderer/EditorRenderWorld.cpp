@@ -34,6 +34,20 @@ const Engine::WorldTileModel* EditorRenderWorld::tile( int x, int y, int z ) con
     return _world->tile( x, y, z );
 }
 
+QList<Engine::RenderWorld::Entity> EditorRenderWorld::entities( int z ) const {
+    Q_UNUSED( z );
+
+    return {};
+}
+
+std::vector<int> EditorRenderWorld::floors() const {
+    if ( !_world ) {
+        return {};
+    }
+
+    return _world->floors();
+}
+
 uint32_t EditorRenderWorld::width() const {
     if ( !_world ) {
         return 0;

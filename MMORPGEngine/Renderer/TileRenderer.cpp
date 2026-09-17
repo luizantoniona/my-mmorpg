@@ -19,16 +19,25 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
     const int endY = static_cast<int>( std::ceil( visibleRect.bottom() / WorldConstants::TILE_SIZE ) );
 
     const qint64 elapsedMs = QDateTime::currentMSecsSinceEpoch();
+    const std::vector<int> loadedFloors = world.floors();
 
     for ( int y = startY; y <= endY; ++y ) {
         for ( int x = startX; x <= endX; ++x ) {
-            const WorldTileModel* tile = world.tile( x, y, z );
+            const int effectiveZ = world.resolveFloor( x, y, z, loadedFloors );
+            const WorldTileModel* tile = world.tile( x, y, effectiveZ );
 
             if ( !tile || !tile->tileModel() ) {
                 continue;
             }
 
-            renderTile( scene, x, y, z, *tile, elapsedMs );
+            renderTile( scene, x, y, effectiveZ, *tile, elapsedMs );
+
+            if ( effectiveZ != z ) {
+                const QPointF position( x * WorldConstants::TILE_SIZE, y * WorldConstants::TILE_SIZE );
+                const QSizeF size( WorldConstants::TILE_SIZE, WorldConstants::TILE_SIZE );
+
+                scene.addRect( position, size, QColor( 0, 0, 0, 130 ) );
+            }
         }
     }
 }

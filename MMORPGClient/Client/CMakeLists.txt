@@ -12,7 +12,9 @@ set(PROJECT_SOURCES
     Manager/AccountManager.cpp
     Manager/AccountManager.h
     Manager/ServerManager.cpp
-    Manager/ServerManager.h)
+    Manager/ServerManager.h
+    Renderer/ClientRenderWorld.cpp
+    Renderer/ClientRenderWorld.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 
@@ -27,6 +29,9 @@ qt_add_qml_module(
   Application/ClientWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
+  Application/Game/Component/CharacterHud.qml
+  Application/Game/Component/HudActionBar.qml
+  Application/Game/Component/StatBar.qml
   Application/Login/LoginPage.qml
   Application/Login/Component/AccountPanel.qml
   Application/Login/Component/ServerPanel.qml

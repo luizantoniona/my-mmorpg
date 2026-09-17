@@ -16,7 +16,7 @@ public:
     QString lastError() const;
 
 public slots:
-    bool createTile( const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs );
+    bool createTile( const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable );
 
 signals:
     void catalogChanged();

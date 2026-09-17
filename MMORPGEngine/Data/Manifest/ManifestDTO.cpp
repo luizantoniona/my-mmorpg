@@ -48,4 +48,8 @@ bool ManifestDTO::isValid() {
     return true;
 }
 
+const std::vector<ManifestDataDTO>& ManifestDTO::data() const {
+    return _data;
+}
+
 } // namespace Engine

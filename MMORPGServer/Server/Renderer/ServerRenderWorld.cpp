@@ -5,7 +5,7 @@
 
 ServerRenderWorld::ServerRenderWorld( QObject* parent ) :
     Engine::RenderWorld( parent ),
-    _world( Engine::Singleton<Server::WorldManager>::instance().world() ) {
+    _world( Engine::Singleton<Server::WorldManager>::instance().runtime().world() ) {
 }
 
 Engine::WorldModel* ServerRenderWorld::world() const {
@@ -32,6 +32,44 @@ const Engine::WorldTileModel* ServerRenderWorld::tile( int x, int y, int z ) con
     }
 
     return _world->tile( x, y, z );
+}
+
+QList<Engine::RenderWorld::Entity> ServerRenderWorld::entities( int z ) const {
+    QList<Engine::RenderWorld::Entity> result;
+
+    auto& worldRuntime = Engine::Singleton<Server::WorldManager>::instance().runtime();
+
+    const std::map<int, Engine::EntityPositionModel> positions = worldRuntime.characterPositions();
+
+    for ( const auto& entry : positions ) {
+        const Engine::EntityPositionModel& position = entry.second;
+
+        if ( position.z() != z ) {
+            continue;
+        }
+
+        result.append( Engine::RenderWorld::Entity( entry.first, position.x(), position.y() ) );
+    }
+
+    // for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+    //     const Engine::EntityPositionModel& position = creature.position();
+
+    //     if ( position.z() != z ) {
+    //         continue;
+    //     }
+
+    //     result.append( Engine::RenderWorld::Entity( creature.idCreature(), position.x(), position.y() ) );
+    // }
+
+    return result;
+}
+
+std::vector<int> ServerRenderWorld::floors() const {
+    if ( !_world ) {
+        return {};
+    }
+
+    return _world->floors();
 }
 
 uint32_t ServerRenderWorld::width() const {

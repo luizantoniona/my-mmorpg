@@ -1,11 +1,12 @@
 #ifndef WORLDMANAGER_H
 #define WORLDMANAGER_H
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <thread>
 
-#include <MMORPGEngine/World/WorldModel.h>
+#include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
 
 namespace Server {
 
@@ -17,13 +18,12 @@ public:
     void initialize( const std::string& worldPath );
     void finalize();
 
-    Engine::WorldModel* world();
-    const Engine::WorldModel* world() const;
+    WorldRuntime& runtime();
 
 private:
     std::atomic<bool> _running;
     std::thread _thread;
-    std::unique_ptr<Engine::WorldModel> _world;
+    std::unique_ptr<WorldRuntime> _runtime;
 };
 
 } // namespace Server

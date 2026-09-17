@@ -1,12 +1,23 @@
 set(PROJECT_SOURCES
     RegisterServerTypes.cpp
     RegisterServerTypes.h
+    Application/Server/ServerPageControl.cpp
+    Application/Server/ServerPageControl.h
     Database/Database.cpp
     Database/Database.h
     Database/Query.cpp
     Database/Query.h
     Database/QueryLoader.cpp
     Database/QueryLoader.h
+    Event/EventBus.cpp
+    Event/EventBus.h
+    Event/WorldEvent.cpp
+    Event/WorldEvent.h
+    Event/WorldEventType.h
+    Manager/ChunkCoordinate.cpp
+    Manager/ChunkCoordinate.h
+    Manager/EntityBroadcaster.cpp
+    Manager/EntityBroadcaster.h
     Manager/NetworkManager.cpp
     Manager/NetworkManager.h
     Manager/WorldManager.cpp
@@ -25,18 +36,36 @@ set(PROJECT_SOURCES
     Network/Rest/DataController.h
     Network/Rest/StatusController.cpp
     Network/Rest/StatusController.h
+    Network/WebSocket/CharacterConnectionContext.cpp
+    Network/WebSocket/CharacterConnectionContext.h
+    Network/WebSocket/CharacterConnectionRegistry.cpp
+    Network/WebSocket/CharacterConnectionRegistry.h
     Network/WebSocket/CharacterWebSocket.cpp
     Network/WebSocket/CharacterWebSocket.h
     Network/WebSocket/MessageReceiver.cpp
     Network/WebSocket/MessageReceiver.h
     Renderer/ServerRenderWorld.cpp
     Renderer/ServerRenderWorld.h
-    Repository/AccountRepository.cpp
-    Repository/AccountRepository.h
-    Repository/CharacterRepository.cpp
-    Repository/CharacterRepository.h
+    Repository/Account/AccountRepository.cpp
+    Repository/Account/AccountRepository.h
+    Repository/Character/CharacterPositionRepository.cpp
+    Repository/Character/CharacterPositionRepository.h
+    Repository/Character/CharacterRepository.cpp
+    Repository/Character/CharacterRepository.h
+    Repository/Character/CharacterVitalsRepository.cpp
+    Repository/Character/CharacterVitalsRepository.h
     Repository/Repository.cpp
-    Repository/Repository.h)
+    Repository/Repository.h
+    Runtime/Character/CharacterRuntime.cpp
+    Runtime/Character/CharacterRuntime.h
+    Runtime/Character/System/CharacterSystem.cpp
+    Runtime/Character/System/CharacterSystem.h
+    Runtime/Creature/CreatureRuntime.cpp
+    Runtime/Creature/CreatureRuntime.h
+    Runtime/World/System/WorldSystem.cpp
+    Runtime/World/System/WorldSystem.h
+    Runtime/World/WorldRuntime.cpp
+    Runtime/World/WorldRuntime.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 
@@ -49,7 +78,11 @@ qt_add_qml_module(
   QML_FILES
   Main.qml
   Application/ServerWindow.qml
-  Application/Server/ServerPage.qml)
+  Application/Server/ServerPage.qml
+  Application/Server/ServerSidebar.qml
+  Application/Server/FloorSelector.qml
+  Application/Server/CharacterListPanel.qml
+  Application/Server/CharacterCard.qml)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

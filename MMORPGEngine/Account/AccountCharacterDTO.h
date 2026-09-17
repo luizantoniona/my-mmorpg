@@ -10,11 +10,11 @@ namespace Engine {
 class AccountCharacterDTO {
 public:
     AccountCharacterDTO();
-    explicit AccountCharacterDTO( const AccountCharacterModel& character );
     ~AccountCharacterDTO();
 
-    Json::Value toJson() const;
+    static AccountCharacterDTO fromModel( const AccountCharacterModel* character );
     static AccountCharacterDTO fromJson( const Json::Value& json );
+    Json::Value toJson() const;
 
     int idCharacter() const;
     void setIdCharacter( int idCharacter );

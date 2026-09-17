@@ -1,6 +1,7 @@
 #ifndef RENDERSCENE_H
 #define RENDERSCENE_H
 
+#include <QColor>
 #include <QImage>
 #include <QList>
 #include <QQuickWindow>
@@ -20,6 +21,7 @@ public:
     void clear();
 
     void addTexture( const QPointF& position, const QSizeF& size, const QImage& image );
+    void addRect( const QPointF& position, const QSizeF& size, const QColor& color );
 
     void build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera, TextureCache& textureCache );
 

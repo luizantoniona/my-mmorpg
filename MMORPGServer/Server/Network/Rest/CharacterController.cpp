@@ -2,9 +2,14 @@
 
 #include <QDebug>
 
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/EntityPositionModel.h>
+#include <MMORPGEngine/Entity/EntityVitalsModel.h>
+#include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Database/Database.h>
+#include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
-#include <MMORPGServer/Server/Repository/CharacterRepository.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterRepository.h>
 
 namespace Server {
 
@@ -23,9 +28,26 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
 
     int idAccount = session.idAccount();
 
-    qInfo() << "CharacterController::create" << " [ACCOUNT] " << idAccount << " [NAME] " << name;
+    qInfo() << "CharacterController::create"
+            << " [ACCOUNT] " << idAccount << " [NAME] " << name;
 
-    int idCharacter = CharacterRepository().createCharacter( idAccount, name );
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
+
+    Engine::EntityPositionModel spawnPosition;
+    spawnPosition.setX( world ? world->spawnX() : 0 );
+    spawnPosition.setY( world ? world->spawnY() : 0 );
+    spawnPosition.setZ( world ? world->spawnZ() : 0 );
+
+    // TODO: Derive from the attribute system once it exists; flat baseline for now.
+    Engine::EntityVitalsModel spawnVitals;
+    spawnVitals.setHealth( 100.0 );
+    spawnVitals.setMaxHealth( 100.0 );
+    spawnVitals.setMana( 50.0 );
+    spawnVitals.setMaxMana( 50.0 );
+    spawnVitals.setStamina( 50.0 );
+    spawnVitals.setMaxStamina( 50.0 );
+
+    int idCharacter = CharacterRepository().createCharacter( idAccount, name, spawnPosition, spawnVitals );
 
     if ( idCharacter == 0 ) {
         auto response = drogon::HttpResponse::newHttpResponse();

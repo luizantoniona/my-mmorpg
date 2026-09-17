@@ -16,37 +16,70 @@ Item {
         id: control
 
         onSyncUpdate: function (message) {
-            vTextStatus = message
+            root.vTextStatus = message
         }
         onSyncSucceeded: function () {
             root.syncSuccess()
         }
         onSyncFailed: function (error) {
-            vTextError = error
+            root.vTextError = error
         }
     }
 
-    Component.onCompleted: {
+    function startSync() {
+        root.vTextError = ""
+        root.vTextStatus = qsTr("Connecting...")
         control.sync()
     }
 
-    ColumnLayout {
+    Component.onCompleted: function () {
+        root.startSync()
+    }
+
+    Rectangle {
         anchors.fill: parent
+        color: Colors.background0
+    }
 
-        LoadingProgress {
-            visible: root.vTextStatus.length > 0
-            vProgress: 0.65
-            vText: root.vTextStatus
-            vTextColor: Colors.info
-            Layout.alignment: Qt.AlignHCenter
-        }
+    PanelBase {
+        anchors.fill: parent
+        anchors.margins: Spaces.spacing8
+        vHeaderType: PanelBase.PanelHeaderType.Header
+        vHeaderTitle: qsTr("Syncing World Data")
 
-        TextTitle {
-            visible: root.vTextError.length > 0
-            vText: root.vTextError
-            vTextColor: Colors.error
-            horizontalAlignment: Text.AlignHCenter
-            Layout.alignment: Qt.AlignHCenter
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: Spaces.spacing8
+            width: Math.min(parent.width - Spaces.spacing8 * 4, 420)
+
+            LoadingProgress {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                visible: root.vTextError === ""
+                vProgress: control.progress
+                vText: root.vTextStatus
+                vTextColor: Colors.info
+            }
+
+            TextTitle {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                visible: root.vTextError !== ""
+                vText: root.vTextError
+                vTextColor: Colors.error
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+            }
+
+            ButtonBase {
+                Layout.alignment: Qt.AlignHCenter
+                visible: root.vTextError !== ""
+                vText: qsTr("Retry")
+
+                onClicked: function () {
+                    root.startSync()
+                }
+            }
         }
     }
 }

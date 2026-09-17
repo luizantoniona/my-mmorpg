@@ -7,12 +7,16 @@ AccountCharacterDTO::AccountCharacterDTO() :
     _name( "" ) {
 }
 
-AccountCharacterDTO::AccountCharacterDTO( const AccountCharacterModel& character ) :
-    _idCharacter( character.idCharacter() ),
-    _name( character.name() ) {
-}
-
 AccountCharacterDTO::~AccountCharacterDTO() = default;
+
+AccountCharacterDTO AccountCharacterDTO::fromModel( const AccountCharacterModel* character ) {
+    AccountCharacterDTO dto;
+
+    dto._idCharacter = character->idCharacter();
+    dto._name = character->name();
+
+    return dto;
+}
 
 AccountCharacterDTO AccountCharacterDTO::fromJson( const Json::Value& json ) {
     AccountCharacterDTO dto;

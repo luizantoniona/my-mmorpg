@@ -6,13 +6,12 @@
     },
     "Floors" : 
     [
-        "0.json",
-        "1.json",
-        "2.json",
-        "3.json",
-        "-1.json"
+        "0.json"
     ],
     "Height" : 64,
     "Name" : "Test Map",
+    "SpawnX" : 32,
+    "SpawnY" : 32,
+    "SpawnZ" : 0,
     "Width" : 64
 }

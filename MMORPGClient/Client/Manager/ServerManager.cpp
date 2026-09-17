@@ -1,6 +1,8 @@
 #include "ServerManager.h"
 
+#include <QRegularExpression>
 #include <QSettings>
+#include <QStandardPaths>
 
 #include <MMORPGClient/Client/Manager/AccountManager.h>
 #include <MMORPGEngine/Commons/Singleton.h>
@@ -8,6 +10,12 @@
 namespace {
 constexpr const char* SETTINGS_SCOPE = "MMORPG";
 constexpr const char* SETTINGS_SUB_SCOPE = "Client";
+
+QString sanitizedForPath( const QString& value ) {
+    QString result = value;
+    result.replace( QRegularExpression( "[^A-Za-z0-9._-]" ), "_" );
+    return result;
+}
 } // namespace
 
 ServerManager::ServerManager( QObject* parent ) :
@@ -25,6 +33,13 @@ ServerManager::~ServerManager() = default;
 
 QString ServerManager::serverAddress() const {
     return _serverAddress.toString();
+}
+
+QString ServerManager::dataDirectory() const {
+    const QString base = QStandardPaths::writableLocation( QStandardPaths::AppDataLocation );
+    const QString serverKey = sanitizedForPath( _serverAddress.host() ) + "_" + QString::number( _serverAddress.port( 80 ) );
+
+    return base + "/ClientData/" + serverKey + "/";
 }
 
 ServerManager::ConnectionState ServerManager::connectionState() const {

@@ -35,6 +35,14 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
     qInfo() << "WorldFactory::createWorld"
             << "[MAP_SIZE]" << world->width() << "x" << world->height();
 
+    // --- Spawn
+    const int defaultSpawnX = static_cast<int>( world->width() / 2 );
+    const int defaultSpawnY = static_cast<int>( world->height() / 2 );
+
+    world->setSpawnX( mapJson.get( "SpawnX", defaultSpawnX ).asInt() );
+    world->setSpawnY( mapJson.get( "SpawnY", defaultSpawnY ).asInt() );
+    world->setSpawnZ( mapJson.get( "SpawnZ", 0 ).asInt() );
+
     // --- Floors
     for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
         FloorFactory::createFloor( mapPath + "Floors/" + floorFile.asString(), world.get() );

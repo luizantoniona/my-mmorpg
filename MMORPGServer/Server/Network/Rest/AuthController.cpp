@@ -7,7 +7,7 @@
 #include <MMORPGServer/Server/Database/Database.h>
 #include <MMORPGServer/Server/Network/Filter/AuthFilter.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
-#include <MMORPGServer/Server/Repository/AccountRepository.h>
+#include <MMORPGServer/Server/Repository/Account/AccountRepository.h>
 
 namespace Server {
 
@@ -49,7 +49,7 @@ void AuthController::login( const drogon::HttpRequestPtr& request, std::function
 
     std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
-    Engine::AccountDTO accountDTO( *account, sessionId );
+    Engine::AccountDTO accountDTO = Engine::AccountDTO::fromModel( account.get(), sessionId );
 
     qInfo() << "AuthController::login [Account] " << account->dsUsername() << " [UUID] " << sessionId;
 
@@ -144,7 +144,7 @@ void AuthController::sign( const drogon::HttpRequestPtr& request, std::function<
 
     std::string sessionId = Engine::Singleton<NetworkServer>::instance().createSession( account->idAccount(), account->dsUsername() );
 
-    Engine::AccountDTO accountDTO( *account, sessionId );
+    Engine::AccountDTO accountDTO = Engine::AccountDTO::fromModel( account.get(), sessionId );
 
     qInfo() << "AuthController::sign [Account] " << account->dsUsername() << " [UUID] " << sessionId;
 

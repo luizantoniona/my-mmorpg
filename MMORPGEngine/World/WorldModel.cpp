@@ -13,7 +13,10 @@ namespace Engine {
 WorldModel::WorldModel() :
     _name( "" ),
     _width( 0 ),
-    _height( 0 ) {
+    _height( 0 ),
+    _spawnX( 0 ),
+    _spawnY( 0 ),
+    _spawnZ( 0 ) {
 }
 
 QString WorldModel::name() const {
@@ -38,6 +41,30 @@ uint32_t WorldModel::height() const {
 
 void WorldModel::setHeight( uint32_t height ) {
     _height = height;
+}
+
+int WorldModel::spawnX() const {
+    return _spawnX;
+}
+
+void WorldModel::setSpawnX( int spawnX ) {
+    _spawnX = spawnX;
+}
+
+int WorldModel::spawnY() const {
+    return _spawnY;
+}
+
+void WorldModel::setSpawnY( int spawnY ) {
+    _spawnY = spawnY;
+}
+
+int WorldModel::spawnZ() const {
+    return _spawnZ;
+}
+
+void WorldModel::setSpawnZ( int spawnZ ) {
+    _spawnZ = spawnZ;
 }
 
 ChunkModel* WorldModel::chunk( int x, int y ) {
@@ -129,6 +156,18 @@ const WorldTileModel* WorldModel::tile( int x, int y, int z ) const {
 }
 
 void WorldModel::setTile( int x, int y, int z, uint32_t tileType ) {
+    const int chunkX = x / WorldConstants::CHUNK_SIZE;
+    const int chunkY = y / WorldConstants::CHUNK_SIZE;
+    const int localX = x % WorldConstants::CHUNK_SIZE;
+    const int localY = y % WorldConstants::CHUNK_SIZE;
+
+    ChunkModel* chunkModel = chunk( chunkX, chunkY );
+
+    if ( tileType == 0 ) {
+        chunkModel->setTile( localX, localY, z, nullptr );
+        return;
+    }
+
     const TileCatalog& catalog = Singleton<DataManager>::instance().tileCatalog();
     const TileModel* tileModel = catalog.tile( tileType );
 
@@ -136,12 +175,6 @@ void WorldModel::setTile( int x, int y, int z, uint32_t tileType ) {
         return;
     }
 
-    const int chunkX = x / WorldConstants::CHUNK_SIZE;
-    const int chunkY = y / WorldConstants::CHUNK_SIZE;
-    const int localX = x % WorldConstants::CHUNK_SIZE;
-    const int localY = y % WorldConstants::CHUNK_SIZE;
-
-    ChunkModel* chunkModel = chunk( chunkX, chunkY );
     WorldTileModel* worldTile = chunkModel->tile( localX, localY, z );
 
     worldTile->setTileModel( tileModel );

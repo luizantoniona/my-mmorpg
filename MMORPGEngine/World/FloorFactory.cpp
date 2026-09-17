@@ -67,6 +67,10 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
                 const uint32_t tileType = row[ x ].asUInt();
 
+                if ( tileType == 0 ) {
+                    continue;
+                }
+
                 const TileModel* tileModel = tileCatalog.tile( tileType );
 
                 if ( !tileModel ) {

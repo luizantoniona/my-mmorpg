@@ -27,7 +27,7 @@ void RegisterEditorTypes::registerTypes() {
     qmlRegisterType<ObjectPaletteModel>( "MMORPGEditorControls", 1, 0, "ObjectPaletteModel" );
     qmlRegisterType<TilePaletteModel>( "MMORPGEditorControls", 1, 0, "TilePaletteModel" );
 
-    // --- Others Components
+    // --- Renderer
     qmlRegisterType<EditorRenderWorld>( "MMORPGEditorComponents", 1, 0, "EditorRenderWorld" );
 }
 

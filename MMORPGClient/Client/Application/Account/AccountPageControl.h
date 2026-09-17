@@ -13,9 +13,18 @@ public:
 public slots:
     void logout();
 
+    void createCharacter( const QString& name );
+    void removeCharacter( int idCharacter );
+
 signals:
     void logoutSucceeded();
     void logoutFailed( const QString& error );
+
+    void characterCreated();
+    void characterCreationFailed( const QString& error );
+
+    void characterRemoved();
+    void characterRemovalFailed( const QString& error );
 };
 
 #endif // ACCOUNTPAGECONTROL_H

@@ -13,11 +13,11 @@ namespace Engine {
 class AccountDTO {
 public:
     AccountDTO();
-    explicit AccountDTO( const AccountModel& account, const std::string& sessionId );
     ~AccountDTO();
 
-    Json::Value toJson() const;
+    static AccountDTO fromModel( const AccountModel* account, const std::string& sessionId );
     static AccountDTO fromJson( const Json::Value& json );
+    Json::Value toJson() const;
 
     int idAccount() const;
     void setIdAccount( int idAccount );

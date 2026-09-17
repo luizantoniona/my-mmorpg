@@ -51,14 +51,50 @@ void AccountManager::setSessionId( const QString& sessionId ) {
     emit sessionIdChanged();
 }
 
+QVariantList AccountManager::characters() const {
+    QVariantList result;
+
+    for ( const Engine::AccountCharacterDTO& character : _characters ) {
+        QVariantMap characterMap;
+        characterMap[ "idCharacter" ] = character.idCharacter();
+        characterMap[ "name" ] = QString::fromStdString( character.name() );
+
+        result.append( characterMap );
+    }
+
+    return result;
+}
+
+void AccountManager::setCharacters( const std::vector<Engine::AccountCharacterDTO>& characters ) {
+    _characters = characters;
+
+    emit charactersChanged();
+}
+
+void AccountManager::addCharacter( const Engine::AccountCharacterDTO& character ) {
+    _characters.push_back( character );
+
+    emit charactersChanged();
+}
+
+void AccountManager::removeCharacter( int idCharacter ) {
+    std::erase_if( _characters, [ idCharacter ]( const Engine::AccountCharacterDTO& character ) {
+        return character.idCharacter() == idCharacter;
+    } );
+
+    emit charactersChanged();
+}
+
 void AccountManager::setAccount( const Engine::AccountDTO& account ) {
     setIdAccount( account.idAccount() );
     setUsername( QString::fromStdString( account.username() ) );
     setSessionId( QString::fromStdString( account.sessionId() ) );
+    setCharacters( account.characters() );
 }
 
 void AccountManager::clear() {
     setIdAccount( 0 );
     setUsername( "" );
     setSessionId( "" );
+    setCharacters( {} );
 }

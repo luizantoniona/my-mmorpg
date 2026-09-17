@@ -3,20 +3,12 @@
 namespace Engine {
 
 EntityModel::EntityModel() :
-    _orientation(),
     _position(),
-    _size() {
+    _size(),
+    _vitals() {
 }
 
 EntityModel::~EntityModel() = default;
-
-EntityOrientationModel EntityModel::orientation() const {
-    return _orientation;
-}
-
-void EntityModel::setOrientation( const EntityOrientationModel& orientation ) {
-    _orientation = orientation;
-}
 
 EntityPositionModel EntityModel::position() const {
     return _position;
@@ -32,6 +24,14 @@ EntitySizeModel EntityModel::size() const {
 
 void EntityModel::setSize( const EntitySizeModel& size ) {
     _size = size;
+}
+
+EntityVitalsModel EntityModel::vitals() const {
+    return _vitals;
+}
+
+void EntityModel::setVitals( const EntityVitalsModel& vitals ) {
+    _vitals = vitals;
 }
 
 } // namespace Engine

@@ -1,6 +1,7 @@
 #include "DataController.h"
 
 #include <QDebug>
+#include <QFileInfo>
 
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/DataManager.h>
@@ -14,7 +15,7 @@ void DataController::downloadManifest( const drogon::HttpRequestPtr& request, st
 
     qInfo() << "DataController::downloadManifest [ACCOUNT] " << session.idAccount();
 
-    const Engine::ManifestModel& manifest = Engine::Singleton<Engine::DataManager>::instance().manifest();
+    const Engine::ManifestModel manifest = Engine::Singleton<Engine::DataManager>::instance().manifest();
 
     Engine::ManifestDTO manifestDTO( manifest );
 
@@ -28,10 +29,19 @@ void DataController::downloadData( const drogon::HttpRequestPtr& request, std::f
 
     qInfo() << "DataController::downloadData [ACCOUNT] " << session.idAccount() << " [PATH] " << path;
 
-    // TODO: DataManager::instance().data(path);
+    const std::string& configPath = Engine::Singleton<Engine::DataManager>::instance().configPath();
 
-    auto response = drogon::HttpResponse::newHttpResponse();
-    response->setStatusCode( drogon::k501NotImplemented );
+    const QFileInfo rootInfo( QString::fromStdString( configPath ) );
+    const QFileInfo fileInfo( QString::fromStdString( configPath + path ) );
+
+    if ( !fileInfo.exists() || !fileInfo.canonicalFilePath().startsWith( rootInfo.canonicalFilePath() ) ) {
+        auto response = drogon::HttpResponse::newHttpResponse();
+        response->setStatusCode( drogon::k404NotFound );
+        callback( response );
+        return;
+    }
+
+    auto response = drogon::HttpResponse::newFileResponse( fileInfo.canonicalFilePath().toStdString() );
     callback( response );
 }
 
