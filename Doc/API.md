@@ -238,23 +238,15 @@ Authentication:
 Required parameters:
 - character (numeric query param)
 
-On a successful connection, the server validates that `character` belongs to
-the account behind the session (`CharacterRepository::findByIdAccountAndIdCharacter`),
-loads the character's persisted position (or a placeholder spawn — map
-center, lowest loaded floor — if none exists yet), registers the character
-in `WorldManager`, and sends one welcome message with that state
-(`Engine::EntityStateDTO`):
-```json
-{
-  "idCharacter": 10,
-  "x": 16,
-  "y": 16,
-  "z": 0,
-  "worldName": "TestMap"
-}
-```
+Every message on this socket is a JSON object with a `"type"` field. The
+value is the C++ enum member name, unquoted case (`OWN_CHARACTER`,
+`CHARACTER_MOVE`, ...) — see `Engine::ClientMessageType`/`ServerMessageType`
+in `MMORPGEngine/Network/WebSocket/`. Client → server messages use
+`ClientMessageType`; server → client messages use `ServerMessageType`. There
+is no shared/generic message type between the two directions.
 
-Error messages sent by server (connection is closed right after):
+Error messages sent by server (connection is closed right after; these do
+not carry a `"type"`, they are a separate pre-handshake error shape):
 ```json
 {"error":"missing_context"}
 ```
@@ -271,21 +263,73 @@ Error messages sent by server (connection is closed right after):
 {"error":"invalid_character"}
 ```
 
-After the handshake, the client can send movement requests on the same
-connection:
-```json
-{"type":"move","dx":0,"dy":-1}
-```
-`dx`/`dy` must each be `-1`, `0` or `1`. The server validates world bounds
-and the destination tile's `isWalkable`, updates the character's position
-if the move is valid, and always replies with the authoritative state
-(unchanged position if the move was blocked):
-```json
-{
-  "idCharacter": 10,
-  "x": 16,
-  "y": 15,
-  "z": 0,
-  "worldName": "TestMap"
-}
-```
+#### Server → Client messages
+
+On a successful connection, the server validates that `character` belongs to
+the account behind the session (`CharacterRepository::findByIdAccountAndIdCharacter`),
+registers the connection, and loads the character into `WorldRuntime`
+(`WorldRuntime::addCharacter`), which publishes an `ENTITY_ENTERED` event.
+`Server::EntityBroadcaster` reacts to that event and sends, in order, to the
+connecting client only:
+
+1. `WORLD_BASIC` (`Engine::WorldBasicDTO`) — once, world identity:
+   ```json
+   { "type": "WORLD_BASIC", "worldName": "TestMap" }
+   ```
+2. `OWN_CHARACTER` (`Engine::OwnCharacterDTO`) — the connecting character's
+   own full state (position + vitals, everything the client's HUD needs):
+   ```json
+   {
+     "type": "OWN_CHARACTER",
+     "idCharacter": 10,
+     "x": 16, "y": 16, "z": 0,
+     "health": 100.0, "maxHealth": 100.0,
+     "mana": 50.0, "maxMana": 50.0,
+     "stamina": 50.0, "maxStamina": 50.0
+   }
+   ```
+3. `CHARACTER` (`Engine::CharacterDTO`) — one per character already nearby
+   (same fields as `OWN_CHARACTER`, minus the "own" semantics):
+   ```json
+   { "type": "CHARACTER", "idCharacter": 11, "x": 20, "y": 16, "z": 0, "health": 100.0, "maxHealth": 100.0, "mana": 50.0, "maxMana": 50.0, "stamina": 50.0, "maxStamina": 50.0 }
+   ```
+4. `CREATURE` (`Engine::CreatureDTO`) — one per creature currently in the
+   world (no proximity filter yet — `// TODO` in `EntityBroadcaster::sendCreatures`):
+   ```json
+   { "type": "CREATURE", "idCreature": 1, "x": 18, "y": 16, "z": 0 }
+   ```
+
+The server also broadcasts a `CHARACTER` message for the entering character
+to everyone already nearby, so existing clients learn about the newcomer.
+
+After the handshake, the server pushes unsolicited messages on the same
+connection whenever something relevant changes nearby:
+- `CHARACTER` — a nearby character moved, or its vitals changed (position +
+  vitals always travel together; there is no separate move-only or
+  vitals-only broadcast).
+- `OWN_CHARACTER` — sent to a character's own connection instead of
+  `CHARACTER` whenever *that* character's own state changes (its vitals
+  regen tick, or the reply to its own `CHARACTER_MOVE`).
+- `ENTITY_LEFT` (`Engine::EntityLeftDTO`) — a nearby character disconnected:
+  ```json
+  { "type": "ENTITY_LEFT", "idCharacter": 11 }
+  ```
+
+There is no `CREATURE` push after the handshake yet — creatures don't move
+or take damage.
+
+#### Client → Server messages
+
+- `CHARACTER_MOVE` (`Engine::CharacterMoveDTO`):
+  ```json
+  { "type": "CHARACTER_MOVE", "dx": 0, "dy": -1 }
+  ```
+  `dx`/`dy` must each be `-1`, `0` or `1`. The server validates world bounds
+  and the destination tile's `isWalkable`, updates the character's position
+  if the move is valid (unchanged position if blocked), and replies with an
+  `OWN_CHARACTER` message carrying the authoritative state — the mover does
+  not get a `CHARACTER` broadcast about themselves, only nearby characters
+  do.
+
+Movement does not carry a facing/orientation — `EntityModel` (and every DTO
+built on top of it) has no orientation field.
