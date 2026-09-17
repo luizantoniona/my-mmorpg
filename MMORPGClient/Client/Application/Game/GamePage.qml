@@ -66,6 +66,14 @@ Item {
         vMaxStamina: control.maxStamina
     }
 
+    HudActionBar {
+        anchors {
+            top: parent.top
+            right: parent.right
+            margins: Spaces.spacing8
+        }
+    }
+
     Text {
         anchors {
             bottom: parent.bottom
