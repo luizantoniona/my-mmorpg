@@ -39,6 +39,9 @@ public:
     Q_INVOKABLE bool hasObject( int x, int y, int z ) const;
     Q_INVOKABLE bool hasTile( int x, int y, int z ) const;
 
+    int resolveFloor( int x, int y, int z ) const;
+    int resolveFloor( int x, int y, int z, const std::vector<int>& loadedFloors ) const;
+
 signals:
     void boundsChanged();
 };

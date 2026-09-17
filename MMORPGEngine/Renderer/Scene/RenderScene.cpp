@@ -1,5 +1,6 @@
 #include "RenderScene.h"
 
+#include <QSGSimpleRectNode>
 #include <QSGSimpleTextureNode>
 
 namespace Engine {
@@ -20,17 +21,31 @@ void RenderScene::addTexture( const QPointF& position, const QSizeF& size, const
     _items.append( item );
 }
 
+void RenderScene::addRect( const QPointF& position, const QSizeF& size, const QColor& color ) {
+    RenderSceneItem item( position, size, color );
+    _items.append( item );
+}
+
 void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera, TextureCache& textureCache ) {
     if ( !rootNode || !window ) {
         return;
     }
 
     for ( const RenderSceneItem& item : _items ) {
-        if ( item.image().isNull() ) {
+        const QPointF screenPosition = camera.worldToScreen( item.position() );
+
+        if ( item.color().isValid() ) {
+            auto* rectNode = new QSGSimpleRectNode();
+            rectNode->setColor( item.color() );
+            rectNode->setRect( screenPosition.x(), screenPosition.y(), item.size().width(), item.size().height() );
+
+            rootNode->appendChildNode( rectNode );
             continue;
         }
 
-        const QPointF screenPosition = camera.worldToScreen( item.position() );
+        if ( item.image().isNull() ) {
+            continue;
+        }
 
         QSGTexture* texture = textureCache.texture( window, item.image() );
 
