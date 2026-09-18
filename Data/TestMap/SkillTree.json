@@ -1,8 +1,8 @@
 {
-    "SkillTrees" :
-    [
+    "SkillTrees": [
         {
-            "ItemType" : 1,
-            "Nodes" :
-            [
-                {
+            "ItemType": 1,
+            "Nodes": []
+        }
+    ]
+}
