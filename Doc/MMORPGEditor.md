@@ -1,69 +1,37 @@
-# MMORPGEditor — technical reference
+# MMORPGEditor
 
-World editor. Opens the active map in `Data/`, lets you edit tiles, objects
-and floors, and saves back to the JSON files. Also registers new tiles in
-the catalog.
+The world-authoring tool for MyMMO. A desktop Qt Quick application that
+opens the active map, lets you paint it floor by floor and writes the
+result straight back to the JSON files the Server loads.
 
-## What it does today
+## What you can do
 
-- Loads the world (`DataManager` → `WorldModel` → `EditorRenderWorld`) and
-  centers the camera.
-- Mutually exclusive tile/object selection; **Select** and **Paint** modes
-  (`ToolModeBar`).
-- Paints tiles and objects from the palettes; removes an object by picking
-  "None" (`type 0`).
-- Switches the active floor (`FloorSelector`).
-- Saves `Floors/*.json` (`WorldControl::saveWorld()`).
-- Tile registration (name, texture, tags, `isWalkable`, auto-assigned
-  `Type`) written to `Tile.json`.
+- **Paint tiles and objects** from side palettes onto the map, one click
+  per cell, with a live preview through the same renderer the game uses.
+  Picking "Empty"/"None" clears a cell.
+- **Select** any cell to inspect what's there.
+- **Work in layers** — switch between floors (Z levels), add a floor above
+  or below, remove one. Empty cells on the current floor show the floor
+  beneath, so multi-level areas are easy to line up.
+- **Register new tiles and objects** in the catalog: give them a name, a
+  texture, tags, whether they can be walked on, and (for objects) a
+  footprint. Types are assigned automatically.
+- **Configure the map** — choose which map folder is active and resize it.
+- **Save** only when you decide to; nothing touches disk until then.
 
-## Structure
+## Under the hood
 
-```
-Editor/
-├── main.cpp                 registers Engine and Editor types, loads Main.qml
-├── RegisterEditorTypes.*    qmlRegisterType → QML module "MMORPGEditorControls"
-├── Renderer/
-│   └── EditorRenderWorld    Engine::RenderWorld specialization for the Editor
-└── Application/
-    ├── EditorWindow.qml     StackView + NavigationBar (World / Tiles / Objects)
-    ├── Navigation/          NavigationBar.qml
-    ├── World/               main editing page
-    │   ├── WorldPage.qml, EditorSidebar.qml
-    │   ├── BrushMode.qml                      (QML singleton)
-    │   ├── WorldControl.*                     world load/save, paintTile/paintObject
-    │   ├── Tool/ToolSelector.qml              floating bar over the Viewport (ToolModeBar + FloorSelector)
-    │   ├── Tool/ToolMode.qml, ToolModeBar.qml (Select/Paint modes)
-    │   ├── Floor/FloorSelector.qml            Z0/Z1/... buttons
-    │   ├── Tile/                              TilePalette.qml, TilePaletteModel, TileSelectionControl, TileIconProvider
-    │   └── Object/                            ObjectPalette.qml, ObjectPaletteModel, ObjectSelectionControl, ObjectIconProvider
-    ├── Tiles/               TileCreationPage.qml + TileCreationControl (catalog registration)
-    └── Objects/             ObjectCreationPage.qml + ObjectCreationControl (catalog registration)
-```
+- Built on the engine's `Viewport`; the Editor adds selection state
+  machines, palette models with icon providers, and a `WorldControl`
+  backend that mutates the `WorldModel` and persists it.
+- Two QML modules: `MMORPGEditorComponents` (pages and components) and
+  `MMORPGEditorControls` (C++ backends). Screens are QML; logic is C++.
+- Theme, buttons, inputs and icons come from the shared `MMORPGUI` module,
+  so the Editor looks like the rest of the project without duplicating UI
+  code.
+- Selection controls are unit-tested with GoogleTest.
 
-Two QML modules: `MMORPGEditorComponents` (`.qml` files) and
-`MMORPGEditorControls` (C++ classes registered in `RegisterEditorTypes`).
+## Stack
 
-## Selection/editing flow
-
-```
-Mouse → Viewport → Camera::screenToWorld() → world position → tile/object
-      → *SelectionControl → visual feedback (highlight)
-Paint: palette (Tile/ObjectPaletteModel) → WorldControl::paintTile/paintObject
-      → WorldTileModel/WorldObjectModel → EditorRenderWorld → Viewport
-```
-
-## Decisions
-
-- The `Viewport`'s `activeFloor` is set directly by the UI
-  (`FloorSelector`). Server and Client use the same mechanism; only the
-  "driver" changes.
-- `FloorSelector.qml` is Editor-specific. Promote it to `MMORPGUI` only once
-  the Server has a real use of its own to compare against.
-- Tile tags are only for organizing/grouping the palette — they have no
-  effect on the world or the render.
-- Objects have no orientation in the current model; object
-  position/orientation waits until the concept exists in the Engine.
-- `EditorRenderWorld::entities()` returns an empty list — the Editor has no
-  entity concept yet. It's the natural place to show creature spawn markers
-  later.
+C++20 · Qt 6 (Quick, QuickControls2, QuickDialogs2) · MMORPGEngine ·
+MMORPGUI.

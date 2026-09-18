@@ -1,84 +1,50 @@
-# MMORPGServer — technical reference
+# MMORPGServer
 
-Game server. Starts a REST + WebSocket API (Drogon) on `0.0.0.0:8080`,
-persists accounts/characters in SQLite, loads the active world from `Data/`
-and opens a Qt debug window that renders the map with the same Engine
-`Viewport`. Classes live in `namespace Server`.
+The authoritative game server for MyMMO. A single C++ process that exposes
+a REST API and a WebSocket endpoint (Drogon), persists accounts and
+characters in SQLite, runs the live world on its own tick thread and opens
+a Qt debug window that renders the map and every connected character.
 
-Route contract: [`API.md`](API.md).
+## What it does
 
-## Lifecycle
+- **Accounts and sessions** — sign up, log in, log out; protected routes
+  are gated by a session filter.
+- **Characters** — create and remove characters; each one gets a spawn
+  position and starting vitals persisted alongside it.
+- **World data distribution** — serves the active world folder with an
+  MD5 manifest, so clients download only what changed.
+- **Live world** — characters enter through `/ws/character`, move one tile
+  at a time, and the server validates every step (bounds, walkability)
+  before replying with the authoritative state.
+- **Proximity broadcast** — the world is indexed by chunk; when something
+  changes, only characters in the surrounding 3×3 chunks are told.
+- **Debug window** — the same engine `Viewport` as the Editor, in
+  read-only mode, with a live list of connected characters (click to
+  center the camera, disconnect from the UI).
 
-`main.cpp` initializes singletons in this order and finalizes them in
-reverse:
+## Architecture highlights
 
-```
-Database  (Database/ServerDatabase via ../../../Database/)
-  → DataManager  (Engine: manifest + catalogs from Data/)
-    → WorldManager  (WorldModel of the active map, own thread, tracks connected characters)
-      → NetworkManager  (Drogon: listeners, controllers, filters)
-        → QML Main (MMORPGServerComponents)
-```
+- **The server is the authority.** Clients send intents; the server
+  validates and pushes state. There is no client-side prediction, which
+  keeps the protocol small and the rules in one place.
+- **Runtime, systems and events.** `WorldManager` owns lifecycle (thread,
+  bootstrap); `WorldRuntime` owns live state (characters, chunk index,
+  event bus) and never builds a network message. Per-entity `*Runtime`
+  objects host pluggable `*System`s that run every tick. State changes are
+  published as events; a single `EntityBroadcaster` turns events into DTOs
+  and sends them.
+- **Mutex discipline.** Runtime methods lock per call; events are published
+  only after the lock is released, so subscribers can safely query the
+  runtime back.
+- **Repository pattern.** All SQLite access goes through `*Repository`
+  classes; creating a character creates its derived rows in one place.
+- **Testable core.** `WorldRuntime`, the event bus and the chunk index are
+  unit-tested without linking Drogon; CI builds and runs them on every
+  push.
 
-Paths are relative to the executable (`../../../Data/`, `../../../Database/`),
-so run from the Server's build folder.
+## Stack
 
-## Structure
+C++20 · Drogon (REST + WebSocket) · SQLite · jsoncpp · Qt 6 (debug
+window) · MMORPGEngine · MMORPGUI · GoogleTest.
 
-```
-Server/
-├── main.cpp, RegisterServerTypes.*      registers types → QML module "MMORPGServerComponents"
-├── Database/    Database (SQLite), Query, QueryLoader
-├── Repository/  Repository (base), AccountRepository, CharacterRepository, CharacterPositionRepository
-├── Manager/     NetworkManager (Drogon), WorldManager (WorldModel + thread, connected characters, characterPositions())
-├── Network/
-│   ├── NetworkServer, NetworkSession        authenticated sessions (sessionID)
-│   ├── Filter/AuthFilter                    protects routes by session
-│   ├── Rest/                                AuthController (/login, /sign, /logout)
-│   │                                        CharacterController (/create, /remove) — no list route, see API.md
-│   │                                        DataController (/data/manifest, /data/{path}) — serves Data/ for the Client to sync
-│   │                                        StatusController (/status)
-│   └── WebSocket/                           CharacterWebSocket (/ws/character), CharacterConnectionContext, MessageReceiver (dispatches move requests)
-├── Renderer/    ServerRenderWorld            Engine::RenderWorld specialization; entities() reads live from WorldManager
-└── Application/ ServerWindow.qml, Server/ServerPage.qml   debug window with Viewport
-```
-
-## Database
-
-Schema in [`../Database/Schema.sql`](../Database/Schema.sql): `account`,
-`character`, `character_inventory`, `character_position`,
-`character_vitals`. The `Database/ServerDatabase` file is git-ignored —
-create it locally from the schema before starting the server (see the
-project [`README.md`](../README.md) for the exact steps). There is no
-automatic migration yet (`Database::migrate()` is a stub) — schema changes
-must be applied by hand while the tables are still evolving.
-
-## Decisions
-
-- **The server is the authority** over entity position and state; the
-  Client sends requests (movement, etc.) and receives the validated state.
-- The debug window uses the same `Engine::Viewport` as the Editor, so it
-  already honors `activeFloor` and renders every connected character as an
-  entity (via `ServerRenderWorld::entities()` → `WorldManager::characterPositions()`,
-  read fresh on every repaint — no polling loop needed). It has no UI of its
-  own to switch floors yet.
-- `ServerRenderWorld` currently exposes only `object`/`tile`/`entities`. For
-  the Runtime Debug View (Phase 4) it still needs: `world`/`floors` exposed
-  as `Q_PROPERTY` (as `WorldControl` does in the Editor) and its own floor
-  selector — without sharing the Editor's `FloorSelector.qml` until there
-  are two real uses.
-- **`/ws/character` handshake**: validates the session and that the
-  character belongs to the account
-  (`CharacterRepository::findByIdAccountAndIdCharacter`), loads any
-  persisted position (`CharacterPositionRepository`, falling back to a
-  placeholder spawn — map center, lowest loaded floor — if none exists),
-  registers the character in `WorldManager`, and sends one
-  `Engine::EntityStateDTO` with that state.
-- **Movement**: `MessageReceiver::receiveMove` validates a single-tile step,
-  world bounds and the destination tile's `isWalkable`, updates the
-  character's position on success, and always replies with the
-  authoritative `EntityStateDTO` (unchanged position if the move was
-  blocked). Objects on the destination tile don't block movement yet
-  (`ObjectModel` has no `isWalkable`/collision concept). Position is only
-  persisted on disconnect (`CharacterWebSocket::handleConnectionClosed`),
-  not on every step.
+Route and message contract: [`API.md`](API.md).

@@ -19,4 +19,4 @@ folder. It opens the currently active map (set in `Data/Config.json`).
 - Save your changes — nothing is written to disk until you do.
 - Register a new tile (with its own texture) from the tile catalog screen.
 
-Technical details: [`Doc/MMORPGEditor.md`](../Doc/MMORPGEditor.md).
+More about it: [`Doc/MMORPGEditor.md`](../Doc/MMORPGEditor.md).

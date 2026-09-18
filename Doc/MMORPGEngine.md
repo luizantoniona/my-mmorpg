@@ -1,76 +1,61 @@
-# MMORPGEngine — technical reference
+# MMORPGEngine
 
-Static library (`MMORPG::MMORPGEngine`) shared by Server, Client and Editor.
-Everything lives in `namespace Engine`. It has no executable of its own.
+The shared core of MyMMO. A C++20 static library that the Server, the
+Client and the Editor all link against, so the three applications agree on
+what a world is, how it is stored, how it is drawn and how it is described
+on the wire.
 
-Depends on Qt 6 (Core, Network, Qml, Quick, WebSockets) and jsoncpp. Always
-include by full path: `#include <MMORPGEngine/World/WorldModel.h>`.
+## What it provides
 
-## Structure
+- **World model** — a map is a set of floors (Z levels), each floor a grid
+  of 32×32-tile chunks. Every cell holds a ground *tile* and, optionally, an
+  *object* on top of it. Type `0` means "empty" for both.
+- **Data catalogs** — tile and object *types* (name, texture, walkability,
+  footprint, animation) loaded from JSON and shared by every application.
+  Textures can be static PNGs or animated GIFs with pre-decoded frames.
+  **Item types** (`ItemTypeModel`) are a fourth catalog, deliberately
+  minimal for now (`Type`, `Name` only) — just enough for a skill tree to
+  reference an item type by id. Gameplay fields (equip slot, hand
+  requirement, resource cost) come back once something actually reads
+  them — see `DESIGN.md` for the full intended shape. **Skill trees**
+  (`SkillCatalog` → `SkillTreeModel`
+  → `SkillNodeModel`) are a fifth: one tree per item type, each node
+  carrying `ProficiencyLevel` and `Prerequisites`, deliberately minimal
+  for the same reason as item types. A tree references its item type by
+  id only; loading skips any tree whose item type isn't in the item type
+  catalog.
+- **Entities** — position, size and vitals (health, mana, stamina) for
+  characters and creatures, plus the DTOs that carry them over the network.
+- **Renderer** — a Qt Quick scene-graph renderer with a camera
+  (world ↔ screen, zoom, clamping to the map bounds) and per-layer
+  renderers for tiles, objects and entities. It culls to the visible
+  range and resolves *see-through floors*: an empty cell on the active
+  floor shows the floor underneath, Tibia-style.
+- **`Viewport`** — a QML item that draws any `RenderWorld`. The Editor, the
+  Server's debug window and the Client all use the same component; only
+  who drives the camera and the active floor changes.
+- **Networking helpers** — an HTTP client, a WebSocket client with
+  session-header auth, and the typed message contract for the game socket
+  (separate enums for client → server and server → client messages).
+- **Data manifest** — an MD5-per-file listing of the world folder, so
+  clients can sync only what changed.
 
-| Folder       | Contents                                                                                     |
-| ------------ | --------------------------------------------------------------------------------------------- |
-| `Account/`   | `AccountModel`/`AccountCharacterModel` (runtime) and their `*DTO` (network)                 |
-| `Commons/`   | `JsonHelper` (JSON load/save via jsoncpp, plus `writeJsonString` for outbound messages), `Singleton<T>`, `RegisterEngineTypes` (registers `Viewport` in QML as the `MMORPGEngine` module) |
-| `Data/`      | `DataManager` (singleton: catalogs + `configPath()`), `DataFactory` (reads/writes `Config.json`, `Tile.json`, `Object.json`), `Manifest/` (`ManifestFactory` walks `Config.json` + the active map folder computing an MD5 per file — used by the Server to build `/data/manifest` and by the Client to hash its local cache), `Tile/` (`TileCatalog`, `TileModel` — includes `isWalkable`), `Object/` (`ObjectCatalog`, `ObjectModel`, `ObjectSizeModel`), `Animation/` (`AnimationModel` — pre-decoded frames of a texture, static or `.gif`) |
-| `Entity/`    | `EntityModel` + `Position`/`Orientation`/`Size`; `Character/` (`CharacterModel`, `CharacterPositionModel`) and `Creature/` specializations; `EntityStateDTO` (network: idCharacter + x/y/z + worldName, used by `/ws/character`) |
-| `Network/`   | `HttpClient` (REST) and `WebSocketClient` (thin `QWebSocket` wrapper — header-based `X-Session` auth, `messageReceived`/`errorOccurred` signals), both used by the Client to talk to the Server |
-| `Renderer/`  | `Renderer` → `TileRenderer` + `ObjectRenderer` + `EntityRenderer`; `Camera/` (world↔screen, zoom, clamp); `Scene/` (`RenderScene`, `RenderSceneItem`); `World/RenderWorld` (base, specialized per module, exposes `object`/`tile`/`entities` per floor) |
-| `UI/`        | `Viewport` — `QQuickItem` that draws a `RenderWorld` through the scene graph                 |
-| `World/`     | `WorldModel` → floors → `ChunkModel` → `WorldTileModel`/`WorldObjectModel`; `WorldFactory` (load/save of `Map.json` + `Floors/*.json`); `WorldConstants` |
+## Design principles
 
-## Concepts
+- **Model vs. DTO.** `*Model` classes are runtime state; `*DTO` classes are
+  the JSON that travels. Every DTO knows how to build itself from its
+  model, so no call site assembles JSON by hand.
+- **Catalog vs. instance.** A `TileModel` is a *kind* of tile; a
+  `WorldTileModel` is one placed on the map and references its kind by type.
+- **Nothing here exists for a single consumer.** A feature is promoted into
+  the engine only once two applications need it.
+- **Specialize, don't fork.** `RenderWorld` is the one base class; each
+  application derives it to say where its entities come from (the Client
+  keeps its own list, the Server reads live state, the Editor has none).
 
-- **Constants**: `CHUNK_SIZE = 32` tiles, `TILE_SIZE = 32` px
-  (`World/WorldConstants.h`).
-- **Floors (Z)**: `WorldModel` tracks the known floors
-  (`floors()`/`addFloor()`). `floors()` reflects what is *loaded* — in the
-  Editor/Server that is the whole map; in the Client, eventually, only the
-  chunks near the player. Do not assume it enumerates the whole world.
-- **Tile vs Object**: a tile is the ground (one per cell); an object sits on
-  top and `type 0` means "no object". Objects have no orientation yet. Tiles
-  have an `isWalkable` flag (default `true`); objects don't block movement
-  yet.
-- **Catalog vs world**: `TileModel`/`ObjectModel` (in `Data/`) are the
-  available *types*; `WorldTileModel`/`WorldObjectModel` (in `World/`) are
-  the *instances* placed on the map, referencing the type by `Type`.
-- **Animated textures**: `TileModel`/`ObjectModel` hold an `AnimationModel`
-  instead of a single `QImage`. `texture()` still returns the first frame
-  (thumbnails/preview); renderers use `animation().frameAt(elapsedMs)` to
-  get the current frame. `Viewport` has an internal `QTimer` (100 ms) that
-  forces a redraw so animations play without depending on another event.
-- **Model vs DTO**: `*Model` is runtime; `*DTO` is the format that travels
-  over the network/JSON.
-- **Entities**: `RenderWorld::entities(z)` returns the `RenderWorld::Entity`
-  (id + x/y) list for a floor. `EntityRenderer` only draws the ones inside
-  the camera's visible range, same culling `ObjectRenderer`/`TileRenderer`
-  already do. Each module's `RenderWorld` decides where its entities come
-  from: `ClientRenderWorld` holds its own (pushed via `setEntity`/
-  `removeEntity`), `ServerRenderWorld` reads live from `WorldManager`,
-  `EditorRenderWorld` has none yet.
+## Stack
 
-## Viewport
+C++20 · Qt 6 (Core, Network, Qml, Quick, WebSockets) · jsoncpp · GoogleTest
+(unit tests for the world model, camera, factories, catalogs and DTOs).
 
-`Engine::Viewport` (`UI/Viewport/`) is the QML render component, used by all
-three modules:
-
-- `renderWorld`: the `RenderWorld` to draw (each module passes its own
-  specialization).
-- `cameraPosition`, `centerCameraOnTile()`, `moveCameraByTiles()`; the
-  `Camera` clamps the position to the world bounds (`setWorldSize`/`clampPosition`).
-- `activeFloor`: the floor (Z) being drawn. `Renderer` (and the tile/object/
-  entity renderers it owns) receive `z` as a parameter — never hard-code
-  `z = 0`. Who sets the value depends on the module: Editor/Server through
-  the UI, Client through the authoritative Z of the player's entity.
-- `setHighlightedTile()`/`clearHighlight()`: highlight of the tile under the
-  mouse.
-- Signal `tileClicked(x, y, z)`.
-
-## Data flow
-
-```
-Data/Config.json ──► DataFactory ──► DataManager (TileCatalog, ObjectCatalog)
-Data/Config.json + <map>/**  ──► ManifestFactory ──► ManifestModel (path + MD5 hash per file)
-Data/<map>/Map.json + Floors/*.json ──► WorldFactory ──► WorldModel
-WorldModel + catalogs ──► RenderWorld ──► Renderer ──► Viewport (QML)
-```
+Route and message contract: [`API.md`](API.md).

@@ -13,9 +13,9 @@ engine and three applications: Server, Client and Editor.
 | 🛠️ [`MMORPGServer`](MMORPGServer/README.md) | Drogon server (REST + WebSocket), SQLite, world debug window |
 | 🎮 [`MMORPGClient`](MMORPGClient/README.md) | Game client: login, data sync, account/characters, game |
 | 🧩 [`MMORPGEditor`](MMORPGEditor/README.md) | World editor: tiles, objects, floors, catalog |
-| 📁 `Data` | Active world (map, catalogs, floors, textures) — see [`Doc/Data.md`](Doc/Data.md) |
+| 📁 `Data` | Active world: `Config.json` picks the map folder; each map has `Map.json`, tile/object catalogs, one JSON per floor and the textures |
 | 🗄️ `Database` | SQLite `Schema.sql` (account, character, inventory, position, vitals) |
-| 📚 [`Doc`](Doc/) | Technical reference for each module + the [server API](Doc/API.md) |
+| 📚 [`Doc`](Doc/) | A presentation of each module + the [server API](Doc/API.md) contract |
 
 ## 🚀 Getting started
 

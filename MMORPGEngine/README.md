@@ -7,4 +7,4 @@ to run here on its own.
 If you're building or running one of the other three apps, this gets built
 automatically along with it.
 
-Technical details: [`Doc/MMORPGEngine.md`](../Doc/MMORPGEngine.md).
+More about it: [`Doc/MMORPGEngine.md`](../Doc/MMORPGEngine.md).
