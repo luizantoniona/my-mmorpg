@@ -54,5 +54,5 @@ TEST( CharacterDTOTest, FromJson_WrongFieldType_IsIgnored ) {
 TEST( CharacterDTOTest, ToJson_SetsMessageType ) {
     Engine::CharacterDTO dto;
 
-    EXPECT_EQ( dto.toJson()[ "type" ].asString(), "character" );
+    EXPECT_EQ( dto.toJson()[ "type" ].asString(), "CHARACTER" );
 }
