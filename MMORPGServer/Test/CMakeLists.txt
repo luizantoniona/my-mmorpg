@@ -8,11 +8,10 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Event/EventBus.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Event/WorldEvent.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Manager/ChunkCoordinate.cpp
-  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/CharacterRuntime.cpp
-  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/CharacterSystem.cpp
-  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/CharacterVitalsSystem.cpp
-  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/CreatureRuntime.cpp
-  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/WorldRuntime.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/CharacterRuntime.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterSystem.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Creature/CreatureRuntime.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/WorldRuntime.cpp
 )
 
 target_link_libraries(MMORPGServerTests PRIVATE MMORPG::MMORPGEngine GTest::gtest_main)
