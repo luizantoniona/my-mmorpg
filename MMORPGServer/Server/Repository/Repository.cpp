@@ -1,7 +1,7 @@
 #include "Repository.h"
 
-#include <Database/Database.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGServer/Server/Database/Database.h>
 
 namespace Server {
 

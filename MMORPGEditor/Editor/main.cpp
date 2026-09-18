@@ -3,25 +3,41 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
-#include "RegisterTypes.h"
+#include <MMORPGEditor/Editor/Application/World/Object/ObjectIconProvider.h>
+#include <MMORPGEditor/Editor/Application/World/Tile/TileIconProvider.h>
+#include <MMORPGEditor/Editor/RegisterEditorTypes.h>
+#include <MMORPGEngine/Commons/RegisterEngineTypes.h>
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
+
+namespace {
+constexpr const char* DATA_PATH = "../../../Data/";
+} // namespace
 
 int main( int argc, char* argv[] ) {
     QQuickStyle::setStyle( "Basic" );
-
     QGuiApplication app( argc, argv );
-
     QSurfaceFormat format;
     format.setSamples( 8 );
     QSurfaceFormat::setDefaultFormat( format );
-
     QQmlApplicationEngine engine;
 
-    RegisterTypes::registerTypes();
+    // --- Register Types Engine
+    Engine::RegisterEngineTypes::registerTypes();
 
-    QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() {
-        QCoreApplication::exit( -1 );
-    }, Qt::QueuedConnection );
+    // --- Register Types Editor
+    Editor::RegisterEditorTypes::registerTypes();
 
+    qInfo() << "STARTING EDITOR";
+
+    // --- Data ---
+    Engine::Singleton<Engine::DataManager>::instance().initialize( DATA_PATH );
+
+    // --- Palette Icon Providers ---
+    engine.addImageProvider( "EditorObjectIcon", new ObjectIconProvider() );
+    engine.addImageProvider( "EditorTileIcon", new TileIconProvider() );
+
+    QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
     engine.loadFromModule( "MMORPGEditorComponents", "Main" );
 
     return app.exec();

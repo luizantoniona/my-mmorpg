@@ -12,9 +12,11 @@ public:
     Database();
     ~Database();
 
+    bool initialize( const std::string& databasePath );
+    void finalize();
+
     bool create();
     bool migrate();
-    bool initialize( const std::string& databasePath );
 
     sqlite3* database();
 

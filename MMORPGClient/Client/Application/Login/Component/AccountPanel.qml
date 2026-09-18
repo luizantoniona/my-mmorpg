@@ -15,7 +15,7 @@ Item {
             anchors.centerIn: parent
             spacing: Spaces.spacing8
 
-            InputFieldCustom {
+            InputBase {
                 id: usernameField
 
                 Layout.alignment: Qt.AlignHCenter
@@ -24,7 +24,7 @@ Item {
                 vPlaceholder: qsTr("")
             }
 
-            InputFieldCustom {
+            InputBase {
                 id: passwordField
 
                 Layout.alignment: Qt.AlignHCenter

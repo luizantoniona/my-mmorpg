@@ -1,10 +1,21 @@
 #include "ServerManager.h"
 
+#include <QRegularExpression>
 #include <QSettings>
+#include <QStandardPaths>
+
+#include <MMORPGClient/Client/Manager/AccountManager.h>
+#include <MMORPGEngine/Commons/Singleton.h>
 
 namespace {
 constexpr const char* SETTINGS_SCOPE = "MMORPG";
 constexpr const char* SETTINGS_SUB_SCOPE = "Client";
+
+QString sanitizedForPath( const QString& value ) {
+    QString result = value;
+    result.replace( QRegularExpression( "[^A-Za-z0-9._-]" ), "_" );
+    return result;
+}
 } // namespace
 
 ServerManager::ServerManager( QObject* parent ) :
@@ -24,6 +35,13 @@ QString ServerManager::serverAddress() const {
     return _serverAddress.toString();
 }
 
+QString ServerManager::dataDirectory() const {
+    const QString base = QStandardPaths::writableLocation( QStandardPaths::AppDataLocation );
+    const QString serverKey = sanitizedForPath( _serverAddress.host() ) + "_" + QString::number( _serverAddress.port( 80 ) );
+
+    return base + "/ClientData/" + serverKey + "/";
+}
+
 ServerManager::ConnectionState ServerManager::connectionState() const {
     return _connectionState;
 }
@@ -32,14 +50,28 @@ QNetworkReply* ServerManager::get( const QString& endpoint ) {
     return _httpClient.get( endpoint );
 }
 
+QNetworkReply* ServerManager::getAuthenticated( const QString& endpoint ) {
+    AccountManager& accountManager = Engine::Singleton<AccountManager>::instance();
+    return _httpClient.getAuthenticated( endpoint, accountManager.sessionId() );
+}
+
 QNetworkReply* ServerManager::post( const QString& endpoint, const QByteArray& body ) {
     return _httpClient.post( endpoint, body );
+}
+
+QNetworkReply* ServerManager::postAuthenticated( const QString& endpoint, const QByteArray& body ) {
+    AccountManager& accountManager = Engine::Singleton<AccountManager>::instance();
+    return _httpClient.postAuthenticated( endpoint, body, accountManager.sessionId() );
 }
 
 void ServerManager::disconnectServer() {
     if ( _connectionState == ConnectionState::Disconnected && _serverAddress.isEmpty() ) {
         return;
     }
+
+    // Futuramente:
+    // _httpClient.abortAllRequests();
+    // _webSocket.disconnectFromHost();
 
     setServerAddress( {} );
     setConnectionState( ConnectionState::Disconnected );
@@ -104,24 +136,3 @@ void ServerManager::setConnectionState( ConnectionState connectionState ) {
 
     emit connectionStateChanged();
 }
-
-/*
-Engine::Singleton<ServerManager>
-
-ServerManager
-├── WebSocket
-│   ├── connect()
-│   ├── disconnect()
-│   ├── send()
-│   └── receive()
-├── Session
-│   ├── token
-│   ├── refresh token
-│   └── headers
-├── Server
-│   ├── address
-│   ├── ping
-│   └── status
-└── Settings
-    └── salvar endereço
-*/

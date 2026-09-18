@@ -1,0 +1,23 @@
+#ifndef TILERENDERER_H
+#define TILERENDERER_H
+
+#include <MMORPGEngine/Renderer/Camera/Camera.h>
+#include <MMORPGEngine/Renderer/Scene/RenderScene.h>
+#include <MMORPGEngine/Renderer/World/RenderWorld.h>
+#include <MMORPGEngine/World/Tile/WorldTileModel.h>
+
+namespace Engine {
+
+class TileRenderer {
+public:
+    TileRenderer();
+
+    void render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z );
+
+private:
+    void renderTile( RenderScene& scene, int x, int y, int z, const WorldTileModel& worldTile, qint64 elapsedMs );
+};
+
+} // namespace Engine
+
+#endif // TILERENDERER_H

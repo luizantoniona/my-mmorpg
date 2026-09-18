@@ -1,16 +1,20 @@
 set(PROJECT_SOURCES
-    RegisterTypes.cpp
-    RegisterTypes.h
+    RegisterClientTypes.cpp
+    RegisterClientTypes.h
     Application/Account/AccountPageControl.cpp
     Application/Account/AccountPageControl.h
     Application/Game/GamePageControl.cpp
     Application/Game/GamePageControl.h
     Application/Login/LoginPageControl.cpp
     Application/Login/LoginPageControl.h
+    Application/Sync/SyncPageControl.cpp
+    Application/Sync/SyncPageControl.h
     Manager/AccountManager.cpp
     Manager/AccountManager.h
     Manager/ServerManager.cpp
-    Manager/ServerManager.h)
+    Manager/ServerManager.h
+    Renderer/ClientRenderWorld.cpp
+    Renderer/ClientRenderWorld.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 
@@ -22,13 +26,17 @@ qt_add_qml_module(
   1.0
   QML_FILES
   Main.qml
-  Application/MainWindow.qml
+  Application/ClientWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
+  Application/Game/Component/CharacterHud.qml
+  Application/Game/Component/HudActionBar.qml
+  Application/Game/Component/StatBar.qml
   Application/Login/LoginPage.qml
   Application/Login/Component/AccountPanel.qml
   Application/Login/Component/ServerPanel.qml
-  Application/Login/Component/ServerStatus.qml)
+  Application/Login/Component/ServerStatus.qml
+  Application/Sync/SyncPage.qml)
 
 # file(GLOB_RECURSE SVG_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} Assets/*.svg
 # )
@@ -40,5 +48,4 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE Qt6::QuickControls2
   PRIVATE MMORPG::MMORPGEngine
-  PRIVATE MMORPG::MMORPGNetwork
   PRIVATE MMORPG::MMORPGUI)

@@ -1,0 +1,97 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import MMORPGUIComponents
+import MMORPGClientComponents
+
+Item {
+    id: root
+
+    property int selectedIdCharacter: -1
+
+    function updatePage(page) {
+        stack.clear()
+
+        switch (page) {
+        case "LoginPage":
+            stack.push(loginPage)
+            break
+        case "SyncPage":
+            stack.push(syncPage)
+            break
+        case "AccountPage":
+            stack.push(accountPage)
+            break
+        case "GamePage":
+            stack.push(gamePage)
+            break
+        }
+    }
+
+    Rectangle {
+        id: background
+
+        anchors.fill: parent
+        color: Colors.background0
+    }
+
+    StackView {
+        id: stack
+
+        anchors.fill: parent
+    }
+
+    Component {
+        id: loginPage
+
+        LoginPage {
+            id: login
+
+            onLoginSuccess: function () {
+                root.updatePage("SyncPage")
+            }
+        }
+    }
+
+    Component {
+        id: syncPage
+
+        SyncPage {
+            id: sync
+
+            onSyncSuccess: function () {
+                root.updatePage("AccountPage")
+            }
+        }
+    }
+
+    Component {
+        id: accountPage
+
+        AccountPage {
+            id: account
+
+            onLogoutSuccess: function () {
+                root.updatePage("LoginPage")
+            }
+            onEnterWorldRequested: function (idCharacter) {
+                root.selectedIdCharacter = idCharacter
+                root.updatePage("GamePage")
+            }
+        }
+    }
+
+    Component {
+        id: gamePage
+
+        GamePage {
+            id: game
+
+            idCharacter: root.selectedIdCharacter
+        }
+    }
+
+    Component.onCompleted: {
+        root.updatePage("LoginPage")
+    }
+}

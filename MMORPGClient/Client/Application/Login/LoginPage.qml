@@ -8,13 +8,13 @@ import MMORPGClientManagers
 Item {
     id: root
 
-    signal success
+    signal loginSuccess
 
     LoginPageControl {
         id: control
 
         onLoginSucceeded: function () {
-            root.success()
+            root.loginSuccess()
         }
         onLoginFailed: function (error) {
             accountPanel.vTextError = error
@@ -32,6 +32,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                color: Colors.background0
                 // TODO: Change Rectangle by LOGO / Background / Something
             }
 

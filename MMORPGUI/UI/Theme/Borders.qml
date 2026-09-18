@@ -3,5 +3,6 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    readonly property real borders2: 2
+    readonly property real border1: 1
+    readonly property real border2: 2
 }

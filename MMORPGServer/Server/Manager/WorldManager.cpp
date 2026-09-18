@@ -2,21 +2,22 @@
 
 #include <chrono>
 
-#include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Core/World/WorldFactory.h>
+#include <MMORPGEngine/World/WorldFactory.h>
 
 namespace Server {
 
 WorldManager::WorldManager() :
     _running( false ),
     _thread(),
-    _world( nullptr ) {}
+    _runtime( nullptr ) {
+}
 
-WorldManager::~WorldManager() {}
+WorldManager::~WorldManager() {
+}
 
 void WorldManager::initialize( const std::string& worldPath ) {
-    if ( !_world ) {
-        _world = Engine::WorldFactory::createWorld( worldPath );
+    if ( !_runtime ) {
+        _runtime = std::make_unique<WorldRuntime>( Engine::WorldFactory::createWorld( worldPath ) );
     }
 
     if ( _running ) {
@@ -35,7 +36,7 @@ void WorldManager::initialize( const std::string& worldPath ) {
         while ( _running ) {
             nextTick += std::chrono::milliseconds( msPerTick );
 
-            // TODO: Tick runtime world and thread systems
+            _runtime->tick();
 
             std::this_thread::sleep_until( nextTick );
         }
@@ -48,6 +49,10 @@ void WorldManager::finalize() {
     if ( _thread.joinable() ) {
         _thread.join();
     }
+}
+
+WorldRuntime& WorldManager::runtime() {
+    return *_runtime;
 }
 
 } // namespace Server

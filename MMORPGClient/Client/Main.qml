@@ -11,7 +11,7 @@ Window {
     width: Screen.width / 1.5
     height: Screen.height / 1.5
 
-    MainWindow {
+    ClientWindow {
         id: application
 
         anchors.fill: parent

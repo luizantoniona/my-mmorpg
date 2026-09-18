@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include <MMORPGNetwork/Network/HttpClient.h>
+#include <MMORPGEngine/Network/HttpClient.h>
 
 class ServerManager : public QObject {
     Q_OBJECT
@@ -24,10 +24,15 @@ public:
 
     QString serverAddress() const;
 
+    QString dataDirectory() const;
+
     ConnectionState connectionState() const;
 
     QNetworkReply* get( const QString& endpoint );
+    QNetworkReply* getAuthenticated( const QString& endpoint );
+
     QNetworkReply* post( const QString& endpoint, const QByteArray& body );
+    QNetworkReply* postAuthenticated( const QString& endpoint, const QByteArray& body );
 
 public slots:
     void disconnectServer();

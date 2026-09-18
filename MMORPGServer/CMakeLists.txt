@@ -11,6 +11,9 @@ find_package(Drogon CONFIG REQUIRED)
 if(WIN32)
   find_package(unofficial-sqlite3 CONFIG REQUIRED)
 endif()
+find_package(Qt6 REQUIRED COMPONENTS Core Qml Quick QuickControls2)
+
+qt_standard_project_setup(REQUIRES 6.8)
 
 add_subdirectory(Server)
 

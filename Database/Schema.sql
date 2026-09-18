@@ -1,7 +1,7 @@
 CREATE TABLE account (
     id_account INTEGER PRIMARY KEY AUTOINCREMENT,
-    ds_username VARCHAR,
-    ds_password VARCHAR
+    ds_username VARCHAR NOT NULL UNIQUE,
+    ds_password VARCHAR NOT NULL
 );
 
 CREATE TABLE 'character' (
@@ -18,6 +18,15 @@ CREATE TABLE character_inventory (
     amount INTEGER DEFAULT 0,
 
     PRIMARY KEY (id_character, id_item),
+    FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
+);
+
+CREATE TABLE character_position (
+    id_character INTEGER PRIMARY KEY,
+    x INTEGER NOT NULL,
+    y INTEGER NOT NULL,
+    z INTEGER NOT NULL,
+
     FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
 );
 
