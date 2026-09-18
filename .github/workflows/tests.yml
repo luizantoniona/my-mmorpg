@@ -67,5 +67,8 @@ jobs:
       - name: Build Server Tests
         run: cmake --build build --config Release --target MMORPGServerTests
 
-      - name: Run tests
-        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Run Engine tests
+        run: ctest --test-dir build/MMORPGEngine/Test -C Release --output-on-failure
+
+      - name: Run Server tests
+        run: ctest --test-dir build/MMORPGServer/Test -C Release --output-on-failure
