@@ -7,11 +7,16 @@ add_executable(
   CharacterDTOTest.cpp
   ChunkModelTest.cpp
   FloorFactoryTest.cpp
+  ItemTypeCatalogTest.cpp
+  ItemTypeFactoryTest.cpp
   JsonHelperTest.cpp
   ManifestFactoryTest.cpp
   ObjectCatalogTest.cpp
   ObjectFactoryTest.cpp
   RenderWorldTest.cpp
+  SkillCatalogTest.cpp
+  SkillFactoryTest.cpp
+  SkillTreeModelTest.cpp
   TileCatalogTest.cpp
   TileFactoryTest.cpp
   WorldFactoryTest.cpp

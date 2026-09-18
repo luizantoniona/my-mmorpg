@@ -22,6 +22,12 @@ set(PROJECT_SOURCES
     Commons/Singleton.h
     Data/Animation/AnimationModel.cpp
     Data/Animation/AnimationModel.h
+    Data/Item/ItemTypeCatalog.cpp
+    Data/Item/ItemTypeCatalog.h
+    Data/Item/ItemTypeFactory.cpp
+    Data/Item/ItemTypeFactory.h
+    Data/Item/ItemTypeModel.cpp
+    Data/Item/ItemTypeModel.h
     Data/Object/ObjectCatalog.cpp
     Data/Object/ObjectCatalog.h
     Data/Object/ObjectFactory.cpp
@@ -30,6 +36,14 @@ set(PROJECT_SOURCES
     Data/Object/ObjectModel.h
     Data/Object/ObjectSizeModel.cpp
     Data/Object/ObjectSizeModel.h
+    Data/Skill/SkillCatalog.cpp
+    Data/Skill/SkillCatalog.h
+    Data/Skill/SkillFactory.cpp
+    Data/Skill/SkillFactory.h
+    Data/Skill/SkillNodeModel.cpp
+    Data/Skill/SkillNodeModel.h
+    Data/Skill/SkillTreeModel.cpp
+    Data/Skill/SkillTreeModel.h
     Data/Tile/TileCatalog.cpp
     Data/Tile/TileCatalog.h
     Data/Tile/TileFactory.cpp

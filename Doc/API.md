@@ -36,7 +36,8 @@ Routes:
 
 Notes:
 - The manifest lists every file under `Config.json` + the active map folder
-  (see [`Data.md`](Data.md)), with an MD5 hash per file
+  (`Map.json`, `Tile.json`, `Object.json`, `Floors/*.json`, `Textures/**`),
+  with an MD5 hash per file
   (`Engine::ManifestFactory`). The Client compares it against its local
   cache and only downloads files whose hash differs or that are missing.
 - `path` is the manifest-relative path (e.g. `TestMap/Textures/Tiles/Grass/Grass.png`).
