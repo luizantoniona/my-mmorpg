@@ -4,7 +4,7 @@
 
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
-#include <MMORPGServer/Server/Runtime/WorldRuntime.h>
+#include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
 
 namespace {
 
