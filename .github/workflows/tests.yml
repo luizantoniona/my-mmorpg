@@ -15,60 +15,98 @@ on:
       - "**/*.md"
 
 jobs:
-  engine-and-server-tests:
+  engine-tests:
     runs-on: windows-2022
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4.3.0
-        with:
-          version: "6.10.3"
-          modules: "qtwebsockets"
-          cache: true
-
-      - name: Cache vcpkg repo
-        id: cache-vcpkg
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}\vcpkg
-          key: vcpkg-repo-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
-
-      - name: Clone vcpkg
-        if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-        run: git clone https://github.com/microsoft/vcpkg "${{ github.workspace }}\vcpkg"
-
-      - name: Bootstrap vcpkg
-        if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-        shell: cmd
-        run: "${{ github.workspace }}\\vcpkg\\bootstrap-vcpkg.bat"
-
-      - name: Cache vcpkg binary cache
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\vcpkg\archives
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
-          restore-keys: |
-            vcpkg-${{ runner.os }}-
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
 
       - name: Configure
         env:
           VCPKG_ROOT: ${{ github.workspace }}\vcpkg
         run: >
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64
-          -DBUILD_EDITOR=OFF -DBUILD_CLIENT=OFF
-          -DMMORPGENGINE_BUILD_TESTS=ON -DMMORPGSERVER_BUILD_TESTS=ON
+          -DBUILD_SERVER=OFF -DBUILD_CLIENT=OFF -DBUILD_EDITOR=OFF
+          -DMMORPGENGINE_BUILD_TESTS=ON
 
       - name: Build Engine Tests
         run: cmake --build build --config Release --target MMORPGEngineTests
 
-      - name: Build Server Tests
-        run: cmake --build build --config Release --target MMORPGServerTests
-
       - name: Run Engine tests
         run: ctest --test-dir build/MMORPGEngine/Test -C Release --output-on-failure
 
+  server-tests:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Configure
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+        run: >
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+          -DBUILD_CLIENT=OFF -DBUILD_EDITOR=OFF
+          -DMMORPGSERVER_BUILD_TESTS=ON
+
+      - name: Build Server Tests
+        run: cmake --build build --config Release --target MMORPGServerTests
+
       - name: Run Server tests
         run: ctest --test-dir build/MMORPGServer/Test -C Release --output-on-failure
+
+  client-tests:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Configure
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+        run: >
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+          -DBUILD_SERVER=OFF -DBUILD_EDITOR=OFF
+          -DMMORPGCLIENT_BUILD_TESTS=ON
+
+      - name: Build Client Tests
+        run: cmake --build build --config Release --target MMORPGClientTests
+
+      - name: Run Client tests
+        run: ctest --test-dir build/MMORPGClient/Test -C Release --output-on-failure
+
+  editor-tests:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Configure
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+        run: >
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+          -DBUILD_SERVER=OFF -DBUILD_CLIENT=OFF
+          -DMMORPGEDITOR_BUILD_TESTS=ON
+
+      - name: Build Editor Tests
+        run: cmake --build build --config Release --target MMORPGEditorTests
+
+      - name: Run Editor tests
+        run: ctest --test-dir build/MMORPGEditor/Test -C Release --output-on-failure

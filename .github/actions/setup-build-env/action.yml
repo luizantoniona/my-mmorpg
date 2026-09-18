@@ -1,0 +1,47 @@
+name: Setup build environment
+description: Instala Qt e prepara o vcpkg (com cache), compartilhado pelos jobs de teste de cada módulo.
+
+inputs:
+  qt-version:
+    description: Versão do Qt a instalar
+    required: false
+    default: "6.10.3"
+  qt-modules:
+    description: Módulos extras do Qt (aqt)
+    required: false
+    default: "qtwebsockets"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4.3.0
+      with:
+        version: ${{ inputs.qt-version }}
+        modules: ${{ inputs.qt-modules }}
+        cache: true
+
+    - name: Cache vcpkg repo
+      id: cache-vcpkg
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}\vcpkg
+        key: vcpkg-repo-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+
+    - name: Clone vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      shell: bash
+      run: git clone https://github.com/microsoft/vcpkg "${{ github.workspace }}\vcpkg"
+
+    - name: Bootstrap vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      shell: cmd
+      run: "${{ github.workspace }}\\vcpkg\\bootstrap-vcpkg.bat"
+
+    - name: Cache vcpkg binary cache
+      uses: actions/cache@v4
+      with:
+        path: ~\AppData\Local\vcpkg\archives
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
