@@ -8,6 +8,8 @@ add_executable(
   CharacterDTOTest.cpp
   ChunkModelTest.cpp
   FloorFactoryTest.cpp
+  ItemCatalogTest.cpp
+  ItemFactoryTest.cpp
   ItemTypeCatalogTest.cpp
   ItemTypeFactoryTest.cpp
   JsonHelperTest.cpp
