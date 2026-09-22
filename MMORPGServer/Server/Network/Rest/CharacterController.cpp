@@ -37,6 +37,9 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
     spawnPosition.setX( world ? world->spawnX() : 0 );
     spawnPosition.setY( world ? world->spawnY() : 0 );
     spawnPosition.setZ( world ? world->spawnZ() : 0 );
+    spawnPosition.setRespawnX( spawnPosition.x() );
+    spawnPosition.setRespawnY( spawnPosition.y() );
+    spawnPosition.setRespawnZ( spawnPosition.z() );
 
     // TODO: Derive from the attribute system once it exists; flat baseline for now.
     Engine::EntityVitalsModel spawnVitals;

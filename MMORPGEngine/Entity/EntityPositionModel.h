@@ -17,10 +17,22 @@ public:
     int z() const;
     void setZ( int z );
 
+    int respawnX() const;
+    void setRespawnX( int respawnX );
+
+    int respawnY() const;
+    void setRespawnY( int respawnY );
+
+    int respawnZ() const;
+    void setRespawnZ( int respawnZ );
+
 private:
     int _x;
     int _y;
     int _z;
+    int _respawnX;
+    int _respawnY;
+    int _respawnZ;
 };
 
 } // namespace Engine

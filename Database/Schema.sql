@@ -26,6 +26,9 @@ CREATE TABLE character_position (
     x INTEGER NOT NULL,
     y INTEGER NOT NULL,
     z INTEGER NOT NULL,
+    respawn_x INTEGER NOT NULL,
+    respawn_y INTEGER NOT NULL,
+    respawn_z INTEGER NOT NULL,
 
     FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
 );
@@ -39,5 +42,15 @@ CREATE TABLE character_vitals (
     stamina NUMERIC DEFAULT 0.0,
     max_stamina NUMERIC DEFAULT 0.0,
 
+    FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
+);
+
+CREATE TABLE character_proficiency (
+    id_character INTEGER NOT NULL,
+    id_item_type INTEGER NOT NULL,
+    xp NUMERIC DEFAULT 0.0,
+    lvl INTEGER DEFAULT 0,
+
+    PRIMARY KEY (id_character, id_item_type),
     FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
 );
