@@ -11,5 +11,7 @@ QtObject {
     readonly property string plus: "qrc:/Assets/Icons/plus.svg"
     readonly property string pointer: "qrc:/Assets/Icons/pointer.svg"
     readonly property string save: "qrc:/Assets/Icons/save.svg"
+    readonly property string shirt: "qrc:/Assets/Icons/shirt.svg"
     readonly property string trash: "qrc:/Assets/Icons/trash.svg"
+    readonly property string x: "qrc:/Assets/Icons/x.svg"
 }
