@@ -28,8 +28,7 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
 
     int idAccount = session.idAccount();
 
-    qInfo() << "CharacterController::create"
-            << " [ACCOUNT] " << idAccount << " [NAME] " << name;
+    qInfo() << "CharacterController::create" << " [ACCOUNT] " << idAccount << " [NAME] " << name;
 
     const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
 
