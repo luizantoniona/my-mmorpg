@@ -32,4 +32,20 @@ void CharacterModel::setName( const std::string& name ) {
     _name = name;
 }
 
+std::vector<CharacterEquipmentModel> CharacterModel::equipment() const {
+    return _equipment;
+}
+
+void CharacterModel::setEquipment( const std::vector<CharacterEquipmentModel>& equipment ) {
+    _equipment = equipment;
+}
+
+std::vector<CharacterInventoryModel> CharacterModel::inventory() const {
+    return _inventory;
+}
+
+void CharacterModel::setInventory( const std::vector<CharacterInventoryModel>& inventory ) {
+    _inventory = inventory;
+}
+
 } // namespace Engine

@@ -77,11 +77,32 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MultipleItemTypes_AllAdded ) 
     EXPECT_EQ( catalog.itemTypes().size(), 2u );
 }
 
+TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingName_SkipsEntry ) {
+    Json::Value invalid;
+    invalid[ "Type" ] = 1;
+
+    Json::Value valid;
+    valid[ "Type" ] = 3;
+    valid[ "Name" ] = "Shield";
+
+    Json::Value itemTypes( Json::arrayValue );
+    itemTypes.append( invalid );
+    itemTypes.append( valid );
+    writeItemTypesJson( itemTypes );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.itemType( 1 ), nullptr );
+    ASSERT_NE( catalog.itemType( 3 ), nullptr );
+    EXPECT_EQ( catalog.itemTypes().size(), 1u );
+}
+
 TEST_F( ItemTypeFactoryTest, SaveItemTypeCatalog_ThenCreateItemTypeCatalog_RoundTripsFields ) {
     Engine::ItemTypeCatalog original;
     Engine::ItemTypeModel itemType;
-    itemType.setType( 4 );
-    itemType.setName( "Fire Grimoire" );
+    itemType.setType( 1 );
+    itemType.setName( "Sword" );
     original.addItemType( itemType );
 
     Engine::ItemTypeFactory::saveItemTypeCatalog( configPath(), original );
@@ -89,6 +110,37 @@ TEST_F( ItemTypeFactoryTest, SaveItemTypeCatalog_ThenCreateItemTypeCatalog_Round
     Engine::ItemTypeCatalog reloaded;
     Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), reloaded );
 
-    ASSERT_NE( reloaded.itemType( 4 ), nullptr );
-    EXPECT_EQ( reloaded.itemType( 4 )->name(), "Fire Grimoire" );
+    ASSERT_NE( reloaded.itemType( 1 ), nullptr );
+    EXPECT_EQ( reloaded.itemType( 1 )->name(), "Sword" );
+}
+
+TEST_F( ItemTypeFactoryTest, SaveItemTypeCatalog_PreservesUnknownFieldsLikeSkillTree ) {
+    Json::Value itemType;
+    itemType[ "Type" ] = 1;
+    itemType[ "Name" ] = "Sword";
+    Json::Value skillTree( Json::arrayValue );
+    Json::Value node;
+    node[ "Type" ] = 1;
+    node[ "Name" ] = "Sword Mastery";
+    skillTree.append( node );
+    itemType[ "SkillTree" ] = skillTree;
+
+    Json::Value itemTypes( Json::arrayValue );
+    itemTypes.append( itemType );
+    writeItemTypesJson( itemTypes );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeModel renamed;
+    renamed.setType( 1 );
+    renamed.setName( "Longsword" );
+    catalog.addItemType( renamed );
+
+    Engine::ItemTypeFactory::saveItemTypeCatalog( configPath(), catalog );
+
+    const Json::Value savedJson = Engine::JsonHelper::loadJsonFile( ( _tempDir / "TestMap" / "ItemType.json" ).string() );
+
+    ASSERT_EQ( savedJson[ "ItemTypes" ].size(), 1u );
+    EXPECT_EQ( savedJson[ "ItemTypes" ][ 0 ][ "Name" ].asString(), "Longsword" );
+    ASSERT_TRUE( savedJson[ "ItemTypes" ][ 0 ].isMember( "SkillTree" ) );
+    EXPECT_EQ( savedJson[ "ItemTypes" ][ 0 ][ "SkillTree" ].size(), 1u );
 }

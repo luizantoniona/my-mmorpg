@@ -1,5 +1,7 @@
 #include "ItemTypeFactory.h"
 
+#include <unordered_map>
+
 #include <QDebug>
 
 #include <json/json.h>
@@ -17,14 +19,18 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
 
     const QString itemTypesFile = mapPath + QString( mapJson[ "Catalogs" ][ "ItemTypes" ].asCString() );
 
-    qInfo() << "ItemTypeFactory::createItemTypeCatalog"
-            << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
+    qInfo() << "ItemTypeFactory::createItemTypeCatalog" << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
 
     Json::Value json = JsonHelper::loadJsonFile( itemTypesFile );
 
     const Json::Value& itemTypes = json[ "ItemTypes" ];
 
     for ( const Json::Value& itemTypeJson : itemTypes ) {
+
+        if ( !itemTypeJson.isMember( "Type" ) || !itemTypeJson.isMember( "Name" ) ) {
+            qWarning() << "ItemTypeFactory::createItemTypeCatalog" << "Invalid ItemType, skipping";
+            continue;
+        }
 
         ItemTypeModel itemType;
         itemType.setType( itemTypeJson[ "Type" ].asUInt() );
@@ -43,6 +49,15 @@ void ItemTypeFactory::saveItemTypeCatalog( const QString& configPath, const Item
 
     const QString itemTypesFile = path + QString( mapJson[ "Catalogs" ][ "ItemTypes" ].asCString() );
 
+    const Json::Value existingJson = JsonHelper::loadJsonFile( itemTypesFile );
+
+    std::unordered_map<uint32_t, Json::Value> existingByType;
+    for ( const Json::Value& itemTypeJson : existingJson[ "ItemTypes" ] ) {
+        if ( itemTypeJson.isMember( "Type" ) ) {
+            existingByType[ itemTypeJson[ "Type" ].asUInt() ] = itemTypeJson;
+        }
+    }
+
     Json::Value json;
     json[ "ItemTypes" ] = Json::Value( Json::arrayValue );
 
@@ -50,14 +65,18 @@ void ItemTypeFactory::saveItemTypeCatalog( const QString& configPath, const Item
         const ItemTypeModel& itemType = entry.second;
 
         Json::Value itemTypeJson;
+        const auto existing = existingByType.find( itemType.type() );
+        if ( existing != existingByType.end() ) {
+            itemTypeJson = existing->second;
+        }
+
         itemTypeJson[ "Type" ] = itemType.type();
         itemTypeJson[ "Name" ] = itemType.name().toStdString();
 
         json[ "ItemTypes" ].append( itemTypeJson );
     }
 
-    qInfo() << "ItemTypeFactory::saveItemTypeCatalog"
-            << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
+    qInfo() << "ItemTypeFactory::saveItemTypeCatalog" << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
 
     JsonHelper::saveJsonFile( itemTypesFile, json );
 }

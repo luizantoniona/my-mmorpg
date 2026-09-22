@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include <MMORPGEngine/Data/Item/ItemCatalog.h>
 #include <MMORPGEngine/Data/Item/ItemTypeCatalog.h>
 #include <MMORPGEngine/Data/Manifest/ManifestModel.h>
 #include <MMORPGEngine/Data/Object/ObjectCatalog.h>
@@ -33,6 +34,9 @@ public:
     const ItemTypeCatalog& itemTypeCatalog() const;
     void addItemType( const ItemTypeModel& itemType );
 
+    const ItemCatalog& itemCatalog() const;
+    void addItem( const ItemModel& item );
+
     const SkillCatalog& skillCatalog() const;
     void addSkillTree( const SkillTreeModel& skillTree );
 
@@ -41,6 +45,7 @@ private:
     ObjectCatalog _objectCatalog;
     TileCatalog _tileCatalog;
     ItemTypeCatalog _itemTypeCatalog;
+    ItemCatalog _itemCatalog;
     SkillCatalog _skillCatalog;
 };
 

@@ -12,12 +12,22 @@ CREATE TABLE 'character' (
     FOREIGN KEY (id_account) REFERENCES account(id_account) ON DELETE CASCADE
 );
 
+CREATE TABLE character_equipment (
+    id_character INTEGER NOT NULL,
+    slot INTEGER NOT NULL,
+    id_item INTEGER NOT NULL,
+
+    PRIMARY KEY (id_character, slot),
+    FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
+);
+
 CREATE TABLE character_inventory (
     id_character INTEGER NOT NULL,
-    id_item TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    id_item INTEGER NOT NULL,
     amount INTEGER DEFAULT 0,
 
-    PRIMARY KEY (id_character, id_item),
+    PRIMARY KEY (id_character, position),
     FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
 );
 
@@ -33,6 +43,16 @@ CREATE TABLE character_position (
     FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
 );
 
+CREATE TABLE character_proficiency (
+    id_character INTEGER NOT NULL,
+    id_item_type INTEGER NOT NULL,
+    xp NUMERIC DEFAULT 0.0,
+    lvl INTEGER DEFAULT 0,
+
+    PRIMARY KEY (id_character, id_item_type),
+    FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
+);
+
 CREATE TABLE character_vitals (
     id_character INTEGER PRIMARY KEY,
     health NUMERIC DEFAULT 0.0,
@@ -42,15 +62,5 @@ CREATE TABLE character_vitals (
     stamina NUMERIC DEFAULT 0.0,
     max_stamina NUMERIC DEFAULT 0.0,
 
-    FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
-);
-
-CREATE TABLE character_proficiency (
-    id_character INTEGER NOT NULL,
-    id_item_type INTEGER NOT NULL,
-    xp NUMERIC DEFAULT 0.0,
-    lvl INTEGER DEFAULT 0,
-
-    PRIMARY KEY (id_character, id_item_type),
     FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
 );

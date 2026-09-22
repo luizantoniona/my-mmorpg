@@ -22,6 +22,12 @@ set(PROJECT_SOURCES
     Commons/Singleton.h
     Data/Animation/AnimationModel.cpp
     Data/Animation/AnimationModel.h
+    Data/Item/ItemCatalog.cpp
+    Data/Item/ItemCatalog.h
+    Data/Item/ItemFactory.cpp
+    Data/Item/ItemFactory.h
+    Data/Item/ItemModel.cpp
+    Data/Item/ItemModel.h
     Data/Item/ItemTypeCatalog.cpp
     Data/Item/ItemTypeCatalog.h
     Data/Item/ItemTypeFactory.cpp
@@ -66,10 +72,17 @@ set(PROJECT_SOURCES
     Data/DataManager.h
     Entity/Character/CharacterDTO.cpp
     Entity/Character/CharacterDTO.h
+    Entity/Character/CharacterEquipmentModel.cpp
+    Entity/Character/CharacterEquipmentModel.h
+    Entity/Character/CharacterInventoryModel.cpp
+    Entity/Character/CharacterInventoryModel.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
     Entity/Character/CharacterMoveDTO.cpp
     Entity/Character/CharacterMoveDTO.h
+    Entity/Character/EquipmentSlotEnum.h
+    Entity/Character/EquipmentSlotHelper.cpp
+    Entity/Character/EquipmentSlotHelper.h
     Entity/Character/OwnCharacterDTO.cpp
     Entity/Character/OwnCharacterDTO.h
     Entity/Creature/CreatureModel.cpp

@@ -1,6 +1,8 @@
 #include "CharacterRepository.h"
 
 #include <MMORPGServer/Server/Database/Query.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterEquipmentRepository.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterInventoryRepository.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterPositionRepository.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterVitalsRepository.h>
 
@@ -33,10 +35,6 @@ int CharacterRepository::createCharacter( const int idAccount, const std::string
     success &= CharacterPositionRepository().create( idCharacter, spawnPosition );
     success &= CharacterVitalsRepository().create( idCharacter, spawnVitals );
 
-    // TODO: Create future derivations
-    // Example:
-    // success &= CharacterEquipmentRepository().createEquipment( idCharacter );
-
     return success ? idCharacter : 0;
 }
 
@@ -63,6 +61,14 @@ bool CharacterRepository::updateCharacter( Engine::CharacterModel character ) {
     // TODO: Update future derivations
     // Example:
     // success &= CharacterEquipmentRepository().updateEquipment( idCharacter, character.equipment() );
+
+    for ( const Engine::CharacterEquipmentModel& equipment : character.equipment() ) {
+        success &= CharacterEquipmentRepository().save( idCharacter, equipment );
+    }
+
+    for ( const Engine::CharacterInventoryModel& inventory : character.inventory() ) {
+        success &= CharacterInventoryRepository().save( idCharacter, inventory );
+    }
 
     return success;
 }
@@ -98,11 +104,8 @@ std::unique_ptr<Engine::CharacterModel> CharacterRepository::findByIdAccountAndI
         }
 
         // TODO: Get future derivations
-        // Example:
-        // auto equipment = CharacterEquipmentRepository().findByCharacterId( character->idCharacter() );
-        // if ( equipment ) {
-        //    character->setEquipment( *equipment );
-        // }
+        character->setEquipment( CharacterEquipmentRepository().findAll( character->idCharacter() ) );
+        character->setInventory( CharacterInventoryRepository().findAll( character->idCharacter() ) );
 
         return character;
     }

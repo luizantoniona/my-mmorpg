@@ -5,6 +5,7 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Item/ItemFactory.h>
 #include <MMORPGEngine/Data/Item/ItemTypeFactory.h>
 #include <MMORPGEngine/Data/Manifest/ManifestFactory.h>
 #include <MMORPGEngine/Data/Object/ObjectFactory.h>
@@ -18,6 +19,7 @@ DataManager::DataManager() :
     _objectCatalog(),
     _tileCatalog(),
     _itemTypeCatalog(),
+    _itemCatalog(),
     _skillCatalog() {
 }
 
@@ -29,6 +31,7 @@ void DataManager::initialize( const std::string& configPath ) {
     ObjectFactory::createObjectCatalog( QString::fromStdString( configPath ), _objectCatalog );
     TileFactory::createTileCatalog( QString::fromStdString( configPath ), _tileCatalog );
     ItemTypeFactory::createItemTypeCatalog( QString::fromStdString( configPath ), _itemTypeCatalog );
+    ItemFactory::createItemCatalog( QString::fromStdString( configPath ), _itemTypeCatalog, _itemCatalog );
     SkillFactory::createSkillCatalog( QString::fromStdString( configPath ), _itemTypeCatalog, _skillCatalog );
 }
 
@@ -36,6 +39,7 @@ void DataManager::reload( const std::string& configPath ) {
     _objectCatalog = ObjectCatalog();
     _tileCatalog = TileCatalog();
     _itemTypeCatalog = ItemTypeCatalog();
+    _itemCatalog = ItemCatalog();
     _skillCatalog = SkillCatalog();
 
     initialize( configPath );
@@ -74,6 +78,14 @@ const ItemTypeCatalog& DataManager::itemTypeCatalog() const {
 
 void DataManager::addItemType( const ItemTypeModel& itemType ) {
     _itemTypeCatalog.addItemType( itemType );
+}
+
+const ItemCatalog& DataManager::itemCatalog() const {
+    return _itemCatalog;
+}
+
+void DataManager::addItem( const ItemModel& item ) {
+    _itemCatalog.addItem( item );
 }
 
 const SkillCatalog& DataManager::skillCatalog() const {
