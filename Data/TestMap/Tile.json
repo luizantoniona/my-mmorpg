@@ -1,3 +1,65 @@
 {
-    "Tiles": []
+    "Tiles" : 
+    [
+        {
+            "FrameDurationMs" : 100,
+            "IsAnimated" : true,
+            "IsWalkable" : false,
+            "Name" : "water0",
+            "Tags" : 
+            [
+                "water"
+            ],
+            "TextureFolder" : "Textures/Tiles/water0",
+            "Type" : 1
+        },
+        {
+            "FrameDurationMs" : 100,
+            "IsAnimated" : true,
+            "IsWalkable" : false,
+            "Name" : "water1",
+            "Tags" : 
+            [
+                "water"
+            ],
+            "TextureFolder" : "Textures/Tiles/water1",
+            "Type" : 2
+        },
+        {
+            "FrameDurationMs" : 100,
+            "IsAnimated" : true,
+            "IsWalkable" : false,
+            "Name" : "water2",
+            "Tags" : 
+            [
+                "water"
+            ],
+            "TextureFolder" : "Textures/Tiles/water2",
+            "Type" : 3
+        },
+        {
+            "FrameDurationMs" : 100,
+            "IsAnimated" : true,
+            "IsWalkable" : false,
+            "Name" : "water3",
+            "Tags" : 
+            [
+                "water"
+            ],
+            "TextureFolder" : "Textures/Tiles/water3",
+            "Type" : 4
+        },
+        {
+            "FrameDurationMs" : 100,
+            "IsAnimated" : true,
+            "IsWalkable" : false,
+            "Name" : "water4",
+            "Tags" : 
+            [
+                "water"
+            ],
+            "TextureFolder" : "Textures/Tiles/water4",
+            "Type" : 5
+        }
+    ]
 }
