@@ -4,6 +4,7 @@
 #include <MMORPGServer/Server/Repository/Character/CharacterEquipmentRepository.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterInventoryRepository.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterPositionRepository.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterProficiencyRepository.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterVitalsRepository.h>
 
 namespace Server {
@@ -58,9 +59,9 @@ bool CharacterRepository::updateCharacter( Engine::CharacterModel character ) {
     success &= CharacterPositionRepository().save( idCharacter, character.position() );
     success &= CharacterVitalsRepository().save( idCharacter, character.vitals() );
 
-    // TODO: Update future derivations
-    // Example:
-    // success &= CharacterEquipmentRepository().updateEquipment( idCharacter, character.equipment() );
+    for ( const Engine::CharacterProficiencyModel& proficiency : character.proficiencies() ) {
+        success &= CharacterProficiencyRepository().save( idCharacter, proficiency );
+    }
 
     for ( const Engine::CharacterEquipmentModel& equipment : character.equipment() ) {
         success &= CharacterEquipmentRepository().save( idCharacter, equipment );
@@ -103,7 +104,7 @@ std::unique_ptr<Engine::CharacterModel> CharacterRepository::findByIdAccountAndI
             character->setVitals( *vitals );
         }
 
-        // TODO: Get future derivations
+        character->setProficiencies( CharacterProficiencyRepository().findAll( character->idCharacter() ) );
         character->setEquipment( CharacterEquipmentRepository().findAll( character->idCharacter() ) );
         character->setInventory( CharacterInventoryRepository().findAll( character->idCharacter() ) );
 
