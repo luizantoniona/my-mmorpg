@@ -14,6 +14,8 @@ add_executable(
   ItemTypeFactoryTest.cpp
   JsonHelperTest.cpp
   ManifestFactoryTest.cpp
+  MonsterCatalogTest.cpp
+  MonsterFactoryTest.cpp
   ObjectCatalogTest.cpp
   ObjectFactoryTest.cpp
   RenderWorldTest.cpp

@@ -43,6 +43,12 @@ set(PROJECT_SOURCES
     Data/Item/ItemTypeFactory.h
     Data/Item/ItemTypeModel.cpp
     Data/Item/ItemTypeModel.h
+    Data/Monster/MonsterCatalog.cpp
+    Data/Monster/MonsterCatalog.h
+    Data/Monster/MonsterFactory.cpp
+    Data/Monster/MonsterFactory.h
+    Data/Monster/MonsterModel.cpp
+    Data/Monster/MonsterModel.h
     Data/Object/ObjectCatalog.cpp
     Data/Object/ObjectCatalog.h
     Data/Object/ObjectFactory.cpp

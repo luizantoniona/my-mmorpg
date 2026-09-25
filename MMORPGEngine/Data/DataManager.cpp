@@ -8,6 +8,7 @@
 #include <MMORPGEngine/Data/Item/ItemFactory.h>
 #include <MMORPGEngine/Data/Item/ItemTypeFactory.h>
 #include <MMORPGEngine/Data/Manifest/ManifestFactory.h>
+#include <MMORPGEngine/Data/Monster/MonsterFactory.h>
 #include <MMORPGEngine/Data/Object/ObjectFactory.h>
 #include <MMORPGEngine/Data/Skill/SkillFactory.h>
 #include <MMORPGEngine/Data/Tile/TileFactory.h>
@@ -20,7 +21,8 @@ DataManager::DataManager() :
     _tileCatalog(),
     _itemTypeCatalog(),
     _itemCatalog(),
-    _skillCatalog() {
+    _skillCatalog(),
+    _monsterCatalog() {
 }
 
 DataManager::~DataManager() = default;
@@ -33,6 +35,7 @@ void DataManager::initialize( const std::string& configPath ) {
     ItemTypeFactory::createItemTypeCatalog( QString::fromStdString( configPath ), _itemTypeCatalog );
     ItemFactory::createItemCatalog( QString::fromStdString( configPath ), _itemTypeCatalog, _itemCatalog );
     SkillFactory::createSkillCatalog( QString::fromStdString( configPath ), _itemTypeCatalog, _skillCatalog );
+    MonsterFactory::createMonsterCatalog( QString::fromStdString( configPath ), _monsterCatalog );
 }
 
 void DataManager::reload( const std::string& configPath ) {
@@ -41,6 +44,7 @@ void DataManager::reload( const std::string& configPath ) {
     _itemTypeCatalog = ItemTypeCatalog();
     _itemCatalog = ItemCatalog();
     _skillCatalog = SkillCatalog();
+    _monsterCatalog = MonsterCatalog();
 
     initialize( configPath );
 }
@@ -94,6 +98,14 @@ const SkillCatalog& DataManager::skillCatalog() const {
 
 void DataManager::addSkillTree( const SkillTreeModel& skillTree ) {
     _skillCatalog.addTree( skillTree );
+}
+
+const MonsterCatalog& DataManager::monsterCatalog() const {
+    return _monsterCatalog;
+}
+
+void DataManager::addMonster( const MonsterModel& monster ) {
+    _monsterCatalog.addMonster( monster );
 }
 
 } // namespace Engine
