@@ -49,6 +49,10 @@ set(PROJECT_SOURCES
     Data/Monster/MonsterFactory.h
     Data/Monster/MonsterModel.cpp
     Data/Monster/MonsterModel.h
+    Data/Monster/MonsterSpawnAreaModel.cpp
+    Data/Monster/MonsterSpawnAreaModel.h
+    Data/Monster/MonsterSpawnEntryModel.cpp
+    Data/Monster/MonsterSpawnEntryModel.h
     Data/Object/ObjectCatalog.cpp
     Data/Object/ObjectCatalog.h
     Data/Object/ObjectFactory.cpp

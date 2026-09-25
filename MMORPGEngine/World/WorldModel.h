@@ -9,6 +9,7 @@
 
 #include <QString>
 
+#include <MMORPGEngine/Data/Monster/MonsterSpawnAreaModel.h>
 #include <MMORPGEngine/World/Chunk/ChunkModel.h>
 #include <MMORPGEngine/World/Tile/WorldTileModel.h>
 
@@ -48,6 +49,11 @@ public:
     const WorldTileModel* tile( int x, int y, int z ) const;
     void setTile( int x, int y, int z, uint32_t tileType );
 
+    std::vector<MonsterSpawnAreaModel> spawnAreas( int z ) const;
+    void addSpawnArea( int z, const MonsterSpawnAreaModel& spawnArea );
+    const MonsterSpawnAreaModel* spawnAreaAt( int x, int y, int z ) const;
+    bool removeSpawnArea( int x, int y, int z );
+
 private:
     QString chunkKey( int x, int y ) const;
 
@@ -59,6 +65,7 @@ private:
     int _spawnY;
     int _spawnZ;
     std::map<QString, std::unique_ptr<ChunkModel>> _chunks;
+    std::map<int, std::vector<MonsterSpawnAreaModel>> _spawnAreas;
     std::set<int> _floors;
 };
 

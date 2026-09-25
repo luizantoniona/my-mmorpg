@@ -2,6 +2,7 @@
 
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/Data/Monster/MonsterSpawnAreaModel.h>
 #include <MMORPGEngine/Data/Tile/TileModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
@@ -97,4 +98,107 @@ TEST( WorldModelTest, SetTile_UnknownType_DoesNotCrash ) {
     Engine::WorldModel world;
 
     EXPECT_NO_THROW( world.setTile( 0, 0, 0, 999999 ) );
+}
+
+TEST( WorldModelTest, SpawnAreas_Empty_ReturnsEmptyVector ) {
+    Engine::WorldModel world;
+
+    EXPECT_TRUE( world.spawnAreas( 0 ).empty() );
+}
+
+TEST( WorldModelTest, AddSpawnArea_ThenGet_ReturnsSameArea ) {
+    Engine::WorldModel world;
+
+    Engine::MonsterSpawnAreaModel area;
+    area.setX( 1 );
+    area.setY( 2 );
+    area.setWidth( 3 );
+    area.setHeight( 4 );
+    world.addSpawnArea( 0, area );
+
+    const std::vector<Engine::MonsterSpawnAreaModel> areas = world.spawnAreas( 0 );
+
+    ASSERT_EQ( areas.size(), 1u );
+    EXPECT_EQ( areas[ 0 ].x(), 1 );
+    EXPECT_EQ( areas[ 0 ].y(), 2 );
+    EXPECT_EQ( areas[ 0 ].width(), 3u );
+    EXPECT_EQ( areas[ 0 ].height(), 4u );
+}
+
+TEST( WorldModelTest, AddSpawnArea_DifferentFloors_AreIndependent ) {
+    Engine::WorldModel world;
+
+    world.addSpawnArea( 0, Engine::MonsterSpawnAreaModel() );
+
+    EXPECT_EQ( world.spawnAreas( 0 ).size(), 1u );
+    EXPECT_TRUE( world.spawnAreas( 1 ).empty() );
+}
+
+TEST( WorldModelTest, SpawnAreaAt_PointInsideArea_ReturnsArea ) {
+    Engine::WorldModel world;
+
+    Engine::MonsterSpawnAreaModel area;
+    area.setX( 10 );
+    area.setY( 10 );
+    area.setWidth( 4 );
+    area.setHeight( 4 );
+    world.addSpawnArea( 0, area );
+
+    ASSERT_NE( world.spawnAreaAt( 12, 12, 0 ), nullptr );
+    EXPECT_EQ( world.spawnAreaAt( 12, 12, 0 )->x(), 10 );
+}
+
+TEST( WorldModelTest, SpawnAreaAt_PointOutsideArea_ReturnsNullptr ) {
+    Engine::WorldModel world;
+
+    Engine::MonsterSpawnAreaModel area;
+    area.setX( 10 );
+    area.setY( 10 );
+    area.setWidth( 4 );
+    area.setHeight( 4 );
+    world.addSpawnArea( 0, area );
+
+    EXPECT_EQ( world.spawnAreaAt( 20, 20, 0 ), nullptr );
+}
+
+TEST( WorldModelTest, SpawnAreaAt_PointOnFarEdge_IsExcluded ) {
+    Engine::WorldModel world;
+
+    Engine::MonsterSpawnAreaModel area;
+    area.setX( 10 );
+    area.setY( 10 );
+    area.setWidth( 4 );
+    area.setHeight( 4 );
+    world.addSpawnArea( 0, area );
+
+    EXPECT_EQ( world.spawnAreaAt( 14, 10, 0 ), nullptr );
+    EXPECT_EQ( world.spawnAreaAt( 10, 14, 0 ), nullptr );
+}
+
+TEST( WorldModelTest, RemoveSpawnArea_PointInsideArea_RemovesAndReturnsTrue ) {
+    Engine::WorldModel world;
+
+    Engine::MonsterSpawnAreaModel area;
+    area.setX( 10 );
+    area.setY( 10 );
+    area.setWidth( 4 );
+    area.setHeight( 4 );
+    world.addSpawnArea( 0, area );
+
+    EXPECT_TRUE( world.removeSpawnArea( 12, 12, 0 ) );
+    EXPECT_TRUE( world.spawnAreas( 0 ).empty() );
+}
+
+TEST( WorldModelTest, RemoveSpawnArea_PointOutsideArea_ReturnsFalse ) {
+    Engine::WorldModel world;
+
+    Engine::MonsterSpawnAreaModel area;
+    area.setX( 10 );
+    area.setY( 10 );
+    area.setWidth( 4 );
+    area.setHeight( 4 );
+    world.addSpawnArea( 0, area );
+
+    EXPECT_FALSE( world.removeSpawnArea( 20, 20, 0 ) );
+    EXPECT_EQ( world.spawnAreas( 0 ).size(), 1u );
 }
