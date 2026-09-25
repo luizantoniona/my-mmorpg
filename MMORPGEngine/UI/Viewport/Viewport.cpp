@@ -1,6 +1,7 @@
 #include "Viewport.h"
 
 #include <QColor>
+#include <QCursor>
 #include <QSGSimpleRectNode>
 
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
@@ -19,14 +20,13 @@ Viewport::Viewport( QQuickItem* parent ) :
     _renderer( new Renderer() ),
     _world( nullptr ),
     _animationTimer( new QTimer( this ) ),
-    _activeFloor( 0 ),
-    _highlightX( 0 ),
-    _highlightY( 0 ),
-    _hasHighlight( false ) {
+    _overlayRects(),
+    _highlightRects(),
+    _activeFloor( 0 ) {
 
     setFlag( ItemHasContents, true );
 
-    setAcceptedMouseButtons( Qt::LeftButton );
+    setAcceptedMouseButtons( Qt::LeftButton | Qt::RightButton );
 
     _renderer->initialize();
     _renderer->resize( size() );
@@ -123,24 +123,73 @@ void Viewport::setActiveFloor( int z ) {
     update();
 }
 
-void Viewport::setHighlightedTile( int x, int y ) {
-    if ( _hasHighlight && _highlightX == x && _highlightY == y ) {
+int Viewport::cursorShape() const {
+    return cursor().shape();
+}
+
+void Viewport::setCursorShape( int shape ) {
+    if ( cursor().shape() == static_cast<Qt::CursorShape>( shape ) ) {
         return;
     }
 
-    _hasHighlight = true;
-    _highlightX = x;
-    _highlightY = y;
+    setCursor( QCursor( static_cast<Qt::CursorShape>( shape ) ) );
+
+    emit cursorShapeChanged();
+}
+
+void Viewport::setHighlightedTile( int x, int y ) {
+    if ( !_highlightRects.isEmpty() && _highlightRects.first().x == x && _highlightRects.first().y == y ) {
+        return;
+    }
+
+    OverlayRect rect;
+    rect.x = x;
+    rect.y = y;
+    rect.width = 1;
+    rect.height = 1;
+    rect.color = QColor( 255, 255, 255, 70 );
+
+    _highlightRects = { rect };
 
     update();
 }
 
 void Viewport::clearHighlight() {
-    if ( !_hasHighlight ) {
+    if ( _highlightRects.isEmpty() ) {
         return;
     }
 
-    _hasHighlight = false;
+    _highlightRects.clear();
+
+    update();
+}
+
+void Viewport::setOverlayRects( const QVariantList& rects, const QColor& color ) {
+    _overlayRects.clear();
+    _overlayRects.reserve( rects.size() );
+
+    for ( const QVariant& rectVariant : rects ) {
+        const QVariantMap rectMap = rectVariant.toMap();
+
+        OverlayRect rect;
+        rect.x = rectMap.value( "x" ).toInt();
+        rect.y = rectMap.value( "y" ).toInt();
+        rect.width = rectMap.value( "width" ).toInt();
+        rect.height = rectMap.value( "height" ).toInt();
+        rect.color = color;
+
+        _overlayRects.append( rect );
+    }
+
+    update();
+}
+
+void Viewport::clearOverlayRects() {
+    if ( _overlayRects.isEmpty() ) {
+        return;
+    }
+
+    _overlayRects.clear();
 
     update();
 }
@@ -162,8 +211,8 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
         return;
     }
 
-    // TODO: RightButton and WheelButton
-    if ( event->button() != Qt::LeftButton ) {
+    // TODO: WheelButton
+    if ( event->button() != Qt::LeftButton && event->button() != Qt::RightButton ) {
         QQuickItem::mousePressEvent( event );
         return;
     }
@@ -178,6 +227,11 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
     const int z = _activeFloor;
 
     if ( x < 0 || y < 0 || x >= static_cast<int>( _world->width() ) || y >= static_cast<int>( _world->height() ) ) {
+        return;
+    }
+
+    if ( event->button() == Qt::RightButton ) {
+        emit tileRightClicked( x, y, z );
         return;
     }
 
@@ -199,20 +253,28 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
 
     scene.build( rootNode, window(), *_camera, _textureCache );
 
-    if ( _hasHighlight ) {
-        const double tileSize = WorldConstants::TILE_SIZE;
+    for ( const OverlayRect& rect : _highlightRects ) {
+        addOverlayNode( rootNode, rect );
+    }
 
-        const QPointF worldPosition( _highlightX * tileSize, _highlightY * tileSize );
-        const QPointF screenPosition = _camera->worldToScreen( worldPosition );
-
-        auto* highlightNode = new QSGSimpleRectNode();
-        highlightNode->setColor( QColor( 255, 255, 255, 70 ) );
-        highlightNode->setRect( screenPosition.x(), screenPosition.y(), tileSize, tileSize );
-
-        rootNode->appendChildNode( highlightNode );
+    for ( const OverlayRect& rect : _overlayRects ) {
+        addOverlayNode( rootNode, rect );
     }
 
     return rootNode;
+}
+
+void Viewport::addOverlayNode( QSGNode* parent, const OverlayRect& rect ) const {
+    const double tileSize = WorldConstants::TILE_SIZE;
+
+    const QPointF worldPosition( rect.x * tileSize, rect.y * tileSize );
+    const QPointF screenPosition = _camera->worldToScreen( worldPosition );
+
+    auto* node = new QSGSimpleRectNode();
+    node->setColor( rect.color );
+    node->setRect( screenPosition.x(), screenPosition.y(), rect.width * tileSize, rect.height * tileSize );
+
+    parent->appendChildNode( node );
 }
 
 } // namespace Engine
