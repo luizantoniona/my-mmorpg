@@ -17,6 +17,8 @@ private:
 
     void sendWorldBasic( const WorldEvent& event );
     void sendOwnCharacter( const WorldEvent& event );
+    void sendOwnEquipment( const WorldEvent& event );
+    void sendOwnInventory( const WorldEvent& event );
     void sendNearbyCharacters( const WorldEvent& event );
     void sendCreatures( const WorldEvent& event );
     void broadcastCharacter( const WorldEvent& event );

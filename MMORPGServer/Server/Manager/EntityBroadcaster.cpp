@@ -4,6 +4,8 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnInventoryDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
 #include <MMORPGEngine/Entity/EntityLeftDTO.h>
 #include <MMORPGEngine/World/WorldBasicDTO.h>
@@ -35,6 +37,8 @@ EntityBroadcaster::EntityBroadcaster() {
 void EntityBroadcaster::onEntityEntered( const WorldEvent& event ) {
     sendWorldBasic( event );
     sendOwnCharacter( event );
+    sendOwnEquipment( event );
+    sendOwnInventory( event );
     sendNearbyCharacters( event );
     sendCreatures( event );
     broadcastCharacter( event );
@@ -104,6 +108,42 @@ void EntityBroadcaster::sendOwnCharacter( const WorldEvent& event ) {
     }
 
     connection->send( Engine::JsonHelper::writeJsonString( Engine::OwnCharacterDTO::fromModel( character ).toJson() ) );
+}
+
+void EntityBroadcaster::sendOwnEquipment( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    drogon::WebSocketConnectionPtr connection = Engine::Singleton<CharacterConnectionRegistry>::instance().connection( idCharacter );
+    if ( !connection ) {
+        return;
+    }
+
+    const Engine::CharacterModel* character = Engine::Singleton<WorldManager>::instance().runtime().character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    connection->send( Engine::JsonHelper::writeJsonString( Engine::OwnEquipmentDTO::fromModel( character ).toJson() ) );
+}
+
+void EntityBroadcaster::sendOwnInventory( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    drogon::WebSocketConnectionPtr connection = Engine::Singleton<CharacterConnectionRegistry>::instance().connection( idCharacter );
+    if ( !connection ) {
+        return;
+    }
+
+    const Engine::CharacterModel* character = Engine::Singleton<WorldManager>::instance().runtime().character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    connection->send( Engine::JsonHelper::writeJsonString( Engine::OwnInventoryDTO::fromModel( character ).toJson() ) );
 }
 
 void EntityBroadcaster::sendNearbyCharacters( const WorldEvent& event ) {
