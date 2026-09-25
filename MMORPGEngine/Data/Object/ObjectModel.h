@@ -2,11 +2,13 @@
 #define OBJECTMODEL_H
 
 #include <cstdint>
+#include <optional>
 
 #include <QImage>
 #include <QString>
 
 #include <MMORPGEngine/Data/Animation/AnimationModel.h>
+#include <MMORPGEngine/Data/Object/ObjectInteractionModel.h>
 #include <MMORPGEngine/Data/Object/ObjectSizeModel.h>
 
 namespace Engine {
@@ -34,12 +36,16 @@ public:
     ObjectSizeModel size() const;
     void setSize( const ObjectSizeModel& size );
 
+    const std::optional<ObjectInteractionModel>& interaction() const;
+    void setInteraction( const ObjectInteractionModel& interaction );
+
 private:
     uint32_t _type;
     QString _name;
     QString _folder;
     AnimationModel _animation;
     ObjectSizeModel _size;
+    std::optional<ObjectInteractionModel> _interaction;
 };
 
 } // namespace Engine

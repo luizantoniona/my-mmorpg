@@ -4,6 +4,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QUrl>
 
 #include <MMORPGEngine/Commons/Singleton.h>
@@ -80,8 +81,9 @@ bool TileCreationControl::createTile( const QString& name, const QString& textur
         return false;
     }
 
-    const bool isAnimated = sourcePath.endsWith( ".gif", Qt::CaseInsensitive );
-    const QString extension = isAnimated ? ".gif" : ".png";
+    const QString sourceExtension = "." + QFileInfo( sourcePath ).suffix().toLower();
+    const bool isAnimated = Engine::DataFactory::textureExtensions().value( sourceExtension, false );
+    const QString extension = isAnimated ? sourceExtension : ".png";
 
     const QString mapPath = Engine::DataFactory::mapPath( DATA_PATH );
     const QString folder = "Textures/Tiles/" + trimmedName;

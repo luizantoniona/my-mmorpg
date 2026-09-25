@@ -36,6 +36,33 @@ TEST( ObjectCatalogTest, AddObject_DuplicateType_KeepsFirstEntry ) {
     EXPECT_EQ( catalog.object( 1 )->name(), "StoneWall" );
 }
 
+TEST( ObjectCatalogTest, AddObject_DefaultInteraction_IsEmpty ) {
+    Engine::ObjectCatalog catalog;
+
+    Engine::ObjectModel object;
+    object.setType( 1 );
+    catalog.addObject( object );
+
+    EXPECT_FALSE( catalog.object( 1 )->interaction().has_value() );
+}
+
+TEST( ObjectCatalogTest, AddObject_ContainerInteraction_KeepsCapacity ) {
+    Engine::ObjectCatalog catalog;
+
+    Engine::ObjectModel object;
+    object.setType( 1 );
+
+    Engine::ObjectInteractionModel interaction;
+    interaction.setType( Engine::ObjectInteractionEnum::CONTAINER );
+    interaction.setContainerCapacity( 8 );
+    object.setInteraction( interaction );
+    catalog.addObject( object );
+
+    ASSERT_TRUE( catalog.object( 1 )->interaction().has_value() );
+    EXPECT_EQ( catalog.object( 1 )->interaction()->type(), Engine::ObjectInteractionEnum::CONTAINER );
+    EXPECT_EQ( catalog.object( 1 )->interaction()->containerCapacity(), 8u );
+}
+
 TEST( ObjectCatalogTest, Objects_ReturnsAllAddedEntries ) {
     Engine::ObjectCatalog catalog;
 

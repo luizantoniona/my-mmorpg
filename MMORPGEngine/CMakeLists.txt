@@ -47,6 +47,11 @@ set(PROJECT_SOURCES
     Data/Object/ObjectCatalog.h
     Data/Object/ObjectFactory.cpp
     Data/Object/ObjectFactory.h
+    Data/Object/ObjectInteractionEnum.h
+    Data/Object/ObjectInteractionHelper.cpp
+    Data/Object/ObjectInteractionHelper.h
+    Data/Object/ObjectInteractionModel.cpp
+    Data/Object/ObjectInteractionModel.h
     Data/Object/ObjectModel.cpp
     Data/Object/ObjectModel.h
     Data/Object/ObjectSizeModel.cpp

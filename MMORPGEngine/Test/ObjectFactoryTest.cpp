@@ -107,3 +107,83 @@ TEST_F( ObjectFactoryTest, SaveObjectCatalog_ThenCreateObjectCatalog_RoundTripsF
     EXPECT_EQ( reloaded.object( 5 )->size().width(), 2 );
     EXPECT_EQ( reloaded.object( 5 )->size().height(), 1 );
 }
+
+TEST_F( ObjectFactoryTest, CreateObjectCatalog_MissingInteraction_IsEmpty ) {
+    Json::Value object;
+    object[ "Type" ] = 1;
+    object[ "Name" ] = "StoneWall";
+    object[ "TextureFolder" ] = "Textures/Objects/StoneWall";
+
+    Json::Value objects( Json::arrayValue );
+    objects.append( object );
+    writeObjectsJson( objects );
+
+    Engine::ObjectCatalog catalog;
+    Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.object( 1 ), nullptr );
+    EXPECT_FALSE( catalog.object( 1 )->interaction().has_value() );
+}
+
+TEST_F( ObjectFactoryTest, CreateObjectCatalog_UnknownInteraction_IsEmpty ) {
+    Json::Value object;
+    object[ "Type" ] = 1;
+    object[ "Name" ] = "StoneWall";
+    object[ "TextureFolder" ] = "Textures/Objects/StoneWall";
+    object[ "Interaction" ] = "LEVER";
+
+    Json::Value objects( Json::arrayValue );
+    objects.append( object );
+    writeObjectsJson( objects );
+
+    Engine::ObjectCatalog catalog;
+    Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.object( 1 ), nullptr );
+    EXPECT_FALSE( catalog.object( 1 )->interaction().has_value() );
+}
+
+TEST_F( ObjectFactoryTest, CreateObjectCatalog_ContainerInteraction_ParsesCapacity ) {
+    Json::Value object;
+    object[ "Type" ] = 1;
+    object[ "Name" ] = "TreasureChest";
+    object[ "TextureFolder" ] = "Textures/Objects/TreasureChest";
+    object[ "Interaction" ] = "CONTAINER";
+    object[ "ContainerCapacity" ] = 8;
+
+    Json::Value objects( Json::arrayValue );
+    objects.append( object );
+    writeObjectsJson( objects );
+
+    Engine::ObjectCatalog catalog;
+    Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.object( 1 ), nullptr );
+    ASSERT_TRUE( catalog.object( 1 )->interaction().has_value() );
+    EXPECT_EQ( catalog.object( 1 )->interaction()->type(), Engine::ObjectInteractionEnum::CONTAINER );
+    EXPECT_EQ( catalog.object( 1 )->interaction()->containerCapacity(), 8u );
+}
+
+TEST_F( ObjectFactoryTest, SaveObjectCatalog_ContainerInteraction_ThenCreateObjectCatalog_RoundTrips ) {
+    Engine::ObjectCatalog original;
+    Engine::ObjectModel object;
+    object.setType( 5 );
+    object.setName( "TreasureChest" );
+    object.setFolder( "Textures/Objects/TreasureChest" );
+
+    Engine::ObjectInteractionModel interaction;
+    interaction.setType( Engine::ObjectInteractionEnum::CONTAINER );
+    interaction.setContainerCapacity( 8 );
+    object.setInteraction( interaction );
+    original.addObject( object );
+
+    Engine::ObjectFactory::saveObjectCatalog( configPath(), original );
+
+    Engine::ObjectCatalog reloaded;
+    Engine::ObjectFactory::createObjectCatalog( configPath(), reloaded );
+
+    ASSERT_NE( reloaded.object( 5 ), nullptr );
+    ASSERT_TRUE( reloaded.object( 5 )->interaction().has_value() );
+    EXPECT_EQ( reloaded.object( 5 )->interaction()->type(), Engine::ObjectInteractionEnum::CONTAINER );
+    EXPECT_EQ( reloaded.object( 5 )->interaction()->containerCapacity(), 8u );
+}
