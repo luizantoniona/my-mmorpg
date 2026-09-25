@@ -22,12 +22,21 @@ set(PROJECT_SOURCES
     Commons/Singleton.h
     Data/Animation/AnimationModel.cpp
     Data/Animation/AnimationModel.h
+    Data/Item/HandRequirementEnum.h
+    Data/Item/HandRequirementHelper.cpp
+    Data/Item/HandRequirementHelper.h
     Data/Item/ItemCatalog.cpp
     Data/Item/ItemCatalog.h
+    Data/Item/ItemCategoryEnum.h
+    Data/Item/ItemCategoryHelper.cpp
+    Data/Item/ItemCategoryHelper.h
     Data/Item/ItemFactory.cpp
     Data/Item/ItemFactory.h
     Data/Item/ItemModel.cpp
     Data/Item/ItemModel.h
+    Data/Item/ItemSlotEnum.h
+    Data/Item/ItemSlotHelper.cpp
+    Data/Item/ItemSlotHelper.h
     Data/Item/ItemTypeCatalog.cpp
     Data/Item/ItemTypeCatalog.h
     Data/Item/ItemTypeFactory.cpp

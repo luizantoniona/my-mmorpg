@@ -3,6 +3,9 @@
 #include <filesystem>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Item/HandRequirementEnum.h>
+#include <MMORPGEngine/Data/Item/ItemCategoryEnum.h>
+#include <MMORPGEngine/Data/Item/ItemSlotEnum.h>
 #include <MMORPGEngine/Data/Item/ItemTypeFactory.h>
 
 namespace {
@@ -45,6 +48,9 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_ParsesFields ) {
     Json::Value itemType;
     itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
+    itemType[ "Category" ] = "WEAPON";
+    itemType[ "Slot" ] = "Hand";
+    itemType[ "HandRequirement" ] = "ONE_HANDED";
 
     Json::Value itemTypes( Json::arrayValue );
     itemTypes.append( itemType );
@@ -55,16 +61,24 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_ParsesFields ) {
 
     ASSERT_NE( catalog.itemType( 1 ), nullptr );
     EXPECT_EQ( catalog.itemType( 1 )->name(), "Sword" );
+    EXPECT_EQ( catalog.itemType( 1 )->category(), Engine::ItemCategoryEnum::WEAPON );
+    EXPECT_EQ( catalog.itemType( 1 )->slot(), Engine::ItemSlotEnum::HAND );
+    ASSERT_TRUE( catalog.itemType( 1 )->handRequirement().has_value() );
+    EXPECT_EQ( catalog.itemType( 1 )->handRequirement().value(), Engine::HandRequirementEnum::ONE_HANDED );
 }
 
 TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MultipleItemTypes_AllAdded ) {
     Json::Value first;
     first[ "Type" ] = 1;
     first[ "Name" ] = "Sword";
+    first[ "Category" ] = "WEAPON";
+    first[ "Slot" ] = "Hand";
 
     Json::Value second;
     second[ "Type" ] = 3;
     second[ "Name" ] = "Shield";
+    second[ "Category" ] = "SHIELD";
+    second[ "Slot" ] = "Hand";
 
     Json::Value itemTypes( Json::arrayValue );
     itemTypes.append( first );
@@ -84,6 +98,8 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingName_SkipsEntry ) {
     Json::Value valid;
     valid[ "Type" ] = 3;
     valid[ "Name" ] = "Shield";
+    valid[ "Category" ] = "SHIELD";
+    valid[ "Slot" ] = "Hand";
 
     Json::Value itemTypes( Json::arrayValue );
     itemTypes.append( invalid );
@@ -98,11 +114,84 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingName_SkipsEntry ) {
     EXPECT_EQ( catalog.itemTypes().size(), 1u );
 }
 
+TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingCategoryOrSlot_SkipsEntry ) {
+    Json::Value missingCategory;
+    missingCategory[ "Type" ] = 1;
+    missingCategory[ "Name" ] = "Sword";
+    missingCategory[ "Slot" ] = "Hand";
+
+    Json::Value missingSlot;
+    missingSlot[ "Type" ] = 2;
+    missingSlot[ "Name" ] = "Axe";
+    missingSlot[ "Category" ] = "WEAPON";
+
+    Json::Value valid;
+    valid[ "Type" ] = 3;
+    valid[ "Name" ] = "Shield";
+    valid[ "Category" ] = "SHIELD";
+    valid[ "Slot" ] = "Hand";
+
+    Json::Value itemTypes( Json::arrayValue );
+    itemTypes.append( missingCategory );
+    itemTypes.append( missingSlot );
+    itemTypes.append( valid );
+    writeItemTypesJson( itemTypes );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.itemType( 1 ), nullptr );
+    EXPECT_EQ( catalog.itemType( 2 ), nullptr );
+    ASSERT_NE( catalog.itemType( 3 ), nullptr );
+    EXPECT_EQ( catalog.itemTypes().size(), 1u );
+}
+
+TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingHandRequirement_IsEmpty ) {
+    Json::Value itemType;
+    itemType[ "Type" ] = 17;
+    itemType[ "Name" ] = "Helmet";
+    itemType[ "Category" ] = "ARMOR";
+    itemType[ "Slot" ] = "Head";
+
+    Json::Value itemTypes( Json::arrayValue );
+    itemTypes.append( itemType );
+    writeItemTypesJson( itemTypes );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.itemType( 17 ), nullptr );
+    EXPECT_FALSE( catalog.itemType( 17 )->handRequirement().has_value() );
+}
+
+TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_UnknownHandRequirement_IsFlaggedUnknown ) {
+    Json::Value itemType;
+    itemType[ "Type" ] = 1;
+    itemType[ "Name" ] = "Sword";
+    itemType[ "Category" ] = "WEAPON";
+    itemType[ "Slot" ] = "Hand";
+    itemType[ "HandRequirement" ] = "THREE_HANDED";
+
+    Json::Value itemTypes( Json::arrayValue );
+    itemTypes.append( itemType );
+    writeItemTypesJson( itemTypes );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.itemType( 1 ), nullptr );
+    ASSERT_TRUE( catalog.itemType( 1 )->handRequirement().has_value() );
+    EXPECT_EQ( catalog.itemType( 1 )->handRequirement().value(), Engine::HandRequirementEnum::UNKNOWN );
+}
+
 TEST_F( ItemTypeFactoryTest, SaveItemTypeCatalog_ThenCreateItemTypeCatalog_RoundTripsFields ) {
     Engine::ItemTypeCatalog original;
     Engine::ItemTypeModel itemType;
     itemType.setType( 1 );
     itemType.setName( "Sword" );
+    itemType.setCategory( Engine::ItemCategoryEnum::WEAPON );
+    itemType.setSlot( Engine::ItemSlotEnum::HAND );
+    itemType.setHandRequirement( Engine::HandRequirementEnum::ONE_HANDED );
     original.addItemType( itemType );
 
     Engine::ItemTypeFactory::saveItemTypeCatalog( configPath(), original );
@@ -112,12 +201,18 @@ TEST_F( ItemTypeFactoryTest, SaveItemTypeCatalog_ThenCreateItemTypeCatalog_Round
 
     ASSERT_NE( reloaded.itemType( 1 ), nullptr );
     EXPECT_EQ( reloaded.itemType( 1 )->name(), "Sword" );
+    EXPECT_EQ( reloaded.itemType( 1 )->category(), Engine::ItemCategoryEnum::WEAPON );
+    EXPECT_EQ( reloaded.itemType( 1 )->slot(), Engine::ItemSlotEnum::HAND );
+    ASSERT_TRUE( reloaded.itemType( 1 )->handRequirement().has_value() );
+    EXPECT_EQ( reloaded.itemType( 1 )->handRequirement().value(), Engine::HandRequirementEnum::ONE_HANDED );
 }
 
 TEST_F( ItemTypeFactoryTest, SaveItemTypeCatalog_PreservesUnknownFieldsLikeSkillTree ) {
     Json::Value itemType;
     itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
+    itemType[ "Category" ] = "WEAPON";
+    itemType[ "Slot" ] = "Hand";
     Json::Value skillTree( Json::arrayValue );
     Json::Value node;
     node[ "Type" ] = 1;
@@ -133,6 +228,8 @@ TEST_F( ItemTypeFactoryTest, SaveItemTypeCatalog_PreservesUnknownFieldsLikeSkill
     Engine::ItemTypeModel renamed;
     renamed.setType( 1 );
     renamed.setName( "Longsword" );
+    renamed.setCategory( Engine::ItemCategoryEnum::WEAPON );
+    renamed.setSlot( Engine::ItemSlotEnum::HAND );
     catalog.addItemType( renamed );
 
     Engine::ItemTypeFactory::saveItemTypeCatalog( configPath(), catalog );

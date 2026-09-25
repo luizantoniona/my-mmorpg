@@ -210,6 +210,8 @@ TEST_F( SkillFactoryTest, SaveSkillCatalog_PreservesItemTypeNameAndType ) {
     Json::Value itemType;
     itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
+    itemType[ "Category" ] = "WEAPON";
+    itemType[ "Slot" ] = "Hand";
 
     Json::Value itemTypes( Json::arrayValue );
     itemTypes.append( itemType );

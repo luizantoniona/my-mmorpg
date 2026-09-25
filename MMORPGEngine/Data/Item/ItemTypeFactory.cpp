@@ -8,6 +8,9 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Data/DataFactory.h>
+#include <MMORPGEngine/Data/Item/HandRequirementHelper.h>
+#include <MMORPGEngine/Data/Item/ItemCategoryHelper.h>
+#include <MMORPGEngine/Data/Item/ItemSlotHelper.h>
 #include <MMORPGEngine/Data/Item/ItemTypeModel.h>
 
 namespace Engine {
@@ -19,7 +22,8 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
 
     const QString itemTypesFile = mapPath + QString( mapJson[ "Catalogs" ][ "ItemTypes" ].asCString() );
 
-    qInfo() << "ItemTypeFactory::createItemTypeCatalog" << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
+    qInfo() << "ItemTypeFactory::createItemTypeCatalog"
+            << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
 
     Json::Value json = JsonHelper::loadJsonFile( itemTypesFile );
 
@@ -28,13 +32,35 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
     for ( const Json::Value& itemTypeJson : itemTypes ) {
 
         if ( !itemTypeJson.isMember( "Type" ) || !itemTypeJson.isMember( "Name" ) ) {
-            qWarning() << "ItemTypeFactory::createItemTypeCatalog" << "Invalid ItemType, skipping";
+            qWarning() << "ItemTypeFactory::createItemTypeCatalog"
+                       << "Invalid ItemType, skipping";
+            continue;
+        }
+
+        const ItemCategoryEnum category = itemTypeJson.isMember( "Category" ) ? ItemCategoryHelper::fromString( itemTypeJson[ "Category" ].asString() ) : ItemCategoryEnum::UNKNOWN;
+        const ItemSlotEnum slot = itemTypeJson.isMember( "Slot" ) ? ItemSlotHelper::fromString( itemTypeJson[ "Slot" ].asString() ) : ItemSlotEnum::UNKNOWN;
+
+        if ( category == ItemCategoryEnum::UNKNOWN || slot == ItemSlotEnum::UNKNOWN ) {
+            qWarning() << "ItemTypeFactory::createItemTypeCatalog"
+                       << "Invalid or unknown Category/Slot, skipping" << itemTypeJson[ "Type" ].asUInt();
             continue;
         }
 
         ItemTypeModel itemType;
         itemType.setType( itemTypeJson[ "Type" ].asUInt() );
         itemType.setName( QString( itemTypeJson[ "Name" ].asCString() ) );
+        itemType.setCategory( category );
+        itemType.setSlot( slot );
+
+        if ( itemTypeJson.isMember( "HandRequirement" ) ) {
+            const HandRequirementEnum handRequirement = HandRequirementHelper::fromString( itemTypeJson[ "HandRequirement" ].asString() );
+            itemType.setHandRequirement( handRequirement );
+
+            if ( handRequirement == HandRequirementEnum::UNKNOWN ) {
+                qWarning() << "ItemTypeFactory::createItemTypeCatalog"
+                           << "Unknown HandRequirement" << itemTypeJson[ "Type" ].asUInt();
+            }
+        }
 
         itemTypeCatalog.addItemType( std::move( itemType ) );
     }
@@ -72,11 +98,20 @@ void ItemTypeFactory::saveItemTypeCatalog( const QString& configPath, const Item
 
         itemTypeJson[ "Type" ] = itemType.type();
         itemTypeJson[ "Name" ] = itemType.name().toStdString();
+        itemTypeJson[ "Category" ] = ItemCategoryHelper::toString( itemType.category() );
+        itemTypeJson[ "Slot" ] = ItemSlotHelper::toString( itemType.slot() );
+
+        if ( itemType.handRequirement().has_value() ) {
+            itemTypeJson[ "HandRequirement" ] = HandRequirementHelper::toString( itemType.handRequirement().value() );
+        } else {
+            itemTypeJson.removeMember( "HandRequirement" );
+        }
 
         json[ "ItemTypes" ].append( itemTypeJson );
     }
 
-    qInfo() << "ItemTypeFactory::saveItemTypeCatalog" << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
+    qInfo() << "ItemTypeFactory::saveItemTypeCatalog"
+            << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
 
     JsonHelper::saveJsonFile( itemTypesFile, json );
 }
