@@ -8,6 +8,7 @@ QtObject {
     readonly property string bolt: "qrc:/Assets/Icons/bolt.svg"
     readonly property string brush: "qrc:/Assets/Icons/brush.svg"
     readonly property string minus: "qrc:/Assets/Icons/minus.svg"
+    readonly property string paw: "qrc:/Assets/Icons/paw.svg"
     readonly property string plus: "qrc:/Assets/Icons/plus.svg"
     readonly property string pointer: "qrc:/Assets/Icons/pointer.svg"
     readonly property string save: "qrc:/Assets/Icons/save.svg"
