@@ -25,15 +25,13 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
     // --- Name
     world->setName( QString( mapJson[ "Name" ].asCString() ) );
 
-    qInfo() << "WorldFactory::createWorld"
-            << "[MAP_NAME]" << world->name();
+    qInfo() << "WorldFactory::createWorld" << "[MAP_NAME]" << world->name();
 
     // --- Size
     world->setWidth( mapJson[ "Width" ].asUInt() );
     world->setHeight( mapJson[ "Height" ].asUInt() );
 
-    qInfo() << "WorldFactory::createWorld"
-            << "[MAP_SIZE]" << world->width() << "x" << world->height();
+    qInfo() << "WorldFactory::createWorld" << "[MAP_SIZE]" << world->width() << "x" << world->height();
 
     // --- Spawn
     const int defaultSpawnX = static_cast<int>( world->width() / 2 );
@@ -112,8 +110,7 @@ bool WorldFactory::removeFloor( const std::string& worldPath, int z ) {
     Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
 
     if ( mapJson[ "Floors" ].size() <= 1 ) {
-        qWarning() << "WorldFactory::removeFloor"
-                   << "Cannot remove the last remaining floor.";
+        qWarning() << "WorldFactory::removeFloor" << "Cannot remove the last remaining floor.";
         return false;
     }
 
@@ -131,8 +128,7 @@ bool WorldFactory::removeFloor( const std::string& worldPath, int z ) {
     }
 
     if ( !found ) {
-        qWarning() << "WorldFactory::removeFloor"
-                   << "Floor not found:" << z;
+        qWarning() << "WorldFactory::removeFloor" << "Floor not found:" << z;
         return false;
     }
 
@@ -150,8 +146,7 @@ bool WorldFactory::resizeWorld( const std::string& worldPath, uint32_t newWidth,
     std::unique_ptr<WorldModel> world = createWorld( worldPath );
 
     if ( newWidth < world->width() || newHeight < world->height() ) {
-        qWarning() << "WorldFactory::resizeWorld"
-                   << "New size must be greater than or equal to the current size.";
+        qWarning() << "WorldFactory::resizeWorld" << "New size must be greater than or equal to the current size.";
         return false;
     }
 
