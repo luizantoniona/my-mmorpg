@@ -96,19 +96,29 @@ set(PROJECT_SOURCES
     Data/DataManager.h
     Entity/Character/CharacterDTO.cpp
     Entity/Character/CharacterDTO.h
+    Entity/Character/CharacterEquipmentDTO.cpp
+    Entity/Character/CharacterEquipmentDTO.h
     Entity/Character/CharacterEquipmentModel.cpp
     Entity/Character/CharacterEquipmentModel.h
+    Entity/Character/CharacterInventoryDTO.cpp
+    Entity/Character/CharacterInventoryDTO.h
     Entity/Character/CharacterInventoryModel.cpp
     Entity/Character/CharacterInventoryModel.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
     Entity/Character/CharacterMoveDTO.cpp
     Entity/Character/CharacterMoveDTO.h
+    Entity/Character/CharacterProficiencyModel.cpp
+    Entity/Character/CharacterProficiencyModel.h
     Entity/Character/EquipmentSlotEnum.h
     Entity/Character/EquipmentSlotHelper.cpp
     Entity/Character/EquipmentSlotHelper.h
     Entity/Character/OwnCharacterDTO.cpp
     Entity/Character/OwnCharacterDTO.h
+    Entity/Character/OwnEquipmentDTO.cpp
+    Entity/Character/OwnEquipmentDTO.h
+    Entity/Character/OwnInventoryDTO.cpp
+    Entity/Character/OwnInventoryDTO.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
     Entity/Creature/CreatureDTO.cpp

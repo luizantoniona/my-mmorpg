@@ -6,6 +6,7 @@
 
 #include <MMORPGEngine/Entity/Character/CharacterEquipmentModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterInventoryModel.h>
+#include <MMORPGEngine/Entity/Character/CharacterProficiencyModel.h>
 #include <MMORPGEngine/Entity/EntityModel.h>
 
 namespace Engine {
@@ -23,6 +24,9 @@ public:
     std::string name() const;
     void setName( const std::string& name );
 
+    std::vector<CharacterProficiencyModel> proficiencies() const;
+    void setProficiencies( const std::vector<CharacterProficiencyModel>& proficiencies );
+
     std::vector<CharacterEquipmentModel> equipment() const;
     void setEquipment( const std::vector<CharacterEquipmentModel>& equipment );
 
@@ -30,6 +34,7 @@ public:
     void setInventory( const std::vector<CharacterInventoryModel>& inventory );
 
 private:
+    std::vector<CharacterProficiencyModel> _proficiencies;
     std::vector<CharacterEquipmentModel> _equipment;
     std::vector<CharacterInventoryModel> _inventory;
     std::string _name;

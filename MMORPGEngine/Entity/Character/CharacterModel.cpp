@@ -32,6 +32,14 @@ void CharacterModel::setName( const std::string& name ) {
     _name = name;
 }
 
+std::vector<CharacterProficiencyModel> CharacterModel::proficiencies() const {
+    return _proficiencies;
+}
+
+void CharacterModel::setProficiencies( const std::vector<CharacterProficiencyModel>& proficiencies ) {
+    _proficiencies = proficiencies;
+}
+
 std::vector<CharacterEquipmentModel> CharacterModel::equipment() const {
     return _equipment;
 }

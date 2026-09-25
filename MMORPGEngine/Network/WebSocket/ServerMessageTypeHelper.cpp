@@ -8,6 +8,10 @@ std::string ServerMessageTypeHelper::toString( ServerMessageType type ) {
         return "WORLD_BASIC";
     case ServerMessageType::OWN_CHARACTER:
         return "OWN_CHARACTER";
+    case ServerMessageType::OWN_EQUIPMENT:
+        return "OWN_EQUIPMENT";
+    case ServerMessageType::OWN_INVENTORY:
+        return "OWN_INVENTORY";
     case ServerMessageType::CHARACTER:
         return "CHARACTER";
     case ServerMessageType::CREATURE:
@@ -27,6 +31,12 @@ ServerMessageType ServerMessageTypeHelper::fromString( const std::string& value 
     }
     if ( value == "OWN_CHARACTER" ) {
         return ServerMessageType::OWN_CHARACTER;
+    }
+    if ( value == "OWN_EQUIPMENT" ) {
+        return ServerMessageType::OWN_EQUIPMENT;
+    }
+    if ( value == "OWN_INVENTORY" ) {
+        return ServerMessageType::OWN_INVENTORY;
     }
     if ( value == "CHARACTER" ) {
         return ServerMessageType::CHARACTER;
