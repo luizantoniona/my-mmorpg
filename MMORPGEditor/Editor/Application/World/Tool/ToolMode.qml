@@ -5,6 +5,7 @@ import QtQml
 QtObject {
     enum Value {
         Select,
-        Paint
+        Paint,
+        Spawn
     }
 }

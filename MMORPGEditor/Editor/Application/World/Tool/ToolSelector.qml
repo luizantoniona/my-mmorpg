@@ -14,6 +14,9 @@ Item {
         }, {
             "mode": ToolMode.Paint,
             "icon": Icons.brush
+        }, {
+            "mode": ToolMode.Spawn,
+            "icon": Icons.paw
         }]
 
     signal modeRequested(int mode)
