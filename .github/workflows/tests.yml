@@ -25,12 +25,8 @@ jobs:
       - name: Setup build environment
         uses: ./.github/actions/setup-build-env
 
-      - name: Configure (installs vcpkg manifest dependencies)
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
-        run: >
-          cmake -S . -B build -G "Visual Studio 17 2022" -A x64
-          -DBUILD_SERVER=OFF -DBUILD_CLIENT=OFF -DBUILD_EDITOR=OFF
+      - name: Install vcpkg manifest dependencies
+        run: '& "${{ github.workspace }}\vcpkg\vcpkg.exe" install --triplet x64-windows'
 
   engine-tests:
     needs: prepare-vcpkg
