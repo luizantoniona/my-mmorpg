@@ -1,9 +1,15 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <set>
+#include <utility>
 
+#include <MMORPGEngine/Data/Monster/MonsterSpawnAreaModel.h>
+#include <MMORPGEngine/Data/Monster/MonsterSpawnEntryModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
+#include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
+#include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
 
 namespace {
@@ -11,14 +17,40 @@ namespace {
 std::unique_ptr<Engine::CharacterModel> makeCharacter( int idCharacter, int x, int y, int z ) {
     auto character = std::make_unique<Engine::CharacterModel>();
     character->setIdCharacter( idCharacter );
-
-    Engine::EntityPositionModel position;
-    position.setX( x );
-    position.setY( y );
-    position.setZ( z );
-    character->setPosition( position );
+    character->position().setX( x );
+    character->position().setY( y );
+    character->position().setZ( z );
 
     return character;
+}
+
+std::unique_ptr<Engine::CreatureModel> makeCreature( int idCreature, int x, int y, int z ) {
+    auto creature = std::make_unique<Engine::CreatureModel>();
+    creature->setIdCreature( idCreature );
+    creature->position().setX( x );
+    creature->position().setY( y );
+    creature->position().setZ( z );
+
+    return creature;
+}
+
+std::unique_ptr<Engine::WorldModel> makeWorldWithSpawnArea( int z, int x, int y, uint32_t width, uint32_t height, uint32_t type, uint32_t quantity ) {
+    Engine::MonsterSpawnEntryModel entry;
+    entry.setType( type );
+    entry.setQuantity( quantity );
+
+    Engine::MonsterSpawnAreaModel area;
+    area.setX( x );
+    area.setY( y );
+    area.setWidth( width );
+    area.setHeight( height );
+    area.setMonsters( { entry } );
+
+    auto world = std::make_unique<Engine::WorldModel>();
+    world->addFloor( z );
+    world->addSpawnArea( z, area );
+
+    return world;
 }
 
 } // namespace
@@ -144,6 +176,42 @@ TEST( WorldRuntimeTest, MoveCharacter_UnknownId_DoesNotPublish ) {
     EXPECT_FALSE( published );
 }
 
+TEST( WorldRuntimeTest, IsCharacterMoveDue_JustAdded_ReturnsTrue ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    EXPECT_TRUE( worldRuntime.isCharacterMoveDue( 1 ) );
+}
+
+TEST( WorldRuntimeTest, IsCharacterMoveDue_UnknownId_ReturnsFalse ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    EXPECT_FALSE( worldRuntime.isCharacterMoveDue( 1 ) );
+}
+
+TEST( WorldRuntimeTest, IsCharacterMoveDue_RightAfterMove_ReturnsFalse ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    worldRuntime.moveCharacter( 1, 1, 0, 0 );
+
+    EXPECT_FALSE( worldRuntime.isCharacterMoveDue( 1 ) );
+}
+
+TEST( WorldRuntimeTest, IsCharacterMoveDue_AfterEnoughTicks_ReturnsTrueAgain ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    worldRuntime.moveCharacter( 1, 1, 0, 0 );
+    ASSERT_FALSE( worldRuntime.isCharacterMoveDue( 1 ) );
+
+    for ( int tick = 0; tick < 20; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    EXPECT_TRUE( worldRuntime.isCharacterMoveDue( 1 ) );
+}
+
 TEST( WorldRuntimeTest, CharactersNear_ExcludesSelf ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
@@ -199,4 +267,155 @@ TEST( WorldRuntimeTest, MoveCharacter_OutOfNeighborhood_UpdatesCharactersNear ) 
     worldRuntime.moveCharacter( 2, 100, 100, 0 );
 
     EXPECT_TRUE( worldRuntime.charactersNear( 1 ).empty() );
+}
+
+TEST( WorldRuntimeTest, IsPositionOccupied_CharacterThere_ReturnsTrue ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 5, 5, 0 ) );
+
+    EXPECT_TRUE( worldRuntime.isPositionOccupied( 5, 5, 0 ) );
+    EXPECT_FALSE( worldRuntime.isPositionOccupied( 6, 5, 0 ) );
+}
+
+TEST( WorldRuntimeTest, IsPositionOccupied_CreatureThere_ReturnsTrue ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+
+    EXPECT_TRUE( worldRuntime.isPositionOccupied( 5, 5, 0 ) );
+}
+
+TEST( WorldRuntimeTest, AddCreature_ThenGet_ReturnsSameCreature ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+
+    const std::vector<Engine::CreatureModel> creatures = worldRuntime.creatures();
+
+    ASSERT_EQ( creatures.size(), 1u );
+    EXPECT_EQ( creatures[ 0 ].idCreature(), 1 );
+    EXPECT_EQ( creatures[ 0 ].position().x(), 5 );
+    EXPECT_EQ( creatures[ 0 ].position().y(), 5 );
+}
+
+TEST( WorldRuntimeTest, Creatures_Empty_ReturnsEmptyVector ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    EXPECT_TRUE( worldRuntime.creatures().empty() );
+}
+
+TEST( WorldRuntimeTest, AddCreature_MultipleCreatures_AllReturned ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    worldRuntime.addCreature( makeCreature( 1, 0, 0, 0 ) );
+    worldRuntime.addCreature( makeCreature( 2, 1, 1, 0 ) );
+
+    EXPECT_EQ( worldRuntime.creatures().size(), 2u );
+}
+
+TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_SpawnsQuantityWithinArea ) {
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 5, 5, 3, 4 ) );
+
+    worldRuntime.spawnCreaturesFromAreas();
+
+    const std::vector<Engine::CreatureModel> creatures = worldRuntime.creatures();
+
+    ASSERT_EQ( creatures.size(), 4u );
+    for ( const Engine::CreatureModel& creature : creatures ) {
+        EXPECT_EQ( creature.type(), 3u );
+        EXPECT_GE( creature.position().x(), 10 );
+        EXPECT_LT( creature.position().x(), 15 );
+        EXPECT_GE( creature.position().y(), 10 );
+        EXPECT_LT( creature.position().y(), 15 );
+        EXPECT_EQ( creature.position().z(), 0 );
+    }
+}
+
+TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_AssignsUniqueIds ) {
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 0, 0, 10, 10, 1, 5 ) );
+
+    worldRuntime.spawnCreaturesFromAreas();
+
+    std::set<int> ids;
+    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+        ids.insert( creature.idCreature() );
+    }
+
+    EXPECT_EQ( ids.size(), 5u );
+}
+
+TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_NullWorld_DoesNothing ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    worldRuntime.spawnCreaturesFromAreas();
+
+    EXPECT_TRUE( worldRuntime.creatures().empty() );
+}
+
+TEST( WorldRuntimeTest, Tick_CreatureWalksA2x2SquareAroundSpawn_WhenCharacterIsNear ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+
+    std::vector<std::pair<int, int>> visited;
+    visited.emplace_back( 5, 5 );
+
+    for ( int step = 0; step < 4; ++step ) {
+        for ( int tick = 0; tick < 20; ++tick ) {
+            worldRuntime.tick();
+        }
+
+        const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
+        visited.emplace_back( position.x(), position.y() );
+    }
+
+    const std::vector<std::pair<int, int>> expected = { { 5, 5 }, { 6, 5 }, { 6, 6 }, { 5, 6 }, { 5, 5 } };
+    EXPECT_EQ( visited, expected );
+}
+
+TEST( WorldRuntimeTest, Tick_CreatureDoesNotMove_WhenNoCharacterIsNear ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+
+    for ( int tick = 0; tick < 100; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
+    EXPECT_EQ( position.x(), 5 );
+    EXPECT_EQ( position.y(), 5 );
+}
+
+TEST( WorldRuntimeTest, Tick_CreatureDoesNotMove_WhenCharacterIsTwoChunksAway ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 5, 5, 0 ) );
+    worldRuntime.addCreature( makeCreature( 1, 500, 500, 0 ) );
+
+    for ( int tick = 0; tick < 100; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
+    EXPECT_EQ( position.x(), 500 );
+    EXPECT_EQ( position.y(), 500 );
+}
+
+TEST( WorldRuntimeTest, Tick_CreatureDoesNotStepIntoTileOccupiedByCharacter ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 6, 5, 0 ) );
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+
+    for ( int tick = 0; tick < 20; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
+    EXPECT_EQ( position.x(), 5 );
+    EXPECT_EQ( position.y(), 5 );
+
+    worldRuntime.moveCharacter( 1, 0, 0, 0 );
+    worldRuntime.tick();
+
+    position = worldRuntime.creatures()[ 0 ].position();
+    EXPECT_EQ( position.x(), 6 );
+    EXPECT_EQ( position.y(), 5 );
 }

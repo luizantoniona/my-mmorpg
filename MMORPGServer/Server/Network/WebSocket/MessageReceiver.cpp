@@ -62,7 +62,7 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
     const Engine::WorldModel* world = _worldRuntime->world();
     const Engine::WorldTileModel* worldTile = world ? world->tile( newX, newY, z ) : nullptr;
 
-    if ( worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable() ) {
+    if ( worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable() && !_worldRuntime->isPositionOccupied( newX, newY, z ) && _worldRuntime->isCharacterMoveDue( idCharacter ) ) {
         _worldRuntime->moveCharacter( idCharacter, newX, newY, z );
 
         qInfo() << "[MessageReceiver] Character moved [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;

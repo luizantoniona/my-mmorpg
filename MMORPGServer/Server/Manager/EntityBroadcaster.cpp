@@ -32,6 +32,10 @@ EntityBroadcaster::EntityBroadcaster() {
     worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_VITALS_CHANGED, [ this ]( const WorldEvent& event ) {
         onEntityVitalsChanged( event );
     } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_MOVED, [ this ]( const WorldEvent& event ) {
+        onCreatureMoved( event );
+    } );
 }
 
 void EntityBroadcaster::onEntityEntered( const WorldEvent& event ) {
@@ -72,6 +76,10 @@ void EntityBroadcaster::onEntityLeft( const WorldEvent& event ) {
 void EntityBroadcaster::onEntityVitalsChanged( const WorldEvent& event ) {
     sendOwnCharacter( event );
     broadcastCharacter( event );
+}
+
+void EntityBroadcaster::onCreatureMoved( const WorldEvent& event ) {
+    broadcastCreature( event );
 }
 
 void EntityBroadcaster::sendWorldBasic( const WorldEvent& event ) {
@@ -181,9 +189,9 @@ void EntityBroadcaster::sendCreatures( const WorldEvent& event ) {
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
     // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Monstros")
-    // for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
-    //     connection->send( Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( &creature ).toJson() ) );
-    // }
+    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+        connection->send( Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( &creature ).toJson() ) );
+    }
 }
 
 void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
@@ -212,6 +220,30 @@ void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
 
         if ( connection ) {
             connection->send( message );
+        }
+    }
+}
+
+void EntityBroadcaster::broadcastCreature( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    Engine::CreatureDTO message;
+    message.setIdCreature( payload[ "idCreature" ].asInt() );
+    message.setX( payload[ "x" ].asInt() );
+    message.setY( payload[ "y" ].asInt() );
+    message.setZ( payload[ "z" ].asInt() );
+
+    const std::string serialized = Engine::JsonHelper::writeJsonString( message.toJson() );
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+    auto& connectionRegistry = Engine::Singleton<CharacterConnectionRegistry>::instance();
+
+    // TODO: Filter by proximity once creatures need to scale beyond a handful (Backlog "Monstros")
+    for ( const Engine::CharacterModel& character : worldRuntime.connectedCharacters() ) {
+        drogon::WebSocketConnectionPtr connection = connectionRegistry.connection( character.idCharacter() );
+
+        if ( connection ) {
+            connection->send( serialized );
         }
     }
 }

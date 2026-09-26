@@ -5,33 +5,42 @@ namespace Engine {
 EntityModel::EntityModel() :
     _position(),
     _size(),
-    _vitals() {
+    _vitals(),
+    _movement() {
 }
 
 EntityModel::~EntityModel() = default;
 
-EntityPositionModel EntityModel::position() const {
+EntityPositionModel& EntityModel::position() {
     return _position;
 }
 
-void EntityModel::setPosition( const EntityPositionModel& position ) {
-    _position = position;
+const EntityPositionModel& EntityModel::position() const {
+    return _position;
 }
 
-EntitySizeModel EntityModel::size() const {
+EntitySizeModel& EntityModel::size() {
     return _size;
 }
 
-void EntityModel::setSize( const EntitySizeModel& size ) {
-    _size = size;
+const EntitySizeModel& EntityModel::size() const {
+    return _size;
 }
 
-EntityVitalsModel EntityModel::vitals() const {
+EntityVitalsModel& EntityModel::vitals() {
     return _vitals;
 }
 
-void EntityModel::setVitals( const EntityVitalsModel& vitals ) {
-    _vitals = vitals;
+const EntityVitalsModel& EntityModel::vitals() const {
+    return _vitals;
+}
+
+EntityMovementModel& EntityModel::movement() {
+    return _movement;
+}
+
+const EntityMovementModel& EntityModel::movement() const {
+    return _movement;
 }
 
 } // namespace Engine

@@ -1,6 +1,7 @@
 #include "ServerRenderWorld.h"
 
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 
 ServerRenderWorld::ServerRenderWorld( QObject* parent ) :
@@ -48,18 +49,18 @@ QList<Engine::RenderWorld::Entity> ServerRenderWorld::entities( int z ) const {
             continue;
         }
 
-        result.append( Engine::RenderWorld::Entity( entry.first, position.x(), position.y() ) );
+        result.append( Engine::RenderWorld::Entity( entry.first, position.x(), position.y(), Engine::RenderWorld::EntityKindEnum::Character ) );
     }
 
-    // for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
-    //     const Engine::EntityPositionModel& position = creature.position();
+    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+        const Engine::EntityPositionModel position = creature.position();
 
-    //     if ( position.z() != z ) {
-    //         continue;
-    //     }
+        if ( position.z() != z ) {
+            continue;
+        }
 
-    //     result.append( Engine::RenderWorld::Entity( creature.idCreature(), position.x(), position.y() ) );
-    // }
+        result.append( Engine::RenderWorld::Entity( creature.idCreature(), position.x(), position.y(), Engine::RenderWorld::EntityKindEnum::Creature ) );
+    }
 
     return result;
 }

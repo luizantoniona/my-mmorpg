@@ -8,6 +8,7 @@ enum class WorldEventType {
     ENTITY_MOVED,
     ENTITY_LEFT,
     ENTITY_VITALS_CHANGED,
+    CREATURE_MOVED,
 };
 
 } // namespace Server

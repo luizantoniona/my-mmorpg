@@ -127,6 +127,8 @@ set(PROJECT_SOURCES
     Entity/EntityLeftDTO.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
+    Entity/EntityMovementModel.cpp
+    Entity/EntityMovementModel.h
     Entity/EntityPositionModel.cpp
     Entity/EntityPositionModel.h
     Entity/EntitySizeModel.cpp

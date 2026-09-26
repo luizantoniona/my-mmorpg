@@ -1,9 +1,11 @@
 #include "WorldRuntime.h"
 
 #include <algorithm>
+#include <random>
 
 #include <QDebug>
 
+#include <MMORPGEngine/Entity/EntityMovementModel.h>
 #include <MMORPGEngine/World/WorldConstants.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
 #include <MMORPGServer/Server/Event/WorldEventType.h>
@@ -11,7 +13,8 @@
 namespace Server {
 
 WorldRuntime::WorldRuntime( std::unique_ptr<Engine::WorldModel> world ) :
-    _world( std::move( world ) ) {
+    _world( std::move( world ) ),
+    _nextIdCreature( 1 ) {
 
     if ( !_world ) {
         return;
@@ -142,13 +145,13 @@ void WorldRuntime::moveCharacter( int idCharacter, int x, int y, int z ) {
 
         const ChunkCoordinate previousChunk = chunkCoordinateFor( characterPtr->position() );
 
-        Engine::EntityPositionModel position;
-        position.setX( x );
-        position.setY( y );
-        position.setZ( z );
-        characterPtr->setPosition( position );
+        characterPtr->position().setX( x );
+        characterPtr->position().setY( y );
+        characterPtr->position().setZ( z );
 
-        const ChunkCoordinate newChunk = chunkCoordinateFor( position );
+        characterPtr->movement().setCounter( 0 );
+
+        const ChunkCoordinate newChunk = chunkCoordinateFor( characterPtr->position() );
 
         if ( !( previousChunk == newChunk ) ) {
             auto& previousBucket = _charactersByChunk[ previousChunk ];
@@ -173,11 +176,132 @@ std::vector<int> WorldRuntime::charactersNear( int idCharacter ) {
     return charactersNearLocked( idCharacter );
 }
 
-void WorldRuntime::tick() {
+bool WorldRuntime::isCharacterMoveDue( int idCharacter ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
-    for ( auto& entry : _characters ) {
-        entry.second->tick();
+    auto it = _characters.find( idCharacter );
+    if ( it == _characters.end() ) {
+        return false;
+    }
+
+    const Engine::EntityMovementModel& movement = it->second->character()->movement();
+    return movement.counter() >= movement.cooldown();
+}
+
+bool WorldRuntime::isPositionOccupied( int x, int y, int z ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    Engine::EntityPositionModel position;
+    position.setX( x );
+    position.setY( y );
+    position.setZ( z );
+
+    return isPositionOccupiedLocked( position );
+}
+
+Engine::CreatureModel* WorldRuntime::addCreature( std::unique_ptr<Engine::CreatureModel> creature ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    const int idCreature = creature->idCreature();
+
+    auto creatureRuntime = std::make_unique<CreatureRuntime>( std::move( creature ) );
+    Engine::CreatureModel* creaturePtr = creatureRuntime->creature();
+    _creatures[ idCreature ] = std::move( creatureRuntime );
+
+    qInfo() << "[WorldRuntime] Creature added [CREATURE]" << idCreature << "[TOTAL]" << _creatures.size();
+
+    return creaturePtr;
+}
+
+std::vector<Engine::CreatureModel> WorldRuntime::creatures() {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    std::vector<Engine::CreatureModel> result;
+    result.reserve( _creatures.size() );
+
+    for ( const auto& entry : _creatures ) {
+        result.push_back( *entry.second->creature() );
+    }
+
+    return result;
+}
+
+void WorldRuntime::spawnCreaturesFromAreas() {
+    if ( !_world ) {
+        return;
+    }
+
+    std::mt19937 randomEngine( std::random_device{}() );
+
+    for ( int z : _world->floors() ) {
+        for ( const Engine::MonsterSpawnAreaModel& area : _world->spawnAreas( z ) ) {
+            if ( area.width() == 0 || area.height() == 0 ) {
+                continue;
+            }
+
+            std::uniform_int_distribution<int> xDistribution( area.x(), area.x() + static_cast<int>( area.width() ) - 1 );
+            std::uniform_int_distribution<int> yDistribution( area.y(), area.y() + static_cast<int>( area.height() ) - 1 );
+
+            for ( const Engine::MonsterSpawnEntryModel& entry : area.monsters() ) {
+                for ( uint32_t i = 0; i < entry.quantity(); ++i ) {
+                    auto creature = std::make_unique<Engine::CreatureModel>();
+                    creature->setIdCreature( _nextIdCreature++ );
+                    creature->setType( entry.type() );
+                    creature->position().setX( xDistribution( randomEngine ) );
+                    creature->position().setY( yDistribution( randomEngine ) );
+                    creature->position().setZ( z );
+
+                    addCreature( std::move( creature ) );
+                }
+            }
+        }
+    }
+}
+
+void WorldRuntime::tick() {
+    std::vector<Json::Value> movedCreaturePayloads;
+
+    {
+        std::lock_guard<std::mutex> lock( _mutex );
+
+        for ( auto& entry : _characters ) {
+            entry.second->tick();
+        }
+
+        for ( auto& entry : _creatures ) {
+            CreatureRuntime& creatureRuntime = *entry.second;
+            Engine::CreatureModel* creaturePtr = creatureRuntime.creature();
+
+            if ( !hasCharacterNearLocked( creaturePtr->position() ) ) {
+                continue;
+            }
+
+            Engine::EntityMovementModel& movement = creaturePtr->movement();
+            movement.setCounter( movement.counter() + 1 );
+
+            if ( movement.counter() < movement.cooldown() ) {
+                continue;
+            }
+
+            const Engine::EntityPositionModel candidate = creatureRuntime.candidateStepPosition();
+            if ( isPositionOccupiedLocked( candidate ) ) {
+                continue;
+            }
+
+            creatureRuntime.commitStep();
+
+            Json::Value payload;
+            payload[ "idCreature" ] = creaturePtr->idCreature();
+            payload[ "x" ] = candidate.x();
+            payload[ "y" ] = candidate.y();
+            payload[ "z" ] = candidate.z();
+
+            movedCreaturePayloads.push_back( payload );
+        }
+    }
+
+    for ( const Json::Value& payload : movedCreaturePayloads ) {
+        _eventBus.publish( WorldEvent( WorldEventType::CREATURE_MOVED, payload ) );
     }
 }
 
@@ -215,6 +339,43 @@ std::vector<int> WorldRuntime::charactersNearLocked( int idCharacter ) const {
     }
 
     return result;
+}
+
+bool WorldRuntime::hasCharacterNearLocked( const Engine::EntityPositionModel& position ) const {
+    const ChunkCoordinate centerChunk = chunkCoordinateFor( position );
+
+    for ( int dx = -1; dx <= 1; ++dx ) {
+        for ( int dy = -1; dy <= 1; ++dy ) {
+            const ChunkCoordinate neighborChunk( centerChunk.x + dx, centerChunk.y + dy, centerChunk.z );
+
+            auto chunkIt = _charactersByChunk.find( neighborChunk );
+            if ( chunkIt != _charactersByChunk.end() && !chunkIt->second.empty() ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool WorldRuntime::isPositionOccupiedLocked( const Engine::EntityPositionModel& position ) const {
+    for ( const auto& entry : _characters ) {
+        const Engine::EntityPositionModel& characterPosition = entry.second->character()->position();
+
+        if ( characterPosition.x() == position.x() && characterPosition.y() == position.y() && characterPosition.z() == position.z() ) {
+            return true;
+        }
+    }
+
+    for ( const auto& entry : _creatures ) {
+        const Engine::EntityPositionModel& creaturePosition = entry.second->creature()->position();
+
+        if ( creaturePosition.x() == position.x() && creaturePosition.y() == position.y() && creaturePosition.z() == position.z() ) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 } // namespace Server

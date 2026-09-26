@@ -18,6 +18,7 @@ WorldManager::~WorldManager() {
 void WorldManager::initialize( const std::string& worldPath ) {
     if ( !_runtime ) {
         _runtime = std::make_unique<WorldRuntime>( Engine::WorldFactory::createWorld( worldPath ) );
+        _runtime->spawnCreaturesFromAreas();
     }
 
     if ( _running ) {

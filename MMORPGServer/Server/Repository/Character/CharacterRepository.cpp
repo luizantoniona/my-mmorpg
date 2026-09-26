@@ -96,12 +96,12 @@ std::unique_ptr<Engine::CharacterModel> CharacterRepository::findByIdAccountAndI
 
         auto position = CharacterPositionRepository().find( character->idCharacter() );
         if ( position ) {
-            character->setPosition( *position );
+            character->position() = *position;
         }
 
         auto vitals = CharacterVitalsRepository().find( character->idCharacter() );
         if ( vitals ) {
-            character->setVitals( *vitals );
+            character->vitals() = *vitals;
         }
 
         character->setProficiencies( CharacterProficiencyRepository().findAll( character->idCharacter() ) );

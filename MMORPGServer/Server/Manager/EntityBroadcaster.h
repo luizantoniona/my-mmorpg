@@ -14,6 +14,7 @@ private:
     void onEntityMoved( const WorldEvent& event );
     void onEntityLeft( const WorldEvent& event );
     void onEntityVitalsChanged( const WorldEvent& event );
+    void onCreatureMoved( const WorldEvent& event );
 
     void sendWorldBasic( const WorldEvent& event );
     void sendOwnCharacter( const WorldEvent& event );
@@ -22,6 +23,7 @@ private:
     void sendNearbyCharacters( const WorldEvent& event );
     void sendCreatures( const WorldEvent& event );
     void broadcastCharacter( const WorldEvent& event );
+    void broadcastCreature( const WorldEvent& event );
 };
 
 } // namespace Server

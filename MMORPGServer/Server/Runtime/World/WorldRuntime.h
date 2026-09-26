@@ -35,22 +35,34 @@ public:
 
     std::vector<Engine::CharacterModel> connectedCharacters();
 
+    Engine::CreatureModel* addCreature( std::unique_ptr<Engine::CreatureModel> creature );
+    std::vector<Engine::CreatureModel> creatures();
+
+    void spawnCreaturesFromAreas();
+
     void moveCharacter( int idCharacter, int x, int y, int z );
 
     std::vector<int> charactersNear( int idCharacter );
+
+    bool isPositionOccupied( int x, int y, int z );
+    bool isCharacterMoveDue( int idCharacter );
 
     void tick();
 
 private:
     ChunkCoordinate chunkCoordinateFor( const Engine::EntityPositionModel& position ) const;
     std::vector<int> charactersNearLocked( int idCharacter ) const;
+    bool hasCharacterNearLocked( const Engine::EntityPositionModel& position ) const;
+    bool isPositionOccupiedLocked( const Engine::EntityPositionModel& position ) const;
 
 private:
     std::mutex _mutex;
     std::unique_ptr<Engine::WorldModel> _world;
     std::map<int, std::unique_ptr<CharacterRuntime>> _characters;
     std::unordered_map<ChunkCoordinate, std::vector<Engine::CharacterModel*>, ChunkCoordinateHash> _charactersByChunk;
+    std::map<int, std::unique_ptr<CreatureRuntime>> _creatures;
     EventBus _eventBus;
+    int _nextIdCreature;
 };
 
 } // namespace Server
