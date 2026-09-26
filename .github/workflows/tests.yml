@@ -15,7 +15,25 @@ on:
       - "**/*.md"
 
 jobs:
+  prepare-vcpkg:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Configure (installs vcpkg manifest dependencies)
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+        run: >
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+          -DBUILD_SERVER=OFF -DBUILD_CLIENT=OFF -DBUILD_EDITOR=OFF
+
   engine-tests:
+    needs: prepare-vcpkg
     runs-on: windows-2022
 
     steps:
@@ -40,6 +58,7 @@ jobs:
         run: ctest --test-dir build/MMORPGEngine/Test -C Release --output-on-failure
 
   server-tests:
+    needs: prepare-vcpkg
     runs-on: windows-2022
 
     steps:
@@ -64,6 +83,7 @@ jobs:
         run: ctest --test-dir build/MMORPGServer/Test -C Release --output-on-failure
 
   client-tests:
+    needs: prepare-vcpkg
     runs-on: windows-2022
 
     steps:
@@ -88,6 +108,7 @@ jobs:
         run: ctest --test-dir build/MMORPGClient/Test -C Release --output-on-failure
 
   editor-tests:
+    needs: prepare-vcpkg
     runs-on: windows-2022
 
     steps:
