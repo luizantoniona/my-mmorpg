@@ -18,7 +18,7 @@ Item {
     FileDialog {
         id: textureDialog
         title: "Select texture"
-        nameFilters: ["Images (*.png *.gif)"]
+        nameFilters: ["Images (*.png *.gif *.webp)"]
         onAccepted: textureInput.vText = selectedFile.toString()
     }
 
@@ -56,7 +56,7 @@ Item {
                     InputBase {
                         id: textureInput
                         Layout.fillWidth: true
-                        vTitle: "Texture (.png or .gif)"
+                        vTitle: "Texture (.png, .gif or .webp)"
                         vPlaceholder: "No texture selected"
                     }
 
