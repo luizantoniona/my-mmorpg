@@ -17,8 +17,7 @@ void ItemFactory::createItemCatalog( const QString& configPath, const ItemTypeCa
 
     const QString itemsFile = mapPath + QString( mapJson[ "Catalogs" ][ "Items" ].asCString() );
 
-    qInfo() << "ItemFactory::createItemCatalog"
-            << "[ITEMS_FILE_PATH]" << itemsFile;
+    qInfo() << "ItemFactory::createItemCatalog" << "[ITEMS_FILE_PATH]" << itemsFile;
 
     Json::Value json = JsonHelper::loadJsonFile( itemsFile );
 
@@ -27,15 +26,13 @@ void ItemFactory::createItemCatalog( const QString& configPath, const ItemTypeCa
     for ( const Json::Value& itemJson : items ) {
 
         if ( !itemJson.isMember( "Id" ) || !itemJson.isMember( "IdItemType" ) || !itemJson.isMember( "Name" ) ) {
-            qWarning() << "ItemFactory::createItemCatalog"
-                       << "Invalid Item, skipping";
+            qWarning() << "ItemFactory::createItemCatalog" << "Invalid Item, skipping";
             continue;
         }
 
         const uint32_t idItemType = itemJson[ "IdItemType" ].asUInt();
         if ( itemTypeCatalog.itemType( idItemType ) == nullptr ) {
-            qWarning() << "ItemFactory::createItemCatalog"
-                       << "Unknown ItemType, skipping Item:" << itemJson[ "Id" ].asUInt();
+            qWarning() << "ItemFactory::createItemCatalog" << "Unknown ItemType, skipping Item:" << itemJson[ "Id" ].asUInt();
             continue;
         }
 
@@ -71,8 +68,7 @@ void ItemFactory::saveItemCatalog( const QString& configPath, const ItemCatalog&
         json[ "Items" ].append( itemJson );
     }
 
-    qInfo() << "ItemFactory::saveItemCatalog"
-            << "[ITEMS_FILE_PATH]" << itemsFile;
+    qInfo() << "ItemFactory::saveItemCatalog" << "[ITEMS_FILE_PATH]" << itemsFile;
 
     JsonHelper::saveJsonFile( itemsFile, json );
 }
