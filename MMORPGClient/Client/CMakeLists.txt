@@ -11,6 +11,8 @@ set(PROJECT_SOURCES
     Application/Sync/SyncPageControl.h
     Manager/AccountManager.cpp
     Manager/AccountManager.h
+    Manager/ClientMessageReceiverManager.cpp
+    Manager/ClientMessageReceiverManager.h
     Manager/ServerManager.cpp
     Manager/ServerManager.h
     Renderer/ClientRenderWorld.cpp
