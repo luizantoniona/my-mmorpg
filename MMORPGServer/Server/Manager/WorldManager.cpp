@@ -2,14 +2,10 @@
 
 #include <chrono>
 
+#include <QDebug>
+
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/World/WorldFactory.h>
-
-namespace {
-
-constexpr int DEFAULT_TICK_RATE = 20;
-
-} // namespace
 
 namespace Server {
 
@@ -22,17 +18,22 @@ WorldManager::WorldManager() :
 WorldManager::~WorldManager() {
 }
 
-void WorldManager::initialize( const std::string& worldPath ) {
+bool WorldManager::initialize( const std::string& worldPath ) {
     if ( !_runtime ) {
         const Json::Value configJson = Engine::JsonHelper::loadJsonFile( worldPath + "Config.json" );
-        const int tickRate = configJson[ "Server" ].get( "TickRate", DEFAULT_TICK_RATE ).asInt();
+        const Json::Value tickRateJson = configJson[ "Server" ][ "TickRate" ];
 
-        _runtime = std::make_unique<WorldRuntime>( Engine::WorldFactory::createWorld( worldPath ), tickRate );
+        if ( !tickRateJson.isInt() || tickRateJson.asInt() <= 0 ) {
+            qCritical() << "[WorldManager] Invalid Server.TickRate in Config.json, expected a positive integer [VALUE]" << QString::fromStdString( Engine::JsonHelper::writeJsonString( tickRateJson ) );
+            return false;
+        }
+
+        _runtime = std::make_unique<WorldRuntime>( Engine::WorldFactory::createWorld( worldPath ), tickRateJson.asInt() );
         _runtime->spawnCreaturesFromAreas();
     }
 
     if ( _running ) {
-        return;
+        return true;
     }
 
     const int msPerTick = 1000 / _runtime->tickRate();
@@ -50,6 +51,8 @@ void WorldManager::initialize( const std::string& worldPath ) {
             std::this_thread::sleep_until( nextTick );
         }
     } );
+
+    return true;
 }
 
 void WorldManager::finalize() {
