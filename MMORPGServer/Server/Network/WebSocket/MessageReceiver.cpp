@@ -74,7 +74,7 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
     const Engine::WorldModel* world = _worldRuntime->world();
     const Engine::WorldTileModel* worldTile = world ? world->tile( newX, newY, z ) : nullptr;
 
-    if ( worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable() && !_worldRuntime->isPositionOccupied( newX, newY, z ) && _worldRuntime->isCharacterMoveDue( idCharacter ) ) {
+    if ( worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable() && !_worldRuntime->isPositionOccupied( newX, newY, z ) && character->movement().isReady() ) {
         _worldRuntime->moveCharacter( idCharacter, newX, newY, z );
 
         qInfo() << "[MessageReceiver] Character moved [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
@@ -107,14 +107,20 @@ void MessageReceiver::receiveAttack( const drogon::WebSocketConnectionPtr& conne
     const int z = currentPosition.z();
 
     Engine::CreatureModel* creature = _worldRuntime->creatureAt( targetX, targetY, z );
+    const bool hasStamina = character->vitals().stamina() >= ATTACK_STAMINA_COST;
+    const bool attackDue = character->combat().isReady();
 
-    if ( creature && character->vitals().stamina() >= ATTACK_STAMINA_COST && _worldRuntime->isCharacterAttackDue( idCharacter ) ) {
-        _worldRuntime->attackCreature( idCharacter, creature->idCreature(), ATTACK_DAMAGE, ATTACK_STAMINA_COST );
+    if ( creature && hasStamina && attackDue ) {
+        const int idCreature = creature->idCreature();
 
-        qInfo() << "[MessageReceiver] Character attacked creature [CHARACTER]" << idCharacter << "[CREATURE]" << creature->idCreature();
+        _worldRuntime->attackCreature( idCharacter, idCreature, ATTACK_DAMAGE, ATTACK_STAMINA_COST );
+
+        qInfo() << "[MessageReceiver] Character attacked creature [CHARACTER]" << idCharacter << "[CREATURE]" << idCreature;
 
     } else {
-        qInfo() << "[MessageReceiver] Attack blocked [CHARACTER]" << idCharacter << "[X]" << targetX << "[Y]" << targetY << "[Z]" << z;
+        qInfo() << "[MessageReceiver] Attack blocked [CHARACTER]" << idCharacter << "[X]" << targetX << "[Y]" << targetY << "[Z]" << z
+                << "[HAS_CREATURE]" << ( creature != nullptr ) << "[HAS_STAMINA]" << hasStamina << "[STAMINA]" << character->vitals().stamina()
+                << "[ATTACK_DUE]" << attackDue;
     }
 }
 

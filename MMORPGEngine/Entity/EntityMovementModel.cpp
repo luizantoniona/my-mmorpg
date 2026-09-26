@@ -30,4 +30,8 @@ void EntityMovementModel::setCounter( int counter ) {
     _movementCounter = counter;
 }
 
+bool EntityMovementModel::isReady() const {
+    return _movementCounter >= _movementCooldown;
+}
+
 } // namespace Engine

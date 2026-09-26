@@ -176,56 +176,44 @@ TEST( WorldRuntimeTest, MoveCharacter_UnknownId_DoesNotPublish ) {
     EXPECT_FALSE( published );
 }
 
-TEST( WorldRuntimeTest, IsCharacterMoveDue_JustAdded_ReturnsTrue ) {
+TEST( WorldRuntimeTest, CharacterMovement_JustAdded_IsReady ) {
     Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
-    EXPECT_TRUE( worldRuntime.isCharacterMoveDue( 1 ) );
+    EXPECT_TRUE( character->movement().isReady() );
 }
 
-TEST( WorldRuntimeTest, IsCharacterMoveDue_UnknownId_ReturnsFalse ) {
+TEST( WorldRuntimeTest, CharacterMovement_RightAfterMove_IsNotReady ) {
     Server::WorldRuntime worldRuntime( nullptr );
-
-    EXPECT_FALSE( worldRuntime.isCharacterMoveDue( 1 ) );
-}
-
-TEST( WorldRuntimeTest, IsCharacterMoveDue_RightAfterMove_ReturnsFalse ) {
-    Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
     worldRuntime.moveCharacter( 1, 1, 0, 0 );
 
-    EXPECT_FALSE( worldRuntime.isCharacterMoveDue( 1 ) );
+    EXPECT_FALSE( character->movement().isReady() );
 }
 
-TEST( WorldRuntimeTest, IsCharacterMoveDue_AfterEnoughTicks_ReturnsTrueAgain ) {
+TEST( WorldRuntimeTest, CharacterMovement_AfterEnoughTicks_IsReadyAgain ) {
     Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
     worldRuntime.moveCharacter( 1, 1, 0, 0 );
-    ASSERT_FALSE( worldRuntime.isCharacterMoveDue( 1 ) );
+    ASSERT_FALSE( character->movement().isReady() );
 
     for ( int tick = 0; tick < 20; ++tick ) {
         worldRuntime.tick();
     }
 
-    EXPECT_TRUE( worldRuntime.isCharacterMoveDue( 1 ) );
+    EXPECT_TRUE( character->movement().isReady() );
 }
 
-TEST( WorldRuntimeTest, IsCharacterAttackDue_JustAdded_ReturnsTrue ) {
+TEST( WorldRuntimeTest, CharacterCombat_JustAdded_IsReady ) {
     Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
-    EXPECT_TRUE( worldRuntime.isCharacterAttackDue( 1 ) );
+    EXPECT_TRUE( character->combat().isReady() );
 }
 
-TEST( WorldRuntimeTest, IsCharacterAttackDue_UnknownId_ReturnsFalse ) {
-    Server::WorldRuntime worldRuntime( nullptr );
-
-    EXPECT_FALSE( worldRuntime.isCharacterAttackDue( 1 ) );
-}
-
-TEST( WorldRuntimeTest, IsCharacterAttackDue_RightAfterAttack_ReturnsFalse ) {
+TEST( WorldRuntimeTest, CharacterCombat_RightAfterAttack_IsNotReady ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
     character->vitals().setStamina( 100.0 );
@@ -234,10 +222,10 @@ TEST( WorldRuntimeTest, IsCharacterAttackDue_RightAfterAttack_ReturnsFalse ) {
 
     worldRuntime.attackCreature( 1, 2, 5.0, 10.0 );
 
-    EXPECT_FALSE( worldRuntime.isCharacterAttackDue( 1 ) );
+    EXPECT_FALSE( character->combat().isReady() );
 }
 
-TEST( WorldRuntimeTest, IsCharacterAttackDue_AfterEnoughTicks_ReturnsTrueAgain ) {
+TEST( WorldRuntimeTest, CharacterCombat_AfterEnoughTicks_IsReadyAgain ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
     character->vitals().setStamina( 100.0 );
@@ -245,13 +233,13 @@ TEST( WorldRuntimeTest, IsCharacterAttackDue_AfterEnoughTicks_ReturnsTrueAgain )
     creature->vitals().setHealth( 100.0 );
 
     worldRuntime.attackCreature( 1, 2, 5.0, 10.0 );
-    ASSERT_FALSE( worldRuntime.isCharacterAttackDue( 1 ) );
+    ASSERT_FALSE( character->combat().isReady() );
 
     for ( int tick = 0; tick < 20; ++tick ) {
         worldRuntime.tick();
     }
 
-    EXPECT_TRUE( worldRuntime.isCharacterAttackDue( 1 ) );
+    EXPECT_TRUE( character->combat().isReady() );
 }
 
 TEST( WorldRuntimeTest, CharactersNear_ExcludesSelf ) {

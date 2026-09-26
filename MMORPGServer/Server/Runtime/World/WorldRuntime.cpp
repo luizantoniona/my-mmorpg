@@ -8,7 +8,6 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 #include <MMORPGEngine/Data/DataManager.h>
-#include <MMORPGEngine/Entity/EntityCombatModel.h>
 #include <MMORPGEngine/Entity/EntityMovementModel.h>
 #include <MMORPGEngine/World/WorldConstants.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
@@ -217,30 +216,6 @@ std::vector<int> WorldRuntime::charactersNear( int idCharacter ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
     return charactersNearLocked( idCharacter );
-}
-
-bool WorldRuntime::isCharacterMoveDue( int idCharacter ) {
-    std::lock_guard<std::mutex> lock( _mutex );
-
-    auto it = _characters.find( idCharacter );
-    if ( it == _characters.end() ) {
-        return false;
-    }
-
-    const Engine::EntityMovementModel& movement = it->second->character()->movement();
-    return movement.counter() >= movement.cooldown();
-}
-
-bool WorldRuntime::isCharacterAttackDue( int idCharacter ) {
-    std::lock_guard<std::mutex> lock( _mutex );
-
-    auto it = _characters.find( idCharacter );
-    if ( it == _characters.end() ) {
-        return false;
-    }
-
-    const Engine::EntityCombatModel& combat = it->second->character()->combat();
-    return combat.counter() >= combat.cooldown();
 }
 
 bool WorldRuntime::isPositionOccupied( int x, int y, int z ) {

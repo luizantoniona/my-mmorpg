@@ -13,6 +13,8 @@ public:
     int counter() const;
     void setCounter( int counter );
 
+    bool isReady() const;
+
 private:
     int _movementCooldown;
     int _movementCounter;

@@ -48,8 +48,6 @@ public:
     std::vector<int> charactersNear( int idCharacter );
 
     bool isPositionOccupied( int x, int y, int z );
-    bool isCharacterMoveDue( int idCharacter );
-    bool isCharacterAttackDue( int idCharacter );
 
     void tick();
 

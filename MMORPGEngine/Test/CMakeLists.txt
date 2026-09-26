@@ -7,6 +7,8 @@ add_executable(
   CameraTest.cpp
   CharacterDTOTest.cpp
   ChunkModelTest.cpp
+  EntityCombatModelTest.cpp
+  EntityMovementModelTest.cpp
   FloorFactoryTest.cpp
   ItemCatalogTest.cpp
   ItemFactoryTest.cpp

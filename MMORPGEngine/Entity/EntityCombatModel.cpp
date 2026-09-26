@@ -29,4 +29,8 @@ void EntityCombatModel::setCounter( int counter ) {
     _attackCounter = counter;
 }
 
+bool EntityCombatModel::isReady() const {
+    return _attackCounter >= _attackCooldown;
+}
+
 } // namespace Engine
