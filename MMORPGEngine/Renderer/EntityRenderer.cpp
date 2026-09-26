@@ -7,11 +7,7 @@ namespace Engine {
 EntityRenderer::EntityRenderer() {
 }
 
-void EntityRenderer::render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z, const QImage& texture ) {
-    if ( texture.isNull() ) {
-        return;
-    }
-
+void EntityRenderer::render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z ) {
     const QRectF visibleRect = camera.visibleRect();
 
     const int startX = static_cast<int>( std::floor( visibleRect.left() / WorldConstants::TILE_SIZE ) );
@@ -24,10 +20,14 @@ void EntityRenderer::render( RenderScene& scene, const Camera& camera, const Ren
             continue;
         }
 
-        const QPointF position( entity.x * WorldConstants::TILE_SIZE, ( entity.y + 1 ) * WorldConstants::TILE_SIZE - texture.height() );
-        const QSizeF size( texture.width(), texture.height() );
+        if ( entity.texture.isNull() ) {
+            continue;
+        }
 
-        scene.addTexture( position, size, texture );
+        const QPointF position( entity.x * WorldConstants::TILE_SIZE, ( entity.y + 1 ) * WorldConstants::TILE_SIZE - entity.texture.height() );
+        const QSizeF size( entity.texture.width(), entity.texture.height() );
+
+        scene.addTexture( position, size, entity.texture );
     }
 }
 

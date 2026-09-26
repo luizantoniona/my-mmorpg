@@ -159,6 +159,8 @@ set(PROJECT_SOURCES
     Renderer/Renderer.h
     Renderer/EntityRenderer.cpp
     Renderer/EntityRenderer.h
+    Renderer/EntityTextureModel.cpp
+    Renderer/EntityTextureModel.h
     Renderer/ObjectRenderer.cpp
     Renderer/ObjectRenderer.h
     Renderer/TileRenderer.cpp

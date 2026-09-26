@@ -27,8 +27,14 @@ public:
     uint32_t width() const override;
     uint32_t height() const override;
 
-    Q_INVOKABLE void setEntity( int idEntity, int x, int y, int z );
-    Q_INVOKABLE void removeEntity( int idEntity );
+    Q_INVOKABLE void setOwnCharacter( int idCharacter, int x, int y, int z );
+
+    Q_INVOKABLE void addCharacter( int idCharacter, int x, int y, int z );
+    Q_INVOKABLE void removeCharacter( int idCharacter );
+
+    Q_INVOKABLE void addCreature( int idCreature, int x, int y, int z );
+    Q_INVOKABLE void removeCreature( int idCreature );
+
     Q_INVOKABLE void clearEntities();
 
 private:
@@ -40,7 +46,9 @@ private:
     };
 
     Engine::WorldModel* _world;
-    QHash<int, EntityPosition> _entities;
+    QHash<int, EntityPosition> _ownCharacter;
+    QHash<int, EntityPosition> _characters;
+    QHash<int, EntityPosition> _creatures;
 };
 
 #endif // CLIENTRENDERWORLD_H

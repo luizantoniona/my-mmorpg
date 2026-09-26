@@ -2,6 +2,7 @@
 
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
+#include <MMORPGEngine/Renderer/EntityTextureModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 
 ServerRenderWorld::ServerRenderWorld( QObject* parent ) :
@@ -49,7 +50,7 @@ QList<Engine::RenderWorld::Entity> ServerRenderWorld::entities( int z ) const {
             continue;
         }
 
-        result.append( Engine::RenderWorld::Entity( entry.first, position.x(), position.y(), Engine::RenderWorld::EntityKindEnum::Character ) );
+        result.append( Engine::RenderWorld::Entity( entry.first, position.x(), position.y(), Engine::EntityTextureModel::characterTexture() ) );
     }
 
     for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
@@ -59,7 +60,7 @@ QList<Engine::RenderWorld::Entity> ServerRenderWorld::entities( int z ) const {
             continue;
         }
 
-        result.append( Engine::RenderWorld::Entity( creature.idCreature(), position.x(), position.y(), Engine::RenderWorld::EntityKindEnum::Creature ) );
+        result.append( Engine::RenderWorld::Entity( creature.idCreature(), position.x(), position.y(), Engine::EntityTextureModel::creatureTexture() ) );
     }
 
     return result;

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 
+#include <QImage>
 #include <QList>
 #include <QObject>
 
@@ -21,6 +22,7 @@ public:
         int idEntity;
         int x;
         int y;
+        QImage texture;
     };
 
     explicit RenderWorld( QObject* parent = nullptr );

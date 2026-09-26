@@ -13,7 +13,7 @@ class EntityRenderer {
 public:
     EntityRenderer();
 
-    void render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z, const QImage& texture );
+    void render( RenderScene& scene, const Camera& camera, const RenderWorld& world, int z );
 };
 
 } // namespace Engine

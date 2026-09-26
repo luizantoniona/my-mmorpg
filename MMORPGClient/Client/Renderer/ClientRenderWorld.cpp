@@ -1,9 +1,13 @@
 #include "ClientRenderWorld.h"
 
+#include <MMORPGEngine/Renderer/EntityTextureModel.h>
+
 ClientRenderWorld::ClientRenderWorld( QObject* parent ) :
     Engine::RenderWorld( parent ),
     _world( nullptr ),
-    _entities() {
+    _ownCharacter(),
+    _characters(),
+    _creatures() {
 }
 
 Engine::WorldModel* ClientRenderWorld::world() const {
@@ -35,12 +39,28 @@ const Engine::WorldTileModel* ClientRenderWorld::tile( int x, int y, int z ) con
 QList<Engine::RenderWorld::Entity> ClientRenderWorld::entities( int z ) const {
     QList<Engine::RenderWorld::Entity> result;
 
-    for ( auto it = _entities.constBegin(); it != _entities.constEnd(); ++it ) {
+    for ( auto it = _ownCharacter.constBegin(); it != _ownCharacter.constEnd(); ++it ) {
         if ( it->z != z ) {
             continue;
         }
 
-        result.append( Engine::RenderWorld::Entity( it.key(), it->x, it->y ) );
+        result.append( Engine::RenderWorld::Entity( it.key(), it->x, it->y, Engine::EntityTextureModel::characterTexture() ) );
+    }
+
+    for ( auto it = _characters.constBegin(); it != _characters.constEnd(); ++it ) {
+        if ( it->z != z ) {
+            continue;
+        }
+
+        result.append( Engine::RenderWorld::Entity( it.key(), it->x, it->y, Engine::EntityTextureModel::characterTexture() ) );
+    }
+
+    for ( auto it = _creatures.constBegin(); it != _creatures.constEnd(); ++it ) {
+        if ( it->z != z ) {
+            continue;
+        }
+
+        result.append( Engine::RenderWorld::Entity( it.key(), it->x, it->y, Engine::EntityTextureModel::creatureTexture() ) );
     }
 
     return result;
@@ -70,14 +90,29 @@ uint32_t ClientRenderWorld::height() const {
     return _world->height();
 }
 
-void ClientRenderWorld::setEntity( int idEntity, int x, int y, int z ) {
-    _entities.insert( idEntity, EntityPosition( x, y, z ) );
+void ClientRenderWorld::setOwnCharacter( int idCharacter, int x, int y, int z ) {
+    _ownCharacter.clear();
+    _ownCharacter.insert( idCharacter, EntityPosition( x, y, z ) );
 }
 
-void ClientRenderWorld::removeEntity( int idEntity ) {
-    _entities.remove( idEntity );
+void ClientRenderWorld::addCharacter( int idCharacter, int x, int y, int z ) {
+    _characters.insert( idCharacter, EntityPosition( x, y, z ) );
+}
+
+void ClientRenderWorld::removeCharacter( int idCharacter ) {
+    _characters.remove( idCharacter );
+}
+
+void ClientRenderWorld::addCreature( int idCreature, int x, int y, int z ) {
+    _creatures.insert( idCreature, EntityPosition( x, y, z ) );
+}
+
+void ClientRenderWorld::removeCreature( int idCreature ) {
+    _creatures.remove( idCreature );
 }
 
 void ClientRenderWorld::clearEntities() {
-    _entities.clear();
+    _ownCharacter.clear();
+    _characters.clear();
+    _creatures.clear();
 }
