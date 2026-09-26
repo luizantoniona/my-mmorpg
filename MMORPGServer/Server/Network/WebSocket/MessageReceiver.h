@@ -18,6 +18,7 @@ public:
 
 private:
     void receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson );
+    void receiveAttack( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson );
 
 private:
     WorldRuntime* _worldRuntime;

@@ -15,21 +15,7 @@ on:
       - "**/*.md"
 
 jobs:
-  prepare-vcpkg:
-    runs-on: windows-2022
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup build environment
-        uses: ./.github/actions/setup-build-env
-
-      - name: Install vcpkg manifest dependencies
-        run: '& "${{ github.workspace }}\vcpkg\vcpkg.exe" install --triplet x64-windows'
-
   engine-tests:
-    needs: prepare-vcpkg
     runs-on: windows-2022
 
     steps:
@@ -54,7 +40,6 @@ jobs:
         run: ctest --test-dir build/MMORPGEngine/Test -C Release --output-on-failure
 
   server-tests:
-    needs: prepare-vcpkg
     runs-on: windows-2022
 
     steps:
@@ -79,7 +64,6 @@ jobs:
         run: ctest --test-dir build/MMORPGServer/Test -C Release --output-on-failure
 
   client-tests:
-    needs: prepare-vcpkg
     runs-on: windows-2022
 
     steps:
@@ -104,7 +88,6 @@ jobs:
         run: ctest --test-dir build/MMORPGClient/Test -C Release --output-on-failure
 
   editor-tests:
-    needs: prepare-vcpkg
     runs-on: windows-2022
 
     steps:

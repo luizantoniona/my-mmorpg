@@ -181,7 +181,7 @@ void WorldModel::setTile( int x, int y, int z, uint32_t tileType ) {
     worldTile->setTileType( tileType );
 }
 
-std::vector<MonsterSpawnAreaModel> WorldModel::spawnAreas( int z ) const {
+std::vector<CreatureSpawnAreaModel> WorldModel::spawnAreas( int z ) const {
     const auto iterator = _spawnAreas.find( z );
 
     if ( iterator == _spawnAreas.end() ) {
@@ -191,18 +191,18 @@ std::vector<MonsterSpawnAreaModel> WorldModel::spawnAreas( int z ) const {
     return iterator->second;
 }
 
-void WorldModel::addSpawnArea( int z, const MonsterSpawnAreaModel& spawnArea ) {
+void WorldModel::addSpawnArea( int z, const CreatureSpawnAreaModel& spawnArea ) {
     _spawnAreas[ z ].push_back( spawnArea );
 }
 
-const MonsterSpawnAreaModel* WorldModel::spawnAreaAt( int x, int y, int z ) const {
+const CreatureSpawnAreaModel* WorldModel::spawnAreaAt( int x, int y, int z ) const {
     const auto iterator = _spawnAreas.find( z );
 
     if ( iterator == _spawnAreas.end() ) {
         return nullptr;
     }
 
-    for ( const MonsterSpawnAreaModel& area : iterator->second ) {
+    for ( const CreatureSpawnAreaModel& area : iterator->second ) {
         if ( x >= area.x() && x < area.x() + static_cast<int>( area.width() ) && y >= area.y() && y < area.y() + static_cast<int>( area.height() ) ) {
             return &area;
         }
@@ -218,7 +218,7 @@ bool WorldModel::removeSpawnArea( int x, int y, int z ) {
         return false;
     }
 
-    std::vector<MonsterSpawnAreaModel>& areas = iterator->second;
+    std::vector<CreatureSpawnAreaModel>& areas = iterator->second;
 
     for ( auto it = areas.begin(); it != areas.end(); ++it ) {
         if ( x >= it->x() && x < it->x() + static_cast<int>( it->width() ) && y >= it->y() && y < it->y() + static_cast<int>( it->height() ) ) {

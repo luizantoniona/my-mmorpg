@@ -36,16 +36,20 @@ public:
     std::vector<Engine::CharacterModel> connectedCharacters();
 
     Engine::CreatureModel* addCreature( std::unique_ptr<Engine::CreatureModel> creature );
+    Engine::CreatureModel* creature( int idCreature );
+    Engine::CreatureModel* creatureAt( int x, int y, int z );
     std::vector<Engine::CreatureModel> creatures();
 
     void spawnCreaturesFromAreas();
 
     void moveCharacter( int idCharacter, int x, int y, int z );
+    bool attackCreature( int idCharacter, int idCreature, double damage, double staminaCost );
 
     std::vector<int> charactersNear( int idCharacter );
 
     bool isPositionOccupied( int x, int y, int z );
     bool isCharacterMoveDue( int idCharacter );
+    bool isCharacterAttackDue( int idCharacter );
 
     void tick();
 

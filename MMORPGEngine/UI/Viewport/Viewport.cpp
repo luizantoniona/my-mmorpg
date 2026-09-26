@@ -2,6 +2,7 @@
 
 #include <QColor>
 #include <QCursor>
+#include <QHoverEvent>
 #include <QSGSimpleRectNode>
 
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
@@ -22,11 +23,13 @@ Viewport::Viewport( QQuickItem* parent ) :
     _animationTimer( new QTimer( this ) ),
     _overlayRects(),
     _highlightRects(),
+    _hoveredTile( 0, 0 ),
     _activeFloor( 0 ) {
 
     setFlag( ItemHasContents, true );
 
     setAcceptedMouseButtons( Qt::LeftButton | Qt::RightButton );
+    setAcceptHoverEvents( true );
 
     _renderer->initialize();
     _renderer->resize( size() );
@@ -137,6 +140,10 @@ void Viewport::setCursorShape( int shape ) {
     emit cursorShapeChanged();
 }
 
+QPoint Viewport::hoveredTile() const {
+    return _hoveredTile;
+}
+
 void Viewport::setHighlightedTile( int x, int y ) {
     if ( !_highlightRects.isEmpty() && _highlightRects.first().x == x && _highlightRects.first().y == y ) {
         return;
@@ -217,13 +224,9 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
         return;
     }
 
-    const QPointF screenPosition = event->position();
-    const QPointF worldPosition = _camera->screenToWorld( screenPosition );
-
-    const double tileSize = WorldConstants::TILE_SIZE;
-
-    const int x = static_cast<int>( std::floor( worldPosition.x() / tileSize ) );
-    const int y = static_cast<int>( std::floor( worldPosition.y() / tileSize ) );
+    const QPoint tile = screenToTile( event->position() );
+    const int x = tile.x();
+    const int y = tile.y();
     const int z = _activeFloor;
 
     if ( x < 0 || y < 0 || x >= static_cast<int>( _world->width() ) || y >= static_cast<int>( _world->height() ) ) {
@@ -236,6 +239,29 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
     }
 
     emit tileClicked( x, y, z );
+}
+
+void Viewport::hoverMoveEvent( QHoverEvent* event ) {
+    const QPoint tile = screenToTile( event->position() );
+
+    if ( tile == _hoveredTile ) {
+        return;
+    }
+
+    _hoveredTile = tile;
+
+    emit hoveredTileChanged();
+}
+
+QPoint Viewport::screenToTile( const QPointF& screenPosition ) const {
+    const QPointF worldPosition = _camera->screenToWorld( screenPosition );
+
+    const double tileSize = WorldConstants::TILE_SIZE;
+
+    const int x = static_cast<int>( std::floor( worldPosition.x() / tileSize ) );
+    const int y = static_cast<int>( std::floor( worldPosition.y() / tileSize ) );
+
+    return QPoint( x, y );
 }
 
 QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {

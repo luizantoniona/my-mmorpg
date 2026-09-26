@@ -1,13 +1,13 @@
-#ifndef MONSTERSPAWNENTRYMODEL_H
-#define MONSTERSPAWNENTRYMODEL_H
+#ifndef CREATURESPAWNENTRYMODEL_H
+#define CREATURESPAWNENTRYMODEL_H
 
 #include <cstdint>
 
 namespace Engine {
 
-class MonsterSpawnEntryModel {
+class CreatureSpawnEntryModel {
 public:
-    MonsterSpawnEntryModel();
+    CreatureSpawnEntryModel();
 
     uint32_t type() const;
     void setType( uint32_t type );
@@ -22,4 +22,4 @@ private:
 
 } // namespace Engine
 
-#endif // MONSTERSPAWNENTRYMODEL_H
+#endif // CREATURESPAWNENTRYMODEL_H

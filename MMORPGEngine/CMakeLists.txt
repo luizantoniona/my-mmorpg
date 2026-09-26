@@ -43,16 +43,18 @@ set(PROJECT_SOURCES
     Data/Item/ItemTypeFactory.h
     Data/Item/ItemTypeModel.cpp
     Data/Item/ItemTypeModel.h
-    Data/Monster/MonsterCatalog.cpp
-    Data/Monster/MonsterCatalog.h
-    Data/Monster/MonsterFactory.cpp
-    Data/Monster/MonsterFactory.h
-    Data/Monster/MonsterModel.cpp
-    Data/Monster/MonsterModel.h
-    Data/Monster/MonsterSpawnAreaModel.cpp
-    Data/Monster/MonsterSpawnAreaModel.h
-    Data/Monster/MonsterSpawnEntryModel.cpp
-    Data/Monster/MonsterSpawnEntryModel.h
+    Data/Creature/CreatureSpawnAreaModel.cpp
+    Data/Creature/CreatureSpawnAreaModel.h
+    Data/Creature/CreatureSpawnEntryModel.cpp
+    Data/Creature/CreatureSpawnEntryModel.h
+    Data/Creature/CreatureTypeCatalog.cpp
+    Data/Creature/CreatureTypeCatalog.h
+    Data/Creature/CreatureTypeFactory.cpp
+    Data/Creature/CreatureTypeFactory.h
+    Data/Creature/CreatureTypeModel.cpp
+    Data/Creature/CreatureTypeModel.h
+    Data/Creature/CreatureTypeVitalsModel.cpp
+    Data/Creature/CreatureTypeVitalsModel.h
     Data/Object/ObjectCatalog.cpp
     Data/Object/ObjectCatalog.h
     Data/Object/ObjectFactory.cpp
@@ -95,6 +97,8 @@ set(PROJECT_SOURCES
     Data/DataManager.cpp
     Data/DataManager.h
     Entity/Character/CharacterDTO.cpp
+    Entity/Character/CharacterAttackDTO.cpp
+    Entity/Character/CharacterAttackDTO.h
     Entity/Character/CharacterDTO.h
     Entity/Character/CharacterEquipmentDTO.cpp
     Entity/Character/CharacterEquipmentDTO.h
@@ -123,8 +127,12 @@ set(PROJECT_SOURCES
     Entity/Creature/CreatureModel.h
     Entity/Creature/CreatureDTO.cpp
     Entity/Creature/CreatureDTO.h
+    Entity/Creature/CreatureLeftDTO.cpp
+    Entity/Creature/CreatureLeftDTO.h
     Entity/EntityLeftDTO.cpp
     Entity/EntityLeftDTO.h
+    Entity/EntityCombatModel.cpp
+    Entity/EntityCombatModel.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
     Entity/EntityMovementModel.cpp

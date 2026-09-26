@@ -5,10 +5,10 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Creature/CreatureTypeFactory.h>
 #include <MMORPGEngine/Data/Item/ItemFactory.h>
 #include <MMORPGEngine/Data/Item/ItemTypeFactory.h>
 #include <MMORPGEngine/Data/Manifest/ManifestFactory.h>
-#include <MMORPGEngine/Data/Monster/MonsterFactory.h>
 #include <MMORPGEngine/Data/Object/ObjectFactory.h>
 #include <MMORPGEngine/Data/Skill/SkillFactory.h>
 #include <MMORPGEngine/Data/Tile/TileFactory.h>
@@ -22,7 +22,7 @@ DataManager::DataManager() :
     _itemTypeCatalog(),
     _itemCatalog(),
     _skillCatalog(),
-    _monsterCatalog() {
+    _creatureTypeCatalog() {
 }
 
 DataManager::~DataManager() = default;
@@ -35,7 +35,7 @@ void DataManager::initialize( const std::string& configPath ) {
     ItemTypeFactory::createItemTypeCatalog( QString::fromStdString( configPath ), _itemTypeCatalog );
     ItemFactory::createItemCatalog( QString::fromStdString( configPath ), _itemTypeCatalog, _itemCatalog );
     SkillFactory::createSkillCatalog( QString::fromStdString( configPath ), _itemTypeCatalog, _skillCatalog );
-    MonsterFactory::createMonsterCatalog( QString::fromStdString( configPath ), _monsterCatalog );
+    CreatureTypeFactory::createCreatureTypeCatalog( QString::fromStdString( configPath ), _creatureTypeCatalog );
 }
 
 void DataManager::reload( const std::string& configPath ) {
@@ -44,7 +44,7 @@ void DataManager::reload( const std::string& configPath ) {
     _itemTypeCatalog = ItemTypeCatalog();
     _itemCatalog = ItemCatalog();
     _skillCatalog = SkillCatalog();
-    _monsterCatalog = MonsterCatalog();
+    _creatureTypeCatalog = CreatureTypeCatalog();
 
     initialize( configPath );
 }
@@ -100,12 +100,12 @@ void DataManager::addSkillTree( const SkillTreeModel& skillTree ) {
     _skillCatalog.addTree( skillTree );
 }
 
-const MonsterCatalog& DataManager::monsterCatalog() const {
-    return _monsterCatalog;
+const CreatureTypeCatalog& DataManager::creatureTypeCatalog() const {
+    return _creatureTypeCatalog;
 }
 
-void DataManager::addMonster( const MonsterModel& monster ) {
-    _monsterCatalog.addMonster( monster );
+void DataManager::addCreatureType( const CreatureTypeModel& creatureType ) {
+    _creatureTypeCatalog.addCreatureType( creatureType );
 }
 
 } // namespace Engine

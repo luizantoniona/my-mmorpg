@@ -12,6 +12,7 @@ enum class ServerMessageType {
     CHARACTER,
     CREATURE,
     ENTITY_LEFT,
+    CREATURE_LEFT,
 };
 
 } // namespace Engine

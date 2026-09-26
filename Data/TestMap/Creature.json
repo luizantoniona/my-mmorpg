@@ -1,0 +1,11 @@
+{
+    "Creatures": [
+        {
+            "Type": 1,
+            "Name": "Goblin",
+            "Vitals": {
+                "MaxHealth": 10
+            }
+        }
+    ]
+}

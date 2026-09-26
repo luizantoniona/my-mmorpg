@@ -6,9 +6,9 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnAreaModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnEntryModel.h>
 #include <MMORPGEngine/Data/DataManager.h>
-#include <MMORPGEngine/Data/Monster/MonsterSpawnAreaModel.h>
-#include <MMORPGEngine/Data/Monster/MonsterSpawnEntryModel.h>
 #include <MMORPGEngine/World/WorldConstants.h>
 
 namespace Engine {
@@ -126,7 +126,7 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
     const Json::Value& spawnAreas = floorJson[ "SpawnAreas" ];
     if ( spawnAreas.isArray() ) {
 
-        const MonsterCatalog& monsterCatalog = Singleton<DataManager>::instance().monsterCatalog();
+        const CreatureTypeCatalog& creatureTypeCatalog = Singleton<DataManager>::instance().creatureTypeCatalog();
 
         for ( const Json::Value& areaJson : spawnAreas ) {
 
@@ -135,34 +135,34 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
                 continue;
             }
 
-            MonsterSpawnAreaModel area;
+            CreatureSpawnAreaModel area;
             area.setX( areaJson[ "X" ].asInt() );
             area.setY( areaJson[ "Y" ].asInt() );
             area.setWidth( areaJson[ "Width" ].asUInt() );
             area.setHeight( areaJson[ "Height" ].asUInt() );
 
-            std::vector<MonsterSpawnEntryModel> entries;
-            for ( const Json::Value& entryJson : areaJson[ "Monsters" ] ) {
+            std::vector<CreatureSpawnEntryModel> entries;
+            for ( const Json::Value& entryJson : areaJson[ "Creatures" ] ) {
 
                 if ( !entryJson.isMember( "Type" ) || !entryJson.isMember( "Quantity" ) ) {
-                    qWarning() << "FloorFactory::createFloor" << "Invalid SpawnArea Monster entry, skipping";
+                    qWarning() << "FloorFactory::createFloor" << "Invalid SpawnArea Creature entry, skipping";
                     continue;
                 }
 
-                const uint32_t monsterType = entryJson[ "Type" ].asUInt();
+                const uint32_t creatureType = entryJson[ "Type" ].asUInt();
 
-                if ( !monsterCatalog.monster( monsterType ) ) {
-                    qWarning() << "FloorFactory::createFloor" << "Unknown monster type:" << monsterType << "in SpawnArea at x y z:" << area.x() << area.y() << z;
+                if ( !creatureTypeCatalog.creatureType( creatureType ) ) {
+                    qWarning() << "FloorFactory::createFloor" << "Unknown creature type:" << creatureType << "in SpawnArea at x y z:" << area.x() << area.y() << z;
                     continue;
                 }
 
-                MonsterSpawnEntryModel entry;
-                entry.setType( monsterType );
+                CreatureSpawnEntryModel entry;
+                entry.setType( creatureType );
                 entry.setQuantity( entryJson[ "Quantity" ].asUInt() );
 
                 entries.push_back( entry );
             }
-            area.setMonsters( entries );
+            area.setCreatures( entries );
 
             world->addSpawnArea( z, area );
         }
@@ -211,22 +211,22 @@ void FloorFactory::saveFloor( const std::string& floorFile, const WorldModel& wo
     floorJson[ "Objects" ] = objectsJson;
 
     Json::Value spawnAreasJson( Json::arrayValue );
-    for ( const MonsterSpawnAreaModel& area : world.spawnAreas( z ) ) {
+    for ( const CreatureSpawnAreaModel& area : world.spawnAreas( z ) ) {
         Json::Value areaJson;
         areaJson[ "X" ] = area.x();
         areaJson[ "Y" ] = area.y();
         areaJson[ "Width" ] = area.width();
         areaJson[ "Height" ] = area.height();
 
-        Json::Value monstersJson( Json::arrayValue );
-        for ( const MonsterSpawnEntryModel& entry : area.monsters() ) {
+        Json::Value creaturesJson( Json::arrayValue );
+        for ( const CreatureSpawnEntryModel& entry : area.creatures() ) {
             Json::Value entryJson;
             entryJson[ "Type" ] = entry.type();
             entryJson[ "Quantity" ] = entry.quantity();
 
-            monstersJson.append( entryJson );
+            creaturesJson.append( entryJson );
         }
-        areaJson[ "Monsters" ] = monstersJson;
+        areaJson[ "Creatures" ] = creaturesJson;
 
         spawnAreasJson.append( areaJson );
     }

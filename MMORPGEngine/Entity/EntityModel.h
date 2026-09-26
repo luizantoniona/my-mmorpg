@@ -1,6 +1,7 @@
 #ifndef ENTITYMODEL_H
 #define ENTITYMODEL_H
 
+#include <MMORPGEngine/Entity/EntityCombatModel.h>
 #include <MMORPGEngine/Entity/EntityMovementModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntitySizeModel.h>
@@ -25,11 +26,15 @@ public:
     EntityMovementModel& movement();
     const EntityMovementModel& movement() const;
 
+    EntityCombatModel& combat();
+    const EntityCombatModel& combat() const;
+
 private:
     EntityPositionModel _position;
     EntitySizeModel _size;
     EntityVitalsModel _vitals;
     EntityMovementModel _movement;
+    EntityCombatModel _combat;
 };
 
 } // namespace Engine

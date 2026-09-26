@@ -4,8 +4,8 @@
 #include <set>
 #include <utility>
 
-#include <MMORPGEngine/Data/Monster/MonsterSpawnAreaModel.h>
-#include <MMORPGEngine/Data/Monster/MonsterSpawnEntryModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnAreaModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnEntryModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
@@ -35,16 +35,16 @@ std::unique_ptr<Engine::CreatureModel> makeCreature( int idCreature, int x, int 
 }
 
 std::unique_ptr<Engine::WorldModel> makeWorldWithSpawnArea( int z, int x, int y, uint32_t width, uint32_t height, uint32_t type, uint32_t quantity ) {
-    Engine::MonsterSpawnEntryModel entry;
+    Engine::CreatureSpawnEntryModel entry;
     entry.setType( type );
     entry.setQuantity( quantity );
 
-    Engine::MonsterSpawnAreaModel area;
+    Engine::CreatureSpawnAreaModel area;
     area.setX( x );
     area.setY( y );
     area.setWidth( width );
     area.setHeight( height );
-    area.setMonsters( { entry } );
+    area.setCreatures( { entry } );
 
     auto world = std::make_unique<Engine::WorldModel>();
     world->addFloor( z );
@@ -212,6 +212,48 @@ TEST( WorldRuntimeTest, IsCharacterMoveDue_AfterEnoughTicks_ReturnsTrueAgain ) {
     EXPECT_TRUE( worldRuntime.isCharacterMoveDue( 1 ) );
 }
 
+TEST( WorldRuntimeTest, IsCharacterAttackDue_JustAdded_ReturnsTrue ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    EXPECT_TRUE( worldRuntime.isCharacterAttackDue( 1 ) );
+}
+
+TEST( WorldRuntimeTest, IsCharacterAttackDue_UnknownId_ReturnsFalse ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    EXPECT_FALSE( worldRuntime.isCharacterAttackDue( 1 ) );
+}
+
+TEST( WorldRuntimeTest, IsCharacterAttackDue_RightAfterAttack_ReturnsFalse ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    worldRuntime.attackCreature( 1, 2, 5.0, 10.0 );
+
+    EXPECT_FALSE( worldRuntime.isCharacterAttackDue( 1 ) );
+}
+
+TEST( WorldRuntimeTest, IsCharacterAttackDue_AfterEnoughTicks_ReturnsTrueAgain ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    worldRuntime.attackCreature( 1, 2, 5.0, 10.0 );
+    ASSERT_FALSE( worldRuntime.isCharacterAttackDue( 1 ) );
+
+    for ( int tick = 0; tick < 20; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    EXPECT_TRUE( worldRuntime.isCharacterAttackDue( 1 ) );
+}
+
 TEST( WorldRuntimeTest, CharactersNear_ExcludesSelf ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
@@ -301,6 +343,37 @@ TEST( WorldRuntimeTest, Creatures_Empty_ReturnsEmptyVector ) {
     Server::WorldRuntime worldRuntime( nullptr );
 
     EXPECT_TRUE( worldRuntime.creatures().empty() );
+}
+
+TEST( WorldRuntimeTest, Creature_ById_ReturnsSameCreature ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+
+    ASSERT_NE( worldRuntime.creature( 1 ), nullptr );
+    EXPECT_EQ( worldRuntime.creature( 1 )->idCreature(), 1 );
+}
+
+TEST( WorldRuntimeTest, Creature_UnknownId_ReturnsNullptr ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    EXPECT_EQ( worldRuntime.creature( 99 ), nullptr );
+}
+
+TEST( WorldRuntimeTest, CreatureAt_PositionMatches_ReturnsCreature ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+
+    Engine::CreatureModel* creature = worldRuntime.creatureAt( 5, 5, 0 );
+
+    ASSERT_NE( creature, nullptr );
+    EXPECT_EQ( creature->idCreature(), 1 );
+}
+
+TEST( WorldRuntimeTest, CreatureAt_NoMatch_ReturnsNullptr ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+
+    EXPECT_EQ( worldRuntime.creatureAt( 6, 5, 0 ), nullptr );
 }
 
 TEST( WorldRuntimeTest, AddCreature_MultipleCreatures_AllReturned ) {
@@ -418,4 +491,96 @@ TEST( WorldRuntimeTest, Tick_CreatureDoesNotStepIntoTileOccupiedByCharacter ) {
     position = worldRuntime.creatures()[ 0 ].position();
     EXPECT_EQ( position.x(), 6 );
     EXPECT_EQ( position.y(), 5 );
+}
+
+TEST( WorldRuntimeTest, AttackCreature_AppliesDamageAndConsumesStamina ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    const bool applied = worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+
+    EXPECT_TRUE( applied );
+    EXPECT_DOUBLE_EQ( character->vitals().stamina(), 90.0 );
+    ASSERT_NE( worldRuntime.creature( 2 ), nullptr );
+    EXPECT_DOUBLE_EQ( worldRuntime.creature( 2 )->vitals().health(), 70.0 );
+}
+
+TEST( WorldRuntimeTest, AttackCreature_KillsCreature_RemovesFromWorld ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 10.0 );
+
+    worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+
+    EXPECT_EQ( worldRuntime.creature( 2 ), nullptr );
+}
+
+TEST( WorldRuntimeTest, AttackCreature_UnknownCharacter_ReturnsFalse ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+
+    EXPECT_FALSE( worldRuntime.attackCreature( 99, 2, 5.0, 10.0 ) );
+}
+
+TEST( WorldRuntimeTest, AttackCreature_UnknownCreature_ReturnsFalse ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    EXPECT_FALSE( worldRuntime.attackCreature( 1, 99, 5.0, 10.0 ) );
+}
+
+TEST( WorldRuntimeTest, AttackCreature_PublishesEntityVitalsChangedForCharacter ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    Json::Value receivedPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::ENTITY_VITALS_CHANGED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
+    } );
+
+    worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+
+    EXPECT_EQ( receivedPayload[ "idCharacter" ].asInt(), 1 );
+}
+
+TEST( WorldRuntimeTest, AttackCreature_PublishesCreatureVitalsChanged_WhenCreatureSurvives ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    Json::Value receivedPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CREATURE_VITALS_CHANGED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
+    } );
+
+    worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+
+    EXPECT_EQ( receivedPayload[ "idCreature" ].asInt(), 2 );
+}
+
+TEST( WorldRuntimeTest, AttackCreature_PublishesCreatureLeft_WhenCreatureDies ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 10.0 );
+
+    Json::Value receivedPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CREATURE_LEFT, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
+    } );
+
+    worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+
+    EXPECT_EQ( receivedPayload[ "idCreature" ].asInt(), 2 );
 }

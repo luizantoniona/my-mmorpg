@@ -2,7 +2,7 @@
 
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/DataManager.h>
-#include <MMORPGEngine/Data/Monster/MonsterSpawnAreaModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnAreaModel.h>
 #include <MMORPGEngine/Data/Tile/TileModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
@@ -109,14 +109,14 @@ TEST( WorldModelTest, SpawnAreas_Empty_ReturnsEmptyVector ) {
 TEST( WorldModelTest, AddSpawnArea_ThenGet_ReturnsSameArea ) {
     Engine::WorldModel world;
 
-    Engine::MonsterSpawnAreaModel area;
+    Engine::CreatureSpawnAreaModel area;
     area.setX( 1 );
     area.setY( 2 );
     area.setWidth( 3 );
     area.setHeight( 4 );
     world.addSpawnArea( 0, area );
 
-    const std::vector<Engine::MonsterSpawnAreaModel> areas = world.spawnAreas( 0 );
+    const std::vector<Engine::CreatureSpawnAreaModel> areas = world.spawnAreas( 0 );
 
     ASSERT_EQ( areas.size(), 1u );
     EXPECT_EQ( areas[ 0 ].x(), 1 );
@@ -128,7 +128,7 @@ TEST( WorldModelTest, AddSpawnArea_ThenGet_ReturnsSameArea ) {
 TEST( WorldModelTest, AddSpawnArea_DifferentFloors_AreIndependent ) {
     Engine::WorldModel world;
 
-    world.addSpawnArea( 0, Engine::MonsterSpawnAreaModel() );
+    world.addSpawnArea( 0, Engine::CreatureSpawnAreaModel() );
 
     EXPECT_EQ( world.spawnAreas( 0 ).size(), 1u );
     EXPECT_TRUE( world.spawnAreas( 1 ).empty() );
@@ -137,7 +137,7 @@ TEST( WorldModelTest, AddSpawnArea_DifferentFloors_AreIndependent ) {
 TEST( WorldModelTest, SpawnAreaAt_PointInsideArea_ReturnsArea ) {
     Engine::WorldModel world;
 
-    Engine::MonsterSpawnAreaModel area;
+    Engine::CreatureSpawnAreaModel area;
     area.setX( 10 );
     area.setY( 10 );
     area.setWidth( 4 );
@@ -151,7 +151,7 @@ TEST( WorldModelTest, SpawnAreaAt_PointInsideArea_ReturnsArea ) {
 TEST( WorldModelTest, SpawnAreaAt_PointOutsideArea_ReturnsNullptr ) {
     Engine::WorldModel world;
 
-    Engine::MonsterSpawnAreaModel area;
+    Engine::CreatureSpawnAreaModel area;
     area.setX( 10 );
     area.setY( 10 );
     area.setWidth( 4 );
@@ -164,7 +164,7 @@ TEST( WorldModelTest, SpawnAreaAt_PointOutsideArea_ReturnsNullptr ) {
 TEST( WorldModelTest, SpawnAreaAt_PointOnFarEdge_IsExcluded ) {
     Engine::WorldModel world;
 
-    Engine::MonsterSpawnAreaModel area;
+    Engine::CreatureSpawnAreaModel area;
     area.setX( 10 );
     area.setY( 10 );
     area.setWidth( 4 );
@@ -178,7 +178,7 @@ TEST( WorldModelTest, SpawnAreaAt_PointOnFarEdge_IsExcluded ) {
 TEST( WorldModelTest, RemoveSpawnArea_PointInsideArea_RemovesAndReturnsTrue ) {
     Engine::WorldModel world;
 
-    Engine::MonsterSpawnAreaModel area;
+    Engine::CreatureSpawnAreaModel area;
     area.setX( 10 );
     area.setY( 10 );
     area.setWidth( 4 );
@@ -192,7 +192,7 @@ TEST( WorldModelTest, RemoveSpawnArea_PointInsideArea_RemovesAndReturnsTrue ) {
 TEST( WorldModelTest, RemoveSpawnArea_PointOutsideArea_ReturnsFalse ) {
     Engine::WorldModel world;
 
-    Engine::MonsterSpawnAreaModel area;
+    Engine::CreatureSpawnAreaModel area;
     area.setX( 10 );
     area.setY( 10 );
     area.setWidth( 4 );

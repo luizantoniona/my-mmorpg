@@ -28,7 +28,15 @@ public:
     int z() const;
     void setZ( int z );
 
+    double health() const;
+    void setHealth( double health );
+
+    double maxHealth() const;
+    void setMaxHealth( double maxHealth );
+
 private:
+    double _health;
+    double _maxHealth;
     int _idCreature;
     int _x;
     int _y;

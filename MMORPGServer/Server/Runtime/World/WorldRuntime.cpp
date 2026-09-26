@@ -5,6 +5,10 @@
 
 #include <QDebug>
 
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
+#include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/Entity/EntityCombatModel.h>
 #include <MMORPGEngine/Entity/EntityMovementModel.h>
 #include <MMORPGEngine/World/WorldConstants.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
@@ -170,6 +174,45 @@ void WorldRuntime::moveCharacter( int idCharacter, int x, int y, int z ) {
     _eventBus.publish( WorldEvent( WorldEventType::ENTITY_MOVED, payload ) );
 }
 
+bool WorldRuntime::attackCreature( int idCharacter, int idCreature, double damage, double staminaCost ) {
+    bool creatureDied = false;
+
+    {
+        std::lock_guard<std::mutex> lock( _mutex );
+
+        auto characterIt = _characters.find( idCharacter );
+        auto creatureIt = _creatures.find( idCreature );
+
+        if ( characterIt == _characters.end() || creatureIt == _creatures.end() ) {
+            return false;
+        }
+
+        Engine::CharacterModel* characterPtr = characterIt->second->character();
+        Engine::CreatureModel* creaturePtr = creatureIt->second->creature();
+
+        characterPtr->vitals().setStamina( std::max( 0.0, characterPtr->vitals().stamina() - staminaCost ) );
+        characterPtr->combat().setCounter( 0 );
+
+        creaturePtr->vitals().setHealth( std::max( 0.0, creaturePtr->vitals().health() - damage ) );
+
+        creatureDied = creaturePtr->vitals().health() <= 0.0;
+
+        if ( creatureDied ) {
+            _creatures.erase( creatureIt );
+        }
+    }
+
+    Json::Value characterPayload;
+    characterPayload[ "idCharacter" ] = idCharacter;
+    _eventBus.publish( WorldEvent( WorldEventType::ENTITY_VITALS_CHANGED, characterPayload ) );
+
+    Json::Value creaturePayload;
+    creaturePayload[ "idCreature" ] = idCreature;
+    _eventBus.publish( WorldEvent( creatureDied ? WorldEventType::CREATURE_LEFT : WorldEventType::CREATURE_VITALS_CHANGED, creaturePayload ) );
+
+    return true;
+}
+
 std::vector<int> WorldRuntime::charactersNear( int idCharacter ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
@@ -186,6 +229,18 @@ bool WorldRuntime::isCharacterMoveDue( int idCharacter ) {
 
     const Engine::EntityMovementModel& movement = it->second->character()->movement();
     return movement.counter() >= movement.cooldown();
+}
+
+bool WorldRuntime::isCharacterAttackDue( int idCharacter ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    auto it = _characters.find( idCharacter );
+    if ( it == _characters.end() ) {
+        return false;
+    }
+
+    const Engine::EntityCombatModel& combat = it->second->character()->combat();
+    return combat.counter() >= combat.cooldown();
 }
 
 bool WorldRuntime::isPositionOccupied( int x, int y, int z ) {
@@ -213,6 +268,28 @@ Engine::CreatureModel* WorldRuntime::addCreature( std::unique_ptr<Engine::Creatu
     return creaturePtr;
 }
 
+Engine::CreatureModel* WorldRuntime::creature( int idCreature ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    auto it = _creatures.find( idCreature );
+    return it != _creatures.end() ? it->second->creature() : nullptr;
+}
+
+Engine::CreatureModel* WorldRuntime::creatureAt( int x, int y, int z ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    for ( auto& entry : _creatures ) {
+        Engine::CreatureModel* creaturePtr = entry.second->creature();
+        const Engine::EntityPositionModel& position = creaturePtr->position();
+
+        if ( position.x() == x && position.y() == y && position.z() == z ) {
+            return creaturePtr;
+        }
+    }
+
+    return nullptr;
+}
+
 std::vector<Engine::CreatureModel> WorldRuntime::creatures() {
     std::lock_guard<std::mutex> lock( _mutex );
 
@@ -234,7 +311,7 @@ void WorldRuntime::spawnCreaturesFromAreas() {
     std::mt19937 randomEngine( std::random_device{}() );
 
     for ( int z : _world->floors() ) {
-        for ( const Engine::MonsterSpawnAreaModel& area : _world->spawnAreas( z ) ) {
+        for ( const Engine::CreatureSpawnAreaModel& area : _world->spawnAreas( z ) ) {
             if ( area.width() == 0 || area.height() == 0 ) {
                 continue;
             }
@@ -242,7 +319,9 @@ void WorldRuntime::spawnCreaturesFromAreas() {
             std::uniform_int_distribution<int> xDistribution( area.x(), area.x() + static_cast<int>( area.width() ) - 1 );
             std::uniform_int_distribution<int> yDistribution( area.y(), area.y() + static_cast<int>( area.height() ) - 1 );
 
-            for ( const Engine::MonsterSpawnEntryModel& entry : area.monsters() ) {
+            for ( const Engine::CreatureSpawnEntryModel& entry : area.creatures() ) {
+                const Engine::CreatureTypeModel* creatureType = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog().creatureType( entry.type() );
+
                 for ( uint32_t i = 0; i < entry.quantity(); ++i ) {
                     auto creature = std::make_unique<Engine::CreatureModel>();
                     creature->setIdCreature( _nextIdCreature++ );
@@ -250,6 +329,11 @@ void WorldRuntime::spawnCreaturesFromAreas() {
                     creature->position().setX( xDistribution( randomEngine ) );
                     creature->position().setY( yDistribution( randomEngine ) );
                     creature->position().setZ( z );
+
+                    if ( creatureType ) {
+                        creature->vitals().setMaxHealth( creatureType->vitals().maxHealth() );
+                        creature->vitals().setHealth( creatureType->vitals().maxHealth() );
+                    }
 
                     addCreature( std::move( creature ) );
                 }

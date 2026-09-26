@@ -4,6 +4,7 @@
 #include <QColor>
 #include <QList>
 #include <QMetaObject>
+#include <QPoint>
 #include <QQuickItem>
 #include <QTimer>
 #include <QVariantList>
@@ -19,6 +20,7 @@ class Viewport : public QQuickItem {
     Q_PROPERTY( RenderWorld* renderWorld READ renderWorld WRITE setRenderWorld )
     Q_PROPERTY( int activeFloor READ activeFloor WRITE setActiveFloor NOTIFY activeFloorChanged )
     Q_PROPERTY( int cursorShape READ cursorShape WRITE setCursorShape NOTIFY cursorShapeChanged )
+    Q_PROPERTY( QPoint hoveredTile READ hoveredTile NOTIFY hoveredTileChanged )
 
 public:
     // Generic tile-space rectangle overlay — no domain meaning here, callers decide what it represents.
@@ -50,6 +52,8 @@ public:
     int cursorShape() const;
     void setCursorShape( int shape );
 
+    QPoint hoveredTile() const;
+
     Q_INVOKABLE void setHighlightedTile( int x, int y );
     Q_INVOKABLE void clearHighlight();
 
@@ -63,6 +67,7 @@ signals:
     void cameraPositionChanged();
     void activeFloorChanged();
     void cursorShapeChanged();
+    void hoveredTileChanged();
     void tileClicked( int x, int y, int z );
     void tileRightClicked( int x, int y, int z );
 
@@ -70,12 +75,14 @@ protected:
     void geometryChange( const QRectF& newGeometry, const QRectF& oldGeometry ) override;
 
     void mousePressEvent( QMouseEvent* event ) override;
+    void hoverMoveEvent( QHoverEvent* event ) override;
 
     QSGNode* updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData ) override;
 
 private:
     void updateWorldBounds();
     void addOverlayNode( QSGNode* parent, const OverlayRect& rect ) const;
+    QPoint screenToTile( const QPointF& screenPosition ) const;
 
 private:
     Camera* _camera;
@@ -86,6 +93,7 @@ private:
     TextureCache _textureCache;
     QList<OverlayRect> _overlayRects;
     QList<OverlayRect> _highlightRects;
+    QPoint _hoveredTile;
 
     int _activeFloor;
 };

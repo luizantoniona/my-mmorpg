@@ -6,7 +6,8 @@ EntityModel::EntityModel() :
     _position(),
     _size(),
     _vitals(),
-    _movement() {
+    _movement(),
+    _combat() {
 }
 
 EntityModel::~EntityModel() = default;
@@ -41,6 +42,14 @@ EntityMovementModel& EntityModel::movement() {
 
 const EntityMovementModel& EntityModel::movement() const {
     return _movement;
+}
+
+EntityCombatModel& EntityModel::combat() {
+    return _combat;
+}
+
+const EntityCombatModel& EntityModel::combat() const {
+    return _combat;
 }
 
 } // namespace Engine

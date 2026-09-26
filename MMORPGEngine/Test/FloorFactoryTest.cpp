@@ -6,10 +6,10 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnAreaModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnEntryModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 #include <MMORPGEngine/Data/DataManager.h>
-#include <MMORPGEngine/Data/Monster/MonsterModel.h>
-#include <MMORPGEngine/Data/Monster/MonsterSpawnAreaModel.h>
-#include <MMORPGEngine/Data/Monster/MonsterSpawnEntryModel.h>
 #include <MMORPGEngine/World/FloorFactory.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
@@ -77,15 +77,15 @@ TEST_F( FloorFactoryTest, SaveFloor_PreservesExistingZ_AndWritesWorldGrid ) {
     object->setObjectType( 9 );
     chunk->setObject( 0, 1, 5, std::move( object ) );
 
-    Engine::MonsterSpawnEntryModel entry;
+    Engine::CreatureSpawnEntryModel entry;
     entry.setType( 1 );
     entry.setQuantity( 3 );
-    Engine::MonsterSpawnAreaModel area;
+    Engine::CreatureSpawnAreaModel area;
     area.setX( 0 );
     area.setY( 0 );
     area.setWidth( 2 );
     area.setHeight( 2 );
-    area.setMonsters( { entry } );
+    area.setCreatures( { entry } );
     world.addSpawnArea( 5, area );
 
     Engine::FloorFactory::saveFloor( path, world );
@@ -101,9 +101,9 @@ TEST_F( FloorFactoryTest, SaveFloor_PreservesExistingZ_AndWritesWorldGrid ) {
     ASSERT_EQ( savedJson[ "SpawnAreas" ].size(), 1u );
     EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "X" ].asInt(), 0 );
     EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Width" ].asUInt(), 2u );
-    ASSERT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Monsters" ].size(), 1u );
-    EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Monsters" ][ 0 ][ "Type" ].asUInt(), 1u );
-    EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Monsters" ][ 0 ][ "Quantity" ].asUInt(), 3u );
+    ASSERT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ].size(), 1u );
+    EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ][ 0 ][ "Type" ].asUInt(), 1u );
+    EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ][ 0 ][ "Quantity" ].asUInt(), 3u );
 }
 
 TEST_F( FloorFactoryTest, CreateFloor_NullWorld_DoesNotCrash ) {
@@ -173,11 +173,11 @@ TEST_F( FloorFactoryTest, CreateFloor_TileTypeZero_YieldsEmptyTileWithoutCatalog
     EXPECT_EQ( constWorld.chunk( 0, 0 ), nullptr );
 }
 
-TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownMonster ) {
-    Engine::MonsterModel monster;
-    monster.setType( 9104 );
-    monster.setName( "FloorFactoryTestMonster" );
-    Engine::Singleton<Engine::DataManager>::instance().addMonster( monster );
+TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownCreature ) {
+    Engine::CreatureTypeModel creatureType;
+    creatureType.setType( 9104 );
+    creatureType.setName( "FloorFactoryTestCreature" );
+    Engine::Singleton<Engine::DataManager>::instance().addCreatureType( creatureType );
 
     Json::Value floorJson;
     floorJson[ "Z" ] = 6;
@@ -195,8 +195,8 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownMonst
     Json::Value unknownEntry;
     unknownEntry[ "Type" ] = 424242;
     unknownEntry[ "Quantity" ] = 1;
-    area[ "Monsters" ].append( knownEntry );
-    area[ "Monsters" ].append( unknownEntry );
+    area[ "Creatures" ].append( knownEntry );
+    area[ "Creatures" ].append( unknownEntry );
     floorJson[ "SpawnAreas" ].append( area );
 
     const std::string path = floorPath( "spawn_area.json" );
@@ -205,15 +205,15 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownMonst
     Engine::WorldModel world;
     Engine::FloorFactory::createFloor( path, &world );
 
-    const std::vector<Engine::MonsterSpawnAreaModel> areas = world.spawnAreas( 6 );
+    const std::vector<Engine::CreatureSpawnAreaModel> areas = world.spawnAreas( 6 );
     ASSERT_EQ( areas.size(), 1u );
     EXPECT_EQ( areas[ 0 ].x(), 10 );
     EXPECT_EQ( areas[ 0 ].y(), 20 );
     EXPECT_EQ( areas[ 0 ].width(), 5u );
     EXPECT_EQ( areas[ 0 ].height(), 5u );
-    ASSERT_EQ( areas[ 0 ].monsters().size(), 1u );
-    EXPECT_EQ( areas[ 0 ].monsters()[ 0 ].type(), 9104u );
-    EXPECT_EQ( areas[ 0 ].monsters()[ 0 ].quantity(), 2u );
+    ASSERT_EQ( areas[ 0 ].creatures().size(), 1u );
+    EXPECT_EQ( areas[ 0 ].creatures()[ 0 ].type(), 9104u );
+    EXPECT_EQ( areas[ 0 ].creatures()[ 0 ].quantity(), 2u );
 }
 
 TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_MissingDimensions_SkipsEntry ) {

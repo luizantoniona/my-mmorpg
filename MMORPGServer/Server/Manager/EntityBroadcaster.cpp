@@ -7,6 +7,7 @@
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnInventoryDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureLeftDTO.h>
 #include <MMORPGEngine/Entity/EntityLeftDTO.h>
 #include <MMORPGEngine/World/WorldBasicDTO.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
@@ -35,6 +36,14 @@ EntityBroadcaster::EntityBroadcaster() {
 
     worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_MOVED, [ this ]( const WorldEvent& event ) {
         onCreatureMoved( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_VITALS_CHANGED, [ this ]( const WorldEvent& event ) {
+        onCreatureVitalsChanged( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_LEFT, [ this ]( const WorldEvent& event ) {
+        onCreatureLeft( event );
     } );
 }
 
@@ -79,7 +88,31 @@ void EntityBroadcaster::onEntityVitalsChanged( const WorldEvent& event ) {
 }
 
 void EntityBroadcaster::onCreatureMoved( const WorldEvent& event ) {
-    broadcastCreature( event );
+    broadcastCreature( event.payload()[ "idCreature" ].asInt() );
+}
+
+void EntityBroadcaster::onCreatureVitalsChanged( const WorldEvent& event ) {
+    broadcastCreature( event.payload()[ "idCreature" ].asInt() );
+}
+
+void EntityBroadcaster::onCreatureLeft( const WorldEvent& event ) {
+    const int idCreature = event.payload()[ "idCreature" ].asInt();
+
+    Engine::CreatureLeftDTO message;
+    message.setIdCreature( idCreature );
+
+    const std::string serialized = Engine::JsonHelper::writeJsonString( message.toJson() );
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+    auto& connectionRegistry = Engine::Singleton<CharacterConnectionRegistry>::instance();
+
+    for ( const Engine::CharacterModel& character : worldRuntime.connectedCharacters() ) {
+        drogon::WebSocketConnectionPtr connection = connectionRegistry.connection( character.idCharacter() );
+
+        if ( connection ) {
+            connection->send( serialized );
+        }
+    }
 }
 
 void EntityBroadcaster::sendWorldBasic( const WorldEvent& event ) {
@@ -188,7 +221,7 @@ void EntityBroadcaster::sendCreatures( const WorldEvent& event ) {
 
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
-    // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Monstros")
+    // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Criaturas")
     for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
         connection->send( Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( &creature ).toJson() ) );
     }
@@ -224,21 +257,19 @@ void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
     }
 }
 
-void EntityBroadcaster::broadcastCreature( const WorldEvent& event ) {
-    const Json::Value& payload = event.payload();
-
-    Engine::CreatureDTO message;
-    message.setIdCreature( payload[ "idCreature" ].asInt() );
-    message.setX( payload[ "x" ].asInt() );
-    message.setY( payload[ "y" ].asInt() );
-    message.setZ( payload[ "z" ].asInt() );
-
-    const std::string serialized = Engine::JsonHelper::writeJsonString( message.toJson() );
-
+void EntityBroadcaster::broadcastCreature( int idCreature ) {
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    const Engine::CreatureModel* creature = worldRuntime.creature( idCreature );
+    if ( !creature ) {
+        return;
+    }
+
+    const std::string serialized = Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( creature ).toJson() );
+
     auto& connectionRegistry = Engine::Singleton<CharacterConnectionRegistry>::instance();
 
-    // TODO: Filter by proximity once creatures need to scale beyond a handful (Backlog "Monstros")
+    // TODO: Filter by proximity once creatures need to scale beyond a handful (Backlog "Criaturas")
     for ( const Engine::CharacterModel& character : worldRuntime.connectedCharacters() ) {
         drogon::WebSocketConnectionPtr connection = connectionRegistry.connection( character.idCharacter() );
 

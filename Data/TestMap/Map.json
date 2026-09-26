@@ -1,6 +1,7 @@
 {
     "Catalogs" : 
     {
+        "Creatures" : "Creature.json",
         "Objects" : "Object.json",
         "Tiles" : "Tile.json"
     },

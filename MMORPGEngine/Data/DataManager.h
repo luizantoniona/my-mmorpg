@@ -3,10 +3,10 @@
 
 #include <string>
 
+#include <MMORPGEngine/Data/Creature/CreatureTypeCatalog.h>
 #include <MMORPGEngine/Data/Item/ItemCatalog.h>
 #include <MMORPGEngine/Data/Item/ItemTypeCatalog.h>
 #include <MMORPGEngine/Data/Manifest/ManifestModel.h>
-#include <MMORPGEngine/Data/Monster/MonsterCatalog.h>
 #include <MMORPGEngine/Data/Object/ObjectCatalog.h>
 #include <MMORPGEngine/Data/Skill/SkillCatalog.h>
 #include <MMORPGEngine/Data/Tile/TileCatalog.h>
@@ -41,8 +41,8 @@ public:
     const SkillCatalog& skillCatalog() const;
     void addSkillTree( const SkillTreeModel& skillTree );
 
-    const MonsterCatalog& monsterCatalog() const;
-    void addMonster( const MonsterModel& monster );
+    const CreatureTypeCatalog& creatureTypeCatalog() const;
+    void addCreatureType( const CreatureTypeModel& creatureType );
 
 private:
     std::string _configPath;
@@ -51,7 +51,7 @@ private:
     ItemTypeCatalog _itemTypeCatalog;
     ItemCatalog _itemCatalog;
     SkillCatalog _skillCatalog;
-    MonsterCatalog _monsterCatalog;
+    CreatureTypeCatalog _creatureTypeCatalog;
 };
 
 } // namespace Engine
