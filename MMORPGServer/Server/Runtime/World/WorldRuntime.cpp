@@ -8,16 +8,16 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 #include <MMORPGEngine/Data/DataManager.h>
-#include <MMORPGEngine/Entity/EntityMovementModel.h>
 #include <MMORPGEngine/World/WorldConstants.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
 #include <MMORPGServer/Server/Event/WorldEventType.h>
 
 namespace Server {
 
-WorldRuntime::WorldRuntime( std::unique_ptr<Engine::WorldModel> world ) :
+WorldRuntime::WorldRuntime( std::unique_ptr<Engine::WorldModel> world, int tickRate ) :
     _world( std::move( world ) ),
-    _nextIdCreature( 1 ) {
+    _nextIdCreature( 1 ),
+    _tickRate( tickRate ) {
 
     if ( !_world ) {
         return;
@@ -36,6 +36,10 @@ EventBus& WorldRuntime::eventBus() {
     return _eventBus;
 }
 
+int WorldRuntime::tickRate() const {
+    return _tickRate;
+}
+
 Engine::CharacterModel* WorldRuntime::addCharacter( std::unique_ptr<Engine::CharacterModel> character ) {
     int idCharacter = 0;
     Engine::EntityPositionModel position;
@@ -47,7 +51,7 @@ Engine::CharacterModel* WorldRuntime::addCharacter( std::unique_ptr<Engine::Char
         idCharacter = character->idCharacter();
         position = character->position();
 
-        auto characterRuntime = std::make_unique<CharacterRuntime>( std::move( character ), _eventBus );
+        auto characterRuntime = std::make_unique<CharacterRuntime>( std::move( character ), _eventBus, _tickRate );
         characterPtr = characterRuntime->character();
         _characters[ idCharacter ] = std::move( characterRuntime );
 
@@ -229,6 +233,12 @@ bool WorldRuntime::isPositionOccupied( int x, int y, int z ) {
     return isPositionOccupiedLocked( position );
 }
 
+void WorldRuntime::enqueueCommand( std::unique_ptr<WorldCommand> command ) {
+    std::lock_guard<std::mutex> lock( _commandMutex );
+
+    _commands.push_back( std::move( command ) );
+}
+
 Engine::CreatureModel* WorldRuntime::addCreature( std::unique_ptr<Engine::CreatureModel> creature ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
@@ -318,6 +328,18 @@ void WorldRuntime::spawnCreaturesFromAreas() {
 }
 
 void WorldRuntime::tick() {
+    std::vector<std::unique_ptr<WorldCommand>> commands;
+
+    {
+        std::lock_guard<std::mutex> lock( _commandMutex );
+
+        commands.swap( _commands );
+    }
+
+    for ( const std::unique_ptr<WorldCommand>& command : commands ) {
+        command->execute( *this );
+    }
+
     std::vector<Json::Value> movedCreaturePayloads;
 
     {
@@ -331,29 +353,20 @@ void WorldRuntime::tick() {
             CreatureRuntime& creatureRuntime = *entry.second;
             Engine::CreatureModel* creaturePtr = creatureRuntime.creature();
 
-            if ( !hasCharacterNearLocked( creaturePtr->position() ) ) {
+            const auto movedPosition = creatureRuntime.tick(
+                [ this ]( const Engine::EntityPositionModel& position ) { return hasCharacterNearLocked( position ); },
+                [ this ]( const Engine::EntityPositionModel& position ) { return isPositionOccupiedLocked( position ); },
+                _tickRate );
+
+            if ( !movedPosition ) {
                 continue;
             }
-
-            Engine::EntityMovementModel& movement = creaturePtr->movement();
-            movement.setCounter( movement.counter() + 1 );
-
-            if ( movement.counter() < movement.cooldown() ) {
-                continue;
-            }
-
-            const Engine::EntityPositionModel candidate = creatureRuntime.candidateStepPosition();
-            if ( isPositionOccupiedLocked( candidate ) ) {
-                continue;
-            }
-
-            creatureRuntime.commitStep();
 
             Json::Value payload;
             payload[ "idCreature" ] = creaturePtr->idCreature();
-            payload[ "x" ] = candidate.x();
-            payload[ "y" ] = candidate.y();
-            payload[ "z" ] = candidate.z();
+            payload[ "x" ] = movedPosition->x();
+            payload[ "y" ] = movedPosition->y();
+            payload[ "z" ] = movedPosition->z();
 
             movedCreaturePayloads.push_back( payload );
         }

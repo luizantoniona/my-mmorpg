@@ -15,17 +15,20 @@
 #include <MMORPGServer/Server/Manager/ChunkCoordinate.h>
 #include <MMORPGServer/Server/Runtime/Character/CharacterRuntime.h>
 #include <MMORPGServer/Server/Runtime/Creature/CreatureRuntime.h>
+#include <MMORPGServer/Server/Runtime/World/Command/WorldCommand.h>
 
 namespace Server {
 
 class WorldRuntime {
 public:
-    explicit WorldRuntime( std::unique_ptr<Engine::WorldModel> world );
+    explicit WorldRuntime( std::unique_ptr<Engine::WorldModel> world, int tickRate = 20 );
 
     Engine::WorldModel* world();
     const Engine::WorldModel* world() const;
 
     EventBus& eventBus();
+
+    int tickRate() const;
 
     Engine::CharacterModel* addCharacter( std::unique_ptr<Engine::CharacterModel> character );
     void removeCharacter( int idCharacter );
@@ -49,6 +52,8 @@ public:
 
     bool isPositionOccupied( int x, int y, int z );
 
+    void enqueueCommand( std::unique_ptr<WorldCommand> command );
+
     void tick();
 
 private:
@@ -64,7 +69,10 @@ private:
     std::unordered_map<ChunkCoordinate, std::vector<Engine::CharacterModel*>, ChunkCoordinateHash> _charactersByChunk;
     std::map<int, std::unique_ptr<CreatureRuntime>> _creatures;
     EventBus _eventBus;
+    std::mutex _commandMutex;
+    std::vector<std::unique_ptr<WorldCommand>> _commands;
     int _nextIdCreature;
+    int _tickRate;
 };
 
 } // namespace Server

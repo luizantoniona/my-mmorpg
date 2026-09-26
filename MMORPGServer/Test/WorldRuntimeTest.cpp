@@ -10,9 +10,26 @@
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
+#include <MMORPGServer/Server/Runtime/World/Command/WorldCommand.h>
 #include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
 
 namespace {
+
+class RecordingCommand : public Server::WorldCommand {
+public:
+    explicit RecordingCommand( std::vector<int>& executionOrder, int id ) :
+        _executionOrder( executionOrder ),
+        _id( id ) {
+    }
+
+    void execute( Server::WorldRuntime& ) override {
+        _executionOrder.push_back( _id );
+    }
+
+private:
+    std::vector<int>& _executionOrder;
+    int _id;
+};
 
 std::unique_ptr<Engine::CharacterModel> makeCharacter( int idCharacter, int x, int y, int z ) {
     auto character = std::make_unique<Engine::CharacterModel>();
@@ -180,7 +197,7 @@ TEST( WorldRuntimeTest, CharacterMovement_JustAdded_IsReady ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
-    EXPECT_TRUE( character->movement().isReady() );
+    EXPECT_TRUE( character->movement().isReady( worldRuntime.tickRate() ) );
 }
 
 TEST( WorldRuntimeTest, CharacterMovement_RightAfterMove_IsNotReady ) {
@@ -189,7 +206,7 @@ TEST( WorldRuntimeTest, CharacterMovement_RightAfterMove_IsNotReady ) {
 
     worldRuntime.moveCharacter( 1, 1, 0, 0 );
 
-    EXPECT_FALSE( character->movement().isReady() );
+    EXPECT_FALSE( character->movement().isReady( worldRuntime.tickRate() ) );
 }
 
 TEST( WorldRuntimeTest, CharacterMovement_AfterEnoughTicks_IsReadyAgain ) {
@@ -197,20 +214,20 @@ TEST( WorldRuntimeTest, CharacterMovement_AfterEnoughTicks_IsReadyAgain ) {
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
     worldRuntime.moveCharacter( 1, 1, 0, 0 );
-    ASSERT_FALSE( character->movement().isReady() );
+    ASSERT_FALSE( character->movement().isReady( worldRuntime.tickRate() ) );
 
     for ( int tick = 0; tick < 20; ++tick ) {
         worldRuntime.tick();
     }
 
-    EXPECT_TRUE( character->movement().isReady() );
+    EXPECT_TRUE( character->movement().isReady( worldRuntime.tickRate() ) );
 }
 
 TEST( WorldRuntimeTest, CharacterCombat_JustAdded_IsReady ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
-    EXPECT_TRUE( character->combat().isReady() );
+    EXPECT_TRUE( character->combat().isReady( worldRuntime.tickRate() ) );
 }
 
 TEST( WorldRuntimeTest, CharacterCombat_RightAfterAttack_IsNotReady ) {
@@ -222,7 +239,7 @@ TEST( WorldRuntimeTest, CharacterCombat_RightAfterAttack_IsNotReady ) {
 
     worldRuntime.attackCreature( 1, 2, 5.0, 10.0 );
 
-    EXPECT_FALSE( character->combat().isReady() );
+    EXPECT_FALSE( character->combat().isReady( worldRuntime.tickRate() ) );
 }
 
 TEST( WorldRuntimeTest, CharacterCombat_AfterEnoughTicks_IsReadyAgain ) {
@@ -233,13 +250,13 @@ TEST( WorldRuntimeTest, CharacterCombat_AfterEnoughTicks_IsReadyAgain ) {
     creature->vitals().setHealth( 100.0 );
 
     worldRuntime.attackCreature( 1, 2, 5.0, 10.0 );
-    ASSERT_FALSE( character->combat().isReady() );
+    ASSERT_FALSE( character->combat().isReady( worldRuntime.tickRate() ) );
 
     for ( int tick = 0; tick < 20; ++tick ) {
         worldRuntime.tick();
     }
 
-    EXPECT_TRUE( character->combat().isReady() );
+    EXPECT_TRUE( character->combat().isReady( worldRuntime.tickRate() ) );
 }
 
 TEST( WorldRuntimeTest, CharactersNear_ExcludesSelf ) {
@@ -554,6 +571,39 @@ TEST( WorldRuntimeTest, AttackCreature_PublishesCreatureVitalsChanged_WhenCreatu
     worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
 
     EXPECT_EQ( receivedPayload[ "idCreature" ].asInt(), 2 );
+}
+
+TEST( WorldRuntimeTest, EnqueueCommand_NotExecuted_BeforeTick ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    std::vector<int> executionOrder;
+
+    worldRuntime.enqueueCommand( std::make_unique<RecordingCommand>( executionOrder, 1 ) );
+
+    EXPECT_TRUE( executionOrder.empty() );
+}
+
+TEST( WorldRuntimeTest, EnqueueCommand_ExecutedOnNextTick ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    std::vector<int> executionOrder;
+
+    worldRuntime.enqueueCommand( std::make_unique<RecordingCommand>( executionOrder, 1 ) );
+    worldRuntime.tick();
+
+    ASSERT_EQ( executionOrder.size(), 1u );
+    EXPECT_EQ( executionOrder[ 0 ], 1 );
+}
+
+TEST( WorldRuntimeTest, EnqueueCommand_MultipleCommands_ExecutedInOrderOnce ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    std::vector<int> executionOrder;
+
+    worldRuntime.enqueueCommand( std::make_unique<RecordingCommand>( executionOrder, 1 ) );
+    worldRuntime.enqueueCommand( std::make_unique<RecordingCommand>( executionOrder, 2 ) );
+    worldRuntime.tick();
+    worldRuntime.tick();
+
+    const std::vector<int> expected = { 1, 2 };
+    EXPECT_EQ( executionOrder, expected );
 }
 
 TEST( WorldRuntimeTest, AttackCreature_PublishesCreatureLeft_WhenCreatureDies ) {

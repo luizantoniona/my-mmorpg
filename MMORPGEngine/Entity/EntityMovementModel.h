@@ -7,16 +7,17 @@ class EntityMovementModel {
 public:
     EntityMovementModel();
 
-    int cooldown() const;
-    void setCooldown( int cooldown );
+    double cooldownSeconds() const;
+    void setCooldownSeconds( double cooldownSeconds );
 
     int counter() const;
     void setCounter( int counter );
 
-    bool isReady() const;
+    int cooldownTicks( int tickRate ) const;
+    bool isReady( int tickRate ) const;
 
 private:
-    int _movementCooldown;
+    double _movementCooldownSeconds;
     int _movementCounter;
 };
 

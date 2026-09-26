@@ -1,24 +1,26 @@
 #include "EntityCombatModel.h"
 
+#include <cmath>
+
 namespace {
 
-constexpr int DEFAULT_ATTACK_COOLDOWN = 20;
+constexpr double DEFAULT_ATTACK_COOLDOWN_SECONDS = 1.0;
 
 } // namespace
 
 namespace Engine {
 
 EntityCombatModel::EntityCombatModel() :
-    _attackCooldown( DEFAULT_ATTACK_COOLDOWN ),
+    _attackCooldownSeconds( DEFAULT_ATTACK_COOLDOWN_SECONDS ),
     _attackCounter( 0 ) {
 }
 
-int EntityCombatModel::cooldown() const {
-    return _attackCooldown;
+double EntityCombatModel::cooldownSeconds() const {
+    return _attackCooldownSeconds;
 }
 
-void EntityCombatModel::setCooldown( int cooldown ) {
-    _attackCooldown = cooldown;
+void EntityCombatModel::setCooldownSeconds( double cooldownSeconds ) {
+    _attackCooldownSeconds = cooldownSeconds;
 }
 
 int EntityCombatModel::counter() const {
@@ -29,8 +31,12 @@ void EntityCombatModel::setCounter( int counter ) {
     _attackCounter = counter;
 }
 
-bool EntityCombatModel::isReady() const {
-    return _attackCounter >= _attackCooldown;
+int EntityCombatModel::cooldownTicks( int tickRate ) const {
+    return static_cast<int>( std::lround( _attackCooldownSeconds * tickRate ) );
+}
+
+bool EntityCombatModel::isReady( int tickRate ) const {
+    return _attackCounter >= cooldownTicks( tickRate );
 }
 
 } // namespace Engine

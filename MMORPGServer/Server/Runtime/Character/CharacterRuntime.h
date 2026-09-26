@@ -12,7 +12,7 @@ namespace Server {
 
 class CharacterRuntime {
 public:
-    CharacterRuntime( std::unique_ptr<Engine::CharacterModel> character, EventBus& worldEventBus );
+    CharacterRuntime( std::unique_ptr<Engine::CharacterModel> character, EventBus& worldEventBus, int tickRate );
 
     Engine::CharacterModel* character();
     const Engine::CharacterModel* character() const;

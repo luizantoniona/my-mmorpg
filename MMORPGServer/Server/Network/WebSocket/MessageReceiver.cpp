@@ -8,18 +8,10 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterAttackDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterMoveDTO.h>
-#include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
-#include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGEngine/Network/WebSocket/ClientMessageTypeHelper.h>
-#include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
-
-namespace {
-
-constexpr double ATTACK_DAMAGE = 5.0;
-constexpr double ATTACK_STAMINA_COST = 10.0;
-
-} // namespace
+#include <MMORPGServer/Server/Runtime/World/Command/AttackCharacterCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/MoveCharacterCommand.h>
 
 namespace Server {
 
@@ -52,11 +44,6 @@ void MessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection,
 }
 
 void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
-    Engine::CharacterModel* character = _worldRuntime->character( idCharacter );
-    if ( !character ) {
-        return;
-    }
-
     const Engine::CharacterMoveDTO input = Engine::CharacterMoveDTO::fromJson( messageJson );
     const int dx = input.dx();
     const int dy = input.dy();
@@ -66,32 +53,12 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
         return;
     }
 
-    const Engine::EntityPositionModel currentPosition = character->position();
-    const int newX = currentPosition.x() + dx;
-    const int newY = currentPosition.y() + dy;
-    const int z = currentPosition.z();
-
-    const Engine::WorldModel* world = _worldRuntime->world();
-    const Engine::WorldTileModel* worldTile = world ? world->tile( newX, newY, z ) : nullptr;
-
-    if ( worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable() && !_worldRuntime->isPositionOccupied( newX, newY, z ) && character->movement().isReady() ) {
-        _worldRuntime->moveCharacter( idCharacter, newX, newY, z );
-
-        qInfo() << "[MessageReceiver] Character moved [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
-
-    } else {
-        qInfo() << "[MessageReceiver] Move blocked [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
-    }
-
-    connection->send( Engine::JsonHelper::writeJsonString( Engine::OwnCharacterDTO::fromModel( character ).toJson() ) );
+    _worldRuntime->enqueueCommand( std::make_unique<MoveCharacterCommand>( idCharacter, dx, dy, [ connection ]( const std::string& json ) {
+        connection->send( json );
+    } ) );
 }
 
 void MessageReceiver::receiveAttack( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
-    Engine::CharacterModel* character = _worldRuntime->character( idCharacter );
-    if ( !character ) {
-        return;
-    }
-
     const Engine::CharacterAttackDTO input = Engine::CharacterAttackDTO::fromJson( messageJson );
     const int dx = input.dx();
     const int dy = input.dy();
@@ -101,27 +68,7 @@ void MessageReceiver::receiveAttack( const drogon::WebSocketConnectionPtr& conne
         return;
     }
 
-    const Engine::EntityPositionModel currentPosition = character->position();
-    const int targetX = currentPosition.x() + dx;
-    const int targetY = currentPosition.y() + dy;
-    const int z = currentPosition.z();
-
-    Engine::CreatureModel* creature = _worldRuntime->creatureAt( targetX, targetY, z );
-    const bool hasStamina = character->vitals().stamina() >= ATTACK_STAMINA_COST;
-    const bool attackDue = character->combat().isReady();
-
-    if ( creature && hasStamina && attackDue ) {
-        const int idCreature = creature->idCreature();
-
-        _worldRuntime->attackCreature( idCharacter, idCreature, ATTACK_DAMAGE, ATTACK_STAMINA_COST );
-
-        qInfo() << "[MessageReceiver] Character attacked creature [CHARACTER]" << idCharacter << "[CREATURE]" << idCreature;
-
-    } else {
-        qInfo() << "[MessageReceiver] Attack blocked [CHARACTER]" << idCharacter << "[X]" << targetX << "[Y]" << targetY << "[Z]" << z
-                << "[HAS_CREATURE]" << ( creature != nullptr ) << "[HAS_STAMINA]" << hasStamina << "[STAMINA]" << character->vitals().stamina()
-                << "[ATTACK_DUE]" << attackDue;
-    }
+    _worldRuntime->enqueueCommand( std::make_unique<AttackCharacterCommand>( idCharacter, dx, dy ) );
 }
 
 } // namespace Server

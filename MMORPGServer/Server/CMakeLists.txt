@@ -64,10 +64,20 @@ set(PROJECT_SOURCES
     Repository/Repository.h
     Runtime/Character/CharacterRuntime.cpp
     Runtime/Character/CharacterRuntime.h
+    Runtime/Character/System/CharacterCombatSystem.cpp
+    Runtime/Character/System/CharacterCombatSystem.h
+    Runtime/Character/System/CharacterMovementSystem.cpp
+    Runtime/Character/System/CharacterMovementSystem.h
     Runtime/Character/System/CharacterSystem.cpp
     Runtime/Character/System/CharacterSystem.h
     Runtime/Creature/CreatureRuntime.cpp
     Runtime/Creature/CreatureRuntime.h
+    Runtime/World/Command/AttackCharacterCommand.cpp
+    Runtime/World/Command/AttackCharacterCommand.h
+    Runtime/World/Command/MoveCharacterCommand.cpp
+    Runtime/World/Command/MoveCharacterCommand.h
+    Runtime/World/Command/WorldCommand.cpp
+    Runtime/World/Command/WorldCommand.h
     Runtime/World/System/WorldSystem.cpp
     Runtime/World/System/WorldSystem.h
     Runtime/World/WorldRuntime.cpp

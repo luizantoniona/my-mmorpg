@@ -1,25 +1,27 @@
 #include "EntityMovementModel.h"
 
+#include <cmath>
+
 namespace {
 
 // TODO: Fixed default for every entity today; revisit when level/stats can scale movement speed (Backlog "Movimento, footprint e orientação")
-constexpr int DEFAULT_MOVEMENT_COOLDOWN = 20;
+constexpr double DEFAULT_MOVEMENT_COOLDOWN_SECONDS = 1.0;
 
 } // namespace
 
 namespace Engine {
 
 EntityMovementModel::EntityMovementModel() :
-    _movementCooldown( DEFAULT_MOVEMENT_COOLDOWN ),
+    _movementCooldownSeconds( DEFAULT_MOVEMENT_COOLDOWN_SECONDS ),
     _movementCounter( 0 ) {
 }
 
-int EntityMovementModel::cooldown() const {
-    return _movementCooldown;
+double EntityMovementModel::cooldownSeconds() const {
+    return _movementCooldownSeconds;
 }
 
-void EntityMovementModel::setCooldown( int cooldown ) {
-    _movementCooldown = cooldown;
+void EntityMovementModel::setCooldownSeconds( double cooldownSeconds ) {
+    _movementCooldownSeconds = cooldownSeconds;
 }
 
 int EntityMovementModel::counter() const {
@@ -30,8 +32,12 @@ void EntityMovementModel::setCounter( int counter ) {
     _movementCounter = counter;
 }
 
-bool EntityMovementModel::isReady() const {
-    return _movementCounter >= _movementCooldown;
+int EntityMovementModel::cooldownTicks( int tickRate ) const {
+    return static_cast<int>( std::lround( _movementCooldownSeconds * tickRate ) );
+}
+
+bool EntityMovementModel::isReady( int tickRate ) const {
+    return _movementCounter >= cooldownTicks( tickRate );
 }
 
 } // namespace Engine
