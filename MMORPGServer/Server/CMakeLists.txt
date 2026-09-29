@@ -28,6 +28,14 @@ set(PROJECT_SOURCES
     Network/NetworkSession.h
     Network/Filter/AuthFilter.cpp
     Network/Filter/AuthFilter.h
+    Network/Observer/CharacterObserver.cpp
+    Network/Observer/CharacterObserver.h
+    Network/Observer/EntityObserver.cpp
+    Network/Observer/EntityObserver.h
+    Network/Observer/GodObserver.cpp
+    Network/Observer/GodObserver.h
+    Network/Observer/ObserverRegistry.cpp
+    Network/Observer/ObserverRegistry.h
     Network/Rest/AuthController.cpp
     Network/Rest/AuthController.h
     Network/Rest/CharacterController.cpp
@@ -38,8 +46,6 @@ set(PROJECT_SOURCES
     Network/Rest/StatusController.h
     Network/WebSocket/CharacterConnectionContext.cpp
     Network/WebSocket/CharacterConnectionContext.h
-    Network/WebSocket/CharacterConnectionRegistry.cpp
-    Network/WebSocket/CharacterConnectionRegistry.h
     Network/WebSocket/CharacterWebSocket.cpp
     Network/WebSocket/CharacterWebSocket.h
     Network/WebSocket/ClientMessageReceiver.cpp

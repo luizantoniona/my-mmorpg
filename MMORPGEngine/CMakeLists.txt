@@ -129,6 +129,8 @@ set(PROJECT_SOURCES
     Entity/Creature/CreatureDTO.h
     Entity/Creature/CreatureLeftDTO.cpp
     Entity/Creature/CreatureLeftDTO.h
+    Entity/EntityAttackedDTO.cpp
+    Entity/EntityAttackedDTO.h
     Entity/EntityLeftDTO.cpp
     Entity/EntityLeftDTO.h
     Entity/EntityCombatModel.cpp
@@ -148,6 +150,8 @@ set(PROJECT_SOURCES
     Network/WebSocket/ClientMessageTypeEnum.h
     Network/WebSocket/ClientMessageTypeHelper.cpp
     Network/WebSocket/ClientMessageTypeHelper.h
+    Network/WebSocket/ServerMessageReceiver.cpp
+    Network/WebSocket/ServerMessageReceiver.h
     Network/WebSocket/ServerMessageTypeEnum.h
     Network/WebSocket/ServerMessageTypeHelper.cpp
     Network/WebSocket/ServerMessageTypeHelper.h
