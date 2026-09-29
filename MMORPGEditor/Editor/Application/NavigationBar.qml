@@ -29,7 +29,7 @@ Item {
                 height: parent.height
                 vText: modelData.label
                 vSelected: root.currentPage === modelData.name
-                vBackgroundColor: "transparent"
+                vBackgroundColor: Colors.transparent
 
                 onClicked: function () {
                     root.pageRequested(modelData.name)

@@ -132,7 +132,7 @@ Item {
 
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                color: "transparent"
+                color: Colors.transparent
                 border.color: Colors.border
                 border.width: Borders.border1
                 clip: true
