@@ -167,6 +167,8 @@ set(PROJECT_SOURCES
     Renderer/Scene/TextureCache.h
     Renderer/World/RenderWorld.cpp
     Renderer/World/RenderWorld.h
+    Renderer/World/StreamRenderWorld.cpp
+    Renderer/World/StreamRenderWorld.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
     Renderer/EntityRenderer.cpp
