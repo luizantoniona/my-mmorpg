@@ -3,9 +3,9 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
-#include <MMORPGEngine/Entity/Creature/CreatureLeftDTO.h>
-#include <MMORPGEngine/Entity/EntityAttackedDTO.h>
-#include <MMORPGEngine/Entity/EntityLeftDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterEventLeaveDTO.h>
 #include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
 
 namespace Engine {
@@ -32,21 +32,21 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     const ServerMessageType type = ServerMessageTypeHelper::fromMessage( json );
 
     switch ( type ) {
-    case ServerMessageType::ENTITY_ATTACKED: {
-        const EntityAttackedDTO entityAttacked = EntityAttackedDTO::fromJson( json );
-        emit entityAttackedReceived( entityAttacked.idCharacter(), entityAttacked.x(), entityAttacked.y(), entityAttacked.z() );
+    case ServerMessageType::CHARACTER_EVENT_ATTACK: {
+        const CharacterEventAttackDTO entityAttacked = CharacterEventAttackDTO::fromJson( json );
+        emit characterEventAttackReceived( entityAttacked.idCharacter(), entityAttacked.x(), entityAttacked.y(), entityAttacked.z() );
         return;
     }
 
-    case ServerMessageType::ENTITY_LEFT: {
-        const EntityLeftDTO entityLeft = EntityLeftDTO::fromJson( json );
-        emit entityLeftReceived( entityLeft.idCharacter() );
+    case ServerMessageType::CHARACTER_EVENT_LEAVE: {
+        const CharacterEventLeaveDTO entityLeft = CharacterEventLeaveDTO::fromJson( json );
+        emit characterEventLeaveReceived( entityLeft.idCharacter() );
         return;
     }
 
-    case ServerMessageType::CREATURE_LEFT: {
-        const CreatureLeftDTO creatureLeft = CreatureLeftDTO::fromJson( json );
-        emit creatureLeftReceived( creatureLeft.idCreature() );
+    case ServerMessageType::CREATURE_EVENT_LEAVE: {
+        const CreatureEventLeaveDTO creatureLeft = CreatureEventLeaveDTO::fromJson( json );
+        emit creatureEventLeaveReceived( creatureLeft.idCreature() );
         return;
     }
 

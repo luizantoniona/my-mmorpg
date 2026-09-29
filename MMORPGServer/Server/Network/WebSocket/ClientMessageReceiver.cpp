@@ -6,8 +6,8 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Entity/Character/CharacterAttackDTO.h>
-#include <MMORPGEngine/Entity/Character/CharacterMoveDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentAttackDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentMoveDTO.h>
 #include <MMORPGEngine/Network/WebSocket/ClientMessageTypeHelper.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Runtime/World/Command/AttackCharacterCommand.h>
@@ -32,10 +32,10 @@ void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& conne
     const Engine::ClientMessageType type = Engine::ClientMessageTypeHelper::fromMessage( messageJson );
 
     switch ( type ) {
-    case Engine::ClientMessageType::CHARACTER_MOVE:
+    case Engine::ClientMessageType::CHARACTER_INTENT_MOVE:
         receiveMove( connection, idCharacter, messageJson );
         break;
-    case Engine::ClientMessageType::CHARACTER_ATTACK:
+    case Engine::ClientMessageType::CHARACTER_INTENT_ATTACK:
         receiveAttack( connection, idCharacter, messageJson );
         break;
     default:
@@ -44,7 +44,7 @@ void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& conne
 }
 
 void ClientMessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
-    const Engine::CharacterMoveDTO input = Engine::CharacterMoveDTO::fromJson( messageJson );
+    const Engine::CharacterIntentMoveDTO input = Engine::CharacterIntentMoveDTO::fromJson( messageJson );
     const int dx = input.dx();
     const int dy = input.dy();
 
@@ -59,7 +59,7 @@ void ClientMessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& c
 }
 
 void ClientMessageReceiver::receiveAttack( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
-    const Engine::CharacterAttackDTO input = Engine::CharacterAttackDTO::fromJson( messageJson );
+    const Engine::CharacterIntentAttackDTO input = Engine::CharacterIntentAttackDTO::fromJson( messageJson );
     const int dx = input.dx();
     const int dy = input.dy();
 

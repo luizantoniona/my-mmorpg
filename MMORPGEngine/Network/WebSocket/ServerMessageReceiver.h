@@ -29,9 +29,9 @@ signals:
 
     void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
     void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds );
-    void entityAttackedReceived( int idCharacter, int x, int y, int z );
-    void entityLeftReceived( int idCharacter );
-    void creatureLeftReceived( int idCreature );
+    void characterEventAttackReceived( int idCharacter, int x, int y, int z );
+    void characterEventLeaveReceived( int idCharacter );
+    void creatureEventLeaveReceived( int idCreature );
 };
 
 } // namespace Engine

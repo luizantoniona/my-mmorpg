@@ -11,9 +11,9 @@ enum class ServerMessageType {
     OWN_INVENTORY,
     CHARACTER,
     CREATURE,
-    ENTITY_ATTACKED,
-    ENTITY_LEFT,
-    CREATURE_LEFT,
+    CHARACTER_EVENT_ATTACK,
+    CHARACTER_EVENT_LEAVE,
+    CREATURE_EVENT_LEAVE,
 };
 
 } // namespace Engine

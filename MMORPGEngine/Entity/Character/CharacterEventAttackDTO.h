@@ -1,16 +1,16 @@
-#ifndef ENTITYATTACKEDDTO_H
-#define ENTITYATTACKEDDTO_H
+#ifndef CHARACTEREVENTATTACKDTO_H
+#define CHARACTEREVENTATTACKDTO_H
 
 #include <json/json.h>
 
 namespace Engine {
 
-class EntityAttackedDTO {
+class CharacterEventAttackDTO {
 public:
-    EntityAttackedDTO();
-    ~EntityAttackedDTO();
+    CharacterEventAttackDTO();
+    ~CharacterEventAttackDTO();
 
-    static EntityAttackedDTO fromJson( const Json::Value& json );
+    static CharacterEventAttackDTO fromJson( const Json::Value& json );
     Json::Value toJson() const;
 
     int idCharacter() const;
@@ -34,4 +34,4 @@ private:
 
 } // namespace Engine
 
-#endif // ENTITYATTACKEDDTO_H
+#endif // CHARACTEREVENTATTACKDTO_H

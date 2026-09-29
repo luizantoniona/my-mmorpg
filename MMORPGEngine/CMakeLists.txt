@@ -97,21 +97,25 @@ set(PROJECT_SOURCES
     Data/DataManager.cpp
     Data/DataManager.h
     Entity/Character/CharacterDTO.cpp
-    Entity/Character/CharacterAttackDTO.cpp
-    Entity/Character/CharacterAttackDTO.h
     Entity/Character/CharacterDTO.h
     Entity/Character/CharacterEquipmentDTO.cpp
     Entity/Character/CharacterEquipmentDTO.h
     Entity/Character/CharacterEquipmentModel.cpp
     Entity/Character/CharacterEquipmentModel.h
+    Entity/Character/CharacterEventAttackDTO.cpp
+    Entity/Character/CharacterEventAttackDTO.h
+    Entity/Character/CharacterEventLeaveDTO.cpp
+    Entity/Character/CharacterEventLeaveDTO.h
+    Entity/Character/CharacterIntentAttackDTO.cpp
+    Entity/Character/CharacterIntentAttackDTO.h
+    Entity/Character/CharacterIntentMoveDTO.cpp
+    Entity/Character/CharacterIntentMoveDTO.h
     Entity/Character/CharacterInventoryDTO.cpp
     Entity/Character/CharacterInventoryDTO.h
     Entity/Character/CharacterInventoryModel.cpp
     Entity/Character/CharacterInventoryModel.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
-    Entity/Character/CharacterMoveDTO.cpp
-    Entity/Character/CharacterMoveDTO.h
     Entity/Character/CharacterProficiencyModel.cpp
     Entity/Character/CharacterProficiencyModel.h
     Entity/Character/EquipmentSlotEnum.h
@@ -127,12 +131,8 @@ set(PROJECT_SOURCES
     Entity/Creature/CreatureModel.h
     Entity/Creature/CreatureDTO.cpp
     Entity/Creature/CreatureDTO.h
-    Entity/Creature/CreatureLeftDTO.cpp
-    Entity/Creature/CreatureLeftDTO.h
-    Entity/EntityAttackedDTO.cpp
-    Entity/EntityAttackedDTO.h
-    Entity/EntityLeftDTO.cpp
-    Entity/EntityLeftDTO.h
+    Entity/Creature/CreatureEventLeaveDTO.cpp
+    Entity/Creature/CreatureEventLeaveDTO.h
     Entity/EntityCombatModel.cpp
     Entity/EntityCombatModel.h
     Entity/EntityModel.cpp

@@ -16,11 +16,11 @@ public:
     void sendSnapshot( EntityObserver& observer );
 
 private:
-    void onEntityEntered( const WorldEvent& event );
-    void onEntityMoved( const WorldEvent& event );
-    void onEntityLeft( const WorldEvent& event );
-    void onEntityVitalsChanged( const WorldEvent& event );
-    void onEntityAttacked( const WorldEvent& event );
+    void onCharacterEntered( const WorldEvent& event );
+    void onCharacterMoved( const WorldEvent& event );
+    void onCharacterLeft( const WorldEvent& event );
+    void onCharacterVitalsChanged( const WorldEvent& event );
+    void onCharacterAttacked( const WorldEvent& event );
     void onCreatureMoved( const WorldEvent& event );
     void onCreatureVitalsChanged( const WorldEvent& event );
     void onCreatureLeft( const WorldEvent& event );

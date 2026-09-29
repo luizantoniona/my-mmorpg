@@ -16,12 +16,12 @@ std::string ServerMessageTypeHelper::toString( ServerMessageType type ) {
         return "CHARACTER";
     case ServerMessageType::CREATURE:
         return "CREATURE";
-    case ServerMessageType::ENTITY_ATTACKED:
-        return "ENTITY_ATTACKED";
-    case ServerMessageType::ENTITY_LEFT:
-        return "ENTITY_LEFT";
-    case ServerMessageType::CREATURE_LEFT:
-        return "CREATURE_LEFT";
+    case ServerMessageType::CHARACTER_EVENT_ATTACK:
+        return "CHARACTER_EVENT_ATTACK";
+    case ServerMessageType::CHARACTER_EVENT_LEAVE:
+        return "CHARACTER_EVENT_LEAVE";
+    case ServerMessageType::CREATURE_EVENT_LEAVE:
+        return "CREATURE_EVENT_LEAVE";
     case ServerMessageType::UNKNOWN:
         return "UNKNOWN";
     }
@@ -48,14 +48,14 @@ ServerMessageType ServerMessageTypeHelper::fromString( const std::string& value 
     if ( value == "CREATURE" ) {
         return ServerMessageType::CREATURE;
     }
-    if ( value == "ENTITY_ATTACKED" ) {
-        return ServerMessageType::ENTITY_ATTACKED;
+    if ( value == "CHARACTER_EVENT_ATTACK" ) {
+        return ServerMessageType::CHARACTER_EVENT_ATTACK;
     }
-    if ( value == "ENTITY_LEFT" ) {
-        return ServerMessageType::ENTITY_LEFT;
+    if ( value == "CHARACTER_EVENT_LEAVE" ) {
+        return ServerMessageType::CHARACTER_EVENT_LEAVE;
     }
-    if ( value == "CREATURE_LEFT" ) {
-        return ServerMessageType::CREATURE_LEFT;
+    if ( value == "CREATURE_EVENT_LEAVE" ) {
+        return ServerMessageType::CREATURE_EVENT_LEAVE;
     }
 
     return ServerMessageType::UNKNOWN;

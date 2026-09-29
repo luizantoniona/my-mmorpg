@@ -1,20 +1,20 @@
-#include "EntityAttackedDTO.h"
+#include "CharacterEventAttackDTO.h"
 
 #include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
 
 namespace Engine {
 
-EntityAttackedDTO::EntityAttackedDTO() :
+CharacterEventAttackDTO::CharacterEventAttackDTO() :
     _idCharacter( 0 ),
     _x( 0 ),
     _y( 0 ),
     _z( 0 ) {
 }
 
-EntityAttackedDTO::~EntityAttackedDTO() = default;
+CharacterEventAttackDTO::~CharacterEventAttackDTO() = default;
 
-EntityAttackedDTO EntityAttackedDTO::fromJson( const Json::Value& json ) {
-    EntityAttackedDTO dto;
+CharacterEventAttackDTO CharacterEventAttackDTO::fromJson( const Json::Value& json ) {
+    CharacterEventAttackDTO dto;
 
     if ( json.isMember( "idCharacter" ) && json[ "idCharacter" ].isInt() ) {
         dto._idCharacter = json[ "idCharacter" ].asInt();
@@ -35,10 +35,10 @@ EntityAttackedDTO EntityAttackedDTO::fromJson( const Json::Value& json ) {
     return dto;
 }
 
-Json::Value EntityAttackedDTO::toJson() const {
+Json::Value CharacterEventAttackDTO::toJson() const {
     Json::Value json;
 
-    json[ "type" ] = ServerMessageTypeHelper::toString( ServerMessageType::ENTITY_ATTACKED );
+    json[ "type" ] = ServerMessageTypeHelper::toString( ServerMessageType::CHARACTER_EVENT_ATTACK );
     json[ "idCharacter" ] = _idCharacter;
     json[ "x" ] = _x;
     json[ "y" ] = _y;
@@ -47,35 +47,35 @@ Json::Value EntityAttackedDTO::toJson() const {
     return json;
 }
 
-int EntityAttackedDTO::idCharacter() const {
+int CharacterEventAttackDTO::idCharacter() const {
     return _idCharacter;
 }
 
-void EntityAttackedDTO::setIdCharacter( int idCharacter ) {
+void CharacterEventAttackDTO::setIdCharacter( int idCharacter ) {
     _idCharacter = idCharacter;
 }
 
-int EntityAttackedDTO::x() const {
+int CharacterEventAttackDTO::x() const {
     return _x;
 }
 
-void EntityAttackedDTO::setX( int x ) {
+void CharacterEventAttackDTO::setX( int x ) {
     _x = x;
 }
 
-int EntityAttackedDTO::y() const {
+int CharacterEventAttackDTO::y() const {
     return _y;
 }
 
-void EntityAttackedDTO::setY( int y ) {
+void CharacterEventAttackDTO::setY( int y ) {
     _y = y;
 }
 
-int EntityAttackedDTO::z() const {
+int CharacterEventAttackDTO::z() const {
     return _z;
 }
 
-void EntityAttackedDTO::setZ( int z ) {
+void CharacterEventAttackDTO::setZ( int z ) {
     _z = z;
 }
 

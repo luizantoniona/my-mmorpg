@@ -5,8 +5,8 @@ namespace Engine {
 
 enum class ClientMessageType {
     UNKNOWN,
-    CHARACTER_MOVE,
-    CHARACTER_ATTACK,
+    CHARACTER_INTENT_MOVE,
+    CHARACTER_INTENT_ATTACK,
 };
 
 } // namespace Engine

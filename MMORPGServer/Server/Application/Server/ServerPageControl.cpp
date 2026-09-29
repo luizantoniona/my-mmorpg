@@ -20,9 +20,9 @@ ServerPageControl::ServerPageControl( QObject* parent ) :
 
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterStateReceived, this, &ServerPageControl::characterStateReceived );
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::creatureStateReceived, this, &ServerPageControl::creatureStateReceived );
-    connect( &_messageReceiver, &Engine::ServerMessageReceiver::entityAttackedReceived, this, &ServerPageControl::entityAttackedReceived );
-    connect( &_messageReceiver, &Engine::ServerMessageReceiver::entityLeftReceived, this, &ServerPageControl::entityLeftReceived );
-    connect( &_messageReceiver, &Engine::ServerMessageReceiver::creatureLeftReceived, this, &ServerPageControl::creatureLeftReceived );
+    connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackReceived, this, &ServerPageControl::characterEventAttackReceived );
+    connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterEventLeaveReceived, this, &ServerPageControl::characterEventLeaveReceived );
+    connect( &_messageReceiver, &Engine::ServerMessageReceiver::creatureEventLeaveReceived, this, &ServerPageControl::creatureEventLeaveReceived );
 
     Engine::Singleton<ObserverRegistry>::instance().registerGlobalObserver( _godObserver );
 

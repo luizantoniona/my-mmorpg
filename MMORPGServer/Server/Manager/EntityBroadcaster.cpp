@@ -7,9 +7,9 @@
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnInventoryDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
-#include <MMORPGEngine/Entity/Creature/CreatureLeftDTO.h>
-#include <MMORPGEngine/Entity/EntityAttackedDTO.h>
-#include <MMORPGEngine/Entity/EntityLeftDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterEventLeaveDTO.h>
 #include <MMORPGEngine/World/WorldBasicDTO.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/Observer/ObserverRegistry.h>
@@ -19,24 +19,24 @@ namespace Server {
 EntityBroadcaster::EntityBroadcaster() {
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
-    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_ENTERED, [ this ]( const WorldEvent& event ) {
-        onEntityEntered( event );
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_ENTERED, [ this ]( const WorldEvent& event ) {
+        onCharacterEntered( event );
     } );
 
-    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_MOVED, [ this ]( const WorldEvent& event ) {
-        onEntityMoved( event );
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_MOVED, [ this ]( const WorldEvent& event ) {
+        onCharacterMoved( event );
     } );
 
-    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_LEFT, [ this ]( const WorldEvent& event ) {
-        onEntityLeft( event );
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_LEFT, [ this ]( const WorldEvent& event ) {
+        onCharacterLeft( event );
     } );
 
-    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_VITALS_CHANGED, [ this ]( const WorldEvent& event ) {
-        onEntityVitalsChanged( event );
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_VITALS_CHANGED, [ this ]( const WorldEvent& event ) {
+        onCharacterVitalsChanged( event );
     } );
 
-    worldRuntime.eventBus().subscribe( WorldEventType::ENTITY_ATTACKED, [ this ]( const WorldEvent& event ) {
-        onEntityAttacked( event );
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_ATTACKED, [ this ]( const WorldEvent& event ) {
+        onCharacterAttacked( event );
     } );
 
     worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_MOVED, [ this ]( const WorldEvent& event ) {
@@ -64,7 +64,7 @@ void EntityBroadcaster::sendSnapshot( EntityObserver& observer ) {
     }
 }
 
-void EntityBroadcaster::onEntityEntered( const WorldEvent& event ) {
+void EntityBroadcaster::onCharacterEntered( const WorldEvent& event ) {
     sendWorldBasic( event );
     sendOwnCharacter( event );
     sendOwnEquipment( event );
@@ -74,14 +74,14 @@ void EntityBroadcaster::onEntityEntered( const WorldEvent& event ) {
     broadcastCharacter( event );
 }
 
-void EntityBroadcaster::onEntityMoved( const WorldEvent& event ) {
+void EntityBroadcaster::onCharacterMoved( const WorldEvent& event ) {
     broadcastCharacter( event );
 }
 
-void EntityBroadcaster::onEntityLeft( const WorldEvent& event ) {
+void EntityBroadcaster::onCharacterLeft( const WorldEvent& event ) {
     const Json::Value& payload = event.payload();
 
-    Engine::EntityLeftDTO message;
+    Engine::CharacterEventLeaveDTO message;
     message.setIdCharacter( payload[ "idCharacter" ].asInt() );
 
     std::vector<int> receivers;
@@ -93,12 +93,12 @@ void EntityBroadcaster::onEntityLeft( const WorldEvent& event ) {
     broadcast( receivers, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
 
-void EntityBroadcaster::onEntityVitalsChanged( const WorldEvent& event ) {
+void EntityBroadcaster::onCharacterVitalsChanged( const WorldEvent& event ) {
     sendOwnCharacter( event );
     broadcastCharacter( event );
 }
 
-void EntityBroadcaster::onEntityAttacked( const WorldEvent& event ) {
+void EntityBroadcaster::onCharacterAttacked( const WorldEvent& event ) {
     broadcastAttack( event );
 }
 
@@ -111,7 +111,7 @@ void EntityBroadcaster::onCreatureVitalsChanged( const WorldEvent& event ) {
 }
 
 void EntityBroadcaster::onCreatureLeft( const WorldEvent& event ) {
-    Engine::CreatureLeftDTO message;
+    Engine::CreatureEventLeaveDTO message;
     message.setIdCreature( event.payload()[ "idCreature" ].asInt() );
 
     broadcastToConnected( Engine::JsonHelper::writeJsonString( message.toJson() ) );
@@ -203,7 +203,7 @@ void EntityBroadcaster::broadcastAttack( const WorldEvent& event ) {
 
     const int idCharacter = payload[ "idCharacter" ].asInt();
 
-    Engine::EntityAttackedDTO message;
+    Engine::CharacterEventAttackDTO message;
     message.setIdCharacter( idCharacter );
     message.setX( payload[ "x" ].asInt() );
     message.setY( payload[ "y" ].asInt() );
