@@ -1,5 +1,5 @@
-#ifndef MESSAGERECEIVER_H
-#define MESSAGERECEIVER_H
+#ifndef CLIENTMESSAGERECEIVER_H
+#define CLIENTMESSAGERECEIVER_H
 
 #include <string>
 
@@ -10,9 +10,9 @@
 
 namespace Server {
 
-class MessageReceiver {
+class ClientMessageReceiver {
 public:
-    MessageReceiver();
+    ClientMessageReceiver();
 
     void receive( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const std::string& message );
 
@@ -26,4 +26,4 @@ private:
 
 } // namespace Server
 
-#endif // MESSAGERECEIVER_H
+#endif // CLIENTMESSAGERECEIVER_H

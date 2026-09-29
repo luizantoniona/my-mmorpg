@@ -42,8 +42,8 @@ set(PROJECT_SOURCES
     Network/WebSocket/CharacterConnectionRegistry.h
     Network/WebSocket/CharacterWebSocket.cpp
     Network/WebSocket/CharacterWebSocket.h
-    Network/WebSocket/MessageReceiver.cpp
-    Network/WebSocket/MessageReceiver.h
+    Network/WebSocket/ClientMessageReceiver.cpp
+    Network/WebSocket/ClientMessageReceiver.h
     Renderer/ServerRenderWorld.cpp
     Renderer/ServerRenderWorld.h
     Repository/Account/AccountRepository.cpp

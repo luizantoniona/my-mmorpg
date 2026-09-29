@@ -1,4 +1,4 @@
-#include "MessageReceiver.h"
+#include "ClientMessageReceiver.h"
 
 #include <cstdlib>
 
@@ -15,11 +15,11 @@
 
 namespace Server {
 
-MessageReceiver::MessageReceiver() {
+ClientMessageReceiver::ClientMessageReceiver() {
     _worldRuntime = &Engine::Singleton<WorldManager>::instance().runtime();
 }
 
-void MessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const std::string& message ) {
+void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const std::string& message ) {
     if ( message.empty() ) {
         return;
     }
@@ -43,13 +43,13 @@ void MessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection,
     }
 }
 
-void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
+void ClientMessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
     const Engine::CharacterMoveDTO input = Engine::CharacterMoveDTO::fromJson( messageJson );
     const int dx = input.dx();
     const int dy = input.dy();
 
     if ( std::abs( dx ) > 1 || std::abs( dy ) > 1 ) {
-        qWarning() << "[MessageReceiver] Rejected move: out-of-range step [CHARACTER]" << idCharacter << "[DX]" << dx << "[DY]" << dy;
+        qWarning() << "[ClientMessageReceiver] Rejected move: out-of-range step [CHARACTER]" << idCharacter << "[DX]" << dx << "[DY]" << dy;
         return;
     }
 
@@ -58,13 +58,13 @@ void MessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connect
     } ) );
 }
 
-void MessageReceiver::receiveAttack( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
+void ClientMessageReceiver::receiveAttack( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
     const Engine::CharacterAttackDTO input = Engine::CharacterAttackDTO::fromJson( messageJson );
     const int dx = input.dx();
     const int dy = input.dy();
 
     if ( std::abs( dx ) > 1 || std::abs( dy ) > 1 || ( dx == 0 && dy == 0 ) ) {
-        qWarning() << "[MessageReceiver] Rejected attack: invalid direction [CHARACTER]" << idCharacter << "[DX]" << dx << "[DY]" << dy;
+        qWarning() << "[ClientMessageReceiver] Rejected attack: invalid direction [CHARACTER]" << idCharacter << "[DX]" << dx << "[DY]" << dy;
         return;
     }
 
