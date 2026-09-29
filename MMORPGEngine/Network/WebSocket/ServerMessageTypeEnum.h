@@ -11,6 +11,7 @@ enum class ServerMessageType {
     OWN_INVENTORY,
     CHARACTER,
     CREATURE,
+    ENTITY_ATTACKED,
     ENTITY_LEFT,
     CREATURE_LEFT,
 };

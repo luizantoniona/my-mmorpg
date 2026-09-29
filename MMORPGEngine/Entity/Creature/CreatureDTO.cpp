@@ -1,5 +1,6 @@
 #include "CreatureDTO.h"
 
+#include <MMORPGEngine/Entity/EntityMovementModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
@@ -9,6 +10,7 @@ namespace Engine {
 CreatureDTO::CreatureDTO() :
     _health( 0.0 ),
     _maxHealth( 0.0 ),
+    _movementCooldownSeconds( 0.0 ),
     _idCreature( 0 ),
     _x( 0 ),
     _y( 0 ),
@@ -29,6 +31,7 @@ CreatureDTO CreatureDTO::fromModel( const CreatureModel* creature ) {
     dto._z = position.z();
     dto._health = vitals.health();
     dto._maxHealth = vitals.maxHealth();
+    dto._movementCooldownSeconds = creature->movement().cooldownSeconds();
 
     return dto;
 }
@@ -60,6 +63,10 @@ CreatureDTO CreatureDTO::fromJson( const Json::Value& json ) {
         dto._maxHealth = json[ "maxHealth" ].asDouble();
     }
 
+    if ( json.isMember( "movementCooldownSeconds" ) && json[ "movementCooldownSeconds" ].isNumeric() ) {
+        dto._movementCooldownSeconds = json[ "movementCooldownSeconds" ].asDouble();
+    }
+
     return dto;
 }
 
@@ -73,6 +80,7 @@ Json::Value CreatureDTO::toJson() const {
     json[ "z" ] = _z;
     json[ "health" ] = _health;
     json[ "maxHealth" ] = _maxHealth;
+    json[ "movementCooldownSeconds" ] = _movementCooldownSeconds;
 
     return json;
 }
@@ -123,6 +131,14 @@ double CreatureDTO::maxHealth() const {
 
 void CreatureDTO::setMaxHealth( double maxHealth ) {
     _maxHealth = maxHealth;
+}
+
+double CreatureDTO::movementCooldownSeconds() const {
+    return _movementCooldownSeconds;
+}
+
+void CreatureDTO::setMovementCooldownSeconds( double movementCooldownSeconds ) {
+    _movementCooldownSeconds = movementCooldownSeconds;
 }
 
 } // namespace Engine

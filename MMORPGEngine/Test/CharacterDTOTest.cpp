@@ -14,6 +14,7 @@ TEST( CharacterDTOTest, ToJson_ThenFromJson_RoundTrips ) {
     original.setMaxMana( 60.0 );
     original.setStamina( 40.0 );
     original.setMaxStamina( 80.0 );
+    original.setMovementCooldownSeconds( 0.8 );
 
     const Engine::CharacterDTO restored = Engine::CharacterDTO::fromJson( original.toJson() );
 
@@ -27,6 +28,7 @@ TEST( CharacterDTOTest, ToJson_ThenFromJson_RoundTrips ) {
     EXPECT_EQ( restored.maxMana(), 60.0 );
     EXPECT_EQ( restored.stamina(), 40.0 );
     EXPECT_EQ( restored.maxStamina(), 80.0 );
+    EXPECT_EQ( restored.movementCooldownSeconds(), 0.8 );
 }
 
 TEST( CharacterDTOTest, FromJson_EmptyObject_KeepsDefaults ) {
@@ -38,6 +40,7 @@ TEST( CharacterDTOTest, FromJson_EmptyObject_KeepsDefaults ) {
     EXPECT_EQ( dto.z(), 0 );
     EXPECT_EQ( dto.health(), 0.0 );
     EXPECT_EQ( dto.maxHealth(), 0.0 );
+    EXPECT_EQ( dto.movementCooldownSeconds(), 0.0 );
 }
 
 TEST( CharacterDTOTest, FromJson_WrongFieldType_IsIgnored ) {

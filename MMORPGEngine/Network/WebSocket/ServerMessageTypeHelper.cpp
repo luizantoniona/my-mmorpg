@@ -16,6 +16,8 @@ std::string ServerMessageTypeHelper::toString( ServerMessageType type ) {
         return "CHARACTER";
     case ServerMessageType::CREATURE:
         return "CREATURE";
+    case ServerMessageType::ENTITY_ATTACKED:
+        return "ENTITY_ATTACKED";
     case ServerMessageType::ENTITY_LEFT:
         return "ENTITY_LEFT";
     case ServerMessageType::CREATURE_LEFT:
@@ -45,6 +47,9 @@ ServerMessageType ServerMessageTypeHelper::fromString( const std::string& value 
     }
     if ( value == "CREATURE" ) {
         return ServerMessageType::CREATURE;
+    }
+    if ( value == "ENTITY_ATTACKED" ) {
+        return ServerMessageType::ENTITY_ATTACKED;
     }
     if ( value == "ENTITY_LEFT" ) {
         return ServerMessageType::ENTITY_LEFT;

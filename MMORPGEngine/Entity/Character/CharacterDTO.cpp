@@ -1,5 +1,6 @@
 #include "CharacterDTO.h"
 
+#include <MMORPGEngine/Entity/EntityMovementModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
@@ -13,6 +14,7 @@ CharacterDTO::CharacterDTO() :
     _maxMana( 0.0 ),
     _stamina( 0.0 ),
     _maxStamina( 0.0 ),
+    _movementCooldownSeconds( 0.0 ),
     _idCharacter( 0 ),
     _x( 0 ),
     _y( 0 ),
@@ -37,6 +39,7 @@ CharacterDTO CharacterDTO::fromModel( const CharacterModel* character ) {
     dto._maxMana = vitals.maxMana();
     dto._stamina = vitals.stamina();
     dto._maxStamina = vitals.maxStamina();
+    dto._movementCooldownSeconds = character->movement().cooldownSeconds();
 
     return dto;
 }
@@ -84,6 +87,10 @@ CharacterDTO CharacterDTO::fromJson( const Json::Value& json ) {
         dto._maxStamina = json[ "maxStamina" ].asDouble();
     }
 
+    if ( json.isMember( "movementCooldownSeconds" ) && json[ "movementCooldownSeconds" ].isNumeric() ) {
+        dto._movementCooldownSeconds = json[ "movementCooldownSeconds" ].asDouble();
+    }
+
     return dto;
 }
 
@@ -101,6 +108,7 @@ Json::Value CharacterDTO::toJson() const {
     json[ "maxMana" ] = _maxMana;
     json[ "stamina" ] = _stamina;
     json[ "maxStamina" ] = _maxStamina;
+    json[ "movementCooldownSeconds" ] = _movementCooldownSeconds;
 
     return json;
 }
@@ -183,6 +191,14 @@ double CharacterDTO::maxStamina() const {
 
 void CharacterDTO::setMaxStamina( double maxStamina ) {
     _maxStamina = maxStamina;
+}
+
+double CharacterDTO::movementCooldownSeconds() const {
+    return _movementCooldownSeconds;
+}
+
+void CharacterDTO::setMovementCooldownSeconds( double movementCooldownSeconds ) {
+    _movementCooldownSeconds = movementCooldownSeconds;
 }
 
 } // namespace Engine

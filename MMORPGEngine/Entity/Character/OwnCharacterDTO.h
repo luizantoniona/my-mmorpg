@@ -46,6 +46,9 @@ public:
     double maxStamina() const;
     void setMaxStamina( double maxStamina );
 
+    double movementCooldownSeconds() const;
+    void setMovementCooldownSeconds( double movementCooldownSeconds );
+
 private:
     double _health;
     double _maxHealth;
@@ -53,6 +56,7 @@ private:
     double _maxMana;
     double _stamina;
     double _maxStamina;
+    double _movementCooldownSeconds;
     int _idCharacter;
     int _x;
     int _y;
