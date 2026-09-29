@@ -3,7 +3,6 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
-#include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
 
 namespace {
@@ -32,22 +31,18 @@ void AttackCharacterCommand::execute( WorldRuntime& runtime ) {
     const int targetY = currentPosition.y() + _dy;
     const int z = currentPosition.z();
 
-    Engine::CreatureModel* creature = runtime.creatureAt( targetX, targetY, z );
     const bool hasStamina = character->vitals().stamina() >= ATTACK_STAMINA_COST;
     const bool attackDue = character->combat().isReady( runtime.tickRate() );
 
-    if ( creature && hasStamina && attackDue ) {
-        const int idCreature = creature->idCreature();
-
-        runtime.attackCreature( _idCharacter, idCreature, ATTACK_DAMAGE, ATTACK_STAMINA_COST );
-
-        qInfo() << "[AttackCharacterCommand] Character attacked creature [CHARACTER]" << _idCharacter << "[CREATURE]" << idCreature;
-
-    } else {
-        qInfo() << "[AttackCharacterCommand] Attack blocked [CHARACTER]" << _idCharacter << "[X]" << targetX << "[Y]" << targetY << "[Z]" << z
-                << "[HAS_CREATURE]" << ( creature != nullptr ) << "[HAS_STAMINA]" << hasStamina << "[STAMINA]" << character->vitals().stamina()
-                << "[ATTACK_DUE]" << attackDue;
+    if ( !hasStamina || !attackDue ) {
+        qInfo() << "[AttackCharacterCommand] Attack blocked [CHARACTER]" << _idCharacter << "[HAS_STAMINA]" << hasStamina
+                << "[STAMINA]" << character->vitals().stamina() << "[ATTACK_DUE]" << attackDue;
+        return;
     }
+
+    runtime.attackTile( _idCharacter, targetX, targetY, z, ATTACK_DAMAGE, ATTACK_STAMINA_COST );
+
+    qInfo() << "[AttackCharacterCommand] Character attacked tile [CHARACTER]" << _idCharacter << "[X]" << targetX << "[Y]" << targetY << "[Z]" << z;
 }
 
 } // namespace Server

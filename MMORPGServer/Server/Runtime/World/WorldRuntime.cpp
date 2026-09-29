@@ -66,7 +66,7 @@ Engine::CharacterModel* WorldRuntime::addCharacter( std::unique_ptr<Engine::Char
     payload[ "y" ] = position.y();
     payload[ "z" ] = position.z();
 
-    _eventBus.publish( WorldEvent( WorldEventType::ENTITY_ENTERED, payload ) );
+    _eventBus.publish( WorldEvent( WorldEventType::CHARACTER_ENTERED, payload ) );
 
     return characterPtr;
 }
@@ -105,7 +105,7 @@ void WorldRuntime::removeCharacter( int idCharacter ) {
     payload[ "idCharacter" ] = idCharacter;
     payload[ "nearby" ] = nearbyJson;
 
-    _eventBus.publish( WorldEvent( WorldEventType::ENTITY_LEFT, payload ) );
+    _eventBus.publish( WorldEvent( WorldEventType::CHARACTER_LEFT, payload ) );
 }
 
 Engine::CharacterModel* WorldRuntime::character( int idCharacter ) {
@@ -174,7 +174,7 @@ void WorldRuntime::moveCharacter( int idCharacter, int x, int y, int z ) {
     payload[ "y" ] = y;
     payload[ "z" ] = z;
 
-    _eventBus.publish( WorldEvent( WorldEventType::ENTITY_MOVED, payload ) );
+    _eventBus.publish( WorldEvent( WorldEventType::CHARACTER_MOVED, payload ) );
 }
 
 bool WorldRuntime::attackCreature( int idCharacter, int idCreature, double damage, double staminaCost ) {
@@ -207,7 +207,7 @@ bool WorldRuntime::attackCreature( int idCharacter, int idCreature, double damag
 
     Json::Value characterPayload;
     characterPayload[ "idCharacter" ] = idCharacter;
-    _eventBus.publish( WorldEvent( WorldEventType::ENTITY_VITALS_CHANGED, characterPayload ) );
+    _eventBus.publish( WorldEvent( WorldEventType::CHARACTER_VITALS_CHANGED, characterPayload ) );
 
     Json::Value creaturePayload;
     creaturePayload[ "idCreature" ] = idCreature;

@@ -1,11 +1,8 @@
 #ifndef CHARACTERMOVEMENTSYSTEM_H
 #define CHARACTERMOVEMENTSYSTEM_H
 
+#include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGServer/Server/Runtime/Character/System/CharacterSystem.h>
-
-namespace Engine {
-class CharacterModel;
-} // namespace Engine
 
 namespace Server {
 

@@ -21,6 +21,7 @@ add_executable(
   ObjectCatalogTest.cpp
   ObjectFactoryTest.cpp
   RenderWorldTest.cpp
+  StreamRenderWorldTest.cpp
   SkillCatalogTest.cpp
   SkillFactoryTest.cpp
   SkillTreeModelTest.cpp

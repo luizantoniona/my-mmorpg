@@ -2,10 +2,10 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
-#include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
-#include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventLeaveDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
 #include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
 
 namespace Engine {
@@ -32,24 +32,6 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     const ServerMessageType type = ServerMessageTypeHelper::fromMessage( json );
 
     switch ( type ) {
-    case ServerMessageType::CHARACTER_EVENT_ATTACK: {
-        const CharacterEventAttackDTO entityAttacked = CharacterEventAttackDTO::fromJson( json );
-        emit characterEventAttackReceived( entityAttacked.idCharacter(), entityAttacked.x(), entityAttacked.y(), entityAttacked.z() );
-        return;
-    }
-
-    case ServerMessageType::CHARACTER_EVENT_LEAVE: {
-        const CharacterEventLeaveDTO entityLeft = CharacterEventLeaveDTO::fromJson( json );
-        emit characterEventLeaveReceived( entityLeft.idCharacter() );
-        return;
-    }
-
-    case ServerMessageType::CREATURE_EVENT_LEAVE: {
-        const CreatureEventLeaveDTO creatureLeft = CreatureEventLeaveDTO::fromJson( json );
-        emit creatureEventLeaveReceived( creatureLeft.idCreature() );
-        return;
-    }
-
     case ServerMessageType::OWN_CHARACTER: {
         const OwnCharacterDTO state = OwnCharacterDTO::fromJson( json );
         emit ownCharacterReceived( state );
@@ -74,9 +56,27 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
         return;
     }
 
+    case ServerMessageType::CHARACTER_EVENT_ATTACK: {
+        const CharacterEventAttackDTO event = CharacterEventAttackDTO::fromJson( json );
+        emit characterEventAttackReceived( event.idCharacter(), event.x(), event.y(), event.z() );
+        return;
+    }
+
+    case ServerMessageType::CHARACTER_EVENT_LEAVE: {
+        const CharacterEventLeaveDTO event = CharacterEventLeaveDTO::fromJson( json );
+        emit characterEventLeaveReceived( event.idCharacter() );
+        return;
+    }
+
     case ServerMessageType::CREATURE: {
         const CreatureDTO state = CreatureDTO::fromJson( json );
         emit creatureStateReceived( state.idCreature(), state.x(), state.y(), state.z(), state.movementCooldownSeconds() );
+        return;
+    }
+
+    case ServerMessageType::CREATURE_EVENT_LEAVE: {
+        const CreatureEventLeaveDTO event = CreatureEventLeaveDTO::fromJson( json );
+        emit creatureEventLeaveReceived( event.idCreature() );
         return;
     }
 

@@ -3,13 +3,14 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterEventLeaveDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnInventoryDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
-#include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
-#include <MMORPGEngine/Entity/Character/CharacterEventLeaveDTO.h>
+#include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/World/WorldBasicDTO.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/Observer/ObserverRegistry.h>
@@ -103,18 +104,18 @@ void EntityBroadcaster::onCharacterAttacked( const WorldEvent& event ) {
 }
 
 void EntityBroadcaster::onCreatureMoved( const WorldEvent& event ) {
-    broadcastCreature( event.payload()[ "idCreature" ].asInt() );
+    broadcastCreature( event.payload() );
 }
 
 void EntityBroadcaster::onCreatureVitalsChanged( const WorldEvent& event ) {
-    broadcastCreature( event.payload()[ "idCreature" ].asInt() );
+    broadcastCreature( event.payload() );
 }
 
 void EntityBroadcaster::onCreatureLeft( const WorldEvent& event ) {
     Engine::CreatureEventLeaveDTO message;
     message.setIdCreature( event.payload()[ "idCreature" ].asInt() );
 
-    broadcastToConnected( Engine::JsonHelper::writeJsonString( message.toJson() ) );
+    broadcastNear( event.payload(), Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
 
 void EntityBroadcaster::sendWorldBasic( const WorldEvent& event ) {
@@ -217,16 +218,21 @@ void EntityBroadcaster::broadcastAttack( const WorldEvent& event ) {
     broadcast( receivers, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
 
-void EntityBroadcaster::broadcastCreature( int idCreature ) {
+void EntityBroadcaster::broadcastCreature( const Json::Value& payload ) {
+    const Engine::CreatureDTO message = Engine::CreatureDTO::fromJson( payload );
+
+    broadcastNear( payload, Engine::JsonHelper::writeJsonString( message.toJson() ) );
+}
+
+void EntityBroadcaster::broadcastNear( const Json::Value& payload, const std::string& message ) {
+    Engine::EntityPositionModel position;
+    position.setX( payload[ "x" ].asInt() );
+    position.setY( payload[ "y" ].asInt() );
+    position.setZ( payload[ "z" ].asInt() );
+
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
-    const Engine::CreatureModel* creature = worldRuntime.creature( idCreature );
-    if ( !creature ) {
-        return;
-    }
-
-    // TODO: Filter by proximity once creatures need to scale beyond a handful (Backlog "Criaturas")
-    broadcastToConnected( Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( creature ).toJson() ) );
+    broadcast( worldRuntime.charactersNear( position ), message );
 }
 
 void EntityBroadcaster::sendToCharacter( int idCharacter, const std::string& message ) {
@@ -251,18 +257,6 @@ void EntityBroadcaster::broadcast( const std::vector<int>& idCharacters, const s
     for ( const std::shared_ptr<EntityObserver>& observer : observerRegistry.globalObservers() ) {
         observer->send( message );
     }
-}
-
-void EntityBroadcaster::broadcastToConnected( const std::string& message ) {
-    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
-
-    std::vector<int> receivers;
-
-    for ( const Engine::CharacterModel& character : worldRuntime.connectedCharacters() ) {
-        receivers.push_back( character.idCharacter() );
-    }
-
-    broadcast( receivers, message );
 }
 
 } // namespace Server

@@ -33,11 +33,11 @@ private:
     void sendCreatures( const WorldEvent& event );
     void broadcastCharacter( const WorldEvent& event );
     void broadcastAttack( const WorldEvent& event );
-    void broadcastCreature( int idCreature );
+    void broadcastCreature( const Json::Value& payload );
 
     void sendToCharacter( int idCharacter, const std::string& message );
     void broadcast( const std::vector<int>& idCharacters, const std::string& message );
-    void broadcastToConnected( const std::string& message );
+    void broadcastNear( const Json::Value& payload, const std::string& message );
 };
 
 } // namespace Server
