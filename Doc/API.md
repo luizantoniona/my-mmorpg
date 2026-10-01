@@ -241,7 +241,7 @@ Required parameters:
 
 Every message on this socket is a JSON object with a `"type"` field. The
 value is the C++ enum member name, unquoted case (`OWN_CHARACTER`,
-`CHARACTER_MOVE`, ...) — see `Engine::ClientMessageType`/`ServerMessageType`
+`CHARACTER_INTENT_MOVE`, ...) — see `Engine::ClientMessageType`/`ServerMessageType`
 in `MMORPGEngine/Network/WebSocket/`. Client → server messages use
 `ClientMessageType`; server → client messages use `ServerMessageType`. There
 is no shared/generic message type between the two directions.
@@ -286,18 +286,23 @@ connecting client only:
      "x": 16, "y": 16, "z": 0,
      "health": 100.0, "maxHealth": 100.0,
      "mana": 50.0, "maxMana": 50.0,
-     "stamina": 50.0, "maxStamina": 50.0
+     "stamina": 50.0, "maxStamina": 50.0,
+     "movementCooldownSeconds": 1.0
    }
    ```
+   `movementCooldownSeconds` is how long the entity must wait between steps.
+   The client uses it as the duration of its tile-to-tile movement animation,
+   so the slide always lasts exactly one step — it is not a client-side
+   constant.
 3. `CHARACTER` (`Engine::CharacterDTO`) — one per character already nearby
    (same fields as `OWN_CHARACTER`, minus the "own" semantics):
    ```json
-   { "type": "CHARACTER", "idCharacter": 11, "x": 20, "y": 16, "z": 0, "health": 100.0, "maxHealth": 100.0, "mana": 50.0, "maxMana": 50.0, "stamina": 50.0, "maxStamina": 50.0 }
+   { "type": "CHARACTER", "idCharacter": 11, "x": 20, "y": 16, "z": 0, "health": 100.0, "maxHealth": 100.0, "mana": 50.0, "maxMana": 50.0, "stamina": 50.0, "maxStamina": 50.0, "movementCooldownSeconds": 1.0 }
    ```
 4. `CREATURE` (`Engine::CreatureDTO`) — one per creature currently in the
    world (no proximity filter yet — `// TODO` in `EntityBroadcaster::sendCreatures`):
    ```json
-   { "type": "CREATURE", "idCreature": 1, "x": 18, "y": 16, "z": 0 }
+   { "type": "CREATURE", "idCreature": 1, "x": 18, "y": 16, "z": 0, "health": 40.0, "maxHealth": 40.0, "movementCooldownSeconds": 1.0 }
    ```
 
 The server also broadcasts a `CHARACTER` message for the entering character
@@ -310,20 +315,48 @@ connection whenever something relevant changes nearby:
   vitals-only broadcast).
 - `OWN_CHARACTER` — sent to a character's own connection instead of
   `CHARACTER` whenever *that* character's own state changes (its vitals
-  regen tick, or the reply to its own `CHARACTER_MOVE`).
-- `ENTITY_LEFT` (`Engine::EntityLeftDTO`) — a nearby character disconnected:
+  regen tick, or the reply to its own `CHARACTER_INTENT_MOVE`).
+- `CHARACTER_EVENT_LEAVE` (`Engine::CharacterEventLeaveDTO`) — a nearby character disconnected:
   ```json
-  { "type": "ENTITY_LEFT", "idCharacter": 11 }
+  { "type": "CHARACTER_EVENT_LEAVE", "idCharacter": 11 }
   ```
-
-There is no `CREATURE` push after the handshake yet — creatures don't move
-or take damage.
+- `CREATURE` — a creature moved or took damage.
+- `CREATURE_EVENT_LEAVE` (`Engine::CreatureEventLeaveDTO`) — a creature died:
+  ```json
+  { "type": "CREATURE_EVENT_LEAVE", "idCreature": 1 }
+  ```
+- `CHARACTER_EVENT_ATTACK_START` (`Engine::CharacterEventAttackStartDTO`) — a character
+  began casting an attack on a tile, sent to the attacker and to everyone nearby:
+  ```json
+  { "type": "CHARACTER_EVENT_ATTACK_START", "idCharacter": 10, "x": 17, "y": 16, "z": 0, "castSeconds": 0.5 }
+  ```
+  Attacks are not instant: the blow is locked onto that tile and lands
+  `castSeconds` later, hitting whoever stands there *then*. Leaving the tile
+  during the cast dodges it, and the attacker moving cancels the cast. The
+  client uses this to telegraph the tile.
+- `CREATURE_EVENT_ATTACK_START` (`Engine::CreatureEventAttackStartDTO`) — same, for a
+  creature (`idCreature` instead of `idCharacter`), sent to characters near the tile.
+- `CREATURE_EVENT_ATTACK` (`Engine::CreatureEventAttackDTO`) — a creature's blow landed
+  on a tile (`idCreature`, `x`, `y`, `z`); the damage reaches the victim as
+  `OWN_CHARACTER`/`CHARACTER`.
+- `CHARACTER_EVENT_ATTACK` (`Engine::CharacterEventAttackDTO`) — a character landed an
+  attack on a tile, sent to the attacker and to everyone nearby:
+  ```json
+  { "type": "CHARACTER_EVENT_ATTACK", "idCharacter": 10, "x": 17, "y": 16, "z": 0 }
+  ```
+  Presentation only: it exists so the client can play a hit effect on that
+  tile. The resulting damage travels in the `CHARACTER`/`OWN_CHARACTER`,
+  `CREATURE` and `CREATURE_EVENT_LEAVE` messages published alongside it — and those
+  are absent when the tile held no creature, since a swing at empty ground
+  damages nothing. It is sent for every swing the character actually performed,
+  including a miss; an attack rejected for cooldown or stamina produces no
+  message at all, because no swing happened.
 
 #### Client → Server messages
 
-- `CHARACTER_MOVE` (`Engine::CharacterMoveDTO`):
+- `CHARACTER_INTENT_MOVE` (`Engine::CharacterIntentMoveDTO`):
   ```json
-  { "type": "CHARACTER_MOVE", "dx": 0, "dy": -1 }
+  { "type": "CHARACTER_INTENT_MOVE", "dx": 0, "dy": -1 }
   ```
   `dx`/`dy` must each be `-1`, `0` or `1`. The server validates world bounds
   and the destination tile's `isWalkable`, updates the character's position
@@ -331,6 +364,20 @@ or take damage.
   `OWN_CHARACTER` message carrying the authoritative state — the mover does
   not get a `CHARACTER` broadcast about themselves, only nearby characters
   do.
+
+- `CHARACTER_INTENT_ATTACK` (`Engine::CharacterIntentAttackDTO`):
+  ```json
+  { "type": "CHARACTER_INTENT_ATTACK", "dx": 1, "dy": 0 }
+  ```
+  A melee attack on the adjacent tile at `dx`/`dy`. The server checks the
+  attack cooldown and the character's stamina; when both hold, the swing
+  starts — it spends the stamina, resets the cooldown and publishes
+  `CHARACTER_EVENT_ATTACK_START` for the target tile. After the cast,
+  `CHARACTER_EVENT_ATTACK` is published for that tile whether or not anything
+  is standing there; a creature on it takes the damage and its state is
+  published alongside. An attack rejected for cooldown, stamina or an
+  already running cast gets no reply, and moving during the cast cancels the
+  blow (the stamina is not refunded).
 
 Movement does not carry a facing/orientation — `EntityModel` (and every DTO
 built on top of it) has no orientation field.

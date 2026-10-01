@@ -20,7 +20,9 @@ a Qt debug window that renders the map and every connected character.
   changes, only characters in the surrounding 3×3 chunks are told.
 - **Debug window** — the same engine `Viewport` as the Editor, in
   read-only mode, with a live list of connected characters (click to
-  center the camera, disconnect from the UI).
+  center the camera, disconnect from the UI). It watches the world as a
+  client would, so movement and attacks animate there exactly as they do
+  in the game.
 
 ## Architecture highlights
 
@@ -33,6 +35,16 @@ a Qt debug window that renders the map and every connected character.
   objects host pluggable `*System`s that run every tick. State changes are
   published as events; a single `EntityBroadcaster` turns events into DTOs
   and sends them.
+- **One delivery path, two kinds of viewer.** The broadcaster doesn't know
+  about sockets: it sends to *observers*. A player's observer wraps a
+  WebSocket connection and sees only its surroundings; the debug window
+  registers a global observer that receives the same DTOs in-process. So
+  the debug window consumes the real protocol instead of reading the
+  runtime directly — it inherits the client's rendering for free, and any
+  divergence between it and the runtime-backed character list is itself a
+  signal that the broadcast is wrong. The same seam is what a spectator
+  mode, an admin client, or socket-free tests of the broadcast layer would
+  plug into.
 - **Mutex discipline.** Runtime methods lock per call; events are published
   only after the lock is released, so subscribers can safely query the
   runtime back.

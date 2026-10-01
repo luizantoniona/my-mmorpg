@@ -15,9 +15,12 @@ you into the map.
   confirmation, then *Enter World*.
 - **Play** — the map renders through the engine `Viewport`; WASD sends
   movement requests and the character moves when the server confirms.
-  Other players nearby appear and disappear in real time. A HUD shows your
-  name and health / mana / stamina bars, plus an action bar ready for
-  inventory, skills and settings.
+  Characters and creatures slide between tiles instead of snapping, the
+  camera tracks your character through that slide, and landing an attack
+  flashes the target tile. Other players nearby appear
+  and disappear in real time. A HUD shows your name and health / mana /
+  stamina bars, plus an action bar ready for inventory, skills and
+  settings.
 
 ## Architecture highlights
 
@@ -27,14 +30,19 @@ you into the map.
 - **Server-authoritative movement.** The client never predicts. It sends
   `CHARACTER_MOVE` and applies whatever `OWN_CHARACTER` state comes back —
   including "you didn't move" when a step is blocked.
+- **Animation without prediction.** The slide between tiles interpolates
+  *between two states the server already sent*, and its duration is the
+  movement cooldown the server reports — so the visuals stay smooth while
+  the authority stays server-side. Attack effects are driven by a server
+  event too: an attack rejected for cooldown or stamina flashes nothing.
 - **Typed messages.** Every WebSocket message carries a `type`; the client
   routes on it and knows from the type alone whether a message is about
   its own character or someone else.
 - **Per-server data cache.** Synced data lives under the OS app-data
   folder, keyed by host and port, so switching servers never mixes worlds.
 - **Shared UI kit.** Panels, inputs, buttons and theme tokens come from
-  `MMORPGUI`; the client only adds game-specific components (HUD, stat
-  bars, action bar).
+  `MMORPGUI`; the client only adds game-specific components (vitals
+  panel, action bar, item slots).
 
 ## Stack
 

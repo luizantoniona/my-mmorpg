@@ -30,10 +30,25 @@ on the wire.
   (world ↔ screen, zoom, clamping to the map bounds) and per-layer
   renderers for tiles, objects and entities. It culls to the visible
   range and resolves *see-through floors*: an empty cell on the active
-  floor shows the floor underneath, Tibia-style.
+  floor shows the floor underneath, Tibia-style. Entities carry a pixel
+  offset from their tile, so a module that knows an entity is between two
+  tiles can have it drawn mid-step without the renderer knowing why.
+- **A render world fed by the state stream.** Modules that learn about
+  entities from server messages — the Client and the Server's own debug
+  window — share one base class that owns the entities and interpolates
+  their movement between tiles, using the movement cooldown the server
+  reports as the step duration. Subclasses supply only the static world,
+  which genuinely differs: the Client streams the map in, the Server has
+  all of it in memory. The Editor, which has no stream at all, sits on the
+  plain render world instead.
 - **`Viewport`** — a QML item that draws any `RenderWorld`. The Editor, the
   Server's debug window and the Client all use the same component; only
-  who drives the camera and the active floor changes.
+  who drives the camera and the active floor changes. It also offers
+  domain-agnostic tile overlays — a persistent highlight, arbitrary
+  rectangles, and a timed flash that fades on its own — so each module can
+  build its own feedback without teaching the engine about its rules. The
+  camera can also lock onto an entity by id and track its animated position,
+  still clamped to the map bounds.
 - **Networking helpers** — an HTTP client, a WebSocket client with
   session-header auth, and the typed message contract for the game socket
   (separate enums for client → server and server → client messages).
