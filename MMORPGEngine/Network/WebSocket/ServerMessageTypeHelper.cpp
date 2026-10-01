@@ -14,12 +14,18 @@ std::string ServerMessageTypeHelper::toString( ServerMessageType type ) {
         return "OWN_INVENTORY";
     case ServerMessageType::CHARACTER:
         return "CHARACTER";
+    case ServerMessageType::CHARACTER_EVENT_ATTACK_START:
+        return "CHARACTER_EVENT_ATTACK_START";
     case ServerMessageType::CHARACTER_EVENT_ATTACK:
         return "CHARACTER_EVENT_ATTACK";
     case ServerMessageType::CHARACTER_EVENT_LEAVE:
         return "CHARACTER_EVENT_LEAVE";
     case ServerMessageType::CREATURE:
         return "CREATURE";
+    case ServerMessageType::CREATURE_EVENT_ATTACK_START:
+        return "CREATURE_EVENT_ATTACK_START";
+    case ServerMessageType::CREATURE_EVENT_ATTACK:
+        return "CREATURE_EVENT_ATTACK";
     case ServerMessageType::CREATURE_EVENT_LEAVE:
         return "CREATURE_EVENT_LEAVE";
     case ServerMessageType::UNKNOWN:
@@ -45,6 +51,9 @@ ServerMessageType ServerMessageTypeHelper::fromString( const std::string& value 
     if ( value == "CHARACTER" ) {
         return ServerMessageType::CHARACTER;
     }
+    if ( value == "CHARACTER_EVENT_ATTACK_START" ) {
+        return ServerMessageType::CHARACTER_EVENT_ATTACK_START;
+    }
     if ( value == "CHARACTER_EVENT_ATTACK" ) {
         return ServerMessageType::CHARACTER_EVENT_ATTACK;
     }
@@ -53,6 +62,12 @@ ServerMessageType ServerMessageTypeHelper::fromString( const std::string& value 
     }
     if ( value == "CREATURE" ) {
         return ServerMessageType::CREATURE;
+    }
+    if ( value == "CREATURE_EVENT_ATTACK_START" ) {
+        return ServerMessageType::CREATURE_EVENT_ATTACK_START;
+    }
+    if ( value == "CREATURE_EVENT_ATTACK" ) {
+        return ServerMessageType::CREATURE_EVENT_ATTACK;
     }
     if ( value == "CREATURE_EVENT_LEAVE" ) {
         return ServerMessageType::CREATURE_EVENT_LEAVE;

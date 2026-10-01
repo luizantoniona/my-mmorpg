@@ -104,6 +104,8 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterEquipmentModel.h
     Entity/Character/CharacterEventAttackDTO.cpp
     Entity/Character/CharacterEventAttackDTO.h
+    Entity/Character/CharacterEventAttackStartDTO.cpp
+    Entity/Character/CharacterEventAttackStartDTO.h
     Entity/Character/CharacterEventLeaveDTO.cpp
     Entity/Character/CharacterEventLeaveDTO.h
     Entity/Character/CharacterIntentAttackDTO.cpp
@@ -131,6 +133,10 @@ set(PROJECT_SOURCES
     Entity/Creature/CreatureModel.h
     Entity/Creature/CreatureDTO.cpp
     Entity/Creature/CreatureDTO.h
+    Entity/Creature/CreatureEventAttackDTO.cpp
+    Entity/Creature/CreatureEventAttackDTO.h
+    Entity/Creature/CreatureEventAttackStartDTO.cpp
+    Entity/Creature/CreatureEventAttackStartDTO.h
     Entity/Creature/CreatureEventLeaveDTO.cpp
     Entity/Creature/CreatureEventLeaveDTO.h
     Entity/EntityCombatModel.cpp

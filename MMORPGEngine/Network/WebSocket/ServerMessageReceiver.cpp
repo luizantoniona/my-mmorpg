@@ -3,8 +3,11 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterEventAttackStartDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventLeaveDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureEventAttackDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureEventAttackStartDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
 #include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
 
@@ -56,6 +59,12 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
         return;
     }
 
+    case ServerMessageType::CHARACTER_EVENT_ATTACK_START: {
+        const CharacterEventAttackStartDTO event = CharacterEventAttackStartDTO::fromJson( json );
+        emit characterEventAttackStartReceived( event.idCharacter(), event.x(), event.y(), event.z(), event.castSeconds() );
+        return;
+    }
+
     case ServerMessageType::CHARACTER_EVENT_ATTACK: {
         const CharacterEventAttackDTO event = CharacterEventAttackDTO::fromJson( json );
         emit characterEventAttackReceived( event.idCharacter(), event.x(), event.y(), event.z() );
@@ -71,6 +80,18 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     case ServerMessageType::CREATURE: {
         const CreatureDTO state = CreatureDTO::fromJson( json );
         emit creatureStateReceived( state.idCreature(), state.x(), state.y(), state.z(), state.movementCooldownSeconds() );
+        return;
+    }
+
+    case ServerMessageType::CREATURE_EVENT_ATTACK_START: {
+        const CreatureEventAttackStartDTO event = CreatureEventAttackStartDTO::fromJson( json );
+        emit creatureEventAttackStartReceived( event.idCreature(), event.x(), event.y(), event.z(), event.castSeconds() );
+        return;
+    }
+
+    case ServerMessageType::CREATURE_EVENT_ATTACK: {
+        const CreatureEventAttackDTO event = CreatureEventAttackDTO::fromJson( json );
+        emit creatureEventAttackReceived( event.idCreature(), event.x(), event.y(), event.z() );
         return;
     }
 

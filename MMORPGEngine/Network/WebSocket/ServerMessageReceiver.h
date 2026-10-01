@@ -29,8 +29,11 @@ signals:
 
     void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
     void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds );
+    void characterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds );
     void characterEventAttackReceived( int idCharacter, int x, int y, int z );
     void characterEventLeaveReceived( int idCharacter );
+    void creatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds );
+    void creatureEventAttackReceived( int idCreature, int x, int y, int z );
     void creatureEventLeaveReceived( int idCreature );
 };
 
