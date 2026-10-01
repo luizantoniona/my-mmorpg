@@ -20,7 +20,10 @@ ServerPageControl::ServerPageControl( QObject* parent ) :
 
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterStateReceived, this, &ServerPageControl::characterStateReceived );
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::creatureStateReceived, this, &ServerPageControl::creatureStateReceived );
+    connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackStartReceived, this, &ServerPageControl::characterEventAttackStartReceived );
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackReceived, this, &ServerPageControl::characterEventAttackReceived );
+    connect( &_messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &ServerPageControl::creatureEventAttackStartReceived );
+    connect( &_messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackReceived, this, &ServerPageControl::creatureEventAttackReceived );
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterEventLeaveReceived, this, &ServerPageControl::characterEventLeaveReceived );
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::creatureEventLeaveReceived, this, &ServerPageControl::creatureEventLeaveReceived );
 
