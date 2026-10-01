@@ -36,7 +36,7 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
                 const QPointF position( x * WorldConstants::TILE_SIZE, y * WorldConstants::TILE_SIZE );
                 const QSizeF size( WorldConstants::TILE_SIZE, WorldConstants::TILE_SIZE );
 
-                scene.addRect( position, size, QColor( 0, 0, 0, 130 ) );
+                scene.addRect( RenderSceneLayerEnum::Tile, position, size, QColor( 0, 0, 0, 130 ) );
             }
         }
     }
@@ -53,7 +53,7 @@ void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const Wo
     const QPointF position( x * WorldConstants::TILE_SIZE, y * WorldConstants::TILE_SIZE );
     const QSizeF size( WorldConstants::TILE_SIZE, WorldConstants::TILE_SIZE );
 
-    scene.addTexture( position, size, frame );
+    scene.addTexture( RenderSceneLayerEnum::Tile, position, size, frame );
 }
 
 } // namespace Engine

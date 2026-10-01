@@ -3,7 +3,6 @@
 #include <QColor>
 #include <QCursor>
 #include <QHoverEvent>
-#include <QSGSimpleRectNode>
 
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Renderer.h>
@@ -12,7 +11,8 @@
 namespace Engine {
 
 namespace {
-constexpr int ANIMATION_INTERVAL_MS = 100;
+constexpr int ANIMATION_INTERVAL_MS = 16;
+constexpr int NO_FOLLOWED_ENTITY = -1;
 } // namespace
 
 Viewport::Viewport( QQuickItem* parent ) :
@@ -21,10 +21,9 @@ Viewport::Viewport( QQuickItem* parent ) :
     _renderer( new Renderer() ),
     _world( nullptr ),
     _animationTimer( new QTimer( this ) ),
-    _overlayRects(),
-    _highlightRects(),
     _hoveredTile( 0, 0 ),
-    _activeFloor( 0 ) {
+    _activeFloor( 0 ),
+    _followedEntity( NO_FOLLOWED_ENTITY ) {
 
     setFlag( ItemHasContents, true );
 
@@ -36,6 +35,7 @@ Viewport::Viewport( QQuickItem* parent ) :
 
     _animationTimer->setInterval( ANIMATION_INTERVAL_MS );
     connect( _animationTimer, &QTimer::timeout, this, [ this ]() {
+        updateFollowedCamera();
         update();
     } );
     _animationTimer->start();
@@ -76,6 +76,18 @@ void Viewport::moveCameraByTiles( int dx, int dy ) {
     update();
 }
 
+void Viewport::followEntity( int idEntity ) {
+    _followedEntity = idEntity;
+
+    updateFollowedCamera();
+
+    update();
+}
+
+void Viewport::stopFollowingEntity() {
+    _followedEntity = NO_FOLLOWED_ENTITY;
+}
+
 Camera* Viewport::camera() const {
     return _camera;
 }
@@ -108,6 +120,31 @@ void Viewport::updateWorldBounds() {
                                   : QSizeF( 0.0, 0.0 ) );
 
     emit cameraPositionChanged();
+}
+
+void Viewport::updateFollowedCamera() {
+    if ( _followedEntity == NO_FOLLOWED_ENTITY || !_world ) {
+        return;
+    }
+
+    const double tileSize = WorldConstants::TILE_SIZE;
+
+    for ( const RenderWorld::Entity& entity : _world->entities( _activeFloor ) ) {
+        if ( entity.idEntity != _followedEntity ) {
+            continue;
+        }
+
+        const QPointF previousPosition = _camera->position();
+
+        _camera->setPosition( QPointF( entity.x * tileSize + entity.offsetX + tileSize / 2.0,
+                                       entity.y * tileSize + entity.offsetY + tileSize / 2.0 ) );
+
+        if ( _camera->position() != previousPosition ) {
+            emit cameraPositionChanged();
+        }
+
+        return;
+    }
 }
 
 int Viewport::activeFloor() const {
@@ -145,63 +182,38 @@ QPoint Viewport::hoveredTile() const {
 }
 
 void Viewport::setHighlightedTile( int x, int y ) {
-    if ( !_highlightRects.isEmpty() && _highlightRects.first().x == x && _highlightRects.first().y == y ) {
-        return;
-    }
-
-    OverlayRect rect;
-    rect.x = x;
-    rect.y = y;
-    rect.width = 1;
-    rect.height = 1;
-    rect.color = QColor( 255, 255, 255, 70 );
-
-    _highlightRects = { rect };
+    _renderer->overlayRenderer()->setHighlightedTile( x, y );
 
     update();
 }
 
 void Viewport::clearHighlight() {
-    if ( _highlightRects.isEmpty() ) {
-        return;
-    }
-
-    _highlightRects.clear();
+    _renderer->overlayRenderer()->clearHighlight();
 
     update();
 }
 
 void Viewport::setOverlayRects( const QVariantList& rects, const QColor& color ) {
-    _overlayRects.clear();
-    _overlayRects.reserve( rects.size() );
-
-    for ( const QVariant& rectVariant : rects ) {
-        const QVariantMap rectMap = rectVariant.toMap();
-
-        OverlayRect rect;
-        rect.x = rectMap.value( "x" ).toInt();
-        rect.y = rectMap.value( "y" ).toInt();
-        rect.width = rectMap.value( "width" ).toInt();
-        rect.height = rectMap.value( "height" ).toInt();
-        rect.color = color;
-
-        _overlayRects.append( rect );
-    }
+    _renderer->overlayRenderer()->setOverlayRects( rects, color );
 
     update();
 }
 
 void Viewport::clearOverlayRects() {
-    if ( _overlayRects.isEmpty() ) {
-        return;
-    }
-
-    _overlayRects.clear();
+    _renderer->overlayRenderer()->clearOverlayRects();
 
     update();
 }
 
-void Viewport::forceRedraw() {
+void Viewport::addTileFlash( int x, int y, const QColor& color, int durationMs ) {
+    _renderer->effectRenderer()->addTileFlash( x, y, color, durationMs );
+
+    update();
+}
+
+void Viewport::addTileWarning( int x, int y, const QColor& color, int durationMs ) {
+    _renderer->effectRenderer()->addTileWarning( x, y, color, durationMs );
+
     update();
 }
 
@@ -279,28 +291,7 @@ QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {
 
     scene.build( rootNode, window(), *_camera, _textureCache );
 
-    for ( const OverlayRect& rect : _highlightRects ) {
-        addOverlayNode( rootNode, rect );
-    }
-
-    for ( const OverlayRect& rect : _overlayRects ) {
-        addOverlayNode( rootNode, rect );
-    }
-
     return rootNode;
-}
-
-void Viewport::addOverlayNode( QSGNode* parent, const OverlayRect& rect ) const {
-    const double tileSize = WorldConstants::TILE_SIZE;
-
-    const QPointF worldPosition( rect.x * tileSize, rect.y * tileSize );
-    const QPointF screenPosition = _camera->worldToScreen( worldPosition );
-
-    auto* node = new QSGSimpleRectNode();
-    node->setColor( rect.color );
-    node->setRect( screenPosition.x(), screenPosition.y(), rect.width * tileSize, rect.height * tileSize );
-
-    parent->appendChildNode( node );
 }
 
 } // namespace Engine

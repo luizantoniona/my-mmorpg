@@ -149,10 +149,8 @@ Item {
                         if (root.toolMode === ToolMode.Paint) {
                             if (root.activeBrush === BrushMode.Tile && root.activeTileType >= 0) {
                                 worldControl.paintTile(x, y, z, root.activeTileType)
-                                viewport.forceRedraw()
                             } else if (root.activeBrush === BrushMode.Object && root.activeObjectType >= 0) {
                                 worldControl.paintObject(x, y, z, root.activeObjectType)
-                                viewport.forceRedraw()
                             }
                             return
                         }

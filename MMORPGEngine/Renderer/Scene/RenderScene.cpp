@@ -1,5 +1,7 @@
 #include "RenderScene.h"
 
+#include <algorithm>
+
 #include <QSGSimpleRectNode>
 #include <QSGSimpleTextureNode>
 
@@ -16,13 +18,13 @@ void RenderScene::clear() {
     _items.clear();
 }
 
-void RenderScene::addTexture( const QPointF& position, const QSizeF& size, const QImage& image ) {
-    RenderSceneItem item( position, size, image );
+void RenderScene::addTexture( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QImage& image ) {
+    RenderSceneItem item( layer, position, size, image );
     _items.append( item );
 }
 
-void RenderScene::addRect( const QPointF& position, const QSizeF& size, const QColor& color ) {
-    RenderSceneItem item( position, size, color );
+void RenderScene::addRect( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QColor& color ) {
+    RenderSceneItem item( layer, position, size, color );
     _items.append( item );
 }
 
@@ -30,6 +32,10 @@ void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& 
     if ( !rootNode || !window ) {
         return;
     }
+
+    std::stable_sort( _items.begin(), _items.end(), []( const RenderSceneItem& left, const RenderSceneItem& right ) {
+        return left.layer() < right.layer();
+    } );
 
     for ( const RenderSceneItem& item : _items ) {
         const QPointF screenPosition = camera.worldToScreen( item.position() );

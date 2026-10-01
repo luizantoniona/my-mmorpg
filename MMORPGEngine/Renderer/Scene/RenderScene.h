@@ -9,6 +9,7 @@
 
 #include <MMORPGEngine/Renderer/Camera/Camera.h>
 #include <MMORPGEngine/Renderer/Scene/RenderSceneItem.h>
+#include <MMORPGEngine/Renderer/Scene/RenderSceneLayerEnum.h>
 #include <MMORPGEngine/Renderer/Scene/TextureCache.h>
 
 namespace Engine {
@@ -20,8 +21,8 @@ public:
 
     void clear();
 
-    void addTexture( const QPointF& position, const QSizeF& size, const QImage& image );
-    void addRect( const QPointF& position, const QSizeF& size, const QColor& color );
+    void addTexture( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QImage& image );
+    void addRect( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QColor& color );
 
     void build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera, TextureCache& textureCache );
 

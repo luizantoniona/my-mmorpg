@@ -163,14 +163,21 @@ set(PROJECT_SOURCES
     Renderer/Scene/RenderScene.h
     Renderer/Scene/RenderSceneItem.cpp
     Renderer/Scene/RenderSceneItem.h
+    Renderer/Scene/RenderSceneLayerEnum.h
     Renderer/Scene/TextureCache.cpp
     Renderer/Scene/TextureCache.h
     Renderer/World/RenderWorld.cpp
     Renderer/World/RenderWorld.h
     Renderer/World/StreamRenderWorld.cpp
     Renderer/World/StreamRenderWorld.h
+    Renderer/EffectRenderer.cpp
+    Renderer/EffectRenderer.h
+    Renderer/OverlayRenderer.cpp
+    Renderer/OverlayRenderer.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
+    Renderer/EntityAnimationModel.cpp
+    Renderer/EntityAnimationModel.h
     Renderer/EntityRenderer.cpp
     Renderer/EntityRenderer.h
     Renderer/EntityTextureModel.cpp

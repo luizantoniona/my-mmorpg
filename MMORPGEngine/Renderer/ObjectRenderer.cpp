@@ -36,7 +36,7 @@ void ObjectRenderer::render( RenderScene& scene, const Camera& camera, const Ren
                 const QPointF position( x * WorldConstants::TILE_SIZE, y * WorldConstants::TILE_SIZE );
                 const QSizeF size( WorldConstants::TILE_SIZE, WorldConstants::TILE_SIZE );
 
-                scene.addRect( position, size, QColor( 0, 0, 0, 130 ) );
+                scene.addRect( RenderSceneLayerEnum::Object, position, size, QColor( 0, 0, 0, 130 ) );
             }
         }
     }
@@ -60,7 +60,7 @@ void ObjectRenderer::renderObject( RenderScene& scene, int x, int y, int z, cons
     const QSizeF size( frame.width() * scale, frame.height() * scale );
     const QPointF position( x * WorldConstants::TILE_SIZE, ( y + 1 ) * WorldConstants::TILE_SIZE - size.height() );
 
-    scene.addTexture( position, size, frame );
+    scene.addTexture( RenderSceneLayerEnum::Object, position, size, frame );
 }
 
 } // namespace Engine
