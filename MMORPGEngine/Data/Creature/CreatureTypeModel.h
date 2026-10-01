@@ -19,6 +19,9 @@ public:
     QString name() const;
     void setName( const QString& name );
 
+    uint32_t aggroRadius() const;
+    void setAggroRadius( uint32_t aggroRadius );
+
     CreatureTypeVitalsModel& vitals();
     const CreatureTypeVitalsModel& vitals() const;
 
@@ -26,6 +29,7 @@ private:
     QString _name;
     CreatureTypeVitalsModel _vitals;
     uint32_t _type;
+    uint32_t _aggroRadius;
 };
 
 } // namespace Engine

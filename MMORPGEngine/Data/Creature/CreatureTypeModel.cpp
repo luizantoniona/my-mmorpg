@@ -4,7 +4,8 @@ namespace Engine {
 
 CreatureTypeModel::CreatureTypeModel() :
     _name( "" ),
-    _type( 0 ) {
+    _type( 0 ),
+    _aggroRadius( 0 ) {
 }
 
 uint32_t CreatureTypeModel::type() const {
@@ -21,6 +22,14 @@ QString CreatureTypeModel::name() const {
 
 void CreatureTypeModel::setName( const QString& name ) {
     _name = name;
+}
+
+uint32_t CreatureTypeModel::aggroRadius() const {
+    return _aggroRadius;
+}
+
+void CreatureTypeModel::setAggroRadius( uint32_t aggroRadius ) {
+    _aggroRadius = aggroRadius;
 }
 
 CreatureTypeVitalsModel& CreatureTypeModel::vitals() {

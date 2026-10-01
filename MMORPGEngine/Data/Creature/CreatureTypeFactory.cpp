@@ -34,6 +34,7 @@ void CreatureTypeFactory::createCreatureTypeCatalog( const QString& configPath, 
         creatureType.setType( creatureTypeJson[ "Type" ].asUInt() );
         creatureType.setName( QString( creatureTypeJson[ "Name" ].asCString() ) );
         creatureType.vitals().setMaxHealth( creatureTypeJson[ "Vitals" ][ "MaxHealth" ].asDouble() );
+        creatureType.setAggroRadius( creatureTypeJson.get( "AggroRadius", 0 ).asUInt() );
 
         creatureTypeCatalog.addCreatureType( std::move( creatureType ) );
     }
@@ -58,6 +59,7 @@ void CreatureTypeFactory::saveCreatureTypeCatalog( const QString& configPath, co
         creatureTypeJson[ "Type" ] = creatureType.type();
         creatureTypeJson[ "Name" ] = creatureType.name().toStdString();
         creatureTypeJson[ "Vitals" ][ "MaxHealth" ] = creatureType.vitals().maxHealth();
+        creatureTypeJson[ "AggroRadius" ] = creatureType.aggroRadius();
 
         json[ "Creatures" ].append( creatureTypeJson );
     }
