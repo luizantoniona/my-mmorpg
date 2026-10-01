@@ -7,6 +7,7 @@
 #include <MMORPGEditor/Editor/Application/Tiles/TileCreationControl.h>
 #include <MMORPGEditor/Editor/Application/World/Object/ObjectPaletteModel.h>
 #include <MMORPGEditor/Editor/Application/World/Object/ObjectSelectionControl.h>
+#include <MMORPGEditor/Editor/Application/World/Spawn/CreatureTypePaletteModel.h>
 #include <MMORPGEditor/Editor/Application/World/Tile/TilePaletteModel.h>
 #include <MMORPGEditor/Editor/Application/World/Tile/TileSelectionControl.h>
 #include <MMORPGEditor/Editor/Application/World/WorldControl.h>
@@ -24,6 +25,7 @@ void RegisterEditorTypes::registerTypes() {
     qmlRegisterType<WorldControl>( "MMORPGEditorControls", 1, 0, "WorldPageControl" );
 
     // --- Models
+    qmlRegisterType<CreatureTypePaletteModel>( "MMORPGEditorControls", 1, 0, "CreatureTypePaletteModel" );
     qmlRegisterType<ObjectPaletteModel>( "MMORPGEditorControls", 1, 0, "ObjectPaletteModel" );
     qmlRegisterType<TilePaletteModel>( "MMORPGEditorControls", 1, 0, "TilePaletteModel" );
 
