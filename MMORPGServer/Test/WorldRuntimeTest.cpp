@@ -4,11 +4,15 @@
 #include <set>
 #include <utility>
 
+#include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/Creature/CreatureSpawnAreaModel.h>
 #include <MMORPGEngine/Data/Creature/CreatureSpawnEntryModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
+#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
+#include <MMORPGEngine/World/WorldConstants.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Runtime/World/Command/WorldCommand.h>
 #include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
@@ -91,7 +95,7 @@ TEST( WorldRuntimeTest, AddCharacter_PublishesEntityEnteredWithPosition ) {
     Server::WorldRuntime worldRuntime( nullptr );
 
     Json::Value receivedPayload;
-    worldRuntime.eventBus().subscribe( Server::WorldEventType::ENTITY_ENTERED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_ENTERED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
         receivedPayload = event.payload();
     } );
 
@@ -125,7 +129,7 @@ TEST( WorldRuntimeTest, RemoveCharacter_PublishesEntityLeftWithNearbyCharacters 
 
     Json::Value receivedPayload;
     bool published = false;
-    worldRuntime.eventBus().subscribe( Server::WorldEventType::ENTITY_LEFT, [ &receivedPayload, &published ]( const Server::WorldEvent& event ) {
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_LEFT, [ &receivedPayload, &published ]( const Server::WorldEvent& event ) {
         receivedPayload = event.payload();
         published = true;
     } );
@@ -138,16 +142,33 @@ TEST( WorldRuntimeTest, RemoveCharacter_PublishesEntityLeftWithNearbyCharacters 
     EXPECT_EQ( receivedPayload[ "nearby" ][ 0 ].asInt(), 2 );
 }
 
-TEST( WorldRuntimeTest, RemoveCharacter_NoNearbyCharacters_DoesNotPublish ) {
+TEST( WorldRuntimeTest, RemoveCharacter_NoNearbyCharacters_StillPublishesWithEmptyNearby ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
+    Json::Value receivedPayload;
     bool published = false;
-    worldRuntime.eventBus().subscribe( Server::WorldEventType::ENTITY_LEFT, [ &published ]( const Server::WorldEvent& ) {
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_LEFT, [ &receivedPayload, &published ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
         published = true;
     } );
 
     worldRuntime.removeCharacter( 1 );
+
+    ASSERT_TRUE( published );
+    EXPECT_EQ( receivedPayload[ "idCharacter" ].asInt(), 1 );
+    EXPECT_EQ( receivedPayload[ "nearby" ].size(), 0u );
+}
+
+TEST( WorldRuntimeTest, RemoveCharacter_UnknownId_DoesNotPublish ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    bool published = false;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_LEFT, [ &published ]( const Server::WorldEvent& ) {
+        published = true;
+    } );
+
+    worldRuntime.removeCharacter( 42 );
 
     EXPECT_FALSE( published );
 }
@@ -156,7 +177,7 @@ TEST( WorldRuntimeTest, MoveCharacter_UpdatesPosition ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
-    worldRuntime.moveCharacter( 1, 3, 4, 0 );
+    worldRuntime.movementSystem().moveCharacter( 1, 3, 4, 0 );
 
     const Engine::EntityPositionModel position = worldRuntime.character( 1 )->position();
     EXPECT_EQ( position.x(), 3 );
@@ -169,11 +190,11 @@ TEST( WorldRuntimeTest, MoveCharacter_PublishesEntityMoved ) {
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
     Json::Value receivedPayload;
-    worldRuntime.eventBus().subscribe( Server::WorldEventType::ENTITY_MOVED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_MOVED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
         receivedPayload = event.payload();
     } );
 
-    worldRuntime.moveCharacter( 1, 3, 4, 0 );
+    worldRuntime.movementSystem().moveCharacter( 1, 3, 4, 0 );
 
     EXPECT_EQ( receivedPayload[ "idCharacter" ].asInt(), 1 );
     EXPECT_EQ( receivedPayload[ "x" ].asInt(), 3 );
@@ -184,11 +205,11 @@ TEST( WorldRuntimeTest, MoveCharacter_UnknownId_DoesNotPublish ) {
     Server::WorldRuntime worldRuntime( nullptr );
 
     bool published = false;
-    worldRuntime.eventBus().subscribe( Server::WorldEventType::ENTITY_MOVED, [ &published ]( const Server::WorldEvent& ) {
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_MOVED, [ &published ]( const Server::WorldEvent& ) {
         published = true;
     } );
 
-    worldRuntime.moveCharacter( 99, 3, 4, 0 );
+    worldRuntime.movementSystem().moveCharacter( 99, 3, 4, 0 );
 
     EXPECT_FALSE( published );
 }
@@ -204,7 +225,7 @@ TEST( WorldRuntimeTest, CharacterMovement_RightAfterMove_IsNotReady ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
-    worldRuntime.moveCharacter( 1, 1, 0, 0 );
+    worldRuntime.movementSystem().moveCharacter( 1, 1, 0, 0 );
 
     EXPECT_FALSE( character->movement().isReady( worldRuntime.tickRate() ) );
 }
@@ -213,7 +234,7 @@ TEST( WorldRuntimeTest, CharacterMovement_AfterEnoughTicks_IsReadyAgain ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
-    worldRuntime.moveCharacter( 1, 1, 0, 0 );
+    worldRuntime.movementSystem().moveCharacter( 1, 1, 0, 0 );
     ASSERT_FALSE( character->movement().isReady( worldRuntime.tickRate() ) );
 
     for ( int tick = 0; tick < 20; ++tick ) {
@@ -237,7 +258,7 @@ TEST( WorldRuntimeTest, CharacterCombat_RightAfterAttack_IsNotReady ) {
     Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
     creature->vitals().setHealth( 100.0 );
 
-    worldRuntime.attackCreature( 1, 2, 5.0, 10.0 );
+    worldRuntime.combatSystem().attack( 1, 1, 0 );
 
     EXPECT_FALSE( character->combat().isReady( worldRuntime.tickRate() ) );
 }
@@ -249,7 +270,7 @@ TEST( WorldRuntimeTest, CharacterCombat_AfterEnoughTicks_IsReadyAgain ) {
     Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
     creature->vitals().setHealth( 100.0 );
 
-    worldRuntime.attackCreature( 1, 2, 5.0, 10.0 );
+    worldRuntime.combatSystem().attack( 1, 1, 0 );
     ASSERT_FALSE( character->combat().isReady( worldRuntime.tickRate() ) );
 
     for ( int tick = 0; tick < 20; ++tick ) {
@@ -304,6 +325,43 @@ TEST( WorldRuntimeTest, CharactersNear_DifferentFloor_IsExcluded ) {
     EXPECT_TRUE( worldRuntime.charactersNear( 1 ).empty() );
 }
 
+TEST( WorldRuntimeTest, CharactersNearPosition_IncludesEveryoneInRange ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 2, 5, 5, 0 ) );
+
+    Engine::EntityPositionModel position;
+    position.setX( 1 );
+    position.setY( 1 );
+    position.setZ( 0 );
+
+    EXPECT_EQ( worldRuntime.charactersNear( position ).size(), 2u );
+}
+
+TEST( WorldRuntimeTest, CharactersNearPosition_TwoChunksAway_IsExcluded ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    Engine::EntityPositionModel position;
+    position.setX( 2 * Engine::WorldConstants::CHUNK_SIZE );
+    position.setY( 0 );
+    position.setZ( 0 );
+
+    EXPECT_TRUE( worldRuntime.charactersNear( position ).empty() );
+}
+
+TEST( WorldRuntimeTest, CharactersNearPosition_DifferentFloor_IsExcluded ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    Engine::EntityPositionModel position;
+    position.setX( 0 );
+    position.setY( 0 );
+    position.setZ( 1 );
+
+    EXPECT_TRUE( worldRuntime.charactersNear( position ).empty() );
+}
+
 TEST( WorldRuntimeTest, MoveCharacter_OutOfNeighborhood_UpdatesCharactersNear ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
@@ -311,7 +369,7 @@ TEST( WorldRuntimeTest, MoveCharacter_OutOfNeighborhood_UpdatesCharactersNear ) 
 
     ASSERT_EQ( worldRuntime.charactersNear( 1 ).size(), 1u );
 
-    worldRuntime.moveCharacter( 2, 100, 100, 0 );
+    worldRuntime.movementSystem().moveCharacter( 2, 100, 100, 0 );
 
     EXPECT_TRUE( worldRuntime.charactersNear( 1 ).empty() );
 }
@@ -393,7 +451,7 @@ TEST( WorldRuntimeTest, AddCreature_MultipleCreatures_AllReturned ) {
 TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_SpawnsQuantityWithinArea ) {
     Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 5, 5, 3, 4 ) );
 
-    worldRuntime.spawnCreaturesFromAreas();
+    worldRuntime.spawnSystem().spawnCreaturesFromAreas();
 
     const std::vector<Engine::CreatureModel> creatures = worldRuntime.creatures();
 
@@ -411,7 +469,7 @@ TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_SpawnsQuantityWithinArea ) {
 TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_AssignsUniqueIds ) {
     Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 0, 0, 10, 10, 1, 5 ) );
 
-    worldRuntime.spawnCreaturesFromAreas();
+    worldRuntime.spawnSystem().spawnCreaturesFromAreas();
 
     std::set<int> ids;
     for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
@@ -424,7 +482,7 @@ TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_AssignsUniqueIds ) {
 TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_NullWorld_DoesNothing ) {
     Server::WorldRuntime worldRuntime( nullptr );
 
-    worldRuntime.spawnCreaturesFromAreas();
+    worldRuntime.spawnSystem().spawnCreaturesFromAreas();
 
     EXPECT_TRUE( worldRuntime.creatures().empty() );
 }
@@ -490,7 +548,7 @@ TEST( WorldRuntimeTest, Tick_CreatureDoesNotStepIntoTileOccupiedByCharacter ) {
     EXPECT_EQ( position.x(), 5 );
     EXPECT_EQ( position.y(), 5 );
 
-    worldRuntime.moveCharacter( 1, 0, 0, 0 );
+    worldRuntime.movementSystem().moveCharacter( 1, 0, 0, 0 );
     worldRuntime.tick();
 
     position = worldRuntime.creatures()[ 0 ].position();
@@ -498,65 +556,111 @@ TEST( WorldRuntimeTest, Tick_CreatureDoesNotStepIntoTileOccupiedByCharacter ) {
     EXPECT_EQ( position.y(), 5 );
 }
 
-TEST( WorldRuntimeTest, AttackCreature_AppliesDamageAndConsumesStamina ) {
+TEST( WorldRuntimeTest, AttackTile_WithCreature_AppliesDamage ) {
     Server::WorldRuntime worldRuntime( nullptr );
-    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
-    character->vitals().setStamina( 100.0 );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
     Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
     creature->vitals().setHealth( 100.0 );
 
-    const bool applied = worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+    const bool applied = worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 );
 
     EXPECT_TRUE( applied );
-    EXPECT_DOUBLE_EQ( character->vitals().stamina(), 90.0 );
     ASSERT_NE( worldRuntime.creature( 2 ), nullptr );
     EXPECT_DOUBLE_EQ( worldRuntime.creature( 2 )->vitals().health(), 70.0 );
 }
 
-TEST( WorldRuntimeTest, AttackCreature_KillsCreature_RemovesFromWorld ) {
+TEST( WorldRuntimeTest, AttackTile_KillsCreature_RemovesFromWorld ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
     character->vitals().setStamina( 100.0 );
     Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
     creature->vitals().setHealth( 10.0 );
 
-    worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 );
 
     EXPECT_EQ( worldRuntime.creature( 2 ), nullptr );
 }
 
-TEST( WorldRuntimeTest, AttackCreature_UnknownCharacter_ReturnsFalse ) {
+TEST( WorldRuntimeTest, AttackTile_UnknownCharacter_ReturnsFalse ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
 
-    EXPECT_FALSE( worldRuntime.attackCreature( 99, 2, 5.0, 10.0 ) );
+    EXPECT_FALSE( worldRuntime.combatSystem().resolveCharacterAttack( 99, 1, 0, 0, 5.0 ) );
 }
 
-TEST( WorldRuntimeTest, AttackCreature_UnknownCreature_ReturnsFalse ) {
+TEST( WorldRuntimeTest, AttackTile_EmptyTile_ResolvesWithoutHittingAnything ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
 
-    EXPECT_FALSE( worldRuntime.attackCreature( 1, 99, 5.0, 10.0 ) );
+    EXPECT_TRUE( worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 ) );
 }
 
-TEST( WorldRuntimeTest, AttackCreature_PublishesEntityVitalsChangedForCharacter ) {
+TEST( WorldRuntimeTest, AttackTile_EmptyTile_PublishesEntityAttackedWithTargetTile ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
     character->vitals().setStamina( 100.0 );
-    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
-    creature->vitals().setHealth( 100.0 );
 
     Json::Value receivedPayload;
-    worldRuntime.eventBus().subscribe( Server::WorldEventType::ENTITY_VITALS_CHANGED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_ATTACKED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
         receivedPayload = event.payload();
     } );
 
-    worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 7, 8, 0, 30.0 );
 
+    EXPECT_EQ( receivedPayload[ "idCharacter" ].asInt(), 1 );
+    EXPECT_EQ( receivedPayload[ "x" ].asInt(), 7 );
+    EXPECT_EQ( receivedPayload[ "y" ].asInt(), 8 );
+    EXPECT_EQ( receivedPayload[ "z" ].asInt(), 0 );
+}
+
+TEST( WorldRuntimeTest, AttackTile_EmptyTile_DoesNotPublishCreatureEvents ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+
+    bool creatureEventPublished = false;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CREATURE_VITALS_CHANGED, [ &creatureEventPublished ]( const Server::WorldEvent& ) {
+        creatureEventPublished = true;
+    } );
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CREATURE_LEFT, [ &creatureEventPublished ]( const Server::WorldEvent& ) {
+        creatureEventPublished = true;
+    } );
+
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 );
+
+    EXPECT_FALSE( creatureEventPublished );
+}
+
+TEST( WorldRuntimeTest, AttackTile_CreatureOnAnotherFloor_IsNotHit ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 1 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 );
+
+    ASSERT_NE( worldRuntime.creature( 2 ), nullptr );
+    EXPECT_DOUBLE_EQ( worldRuntime.creature( 2 )->vitals().health(), 100.0 );
+}
+
+TEST( WorldRuntimeTest, Attack_ConsumesStaminaAndPublishesVitalsChanged_AtCastStart ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+
+    Json::Value receivedPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_VITALS_CHANGED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
+    } );
+
+    EXPECT_TRUE( worldRuntime.combatSystem().attack( 1, 1, 0 ) );
+
+    EXPECT_DOUBLE_EQ( character->vitals().stamina(), 90.0 );
     EXPECT_EQ( receivedPayload[ "idCharacter" ].asInt(), 1 );
 }
 
-TEST( WorldRuntimeTest, AttackCreature_PublishesCreatureVitalsChanged_WhenCreatureSurvives ) {
+TEST( WorldRuntimeTest, AttackTile_PublishesCreatureVitalsChanged_WhenCreatureSurvives ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
     character->vitals().setStamina( 100.0 );
@@ -568,7 +672,7 @@ TEST( WorldRuntimeTest, AttackCreature_PublishesCreatureVitalsChanged_WhenCreatu
         receivedPayload = event.payload();
     } );
 
-    worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 );
 
     EXPECT_EQ( receivedPayload[ "idCreature" ].asInt(), 2 );
 }
@@ -606,7 +710,7 @@ TEST( WorldRuntimeTest, EnqueueCommand_MultipleCommands_ExecutedInOrderOnce ) {
     EXPECT_EQ( executionOrder, expected );
 }
 
-TEST( WorldRuntimeTest, AttackCreature_PublishesCreatureLeft_WhenCreatureDies ) {
+TEST( WorldRuntimeTest, AttackTile_PublishesCreatureLeft_WhenCreatureDies ) {
     Server::WorldRuntime worldRuntime( nullptr );
     Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
     character->vitals().setStamina( 100.0 );
@@ -618,7 +722,293 @@ TEST( WorldRuntimeTest, AttackCreature_PublishesCreatureLeft_WhenCreatureDies ) 
         receivedPayload = event.payload();
     } );
 
-    worldRuntime.attackCreature( 1, 2, 30.0, 10.0 );
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 );
 
     EXPECT_EQ( receivedPayload[ "idCreature" ].asInt(), 2 );
+}
+
+TEST( WorldRuntimeTest, AttackTile_WithCreature_PublishesEntityAttackedWithTargetTile ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    Json::Value receivedPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_ATTACKED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
+    } );
+
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 );
+
+    EXPECT_EQ( receivedPayload[ "idCharacter" ].asInt(), 1 );
+    EXPECT_EQ( receivedPayload[ "x" ].asInt(), 1 );
+    EXPECT_EQ( receivedPayload[ "y" ].asInt(), 0 );
+    EXPECT_EQ( receivedPayload[ "z" ].asInt(), 0 );
+}
+
+TEST( WorldRuntimeTest, AttackTile_PublishesEntityAttacked_WhenCreatureDies ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 10.0 );
+
+    Json::Value receivedPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_ATTACKED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
+    } );
+
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 1, 0, 0, 30.0 );
+
+    EXPECT_EQ( receivedPayload[ "x" ].asInt(), 1 );
+    EXPECT_EQ( receivedPayload[ "y" ].asInt(), 0 );
+}
+
+TEST( WorldRuntimeTest, Tick_RegeneratesVitalsByOnePerSecond ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setMaxHealth( 100.0 );
+    character->vitals().setHealth( 50.0 );
+    character->vitals().setMaxMana( 100.0 );
+    character->vitals().setMana( 50.0 );
+    character->vitals().setMaxStamina( 100.0 );
+    character->vitals().setStamina( 50.0 );
+
+    for ( int tick = 0; tick < worldRuntime.tickRate() - 1; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    EXPECT_EQ( character->vitals().health(), 50.0 );
+
+    worldRuntime.tick();
+
+    EXPECT_EQ( character->vitals().health(), 51.0 );
+    EXPECT_EQ( character->vitals().mana(), 51.0 );
+    EXPECT_EQ( character->vitals().stamina(), 51.0 );
+}
+
+TEST( WorldRuntimeTest, Tick_RegenDoesNotExceedMaxVitals ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setMaxHealth( 100.0 );
+    character->vitals().setHealth( 100.0 );
+    character->vitals().setMaxMana( 100.0 );
+    character->vitals().setMana( 99.5 );
+    character->vitals().setMaxStamina( 100.0 );
+    character->vitals().setStamina( 100.0 );
+
+    for ( int tick = 0; tick < worldRuntime.tickRate() * 3; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    EXPECT_EQ( character->vitals().health(), 100.0 );
+    EXPECT_EQ( character->vitals().mana(), 100.0 );
+    EXPECT_EQ( character->vitals().stamina(), 100.0 );
+}
+
+TEST( WorldRuntimeTest, Tick_PublishesVitalsChanged_OnlyWhenRegenChangesVitals ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setMaxHealth( 100.0 );
+    character->vitals().setHealth( 100.0 );
+    character->vitals().setMaxMana( 100.0 );
+    character->vitals().setMana( 100.0 );
+    character->vitals().setMaxStamina( 100.0 );
+    character->vitals().setStamina( 90.0 );
+
+    int publishedCount = 0;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_VITALS_CHANGED, [ &publishedCount ]( const Server::WorldEvent& ) {
+        ++publishedCount;
+    } );
+
+    for ( int tick = 0; tick < worldRuntime.tickRate() * 3; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    EXPECT_EQ( publishedCount, 3 );
+}
+
+namespace {
+
+constexpr uint32_t AGGRESSIVE_CREATURE_TYPE = 900;
+constexpr uint32_t SHORT_SIGHTED_CREATURE_TYPE = 901;
+constexpr uint32_t PASSIVE_CREATURE_TYPE = 902;
+
+void registerCreatureType( uint32_t type, uint32_t aggroRadius ) {
+    Engine::CreatureTypeModel creatureType;
+    creatureType.setType( type );
+    creatureType.setName( "TestCreature" );
+    creatureType.setAggroRadius( aggroRadius );
+
+    Engine::Singleton<Engine::DataManager>::instance().addCreatureType( std::move( creatureType ) );
+}
+
+std::unique_ptr<Engine::CreatureModel> makeCreatureOfType( uint32_t type, int idCreature, int x, int y, int z ) {
+    auto creature = makeCreature( idCreature, x, y, z );
+    creature->setType( type );
+
+    return creature;
+}
+
+void tickTimes( Server::WorldRuntime& worldRuntime, int ticks ) {
+    for ( int tick = 0; tick < ticks; ++tick ) {
+        worldRuntime.tick();
+    }
+}
+
+} // namespace
+
+TEST( WorldRuntimeTest, Attack_DoesNotHitBeforeCastEnds ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    worldRuntime.combatSystem().attack( 1, 1, 0 );
+    tickTimes( worldRuntime, 5 );
+
+    EXPECT_DOUBLE_EQ( creature->vitals().health(), 100.0 );
+}
+
+TEST( WorldRuntimeTest, Attack_HitsTargetTileWhenCastEnds ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    worldRuntime.combatSystem().attack( 1, 1, 0 );
+    tickTimes( worldRuntime, worldRuntime.tickRate() );
+
+    EXPECT_DOUBLE_EQ( creature->vitals().health(), 95.0 );
+}
+
+TEST( WorldRuntimeTest, Attack_MissesWhenTargetLeavesTileDuringCast ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    worldRuntime.combatSystem().attack( 1, 1, 0 );
+    creature->position().setX( 2 );
+    tickTimes( worldRuntime, worldRuntime.tickRate() );
+
+    EXPECT_DOUBLE_EQ( creature->vitals().health(), 100.0 );
+}
+
+TEST( WorldRuntimeTest, Attack_IsCancelledWhenAttackerMoves ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    Engine::CreatureModel* creature = worldRuntime.addCreature( makeCreature( 2, 1, 0, 0 ) );
+    creature->vitals().setHealth( 100.0 );
+
+    bool attackedPublished = false;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_ATTACKED, [ &attackedPublished ]( const Server::WorldEvent& ) {
+        attackedPublished = true;
+    } );
+
+    worldRuntime.combatSystem().attack( 1, 1, 0 );
+    worldRuntime.movementSystem().moveCharacter( 1, 0, 1, 0 );
+    tickTimes( worldRuntime, worldRuntime.tickRate() );
+
+    EXPECT_DOUBLE_EQ( creature->vitals().health(), 100.0 );
+    EXPECT_FALSE( attackedPublished );
+}
+
+TEST( WorldRuntimeTest, Attack_WhileAlreadyCasting_IsBlocked ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+
+    ASSERT_TRUE( worldRuntime.combatSystem().attack( 1, 1, 0 ) );
+    character->combat().setCounter( 1000 );
+
+    EXPECT_FALSE( worldRuntime.combatSystem().attack( 1, 1, 0 ) );
+}
+
+TEST( WorldRuntimeTest, Attack_PublishesAttackStartedWithTargetTileAndCastSeconds ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+
+    Json::Value receivedPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_ATTACK_STARTED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
+    } );
+
+    worldRuntime.combatSystem().attack( 1, 0, 1 );
+
+    EXPECT_EQ( receivedPayload[ "idCharacter" ].asInt(), 1 );
+    EXPECT_EQ( receivedPayload[ "x" ].asInt(), 0 );
+    EXPECT_EQ( receivedPayload[ "y" ].asInt(), 1 );
+    EXPECT_GT( receivedPayload[ "castSeconds" ].asDouble(), 0.0 );
+}
+
+TEST( WorldRuntimeTest, Tick_AggressiveCreatureAdjacentToCharacter_HitsAfterCast ) {
+    registerCreatureType( AGGRESSIVE_CREATURE_TYPE, 5 );
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setMaxHealth( 100.0 );
+    character->vitals().setHealth( 100.0 );
+    worldRuntime.addCreature( makeCreatureOfType( AGGRESSIVE_CREATURE_TYPE, 2, 1, 0, 0 ) );
+
+    tickTimes( worldRuntime, worldRuntime.tickRate() * 2 );
+
+    EXPECT_LT( character->vitals().health(), 100.0 );
+}
+
+TEST( WorldRuntimeTest, Tick_AggressiveCreature_CharacterDodgesByLeavingTile ) {
+    registerCreatureType( AGGRESSIVE_CREATURE_TYPE, 5 );
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setMaxHealth( 100.0 );
+    character->vitals().setHealth( 100.0 );
+    worldRuntime.addCreature( makeCreatureOfType( AGGRESSIVE_CREATURE_TYPE, 2, 1, 0, 0 ) );
+
+    bool attackStarted = false;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CREATURE_ATTACK_STARTED, [ &worldRuntime, &attackStarted ]( const Server::WorldEvent& ) {
+        attackStarted = true;
+        worldRuntime.movementSystem().moveCharacter( 1, 0, 5, 0 );
+    } );
+
+    tickTimes( worldRuntime, worldRuntime.tickRate() * 2 );
+
+    ASSERT_TRUE( attackStarted );
+    EXPECT_DOUBLE_EQ( character->vitals().health(), 100.0 );
+}
+
+TEST( WorldRuntimeTest, Tick_AggressiveCreature_IgnoresCharacterOutsideAggroRadius ) {
+    registerCreatureType( SHORT_SIGHTED_CREATURE_TYPE, 2 );
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setMaxHealth( 100.0 );
+    character->vitals().setHealth( 100.0 );
+    worldRuntime.addCreature( makeCreatureOfType( SHORT_SIGHTED_CREATURE_TYPE, 2, 5, 0, 0 ) );
+
+    bool attackStarted = false;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CREATURE_ATTACK_STARTED, [ &attackStarted ]( const Server::WorldEvent& ) {
+        attackStarted = true;
+    } );
+
+    tickTimes( worldRuntime, worldRuntime.tickRate() * 2 );
+
+    EXPECT_FALSE( attackStarted );
+    EXPECT_DOUBLE_EQ( character->vitals().health(), 100.0 );
+}
+
+TEST( WorldRuntimeTest, Tick_PassiveCreature_NeverAttacks ) {
+    registerCreatureType( PASSIVE_CREATURE_TYPE, 0 );
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setMaxHealth( 100.0 );
+    character->vitals().setHealth( 100.0 );
+    worldRuntime.addCreature( makeCreatureOfType( PASSIVE_CREATURE_TYPE, 2, 1, 0, 0 ) );
+
+    tickTimes( worldRuntime, worldRuntime.tickRate() * 3 );
+
+    EXPECT_DOUBLE_EQ( character->vitals().health(), 100.0 );
 }

@@ -76,6 +76,8 @@ set(PROJECT_SOURCES
     Runtime/Character/System/CharacterMovementSystem.h
     Runtime/Character/System/CharacterSystem.cpp
     Runtime/Character/System/CharacterSystem.h
+    Runtime/Character/System/CharacterVitalsSystem.cpp
+    Runtime/Character/System/CharacterVitalsSystem.h
     Runtime/Creature/CreatureRuntime.cpp
     Runtime/Creature/CreatureRuntime.h
     Runtime/World/Command/AttackCharacterCommand.cpp
@@ -84,10 +86,20 @@ set(PROJECT_SOURCES
     Runtime/World/Command/MoveCharacterCommand.h
     Runtime/World/Command/WorldCommand.cpp
     Runtime/World/Command/WorldCommand.h
+    Runtime/World/System/WorldCombatSystem.cpp
+    Runtime/World/System/WorldCombatSystem.h
+    Runtime/World/System/WorldCreatureSystem.cpp
+    Runtime/World/System/WorldCreatureSystem.h
+    Runtime/World/System/WorldMovementSystem.cpp
+    Runtime/World/System/WorldMovementSystem.h
+    Runtime/World/System/WorldSpawnSystem.cpp
+    Runtime/World/System/WorldSpawnSystem.h
     Runtime/World/System/WorldSystem.cpp
     Runtime/World/System/WorldSystem.h
     Runtime/World/WorldRuntime.cpp
-    Runtime/World/WorldRuntime.h)
+    Runtime/World/WorldRuntime.h
+    Runtime/World/WorldSpatialIndex.cpp
+    Runtime/World/WorldSpatialIndex.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 

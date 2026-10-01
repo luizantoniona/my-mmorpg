@@ -4,7 +4,6 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 #include <vector>
 
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
@@ -12,10 +11,14 @@
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Event/EventBus.h>
-#include <MMORPGServer/Server/Manager/ChunkCoordinate.h>
 #include <MMORPGServer/Server/Runtime/Character/CharacterRuntime.h>
 #include <MMORPGServer/Server/Runtime/Creature/CreatureRuntime.h>
 #include <MMORPGServer/Server/Runtime/World/Command/WorldCommand.h>
+#include <MMORPGServer/Server/Runtime/World/System/WorldCombatSystem.h>
+#include <MMORPGServer/Server/Runtime/World/System/WorldCreatureSystem.h>
+#include <MMORPGServer/Server/Runtime/World/System/WorldMovementSystem.h>
+#include <MMORPGServer/Server/Runtime/World/System/WorldSpawnSystem.h>
+#include <MMORPGServer/Server/Runtime/World/WorldSpatialIndex.h>
 
 namespace Server {
 
@@ -27,6 +30,15 @@ public:
     const Engine::WorldModel* world() const;
 
     EventBus& eventBus();
+
+    std::mutex& mutex();
+
+    WorldSpatialIndex& spatialIndex();
+    const WorldSpatialIndex& spatialIndex() const;
+
+    WorldCombatSystem& combatSystem();
+    WorldMovementSystem& movementSystem();
+    WorldSpawnSystem& spawnSystem();
 
     int tickRate() const;
 
@@ -41,14 +53,16 @@ public:
     Engine::CreatureModel* addCreature( std::unique_ptr<Engine::CreatureModel> creature );
     Engine::CreatureModel* creature( int idCreature );
     Engine::CreatureModel* creatureAt( int x, int y, int z );
+
     std::vector<Engine::CreatureModel> creatures();
+    std::vector<Engine::CreatureModel> creaturesNear( const Engine::EntityPositionModel& position );
 
-    void spawnCreaturesFromAreas();
-
-    void moveCharacter( int idCharacter, int x, int y, int z );
-    bool attackCreature( int idCharacter, int idCreature, double damage, double staminaCost );
+    Engine::CharacterModel* characterLocked( int idCharacter ) const;
+    std::map<int, std::unique_ptr<CreatureRuntime>>& creaturesLocked();
+    void eraseCreatureLocked( int idCreature );
 
     std::vector<int> charactersNear( int idCharacter );
+    std::vector<int> charactersNear( const Engine::EntityPositionModel& position );
 
     bool isPositionOccupied( int x, int y, int z );
 
@@ -57,21 +71,18 @@ public:
     void tick();
 
 private:
-    ChunkCoordinate chunkCoordinateFor( const Engine::EntityPositionModel& position ) const;
-    std::vector<int> charactersNearLocked( int idCharacter ) const;
-    bool hasCharacterNearLocked( const Engine::EntityPositionModel& position ) const;
-    bool isPositionOccupiedLocked( const Engine::EntityPositionModel& position ) const;
-
-private:
     std::mutex _mutex;
     std::unique_ptr<Engine::WorldModel> _world;
     std::map<int, std::unique_ptr<CharacterRuntime>> _characters;
-    std::unordered_map<ChunkCoordinate, std::vector<Engine::CharacterModel*>, ChunkCoordinateHash> _charactersByChunk;
     std::map<int, std::unique_ptr<CreatureRuntime>> _creatures;
+    WorldSpatialIndex _spatialIndex;
+    std::unique_ptr<WorldCombatSystem> _combatSystem;
+    std::unique_ptr<WorldMovementSystem> _movementSystem;
+    std::unique_ptr<WorldCreatureSystem> _creatureSystem;
+    std::unique_ptr<WorldSpawnSystem> _spawnSystem;
     EventBus _eventBus;
     std::mutex _commandMutex;
     std::vector<std::unique_ptr<WorldCommand>> _commands;
-    int _nextIdCreature;
     int _tickRate;
 };
 

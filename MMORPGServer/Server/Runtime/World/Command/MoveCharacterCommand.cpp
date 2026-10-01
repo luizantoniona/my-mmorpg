@@ -2,12 +2,9 @@
 
 #include <utility>
 
-#include <QDebug>
-
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
-#include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
 
 namespace Server {
@@ -25,22 +22,7 @@ void MoveCharacterCommand::execute( WorldRuntime& runtime ) {
         return;
     }
 
-    const Engine::EntityPositionModel currentPosition = character->position();
-    const int newX = currentPosition.x() + _dx;
-    const int newY = currentPosition.y() + _dy;
-    const int z = currentPosition.z();
-
-    const Engine::WorldModel* world = runtime.world();
-    const Engine::WorldTileModel* worldTile = world ? world->tile( newX, newY, z ) : nullptr;
-
-    if ( worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable() && !runtime.isPositionOccupied( newX, newY, z ) && character->movement().isReady( runtime.tickRate() ) ) {
-        runtime.moveCharacter( _idCharacter, newX, newY, z );
-
-        qInfo() << "[MoveCharacterCommand] Character moved [CHARACTER]" << _idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
-
-    } else {
-        qInfo() << "[MoveCharacterCommand] Move blocked [CHARACTER]" << _idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
-    }
+    runtime.movementSystem().move( _idCharacter, _dx, _dy );
 
     _respond( Engine::JsonHelper::writeJsonString( Engine::OwnCharacterDTO::fromModel( character ).toJson() ) );
 }

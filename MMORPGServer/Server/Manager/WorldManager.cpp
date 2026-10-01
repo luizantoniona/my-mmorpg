@@ -29,7 +29,7 @@ bool WorldManager::initialize( const std::string& worldPath ) {
         }
 
         _runtime = std::make_unique<WorldRuntime>( Engine::WorldFactory::createWorld( worldPath ), tickRateJson.asInt() );
-        _runtime->spawnCreaturesFromAreas();
+        _runtime->spawnSystem().spawnCreaturesFromAreas();
     }
 
     if ( _running ) {

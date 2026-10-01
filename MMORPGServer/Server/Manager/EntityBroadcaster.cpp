@@ -4,11 +4,14 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterEventAttackStartDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventLeaveDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnInventoryDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureEventAttackDTO.h>
+#include <MMORPGEngine/Entity/Creature/CreatureEventAttackStartDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/World/WorldBasicDTO.h>
@@ -36,6 +39,10 @@ EntityBroadcaster::EntityBroadcaster() {
         onCharacterVitalsChanged( event );
     } );
 
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_ATTACK_STARTED, [ this ]( const WorldEvent& event ) {
+        onCharacterAttackStarted( event );
+    } );
+
     worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_ATTACKED, [ this ]( const WorldEvent& event ) {
         onCharacterAttacked( event );
     } );
@@ -46,6 +53,14 @@ EntityBroadcaster::EntityBroadcaster() {
 
     worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_VITALS_CHANGED, [ this ]( const WorldEvent& event ) {
         onCreatureVitalsChanged( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_ATTACK_STARTED, [ this ]( const WorldEvent& event ) {
+        onCreatureAttackStarted( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_ATTACKED, [ this ]( const WorldEvent& event ) {
+        onCreatureAttacked( event );
     } );
 
     worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_LEFT, [ this ]( const WorldEvent& event ) {
@@ -99,6 +114,10 @@ void EntityBroadcaster::onCharacterVitalsChanged( const WorldEvent& event ) {
     broadcastCharacter( event );
 }
 
+void EntityBroadcaster::onCharacterAttackStarted( const WorldEvent& event ) {
+    broadcastAttackStart( event );
+}
+
 void EntityBroadcaster::onCharacterAttacked( const WorldEvent& event ) {
     broadcastAttack( event );
 }
@@ -116,6 +135,31 @@ void EntityBroadcaster::onCreatureLeft( const WorldEvent& event ) {
     message.setIdCreature( event.payload()[ "idCreature" ].asInt() );
 
     broadcastNear( event.payload(), Engine::JsonHelper::writeJsonString( message.toJson() ) );
+}
+
+void EntityBroadcaster::onCreatureAttackStarted( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    Engine::CreatureEventAttackStartDTO message;
+    message.setIdCreature( payload[ "idCreature" ].asInt() );
+    message.setX( payload[ "x" ].asInt() );
+    message.setY( payload[ "y" ].asInt() );
+    message.setZ( payload[ "z" ].asInt() );
+    message.setCastSeconds( payload[ "castSeconds" ].asDouble() );
+
+    broadcastNear( payload, Engine::JsonHelper::writeJsonString( message.toJson() ) );
+}
+
+void EntityBroadcaster::onCreatureAttacked( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    Engine::CreatureEventAttackDTO message;
+    message.setIdCreature( payload[ "idCreature" ].asInt() );
+    message.setX( payload[ "x" ].asInt() );
+    message.setY( payload[ "y" ].asInt() );
+    message.setZ( payload[ "z" ].asInt() );
+
+    broadcastNear( payload, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
 
 void EntityBroadcaster::sendWorldBasic( const WorldEvent& event ) {
@@ -180,8 +224,7 @@ void EntityBroadcaster::sendCreatures( const WorldEvent& event ) {
 
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
-    // TODO: Filter by proximity once creatures move/spawn dynamically (Backlog "Criaturas")
-    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+    for ( const Engine::CreatureModel& creature : worldRuntime.creaturesNear( positionFromPayload( event.payload() ) ) ) {
         sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( &creature ).toJson() ) );
     }
 }
@@ -197,6 +240,26 @@ void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
     }
 
     broadcast( worldRuntime.charactersNear( idCharacter ), Engine::JsonHelper::writeJsonString( Engine::CharacterDTO::fromModel( character ).toJson() ) );
+}
+
+void EntityBroadcaster::broadcastAttackStart( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    Engine::CharacterEventAttackStartDTO message;
+    message.setIdCharacter( idCharacter );
+    message.setX( payload[ "x" ].asInt() );
+    message.setY( payload[ "y" ].asInt() );
+    message.setZ( payload[ "z" ].asInt() );
+    message.setCastSeconds( payload[ "castSeconds" ].asDouble() );
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    std::vector<int> receivers = worldRuntime.charactersNear( idCharacter );
+    receivers.push_back( idCharacter );
+
+    broadcast( receivers, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
 
 void EntityBroadcaster::broadcastAttack( const WorldEvent& event ) {
@@ -225,14 +288,18 @@ void EntityBroadcaster::broadcastCreature( const Json::Value& payload ) {
 }
 
 void EntityBroadcaster::broadcastNear( const Json::Value& payload, const std::string& message ) {
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    broadcast( worldRuntime.charactersNear( positionFromPayload( payload ) ), message );
+}
+
+Engine::EntityPositionModel EntityBroadcaster::positionFromPayload( const Json::Value& payload ) {
     Engine::EntityPositionModel position;
     position.setX( payload[ "x" ].asInt() );
     position.setY( payload[ "y" ].asInt() );
     position.setZ( payload[ "z" ].asInt() );
 
-    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
-
-    broadcast( worldRuntime.charactersNear( position ), message );
+    return position;
 }
 
 void EntityBroadcaster::sendToCharacter( int idCharacter, const std::string& message ) {
