@@ -3,6 +3,10 @@ set(PROJECT_SOURCES
     RegisterClientTypes.h
     Application/Account/AccountPageControl.cpp
     Application/Account/AccountPageControl.h
+    Application/Game/Component/CharacterEquipmentPanelControl.cpp
+    Application/Game/Component/CharacterEquipmentPanelControl.h
+    Application/Game/Component/CharacterInventoryPanelControl.cpp
+    Application/Game/Component/CharacterInventoryPanelControl.h
     Application/Game/GamePageControl.cpp
     Application/Game/GamePageControl.h
     Application/Login/LoginPageControl.cpp
@@ -29,9 +33,13 @@ qt_add_qml_module(
   Application/ClientWindow.qml
   Application/Account/AccountPage.qml
   Application/Game/GamePage.qml
-  Application/Game/Component/CharacterHud.qml
-  Application/Game/Component/HudActionBar.qml
-  Application/Game/Component/StatBar.qml
+  Application/Game/Component/CharacterVitalsPanel.qml
+  Application/Game/Component/CharacterEquipmentPanel.qml
+  Application/Game/Component/GamePanelBase.qml
+  Application/Game/Component/GameActionBar.qml
+  Application/Game/Component/CharacterInventoryPanel.qml
+  Application/Game/Component/ItemSlot.qml
+  Application/Game/Component/VitalBar.qml
   Application/Login/LoginPage.qml
   Application/Login/Component/AccountPanel.qml
   Application/Login/Component/ServerPanel.qml

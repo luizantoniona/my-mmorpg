@@ -29,7 +29,10 @@ GamePageControl::GamePageControl( QObject* parent ) :
 
     connect( &messageReceiver, &Engine::ServerMessageReceiver::errorReceived, this, &GamePageControl::worldEntryFailed );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCharacterReceived, this, &GamePageControl::onOwnCharacterReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackStartReceived, this, &GamePageControl::characterEventAttackStartReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackReceived, this, &GamePageControl::characterEventAttackReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &GamePageControl::creatureEventAttackStartReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackReceived, this, &GamePageControl::creatureEventAttackReceived );
 }
 
 GamePageControl::~GamePageControl() = default;

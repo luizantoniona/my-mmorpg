@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import MMORPGUIComponents
 
-Item {
+GamePanelBase {
     id: root
 
     property string vCharacterName: ""
@@ -13,35 +13,18 @@ Item {
     property real vStamina: 0
     property real vMaxStamina: 1
 
+    vTitle: root.vCharacterName
+    vClosable: false
     implicitWidth: 220
-    implicitHeight: column.implicitHeight + Spaces.spacing8 * 2
-
-    Rectangle {
-        anchors.fill: parent
-        color: Colors.background1
-        border.color: Colors.border
-        border.width: Borders.border1
-        radius: Radiuses.radius8
-        opacity: 0.9
-    }
+    implicitHeight: column.implicitHeight + 40 + Spaces.spacing8 * 4
 
     ColumnLayout {
         id: column
 
         anchors.fill: parent
-        anchors.margins: Spaces.spacing8
         spacing: Spaces.spacing8
 
-        Text {
-            Layout.fillWidth: true
-            color: Colors.text
-            font: Fonts.bodyBold
-            elide: Text.ElideRight
-            text: root.vCharacterName
-            visible: root.vCharacterName !== ""
-        }
-
-        StatBar {
+        VitalBar {
             Layout.fillWidth: true
             vLabel: "HP"
             vValue: root.vHealth
@@ -49,7 +32,7 @@ Item {
             vBarColor: Colors.error
         }
 
-        StatBar {
+        VitalBar {
             Layout.fillWidth: true
             vLabel: "MP"
             vValue: root.vMana
@@ -57,7 +40,7 @@ Item {
             vBarColor: Colors.info
         }
 
-        StatBar {
+        VitalBar {
             Layout.fillWidth: true
             vLabel: "SP"
             vValue: root.vStamina

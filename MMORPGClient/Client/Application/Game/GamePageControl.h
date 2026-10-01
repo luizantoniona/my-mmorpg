@@ -69,7 +69,10 @@ signals:
     void worldEntryReceived();
     void worldEntryFailed( const QString& error );
 
+    void characterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds );
     void characterEventAttackReceived( int idCharacter, int x, int y, int z );
+    void creatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds );
+    void creatureEventAttackReceived( int idCreature, int x, int y, int z );
 
     void worldLeft();
 
