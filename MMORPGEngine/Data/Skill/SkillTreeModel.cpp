@@ -4,14 +4,14 @@ namespace Engine {
 
 SkillTreeModel::SkillTreeModel() :
     _nodes(),
-    _itemType( 0 ) {
+    _itemType( "" ) {
 }
 
-uint32_t SkillTreeModel::itemType() const {
+QString SkillTreeModel::itemType() const {
     return _itemType;
 }
 
-void SkillTreeModel::setItemType( uint32_t itemType ) {
+void SkillTreeModel::setItemType( const QString& itemType ) {
     _itemType = itemType;
 }
 

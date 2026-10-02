@@ -7,13 +7,13 @@ TEST( ItemCatalogTest, AddItem_ThenGet_ReturnsSameItem ) {
 
     Engine::ItemModel item;
     item.setId( 1 );
-    item.setIdItemType( 1 );
+    item.setIdItemType( "SWORD" );
     item.setName( "Iron Sword" );
     catalog.addItem( item );
 
     ASSERT_NE( catalog.item( 1 ), nullptr );
     EXPECT_EQ( catalog.item( 1 )->name(), "Iron Sword" );
-    EXPECT_EQ( catalog.item( 1 )->idItemType(), 1u );
+    EXPECT_EQ( catalog.item( 1 )->idItemType(), "SWORD" );
 }
 
 TEST( ItemCatalogTest, Item_UnknownId_ReturnsNullptr ) {

@@ -1,8 +1,9 @@
 #include "ItemTypeFactory.h"
 
-#include <unordered_map>
-
 #include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QRegularExpression>
 
 #include <json/json.h>
 
@@ -15,25 +16,78 @@
 
 namespace Engine {
 
-void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemTypeCatalog& itemTypeCatalog ) {
-    const QString mapPath = DataFactory::mapPath( configPath );
+namespace {
 
+QString indexFilePath( const QString& mapPath ) {
     Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
 
-    const QString itemTypesFile = mapPath + QString( mapJson[ "Catalogs" ][ "ItemTypes" ].asCString() );
+    return mapPath + QString( mapJson[ "Catalogs" ][ "Items" ].asCString() );
+}
 
+} // namespace
+
+bool ItemTypeFactory::isValidType( const QString& type ) {
+    static const QRegularExpression pattern( "^[A-Z0-9_]+$" );
+
+    return pattern.match( type ).hasMatch();
+}
+
+QStringList ItemTypeFactory::readTypeKeys( const QString& configPath ) {
+    const QString mapPath = DataFactory::mapPath( configPath );
+
+    const Json::Value json = JsonHelper::loadJsonFile( indexFilePath( mapPath ) );
+
+    QStringList keys;
+
+    for ( const Json::Value& keyJson : json[ "ItemTypes" ] ) {
+        if ( !keyJson.isString() ) {
+            qWarning() << "ItemTypeFactory::readTypeKeys"
+                       << "Invalid ItemType key, skipping";
+            continue;
+        }
+
+        const QString key = QString::fromStdString( keyJson.asString() );
+
+        if ( !isValidType( key ) ) {
+            qWarning() << "ItemTypeFactory::readTypeKeys"
+                       << "Invalid ItemType key (use A-Z, 0-9, _), skipping:" << key;
+            continue;
+        }
+
+        if ( keys.contains( key ) ) {
+            qWarning() << "ItemTypeFactory::readTypeKeys"
+                       << "Duplicated ItemType key, skipping:" << key;
+            continue;
+        }
+
+        keys.append( key );
+    }
+
+    return keys;
+}
+
+QString ItemTypeFactory::typeFilePath( const QString& configPath, const QString& type ) {
+    return DataFactory::mapPath( configPath ) + "Items/" + type + ".json";
+}
+
+void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemTypeCatalog& itemTypeCatalog ) {
     qInfo() << "ItemTypeFactory::createItemTypeCatalog"
-            << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
+            << "[ITEM_TYPES_FOLDER_PATH]" << DataFactory::mapPath( configPath ) + "Items/";
 
-    Json::Value json = JsonHelper::loadJsonFile( itemTypesFile );
+    for ( const QString& key : readTypeKeys( configPath ) ) {
+        const QString file = typeFilePath( configPath, key );
 
-    const Json::Value& itemTypes = json[ "ItemTypes" ];
-
-    for ( const Json::Value& itemTypeJson : itemTypes ) {
-
-        if ( !itemTypeJson.isMember( "Type" ) || !itemTypeJson.isMember( "Name" ) ) {
+        if ( !QFile::exists( file ) ) {
             qWarning() << "ItemTypeFactory::createItemTypeCatalog"
-                       << "Invalid ItemType, skipping";
+                       << "ItemType file not found, skipping:" << file;
+            continue;
+        }
+
+        const Json::Value itemTypeJson = JsonHelper::loadJsonFile( file );
+
+        if ( !itemTypeJson.isMember( "Name" ) ) {
+            qWarning() << "ItemTypeFactory::createItemTypeCatalog"
+                       << "Invalid ItemType, skipping" << key;
             continue;
         }
 
@@ -42,12 +96,12 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
 
         if ( category == ItemCategoryEnum::UNKNOWN || slot == ItemSlotEnum::UNKNOWN ) {
             qWarning() << "ItemTypeFactory::createItemTypeCatalog"
-                       << "Invalid or unknown Category/Slot, skipping" << itemTypeJson[ "Type" ].asUInt();
+                       << "Invalid or unknown Category/Slot, skipping" << key;
             continue;
         }
 
         ItemTypeModel itemType;
-        itemType.setType( itemTypeJson[ "Type" ].asUInt() );
+        itemType.setType( key );
         itemType.setName( QString( itemTypeJson[ "Name" ].asCString() ) );
         itemType.setCategory( category );
         itemType.setSlot( slot );
@@ -58,7 +112,7 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
 
             if ( handRequirement == HandRequirementEnum::UNKNOWN ) {
                 qWarning() << "ItemTypeFactory::createItemTypeCatalog"
-                           << "Unknown HandRequirement" << itemTypeJson[ "Type" ].asUInt();
+                           << "Unknown HandRequirement" << key;
             }
         }
 
@@ -69,34 +123,39 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
 }
 
 void ItemTypeFactory::saveItemTypeCatalog( const QString& configPath, const ItemTypeCatalog& itemTypeCatalog ) {
-    const QString path = DataFactory::mapPath( configPath );
+    QDir().mkpath( DataFactory::mapPath( configPath ) + "Items/" );
 
-    Json::Value mapJson = JsonHelper::loadJsonFile( path + "Map.json" );
-
-    const QString itemTypesFile = path + QString( mapJson[ "Catalogs" ][ "ItemTypes" ].asCString() );
-
-    const Json::Value existingJson = JsonHelper::loadJsonFile( itemTypesFile );
-
-    std::unordered_map<uint32_t, Json::Value> existingByType;
-    for ( const Json::Value& itemTypeJson : existingJson[ "ItemTypes" ] ) {
-        if ( itemTypeJson.isMember( "Type" ) ) {
-            existingByType[ itemTypeJson[ "Type" ].asUInt() ] = itemTypeJson;
+    QStringList keys;
+    for ( const QString& key : readTypeKeys( configPath ) ) {
+        if ( itemTypeCatalog.itemType( key ) != nullptr ) {
+            keys.append( key );
         }
     }
 
-    Json::Value json;
-    json[ "ItemTypes" ] = Json::Value( Json::arrayValue );
-
+    QStringList newKeys;
     for ( const auto& entry : itemTypeCatalog.itemTypes() ) {
-        const ItemTypeModel& itemType = entry.second;
+        if ( !keys.contains( entry.first ) ) {
+            newKeys.append( entry.first );
+        }
+    }
+    newKeys.sort();
+    keys.append( newKeys );
 
-        Json::Value itemTypeJson;
-        const auto existing = existingByType.find( itemType.type() );
-        if ( existing != existingByType.end() ) {
-            itemTypeJson = existing->second;
+    Json::Value indexJson;
+    indexJson[ "ItemTypes" ] = Json::Value( Json::arrayValue );
+
+    for ( const QString& key : keys ) {
+        if ( !isValidType( key ) ) {
+            qWarning() << "ItemTypeFactory::saveItemTypeCatalog"
+                       << "Invalid ItemType key, skipping:" << key;
+            continue;
         }
 
-        itemTypeJson[ "Type" ] = itemType.type();
+        const ItemTypeModel& itemType = *itemTypeCatalog.itemType( key );
+
+        const QString file = typeFilePath( configPath, key );
+        Json::Value itemTypeJson = QFile::exists( file ) ? JsonHelper::loadJsonFile( file ) : Json::Value( Json::objectValue );
+
         itemTypeJson[ "Name" ] = itemType.name().toStdString();
         itemTypeJson[ "Category" ] = ItemCategoryHelper::toString( itemType.category() );
         itemTypeJson[ "Slot" ] = ItemSlotHelper::toString( itemType.slot() );
@@ -107,13 +166,17 @@ void ItemTypeFactory::saveItemTypeCatalog( const QString& configPath, const Item
             itemTypeJson.removeMember( "HandRequirement" );
         }
 
-        json[ "ItemTypes" ].append( itemTypeJson );
+        JsonHelper::saveJsonFile( file, itemTypeJson );
+
+        indexJson[ "ItemTypes" ].append( key.toStdString() );
     }
 
-    qInfo() << "ItemTypeFactory::saveItemTypeCatalog"
-            << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
+    const QString indexFile = indexFilePath( DataFactory::mapPath( configPath ) );
 
-    JsonHelper::saveJsonFile( itemTypesFile, json );
+    qInfo() << "ItemTypeFactory::saveItemTypeCatalog"
+            << "[ITEM_TYPES_INDEX_FILE_PATH]" << indexFile;
+
+    JsonHelper::saveJsonFile( indexFile, indexJson );
 }
 
 } // namespace Engine

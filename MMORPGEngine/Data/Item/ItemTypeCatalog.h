@@ -1,7 +1,9 @@
 #ifndef ITEMTYPECATALOG_H
 #define ITEMTYPECATALOG_H
 
-#include <unordered_map>
+#include <map>
+
+#include <QString>
 
 #include <MMORPGEngine/Data/Item/ItemTypeModel.h>
 
@@ -11,12 +13,12 @@ class ItemTypeCatalog {
 public:
     ItemTypeCatalog();
 
-    const ItemTypeModel* itemType( uint32_t type ) const;
-    const std::unordered_map<uint32_t, ItemTypeModel>& itemTypes() const;
+    const ItemTypeModel* itemType( const QString& type ) const;
+    const std::map<QString, ItemTypeModel>& itemTypes() const;
     void addItemType( const ItemTypeModel& itemType );
 
 private:
-    std::unordered_map<uint32_t, ItemTypeModel> _itemTypes;
+    std::map<QString, ItemTypeModel> _itemTypes;
 };
 
 } // namespace Engine

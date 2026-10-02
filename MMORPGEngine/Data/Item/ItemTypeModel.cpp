@@ -3,18 +3,18 @@
 namespace Engine {
 
 ItemTypeModel::ItemTypeModel() :
+    _type( "" ),
     _name( "" ),
     _handRequirement( std::nullopt ),
-    _type( 0 ),
     _category( ItemCategoryEnum::UNKNOWN ),
     _slot( ItemSlotEnum::UNKNOWN ) {
 }
 
-uint32_t ItemTypeModel::type() const {
+QString ItemTypeModel::type() const {
     return _type;
 }
 
-void ItemTypeModel::setType( uint32_t type ) {
+void ItemTypeModel::setType( const QString& type ) {
     _type = type;
 }
 

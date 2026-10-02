@@ -3,7 +3,10 @@
 
 #include <cstdint>
 
+#include <QImage>
 #include <QString>
+
+#include <MMORPGEngine/Data/Animation/AnimationModel.h>
 
 namespace Engine {
 
@@ -14,16 +17,26 @@ public:
     uint32_t id() const;
     void setId( uint32_t id );
 
-    uint32_t idItemType() const;
-    void setIdItemType( uint32_t idItemType );
+    QString idItemType() const;
+    void setIdItemType( const QString& idItemType );
 
     QString name() const;
     void setName( const QString& name );
 
+    QString folder() const;
+    void setFolder( const QString& folder );
+
+    QImage texture() const;
+
+    AnimationModel animation() const;
+    void setAnimation( const AnimationModel& animation );
+
 private:
     QString _name;
+    QString _idItemType;
+    QString _folder;
+    AnimationModel _animation;
     uint32_t _id;
-    uint32_t _idItemType;
 };
 
 } // namespace Engine

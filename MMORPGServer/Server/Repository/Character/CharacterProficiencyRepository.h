@@ -15,7 +15,7 @@ public:
 
     bool create( int idCharacter, const Engine::CharacterProficiencyModel& proficiency );
 
-    std::unique_ptr<Engine::CharacterProficiencyModel> find( int idCharacter, uint32_t idItemType );
+    std::unique_ptr<Engine::CharacterProficiencyModel> find( int idCharacter, const QString& idItemType );
     std::vector<Engine::CharacterProficiencyModel> findAll( int idCharacter );
 
     bool save( int idCharacter, const Engine::CharacterProficiencyModel& proficiency );

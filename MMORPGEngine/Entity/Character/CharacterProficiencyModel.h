@@ -3,14 +3,16 @@
 
 #include <cstdint>
 
+#include <QString>
+
 namespace Engine {
 
 class CharacterProficiencyModel {
 public:
     CharacterProficiencyModel();
 
-    uint32_t idItemType() const;
-    void setIdItemType( uint32_t idItemType );
+    QString idItemType() const;
+    void setIdItemType( const QString& idItemType );
 
     double xp() const;
     void setXp( double xp );
@@ -20,7 +22,7 @@ public:
 
 private:
     double _xp;
-    uint32_t _idItemType;
+    QString _idItemType;
     uint32_t _lvl;
 };
 

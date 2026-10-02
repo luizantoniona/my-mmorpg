@@ -1,7 +1,6 @@
 #ifndef ITEMTYPEMODEL_H
 #define ITEMTYPEMODEL_H
 
-#include <cstdint>
 #include <optional>
 
 #include <QString>
@@ -16,8 +15,8 @@ class ItemTypeModel {
 public:
     ItemTypeModel();
 
-    uint32_t type() const;
-    void setType( uint32_t type );
+    QString type() const;
+    void setType( const QString& type );
 
     QString name() const;
     void setName( const QString& name );
@@ -32,9 +31,9 @@ public:
     void setHandRequirement( HandRequirementEnum handRequirement );
 
 private:
+    QString _type;
     QString _name;
     std::optional<HandRequirementEnum> _handRequirement;
-    uint32_t _type;
     ItemCategoryEnum _category;
     ItemSlotEnum _slot;
 };

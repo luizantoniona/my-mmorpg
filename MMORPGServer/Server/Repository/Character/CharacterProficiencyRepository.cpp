@@ -20,14 +20,14 @@ bool CharacterProficiencyRepository::create( int idCharacter, const Engine::Char
     Query query( _db, sql );
 
     query.bindInt( 1, idCharacter );
-    query.bindInt( 2, static_cast<int>( proficiency.idItemType() ) );
+    query.bindText( 2, proficiency.idItemType().toStdString() );
     query.bindDouble( 3, proficiency.xp() );
     query.bindInt( 4, static_cast<int>( proficiency.lvl() ) );
 
     return query.exec();
 }
 
-std::unique_ptr<Engine::CharacterProficiencyModel> CharacterProficiencyRepository::find( int idCharacter, uint32_t idItemType ) {
+std::unique_ptr<Engine::CharacterProficiencyModel> CharacterProficiencyRepository::find( int idCharacter, const QString& idItemType ) {
     const std::string sql = R"SQL(
         SELECT
             id_item_type,
@@ -39,14 +39,14 @@ std::unique_ptr<Engine::CharacterProficiencyModel> CharacterProficiencyRepositor
     Query query( _db, sql );
 
     query.bindInt( 1, idCharacter );
-    query.bindInt( 2, static_cast<int>( idItemType ) );
+    query.bindText( 2, idItemType.toStdString() );
 
     if ( !query.step() ) {
         return nullptr;
     }
 
     auto proficiency = std::make_unique<Engine::CharacterProficiencyModel>();
-    proficiency->setIdItemType( static_cast<uint32_t>( query.getColumnInt( 0 ) ) );
+    proficiency->setIdItemType( QString::fromStdString( query.getColumnText( 0 ) ) );
     proficiency->setXp( query.getColumnDouble( 1 ) );
     proficiency->setLvl( static_cast<uint32_t>( query.getColumnInt( 2 ) ) );
 
@@ -70,7 +70,7 @@ std::vector<Engine::CharacterProficiencyModel> CharacterProficiencyRepository::f
 
     while ( query.step() ) {
         Engine::CharacterProficiencyModel proficiency;
-        proficiency.setIdItemType( static_cast<uint32_t>( query.getColumnInt( 0 ) ) );
+        proficiency.setIdItemType( QString::fromStdString( query.getColumnText( 0 ) ) );
         proficiency.setXp( query.getColumnDouble( 1 ) );
         proficiency.setLvl( static_cast<uint32_t>( query.getColumnInt( 2 ) ) );
 
@@ -95,7 +95,7 @@ bool CharacterProficiencyRepository::save( int idCharacter, const Engine::Charac
     Query query( _db, sql );
 
     query.bindInt( 1, idCharacter );
-    query.bindInt( 2, static_cast<int>( proficiency.idItemType() ) );
+    query.bindText( 2, proficiency.idItemType().toStdString() );
     query.bindDouble( 3, proficiency.xp() );
     query.bindInt( 4, static_cast<int>( proficiency.lvl() ) );
 

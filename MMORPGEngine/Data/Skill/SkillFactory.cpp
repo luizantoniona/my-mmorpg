@@ -1,39 +1,29 @@
 #include "SkillFactory.h"
 
-#include <unordered_set>
-
 #include <QDebug>
+#include <QFile>
 
 #include <json/json.h>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Data/DataFactory.h>
+#include <MMORPGEngine/Data/Item/ItemTypeFactory.h>
 #include <MMORPGEngine/Data/Skill/SkillNodeModel.h>
 
 namespace Engine {
 
 void SkillFactory::createSkillCatalog( const QString& configPath, const ItemTypeCatalog& itemTypeCatalog, SkillCatalog& skillCatalog ) {
-    const QString mapPath = DataFactory::mapPath( configPath );
+    for ( const QString& itemTypeId : ItemTypeFactory::readTypeKeys( configPath ) ) {
 
-    Json::Value mapJson = JsonHelper::loadJsonFile( mapPath + "Map.json" );
-
-    const QString itemTypesFile = mapPath + QString( mapJson[ "Catalogs" ][ "ItemTypes" ].asCString() );
-
-    qInfo() << "SkillFactory::createSkillCatalog" << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
-
-    Json::Value json = JsonHelper::loadJsonFile( itemTypesFile );
-
-    const Json::Value& itemTypes = json[ "ItemTypes" ];
-
-    for ( const Json::Value& itemTypeJson : itemTypes ) {
-
-        if ( !itemTypeJson.isMember( "SkillTree" ) ) {
+        if ( itemTypeCatalog.itemType( itemTypeId ) == nullptr ) {
+            qWarning() << "SkillFactory::createSkillCatalog"
+                       << "Unknown ItemType, skipping SkillTree:" << itemTypeId;
             continue;
         }
 
-        const uint32_t itemTypeId = itemTypeJson[ "Type" ].asUInt();
-        if ( itemTypeCatalog.itemType( itemTypeId ) == nullptr ) {
-            qWarning() << "SkillFactory::createSkillCatalog" << "Unknown ItemType, skipping SkillTree:" << itemTypeId;
+        const Json::Value itemTypeJson = JsonHelper::loadJsonFile( ItemTypeFactory::typeFilePath( configPath, itemTypeId ) );
+
+        if ( !itemTypeJson.isMember( "SkillTree" ) ) {
             continue;
         }
 
@@ -46,7 +36,8 @@ void SkillFactory::createSkillCatalog( const QString& configPath, const ItemType
         for ( const Json::Value& nodeJson : nodesJson ) {
 
             if ( !nodeJson.isMember( "Type" ) || !nodeJson.isMember( "Name" ) ) {
-                qWarning() << "SkillFactory::createSkillCatalog" << "Invalid node, skipping SkillTree:" << itemTypeId;
+                qWarning() << "SkillFactory::createSkillCatalog"
+                           << "Invalid node, skipping SkillTree:" << itemTypeId;
                 isTreeValid = false;
                 break;
             }
@@ -79,61 +70,56 @@ void SkillFactory::createSkillCatalog( const QString& configPath, const ItemType
 }
 
 void SkillFactory::saveSkillCatalog( const QString& configPath, const SkillCatalog& skillCatalog ) {
-    const QString path = DataFactory::mapPath( configPath );
+    const QStringList keys = ItemTypeFactory::readTypeKeys( configPath );
 
-    Json::Value mapJson = JsonHelper::loadJsonFile( path + "Map.json" );
+    for ( const auto& treeEntry : skillCatalog.trees() ) {
+        if ( !keys.contains( treeEntry.first ) ) {
+            qWarning() << "SkillFactory::saveSkillCatalog"
+                       << "Unknown ItemType, skipping SkillTree:" << treeEntry.first;
+        }
+    }
 
-    const QString itemTypesFile = path + QString( mapJson[ "Catalogs" ][ "ItemTypes" ].asCString() );
+    for ( const QString& itemTypeId : keys ) {
+        const QString file = ItemTypeFactory::typeFilePath( configPath, itemTypeId );
 
-    Json::Value json = JsonHelper::loadJsonFile( itemTypesFile );
-
-    std::unordered_set<uint32_t> matchedTypes;
-
-    for ( Json::Value& itemTypeJson : json[ "ItemTypes" ] ) {
-        if ( !itemTypeJson.isMember( "Type" ) ) {
+        if ( !QFile::exists( file ) ) {
+            qWarning() << "SkillFactory::saveSkillCatalog"
+                       << "ItemType file not found, skipping:" << file;
             continue;
         }
 
-        const uint32_t itemTypeId = itemTypeJson[ "Type" ].asUInt();
+        Json::Value itemTypeJson = JsonHelper::loadJsonFile( file );
         const SkillTreeModel* skillTree = skillCatalog.tree( itemTypeId );
 
         if ( skillTree == nullptr ) {
             itemTypeJson.removeMember( "SkillTree" );
-            continue;
-        }
 
-        matchedTypes.insert( itemTypeId );
+        } else {
+            Json::Value nodesJson( Json::arrayValue );
+            for ( const auto& nodeEntry : skillTree->nodes() ) {
+                const SkillNodeModel& node = nodeEntry.second;
 
-        Json::Value nodesJson( Json::arrayValue );
-        for ( const auto& nodeEntry : skillTree->nodes() ) {
-            const SkillNodeModel& node = nodeEntry.second;
+                Json::Value nodeJson;
+                nodeJson[ "Type" ] = node.type();
+                nodeJson[ "Name" ] = node.name().toStdString();
+                nodeJson[ "ProficiencyLevel" ] = node.proficiencyLevel();
 
-            Json::Value nodeJson;
-            nodeJson[ "Type" ] = node.type();
-            nodeJson[ "Name" ] = node.name().toStdString();
-            nodeJson[ "ProficiencyLevel" ] = node.proficiencyLevel();
+                Json::Value prerequisitesJson( Json::arrayValue );
+                for ( uint32_t prerequisite : node.prerequisites() ) {
+                    prerequisitesJson.append( prerequisite );
+                }
+                nodeJson[ "Prerequisites" ] = prerequisitesJson;
 
-            Json::Value prerequisitesJson( Json::arrayValue );
-            for ( uint32_t prerequisite : node.prerequisites() ) {
-                prerequisitesJson.append( prerequisite );
+                nodesJson.append( nodeJson );
             }
-            nodeJson[ "Prerequisites" ] = prerequisitesJson;
 
-            nodesJson.append( nodeJson );
+            itemTypeJson[ "SkillTree" ] = nodesJson;
         }
 
-        itemTypeJson[ "SkillTree" ] = nodesJson;
+        JsonHelper::saveJsonFile( file, itemTypeJson );
     }
 
-    for ( const auto& treeEntry : skillCatalog.trees() ) {
-        if ( matchedTypes.find( treeEntry.first ) == matchedTypes.end() ) {
-            qWarning() << "SkillFactory::saveSkillCatalog" << "Unknown ItemType, skipping SkillTree:" << treeEntry.first;
-        }
-    }
-
-    qInfo() << "SkillFactory::saveSkillCatalog" << "[ITEM_TYPES_FILE_PATH]" << itemTypesFile;
-
-    JsonHelper::saveJsonFile( itemTypesFile, json );
+    qInfo() << "SkillFactory::saveSkillCatalog";
 }
 
 } // namespace Engine

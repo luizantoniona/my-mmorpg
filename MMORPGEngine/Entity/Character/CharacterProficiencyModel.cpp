@@ -4,15 +4,15 @@ namespace Engine {
 
 CharacterProficiencyModel::CharacterProficiencyModel() :
     _xp( 0.0 ),
-    _idItemType( 0 ),
+    _idItemType( "" ),
     _lvl( 0 ) {
 }
 
-uint32_t CharacterProficiencyModel::idItemType() const {
+QString CharacterProficiencyModel::idItemType() const {
     return _idItemType;
 }
 
-void CharacterProficiencyModel::setIdItemType( uint32_t idItemType ) {
+void CharacterProficiencyModel::setIdItemType( const QString& idItemType ) {
     _idItemType = idItemType;
 }
 

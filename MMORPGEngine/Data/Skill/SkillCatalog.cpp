@@ -6,7 +6,7 @@ SkillCatalog::SkillCatalog() :
     _trees() {
 }
 
-const SkillTreeModel* SkillCatalog::tree( uint32_t itemType ) const {
+const SkillTreeModel* SkillCatalog::tree( const QString& itemType ) const {
     auto iterator = _trees.find( itemType );
 
     if ( iterator == _trees.end() ) {
@@ -16,7 +16,7 @@ const SkillTreeModel* SkillCatalog::tree( uint32_t itemType ) const {
     return &iterator->second;
 }
 
-const std::unordered_map<uint32_t, SkillTreeModel>& SkillCatalog::trees() const {
+const std::map<QString, SkillTreeModel>& SkillCatalog::trees() const {
     return _trees;
 }
 

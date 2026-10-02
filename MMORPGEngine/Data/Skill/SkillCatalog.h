@@ -1,7 +1,9 @@
 #ifndef SKILLCATALOG_H
 #define SKILLCATALOG_H
 
-#include <unordered_map>
+#include <map>
+
+#include <QString>
 
 #include <MMORPGEngine/Data/Skill/SkillTreeModel.h>
 
@@ -11,12 +13,12 @@ class SkillCatalog {
 public:
     SkillCatalog();
 
-    const SkillTreeModel* tree( uint32_t itemType ) const;
-    const std::unordered_map<uint32_t, SkillTreeModel>& trees() const;
+    const SkillTreeModel* tree( const QString& itemType ) const;
+    const std::map<QString, SkillTreeModel>& trees() const;
     void addTree( const SkillTreeModel& tree );
 
 private:
-    std::unordered_map<uint32_t, SkillTreeModel> _trees;
+    std::map<QString, SkillTreeModel> _trees;
 };
 
 } // namespace Engine

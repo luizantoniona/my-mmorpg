@@ -45,7 +45,7 @@ CREATE TABLE character_position (
 
 CREATE TABLE character_proficiency (
     id_character INTEGER NOT NULL,
-    id_item_type INTEGER NOT NULL,
+    id_item_type TEXT NOT NULL,
     xp NUMERIC DEFAULT 0.0,
     lvl INTEGER DEFAULT 0,
 

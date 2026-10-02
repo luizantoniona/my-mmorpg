@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <unordered_map>
 
+#include <QString>
+
 #include <MMORPGEngine/Data/Skill/SkillNodeModel.h>
 
 namespace Engine {
@@ -12,8 +14,8 @@ class SkillTreeModel {
 public:
     SkillTreeModel();
 
-    uint32_t itemType() const;
-    void setItemType( uint32_t itemType );
+    QString itemType() const;
+    void setItemType( const QString& itemType );
 
     const SkillNodeModel* node( uint32_t type ) const;
     const std::unordered_map<uint32_t, SkillNodeModel>& nodes() const;
@@ -21,7 +23,7 @@ public:
 
 private:
     std::unordered_map<uint32_t, SkillNodeModel> _nodes;
-    uint32_t _itemType;
+    QString _itemType;
 };
 
 } // namespace Engine

@@ -12,18 +12,24 @@ class SkillFactoryTest : public ::testing::Test {
 protected:
     void SetUp() override {
         _tempDir = std::filesystem::temp_directory_path() / "mmorpg_engine_test_skillfactory";
-        std::filesystem::create_directories( _tempDir / "TestMap" );
+        std::filesystem::create_directories( _tempDir / "TestMap" / "Items" );
 
         Json::Value configJson;
         configJson[ "ActiveFolder" ] = "TestMap";
         Engine::JsonHelper::saveJsonFile( ( _tempDir / "Config.json" ).string(), configJson );
 
         Json::Value mapJson;
-        mapJson[ "Catalogs" ][ "ItemTypes" ] = "ItemType.json";
+        mapJson[ "Catalogs" ][ "Items" ] = "Items.json";
         Engine::JsonHelper::saveJsonFile( ( _tempDir / "TestMap" / "Map.json" ).string(), mapJson );
 
+        Json::Value indexJson;
+        indexJson[ "ItemTypes" ] = Json::Value( Json::arrayValue );
+        indexJson[ "ItemTypes" ].append( "SWORD" );
+        indexJson[ "ItemTypes" ].append( "GHOST" );
+        Engine::JsonHelper::saveJsonFile( ( _tempDir / "TestMap" / "Items.json" ).string(), indexJson );
+
         Engine::ItemTypeModel sword;
-        sword.setType( 1 );
+        sword.setType( "SWORD" );
         sword.setName( "Sword" );
         _itemTypeCatalog.addItemType( sword );
     }
@@ -32,10 +38,8 @@ protected:
         std::filesystem::remove_all( _tempDir );
     }
 
-    void writeItemTypesJson( const Json::Value& itemTypesArray ) const {
-        Json::Value itemTypeJson;
-        itemTypeJson[ "ItemTypes" ] = itemTypesArray;
-        Engine::JsonHelper::saveJsonFile( ( _tempDir / "TestMap" / "ItemType.json" ).string(), itemTypeJson );
+    void writeItemTypeJson( const std::string& key, const Json::Value& itemTypeJson ) const {
+        Engine::JsonHelper::saveJsonFile( ( _tempDir / "TestMap" / "Items" / ( key + ".json" ) ).string(), itemTypeJson );
     }
 
     QString configPath() const {
@@ -61,21 +65,17 @@ TEST_F( SkillFactoryTest, CreateSkillCatalog_ParsesFields ) {
     nodes.append( node );
 
     Json::Value itemType;
-    itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
     itemType[ "SkillTree" ] = nodes;
-
-    Json::Value itemTypes( Json::arrayValue );
-    itemTypes.append( itemType );
-    writeItemTypesJson( itemTypes );
+    writeItemTypeJson( "SWORD", itemType );
 
     Engine::SkillCatalog catalog;
     Engine::SkillFactory::createSkillCatalog( configPath(), _itemTypeCatalog, catalog );
 
-    ASSERT_NE( catalog.tree( 1 ), nullptr );
-    ASSERT_NE( catalog.tree( 1 )->node( 1 ), nullptr );
+    ASSERT_NE( catalog.tree( "SWORD" ), nullptr );
+    ASSERT_NE( catalog.tree( "SWORD" )->node( 1 ), nullptr );
 
-    const Engine::SkillNodeModel* skillNode = catalog.tree( 1 )->node( 1 );
+    const Engine::SkillNodeModel* skillNode = catalog.tree( "SWORD" )->node( 1 );
     EXPECT_EQ( skillNode->name(), "Sword Mastery" );
     EXPECT_EQ( skillNode->proficiencyLevel(), 5u );
     ASSERT_EQ( skillNode->prerequisites().size(), 1 );
@@ -84,34 +84,26 @@ TEST_F( SkillFactoryTest, CreateSkillCatalog_ParsesFields ) {
 
 TEST_F( SkillFactoryTest, CreateSkillCatalog_ItemTypeWithoutSkillTree_IsIgnored ) {
     Json::Value itemType;
-    itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
-
-    Json::Value itemTypes( Json::arrayValue );
-    itemTypes.append( itemType );
-    writeItemTypesJson( itemTypes );
+    writeItemTypeJson( "SWORD", itemType );
 
     Engine::SkillCatalog catalog;
     Engine::SkillFactory::createSkillCatalog( configPath(), _itemTypeCatalog, catalog );
 
-    EXPECT_EQ( catalog.tree( 1 ), nullptr );
+    EXPECT_EQ( catalog.tree( "SWORD" ), nullptr );
     EXPECT_EQ( catalog.trees().size(), 0u );
 }
 
 TEST_F( SkillFactoryTest, CreateSkillCatalog_UnknownItemType_SkipsTree ) {
     Json::Value itemType;
-    itemType[ "Type" ] = 99;
     itemType[ "Name" ] = "Ghost";
     itemType[ "SkillTree" ] = Json::Value( Json::arrayValue );
-
-    Json::Value itemTypes( Json::arrayValue );
-    itemTypes.append( itemType );
-    writeItemTypesJson( itemTypes );
+    writeItemTypeJson( "GHOST", itemType );
 
     Engine::SkillCatalog catalog;
     Engine::SkillFactory::createSkillCatalog( configPath(), _itemTypeCatalog, catalog );
 
-    EXPECT_EQ( catalog.tree( 99 ), nullptr );
+    EXPECT_EQ( catalog.tree( "GHOST" ), nullptr );
     EXPECT_EQ( catalog.trees().size(), 0u );
 }
 
@@ -123,18 +115,14 @@ TEST_F( SkillFactoryTest, CreateSkillCatalog_NodeMissingType_SkipsTree ) {
     nodes.append( node );
 
     Json::Value itemType;
-    itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
     itemType[ "SkillTree" ] = nodes;
-
-    Json::Value itemTypes( Json::arrayValue );
-    itemTypes.append( itemType );
-    writeItemTypesJson( itemTypes );
+    writeItemTypeJson( "SWORD", itemType );
 
     Engine::SkillCatalog catalog;
     Engine::SkillFactory::createSkillCatalog( configPath(), _itemTypeCatalog, catalog );
 
-    EXPECT_EQ( catalog.tree( 1 ), nullptr );
+    EXPECT_EQ( catalog.tree( "SWORD" ), nullptr );
     EXPECT_EQ( catalog.trees().size(), 0u );
 }
 
@@ -155,34 +143,26 @@ TEST_F( SkillFactoryTest, CreateSkillCatalog_MultipleNodesInTree_AllAdded ) {
     nodes.append( second );
 
     Json::Value itemType;
-    itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
     itemType[ "SkillTree" ] = nodes;
-
-    Json::Value itemTypes( Json::arrayValue );
-    itemTypes.append( itemType );
-    writeItemTypesJson( itemTypes );
+    writeItemTypeJson( "SWORD", itemType );
 
     Engine::SkillCatalog catalog;
     Engine::SkillFactory::createSkillCatalog( configPath(), _itemTypeCatalog, catalog );
 
-    ASSERT_NE( catalog.tree( 1 ), nullptr );
-    EXPECT_EQ( catalog.tree( 1 )->nodes().size(), 2u );
+    ASSERT_NE( catalog.tree( "SWORD" ), nullptr );
+    EXPECT_EQ( catalog.tree( "SWORD" )->nodes().size(), 2u );
 }
 
 TEST_F( SkillFactoryTest, SaveSkillCatalog_ThenCreateSkillCatalog_RoundTripsFields ) {
     Json::Value itemType;
-    itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
-
-    Json::Value itemTypes( Json::arrayValue );
-    itemTypes.append( itemType );
-    writeItemTypesJson( itemTypes );
+    writeItemTypeJson( "SWORD", itemType );
 
     Engine::SkillCatalog original;
 
     Engine::SkillTreeModel tree;
-    tree.setItemType( 1 );
+    tree.setItemType( "SWORD" );
 
     Engine::SkillNodeModel node;
     node.setType( 2 );
@@ -198,29 +178,25 @@ TEST_F( SkillFactoryTest, SaveSkillCatalog_ThenCreateSkillCatalog_RoundTripsFiel
     Engine::SkillCatalog reloaded;
     Engine::SkillFactory::createSkillCatalog( configPath(), _itemTypeCatalog, reloaded );
 
-    ASSERT_NE( reloaded.tree( 1 ), nullptr );
-    ASSERT_NE( reloaded.tree( 1 )->node( 2 ), nullptr );
-    EXPECT_EQ( reloaded.tree( 1 )->node( 2 )->name(), "Whirlwind Strike" );
-    EXPECT_EQ( reloaded.tree( 1 )->node( 2 )->proficiencyLevel(), 10u );
-    ASSERT_EQ( reloaded.tree( 1 )->node( 2 )->prerequisites().size(), 1 );
-    EXPECT_EQ( reloaded.tree( 1 )->node( 2 )->prerequisites().first(), 1u );
+    ASSERT_NE( reloaded.tree( "SWORD" ), nullptr );
+    ASSERT_NE( reloaded.tree( "SWORD" )->node( 2 ), nullptr );
+    EXPECT_EQ( reloaded.tree( "SWORD" )->node( 2 )->name(), "Whirlwind Strike" );
+    EXPECT_EQ( reloaded.tree( "SWORD" )->node( 2 )->proficiencyLevel(), 10u );
+    ASSERT_EQ( reloaded.tree( "SWORD" )->node( 2 )->prerequisites().size(), 1 );
+    EXPECT_EQ( reloaded.tree( "SWORD" )->node( 2 )->prerequisites().first(), 1u );
 }
 
-TEST_F( SkillFactoryTest, SaveSkillCatalog_PreservesItemTypeNameAndType ) {
+TEST_F( SkillFactoryTest, SaveSkillCatalog_PreservesItemTypeFields ) {
     Json::Value itemType;
-    itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
     itemType[ "Category" ] = "WEAPON";
     itemType[ "Slot" ] = "Hand";
-
-    Json::Value itemTypes( Json::arrayValue );
-    itemTypes.append( itemType );
-    writeItemTypesJson( itemTypes );
+    writeItemTypeJson( "SWORD", itemType );
 
     Engine::SkillCatalog original;
 
     Engine::SkillTreeModel tree;
-    tree.setItemType( 1 );
+    tree.setItemType( "SWORD" );
     original.addTree( tree );
 
     Engine::SkillFactory::saveSkillCatalog( configPath(), original );
@@ -228,23 +204,19 @@ TEST_F( SkillFactoryTest, SaveSkillCatalog_PreservesItemTypeNameAndType ) {
     Engine::ItemTypeCatalog reloadedItemTypeCatalog;
     Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), reloadedItemTypeCatalog );
 
-    ASSERT_NE( reloadedItemTypeCatalog.itemType( 1 ), nullptr );
-    EXPECT_EQ( reloadedItemTypeCatalog.itemType( 1 )->name(), "Sword" );
+    ASSERT_NE( reloadedItemTypeCatalog.itemType( "SWORD" ), nullptr );
+    EXPECT_EQ( reloadedItemTypeCatalog.itemType( "SWORD" )->name(), "Sword" );
 }
 
 TEST_F( SkillFactoryTest, SaveSkillCatalog_UnknownItemType_DoesNotCreateEntry ) {
     Json::Value itemType;
-    itemType[ "Type" ] = 1;
     itemType[ "Name" ] = "Sword";
-
-    Json::Value itemTypes( Json::arrayValue );
-    itemTypes.append( itemType );
-    writeItemTypesJson( itemTypes );
+    writeItemTypeJson( "SWORD", itemType );
 
     Engine::SkillCatalog original;
 
     Engine::SkillTreeModel tree;
-    tree.setItemType( 99 );
+    tree.setItemType( "UNLISTED" );
     original.addTree( tree );
 
     Engine::SkillFactory::saveSkillCatalog( configPath(), original );
@@ -252,5 +224,32 @@ TEST_F( SkillFactoryTest, SaveSkillCatalog_UnknownItemType_DoesNotCreateEntry ) 
     Engine::SkillCatalog reloaded;
     Engine::SkillFactory::createSkillCatalog( configPath(), _itemTypeCatalog, reloaded );
 
-    EXPECT_EQ( reloaded.tree( 99 ), nullptr );
+    EXPECT_EQ( reloaded.tree( "UNLISTED" ), nullptr );
+}
+
+TEST_F( SkillFactoryTest, SaveSkillCatalog_PreservesItemsOfTheType ) {
+    Json::Value item;
+    item[ "Id" ] = 1;
+    item[ "Name" ] = "Iron Sword";
+
+    Json::Value items( Json::arrayValue );
+    items.append( item );
+
+    Json::Value itemType;
+    itemType[ "Name" ] = "Sword";
+    itemType[ "Items" ] = items;
+    writeItemTypeJson( "SWORD", itemType );
+
+    Engine::SkillCatalog original;
+
+    Engine::SkillTreeModel tree;
+    tree.setItemType( "SWORD" );
+    original.addTree( tree );
+
+    Engine::SkillFactory::saveSkillCatalog( configPath(), original );
+
+    const Json::Value saved = Engine::JsonHelper::loadJsonFile( ( _tempDir / "TestMap" / "Items" / "SWORD.json" ).string() );
+
+    ASSERT_TRUE( saved.isMember( "Items" ) );
+    EXPECT_EQ( saved[ "Items" ].size(), 1u );
 }
