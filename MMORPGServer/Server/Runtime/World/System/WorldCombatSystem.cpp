@@ -144,6 +144,7 @@ bool WorldCombatSystem::hasPendingCreatureAttack( int idCreature ) const {
 bool WorldCombatSystem::resolveCharacterAttack( int idCharacter, int x, int y, int z, double damage ) {
     int idCreature = NO_CREATURE;
     bool creatureDied = false;
+    uint32_t creatureType = 0;
     double creatureHealth = 0.0;
     double creatureMaxHealth = 0.0;
     double creatureMovementCooldownSeconds = 0.0;
@@ -159,6 +160,7 @@ bool WorldCombatSystem::resolveCharacterAttack( int idCharacter, int x, int y, i
 
         if ( creaturePtr ) {
             idCreature = creaturePtr->idCreature();
+            creatureType = creaturePtr->type();
 
             creaturePtr->vitals().setHealth( std::max( 0.0, creaturePtr->vitals().health() - damage ) );
 
@@ -195,6 +197,11 @@ bool WorldCombatSystem::resolveCharacterAttack( int idCharacter, int x, int y, i
     creaturePayload[ "maxHealth" ] = creatureMaxHealth;
     creaturePayload[ "movementCooldownSeconds" ] = creatureMovementCooldownSeconds;
     eventBus.publish( WorldEvent( creatureDied ? WorldEventType::CREATURE_LEFT : WorldEventType::CREATURE_VITALS_CHANGED, creaturePayload ) );
+
+    if ( creatureDied ) {
+        creaturePayload[ "type" ] = creatureType;
+        eventBus.publish( WorldEvent( WorldEventType::CREATURE_DIED, creaturePayload ) );
+    }
 
     return true;
 }

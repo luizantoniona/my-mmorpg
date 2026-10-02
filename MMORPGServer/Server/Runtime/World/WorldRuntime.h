@@ -51,6 +51,7 @@ public:
     std::vector<Engine::CharacterModel> connectedCharacters();
 
     Engine::CreatureModel* addCreature( std::unique_ptr<Engine::CreatureModel> creature );
+    Engine::CreatureModel* addCreature( std::unique_ptr<Engine::CreatureModel> creature, const WorldSpawnAreaRuntime* spawnArea );
     Engine::CreatureModel* creature( int idCreature );
     Engine::CreatureModel* creatureAt( int x, int y, int z );
 
@@ -72,6 +73,7 @@ public:
 
 private:
     std::mutex _mutex;
+    EventBus _eventBus;
     std::unique_ptr<Engine::WorldModel> _world;
     std::map<int, std::unique_ptr<CharacterRuntime>> _characters;
     std::map<int, std::unique_ptr<CreatureRuntime>> _creatures;
@@ -80,7 +82,6 @@ private:
     std::unique_ptr<WorldMovementSystem> _movementSystem;
     std::unique_ptr<WorldCreatureSystem> _creatureSystem;
     std::unique_ptr<WorldSpawnSystem> _spawnSystem;
-    EventBus _eventBus;
     std::mutex _commandMutex;
     std::vector<std::unique_ptr<WorldCommand>> _commands;
     int _tickRate;

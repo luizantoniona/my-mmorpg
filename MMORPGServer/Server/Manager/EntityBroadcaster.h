@@ -23,6 +23,7 @@ private:
     void onCharacterVitalsChanged( const WorldEvent& event );
     void onCharacterAttackStarted( const WorldEvent& event );
     void onCharacterAttacked( const WorldEvent& event );
+    void onCreatureEntered( const WorldEvent& event );
     void onCreatureMoved( const WorldEvent& event );
     void onCreatureVitalsChanged( const WorldEvent& event );
     void onCreatureLeft( const WorldEvent& event );
@@ -31,6 +32,7 @@ private:
 
     void sendWorldBasic( const WorldEvent& event );
     void sendOwnCharacter( const WorldEvent& event );
+    void sendOwnCombat( const WorldEvent& event );
     void sendOwnEquipment( const WorldEvent& event );
     void sendOwnInventory( const WorldEvent& event );
     void sendNearbyCharacters( const WorldEvent& event );

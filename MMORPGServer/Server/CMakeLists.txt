@@ -78,6 +78,8 @@ set(PROJECT_SOURCES
     Runtime/Character/System/CharacterSystem.h
     Runtime/Character/System/CharacterVitalsSystem.cpp
     Runtime/Character/System/CharacterVitalsSystem.h
+    Runtime/Creature/CreaturePathfinder.cpp
+    Runtime/Creature/CreaturePathfinder.h
     Runtime/Creature/CreatureRuntime.cpp
     Runtime/Creature/CreatureRuntime.h
     Runtime/World/Command/AttackCharacterCommand.cpp
@@ -86,6 +88,8 @@ set(PROJECT_SOURCES
     Runtime/World/Command/MoveCharacterCommand.h
     Runtime/World/Command/WorldCommand.cpp
     Runtime/World/Command/WorldCommand.h
+    Runtime/World/Spawn/WorldSpawnAreaRuntime.cpp
+    Runtime/World/Spawn/WorldSpawnAreaRuntime.h
     Runtime/World/System/WorldCombatSystem.cpp
     Runtime/World/System/WorldCombatSystem.h
     Runtime/World/System/WorldCreatureSystem.cpp

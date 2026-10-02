@@ -9,6 +9,7 @@
 #include <MMORPGEngine/Data/Creature/CreatureSpawnEntryModel.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 #include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/Data/Tile/TileModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
@@ -55,7 +56,28 @@ std::unique_ptr<Engine::CreatureModel> makeCreature( int idCreature, int x, int 
     return creature;
 }
 
-std::unique_ptr<Engine::WorldModel> makeWorldWithSpawnArea( int z, int x, int y, uint32_t width, uint32_t height, uint32_t type, uint32_t quantity ) {
+constexpr uint32_t WALKABLE_TILE_TYPE = 777;
+
+void tickTimes( Server::WorldRuntime& worldRuntime, int ticks ) {
+    for ( int tick = 0; tick < ticks; ++tick ) {
+        worldRuntime.tick();
+    }
+}
+
+void paintWalkableTiles( Engine::WorldModel& world, int z, int x, int y, int width, int height ) {
+    Engine::TileModel tile;
+    tile.setType( WALKABLE_TILE_TYPE );
+    tile.setIsWalkable( true );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( tile );
+
+    for ( int tileX = x; tileX < x + width; ++tileX ) {
+        for ( int tileY = y; tileY < y + height; ++tileY ) {
+            world.setTile( tileX, tileY, z, WALKABLE_TILE_TYPE );
+        }
+    }
+}
+
+std::unique_ptr<Engine::WorldModel> makeWorldWithSpawnArea( int z, int x, int y, uint32_t width, uint32_t height, uint32_t type, uint32_t quantity, double respawnSeconds = 60.0 ) {
     Engine::CreatureSpawnEntryModel entry;
     entry.setType( type );
     entry.setQuantity( quantity );
@@ -65,11 +87,13 @@ std::unique_ptr<Engine::WorldModel> makeWorldWithSpawnArea( int z, int x, int y,
     area.setY( y );
     area.setWidth( width );
     area.setHeight( height );
+    area.setRespawnSeconds( respawnSeconds );
     area.setCreatures( { entry } );
 
     auto world = std::make_unique<Engine::WorldModel>();
     world->addFloor( z );
     world->addSpawnArea( z, area );
+    paintWalkableTiles( *world, z, x, y, static_cast<int>( width ), static_cast<int>( height ) );
 
     return world;
 }
@@ -448,10 +472,10 @@ TEST( WorldRuntimeTest, AddCreature_MultipleCreatures_AllReturned ) {
     EXPECT_EQ( worldRuntime.creatures().size(), 2u );
 }
 
-TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_SpawnsQuantityWithinArea ) {
+TEST( WorldRuntimeTest, SpawnSystem_FirstTick_SpawnsQuantityWithinArea ) {
     Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 5, 5, 3, 4 ) );
 
-    worldRuntime.spawnSystem().spawnCreaturesFromAreas();
+    worldRuntime.tick();
 
     const std::vector<Engine::CreatureModel> creatures = worldRuntime.creatures();
 
@@ -466,10 +490,10 @@ TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_SpawnsQuantityWithinArea ) {
     }
 }
 
-TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_AssignsUniqueIds ) {
+TEST( WorldRuntimeTest, SpawnSystem_AssignsUniqueIds ) {
     Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 0, 0, 10, 10, 1, 5 ) );
 
-    worldRuntime.spawnSystem().spawnCreaturesFromAreas();
+    worldRuntime.tick();
 
     std::set<int> ids;
     for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
@@ -479,66 +503,194 @@ TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_AssignsUniqueIds ) {
     EXPECT_EQ( ids.size(), 5u );
 }
 
-TEST( WorldRuntimeTest, SpawnCreaturesFromAreas_NullWorld_DoesNothing ) {
+TEST( WorldRuntimeTest, SpawnSystem_NullWorld_DoesNothing ) {
     Server::WorldRuntime worldRuntime( nullptr );
 
-    worldRuntime.spawnSystem().spawnCreaturesFromAreas();
+    worldRuntime.tick();
 
     EXPECT_TRUE( worldRuntime.creatures().empty() );
 }
 
-TEST( WorldRuntimeTest, Tick_CreatureWalksA2x2SquareAroundSpawn_WhenCharacterIsNear ) {
-    Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
-    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+TEST( WorldRuntimeTest, SpawnSystem_SkipsEmptyTiles ) {
+    auto world = makeWorldWithSpawnArea( 0, 10, 10, 4, 1, 3, 12 );
+    world->setTile( 10, 10, 0, 0 );
+    world->setTile( 11, 10, 0, 0 );
+    Server::WorldRuntime worldRuntime( std::move( world ) );
 
-    std::vector<std::pair<int, int>> visited;
-    visited.emplace_back( 5, 5 );
+    worldRuntime.tick();
 
-    for ( int step = 0; step < 4; ++step ) {
-        for ( int tick = 0; tick < 20; ++tick ) {
-            worldRuntime.tick();
+    for ( const Engine::CreatureModel& creature : worldRuntime.creatures() ) {
+        EXPECT_GE( creature.position().x(), 12 );
+    }
+}
+
+TEST( WorldRuntimeTest, SpawnSystem_NoWalkableTile_SpawnsNothingAndStaysActive ) {
+    auto world = makeWorldWithSpawnArea( 0, 10, 10, 2, 2, 3, 3 );
+    for ( int x = 10; x < 12; ++x ) {
+        for ( int y = 10; y < 12; ++y ) {
+            world->setTile( x, y, 0, 0 );
         }
+    }
+    Server::WorldRuntime worldRuntime( std::move( world ) );
+
+    worldRuntime.tick();
+
+    EXPECT_TRUE( worldRuntime.creatures().empty() );
+    EXPECT_EQ( worldRuntime.spawnSystem().activeAreaCount(), 1u );
+}
+
+TEST( WorldRuntimeTest, SpawnSystem_AreaWithoutRespawnSeconds_IsNotCreated ) {
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 5, 5, 3, 4, 0.0 ) );
+
+    worldRuntime.tick();
+
+    EXPECT_TRUE( worldRuntime.creatures().empty() );
+    EXPECT_TRUE( worldRuntime.spawnSystem().areas().empty() );
+}
+
+TEST( WorldRuntimeTest, SpawnSystem_AfterFillingArea_GoesIdle ) {
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 5, 5, 3, 4 ) );
+
+    worldRuntime.tick();
+
+    EXPECT_EQ( worldRuntime.creatures().size(), 4u );
+    EXPECT_EQ( worldRuntime.spawnSystem().activeAreaCount(), 0u );
+}
+
+TEST( WorldRuntimeTest, SpawnSystem_CreatureDies_RespawnsAfterAreaRespawnSeconds ) {
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 5, 5, 3, 1, 2.0 ) );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    worldRuntime.tick();
+    ASSERT_EQ( worldRuntime.creatures().size(), 1u );
+
+    const int firstId = worldRuntime.creatures()[ 0 ].idCreature();
+    const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
+    worldRuntime.creature( firstId )->vitals().setHealth( 1.0 );
+    ASSERT_TRUE( worldRuntime.combatSystem().resolveCharacterAttack( 1, position.x(), position.y(), 0, 30.0 ) );
+
+    EXPECT_TRUE( worldRuntime.creatures().empty() );
+    EXPECT_EQ( worldRuntime.spawnSystem().activeAreaCount(), 1u );
+
+    tickTimes( worldRuntime, 39 );
+    EXPECT_TRUE( worldRuntime.creatures().empty() );
+
+    worldRuntime.tick();
+
+    ASSERT_EQ( worldRuntime.creatures().size(), 1u );
+    EXPECT_NE( worldRuntime.creatures()[ 0 ].idCreature(), firstId );
+    EXPECT_EQ( worldRuntime.spawnSystem().activeAreaCount(), 0u );
+}
+
+TEST( WorldRuntimeTest, SpawnSystem_Respawn_PublishesCreatureEntered ) {
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 5, 5, 3, 1, 1.0 ) );
+
+    int entered = 0;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CREATURE_ENTERED, [ &entered ]( const Server::WorldEvent& ) {
+        ++entered;
+    } );
+
+    worldRuntime.tick();
+
+    EXPECT_EQ( entered, 1 );
+}
+
+TEST( WorldRuntimeTest, Tick_CreatureDoesNotWalkOntoEmptyTile ) {
+    auto world = makeWorldWithSpawnArea( 0, 5, 5, 2, 2, 3, 1 );
+    world->setTile( 6, 6, 0, 0 );
+    Server::WorldRuntime worldRuntime( std::move( world ) );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.tick();
+    ASSERT_EQ( worldRuntime.creatures().size(), 1u );
+
+    for ( int tick = 0; tick < 200; ++tick ) {
+        worldRuntime.tick();
 
         const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
-        visited.emplace_back( position.x(), position.y() );
+        EXPECT_FALSE( position.x() == 6 && position.y() == 6 );
+    }
+}
+
+TEST( WorldRuntimeTest, Tick_CreatureWandersRandomlyInsideSpawnArea_WhenCharacterIsNear ) {
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 4, 4, 3, 1 ) );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.tick();
+    ASSERT_EQ( worldRuntime.creatures().size(), 1u );
+
+    std::set<std::pair<int, int>> visited;
+    Engine::EntityPositionModel previous = worldRuntime.creatures()[ 0 ].position();
+
+    for ( int tick = 0; tick < 20 * 40; ++tick ) {
+        worldRuntime.tick();
+
+        const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
+        EXPECT_GE( position.x(), 10 );
+        EXPECT_LT( position.x(), 14 );
+        EXPECT_GE( position.y(), 10 );
+        EXPECT_LT( position.y(), 14 );
+        EXPECT_LE( std::abs( position.x() - previous.x() ), 1 );
+        EXPECT_LE( std::abs( position.y() - previous.y() ), 1 );
+
+        visited.emplace( position.x(), position.y() );
+        previous = position;
     }
 
-    const std::vector<std::pair<int, int>> expected = { { 5, 5 }, { 6, 5 }, { 6, 6 }, { 5, 6 }, { 5, 5 } };
-    EXPECT_EQ( visited, expected );
+    EXPECT_GT( visited.size(), 3u );
+}
+
+TEST( WorldRuntimeTest, Tick_CreatureOutsideSpawnArea_WalksBackIntoIt ) {
+    auto world = makeWorldWithSpawnArea( 0, 10, 10, 4, 4, 3, 0 );
+    paintWalkableTiles( *world, 0, 0, 0, 30, 30 );
+    Server::WorldRuntime worldRuntime( std::move( world ) );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.tick();
+    worldRuntime.addCreature( makeCreature( 1, 20, 20, 0 ), worldRuntime.spawnSystem().areas()[ 0 ].get() );
+
+    for ( int tick = 0; tick < 20 * 12; ++tick ) {
+        worldRuntime.tick();
+    }
+
+    const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
+    EXPECT_GE( position.x(), 10 );
+    EXPECT_LT( position.x(), 14 );
+    EXPECT_GE( position.y(), 10 );
+    EXPECT_LT( position.y(), 14 );
 }
 
 TEST( WorldRuntimeTest, Tick_CreatureDoesNotMove_WhenNoCharacterIsNear ) {
-    Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 4, 4, 3, 1 ) );
 
-    for ( int tick = 0; tick < 100; ++tick ) {
-        worldRuntime.tick();
-    }
+    worldRuntime.tick();
+    ASSERT_EQ( worldRuntime.creatures().size(), 1u );
+    const Engine::EntityPositionModel spawned = worldRuntime.creatures()[ 0 ].position();
+
+    tickTimes( worldRuntime, 100 );
 
     const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
-    EXPECT_EQ( position.x(), 5 );
-    EXPECT_EQ( position.y(), 5 );
+    EXPECT_EQ( position.x(), spawned.x() );
+    EXPECT_EQ( position.y(), spawned.y() );
 }
 
 TEST( WorldRuntimeTest, Tick_CreatureDoesNotMove_WhenCharacterIsTwoChunksAway ) {
-    Server::WorldRuntime worldRuntime( nullptr );
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 500, 500, 4, 4, 3, 1 ) );
     worldRuntime.addCharacter( makeCharacter( 1, 5, 5, 0 ) );
-    worldRuntime.addCreature( makeCreature( 1, 500, 500, 0 ) );
 
-    for ( int tick = 0; tick < 100; ++tick ) {
-        worldRuntime.tick();
-    }
+    worldRuntime.tick();
+    ASSERT_EQ( worldRuntime.creatures().size(), 1u );
+    const Engine::EntityPositionModel spawned = worldRuntime.creatures()[ 0 ].position();
+
+    tickTimes( worldRuntime, 100 );
 
     const Engine::EntityPositionModel position = worldRuntime.creatures()[ 0 ].position();
-    EXPECT_EQ( position.x(), 500 );
-    EXPECT_EQ( position.y(), 500 );
+    EXPECT_EQ( position.x(), spawned.x() );
+    EXPECT_EQ( position.y(), spawned.y() );
 }
 
 TEST( WorldRuntimeTest, Tick_CreatureDoesNotStepIntoTileOccupiedByCharacter ) {
-    Server::WorldRuntime worldRuntime( nullptr );
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 5, 5, 2, 1, 3, 0 ) );
     worldRuntime.addCharacter( makeCharacter( 1, 6, 5, 0 ) );
-    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ) );
+    worldRuntime.tick();
+    worldRuntime.addCreature( makeCreature( 1, 5, 5, 0 ), worldRuntime.spawnSystem().areas()[ 0 ].get() );
 
     for ( int tick = 0; tick < 20; ++tick ) {
         worldRuntime.tick();
@@ -849,12 +1001,6 @@ std::unique_ptr<Engine::CreatureModel> makeCreatureOfType( uint32_t type, int id
     creature->setType( type );
 
     return creature;
-}
-
-void tickTimes( Server::WorldRuntime& worldRuntime, int ticks ) {
-    for ( int tick = 0; tick < ticks; ++tick ) {
-        worldRuntime.tick();
-    }
 }
 
 } // namespace

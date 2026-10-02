@@ -4,6 +4,7 @@ include(GoogleTest)
 add_executable(
   MMORPGServerTests
   ChunkCoordinateTest.cpp
+  CreaturePathfinderTest.cpp
   EventBusTest.cpp
   WorldRuntimeTest.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Event/EventBus.cpp
@@ -14,8 +15,10 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterMovementSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterVitalsSystem.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Creature/CreaturePathfinder.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Creature/CreatureRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/WorldCommand.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Spawn/WorldSpawnAreaRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldCombatSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldCreatureSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldMovementSystem.cpp

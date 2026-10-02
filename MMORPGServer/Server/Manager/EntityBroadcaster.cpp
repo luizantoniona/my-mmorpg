@@ -7,6 +7,7 @@
 #include <MMORPGEngine/Entity/Character/CharacterEventAttackStartDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventLeaveDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCombatDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnInventoryDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
@@ -47,6 +48,10 @@ EntityBroadcaster::EntityBroadcaster() {
         onCharacterAttacked( event );
     } );
 
+    worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_ENTERED, [ this ]( const WorldEvent& event ) {
+        onCreatureEntered( event );
+    } );
+
     worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_MOVED, [ this ]( const WorldEvent& event ) {
         onCreatureMoved( event );
     } );
@@ -83,6 +88,7 @@ void EntityBroadcaster::sendSnapshot( EntityObserver& observer ) {
 void EntityBroadcaster::onCharacterEntered( const WorldEvent& event ) {
     sendWorldBasic( event );
     sendOwnCharacter( event );
+    sendOwnCombat( event );
     sendOwnEquipment( event );
     sendOwnInventory( event );
     sendNearbyCharacters( event );
@@ -120,6 +126,10 @@ void EntityBroadcaster::onCharacterAttackStarted( const WorldEvent& event ) {
 
 void EntityBroadcaster::onCharacterAttacked( const WorldEvent& event ) {
     broadcastAttack( event );
+}
+
+void EntityBroadcaster::onCreatureEntered( const WorldEvent& event ) {
+    broadcastCreature( event.payload() );
 }
 
 void EntityBroadcaster::onCreatureMoved( const WorldEvent& event ) {
@@ -180,6 +190,17 @@ void EntityBroadcaster::sendOwnCharacter( const WorldEvent& event ) {
     }
 
     sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::OwnCharacterDTO::fromModel( character ).toJson() ) );
+}
+
+void EntityBroadcaster::sendOwnCombat( const WorldEvent& event ) {
+    const int idCharacter = event.payload()[ "idCharacter" ].asInt();
+
+    const Engine::CharacterModel* character = Engine::Singleton<WorldManager>::instance().runtime().character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::OwnCombatDTO::fromModel( character ).toJson() ) );
 }
 
 void EntityBroadcaster::sendOwnEquipment( const WorldEvent& event ) {

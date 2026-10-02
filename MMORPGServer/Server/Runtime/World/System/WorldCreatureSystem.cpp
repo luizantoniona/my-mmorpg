@@ -1,6 +1,7 @@
 #include "WorldCreatureSystem.h"
 
 #include <cstdlib>
+#include <optional>
 #include <vector>
 
 #include <json/json.h>
@@ -8,6 +9,7 @@
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 #include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
 #include <MMORPGServer/Server/Event/WorldEventType.h>
 #include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
@@ -29,8 +31,9 @@ public:
     int z;
 };
 
-bool isAdjacent( const Engine::EntityPositionModel& from, const Engine::EntityPositionModel& to ) {
-    return from.z() == to.z() && std::abs( from.x() - to.x() ) <= 1 && std::abs( from.y() - to.y() ) <= 1;
+// TODO: ranged attackers also need line of sight, not only distance
+bool isWithinRange( const Engine::EntityPositionModel& from, const Engine::EntityPositionModel& to, int range ) {
+    return from.z() == to.z() && std::abs( from.x() - to.x() ) <= range && std::abs( from.y() - to.y() ) <= range;
 }
 
 } // namespace
@@ -50,6 +53,20 @@ void WorldCreatureSystem::onTick() {
 
         const WorldSpatialIndex& spatialIndex = _runtime.spatialIndex();
         const Engine::CreatureTypeCatalog& creatureTypeCatalog = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog();
+        const Engine::WorldModel* world = _runtime.world();
+
+        const auto isWalkable = [ world ]( int x, int y, int z ) {
+            const Engine::WorldTileModel* worldTile = world ? world->tile( x, y, z ) : nullptr;
+            return worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable();
+        };
+
+        const auto isOccupied = [ &spatialIndex ]( int x, int y, int z ) {
+            Engine::EntityPositionModel position;
+            position.setX( x );
+            position.setY( y );
+            position.setZ( z );
+            return spatialIndex.isPositionOccupied( position );
+        };
 
         for ( auto& entry : _runtime.creaturesLocked() ) {
             CreatureRuntime& creatureRuntime = *entry.second;
@@ -58,25 +75,29 @@ void WorldCreatureSystem::onTick() {
             Engine::EntityCombatModel& combat = creaturePtr->combat();
             combat.setCounter( combat.counter() + 1 );
 
+            creatureRuntime.updateLeash();
+
             const Engine::CreatureTypeModel* creatureType = creatureTypeCatalog.creatureType( creaturePtr->type() );
             const int aggroRadius = creatureType ? static_cast<int>( creatureType->aggroRadius() ) : 0;
-            const Engine::CharacterModel* target = aggroRadius > 0 ? spatialIndex.nearestCharacterWithin( creaturePtr->position(), aggroRadius ) : nullptr;
+            const Engine::CharacterModel* target = aggroRadius > 0 && !creatureRuntime.isReturning() ? spatialIndex.nearestCharacterWithin( creaturePtr->position(), aggroRadius ) : nullptr;
+
+            std::optional<Engine::EntityPositionModel> movedPosition;
 
             if ( target ) {
-                // TODO: perseguir o alvo com A*; por ora a criatura com agro fica parada e só ataca quando adjacente
-                const bool canAttack = isAdjacent( creaturePtr->position(), target->position() ) && combat.isReady( _runtime.tickRate() ) && !_runtime.combatSystem().hasPendingCreatureAttack( creaturePtr->idCreature() );
+                const int attackRange = combat.attackRange();
 
-                if ( canAttack ) {
+                if ( !isWithinRange( creaturePtr->position(), target->position(), attackRange ) ) {
+                    movedPosition = creatureRuntime.chase( target->position(), attackRange, isWalkable, isOccupied, _runtime.tickRate() );
+                } else if ( combat.isReady( _runtime.tickRate() ) && !_runtime.combatSystem().hasPendingCreatureAttack( creaturePtr->idCreature() ) ) {
                     attackIntents.push_back( CreatureAttackIntent( creaturePtr->idCreature(), target->position().x(), target->position().y(), target->position().z() ) );
                 }
-
-                continue;
+            } else {
+                movedPosition = creatureRuntime.tick(
+                    [ &spatialIndex ]( const Engine::EntityPositionModel& position ) { return spatialIndex.hasCharacterNear( position ); },
+                    isWalkable,
+                    isOccupied,
+                    _runtime.tickRate() );
             }
-
-            const auto movedPosition = creatureRuntime.tick(
-                [ &spatialIndex ]( const Engine::EntityPositionModel& position ) { return spatialIndex.hasCharacterNear( position ); },
-                [ &spatialIndex ]( const Engine::EntityPositionModel& position ) { return spatialIndex.isPositionOccupied( position ); },
-                _runtime.tickRate() );
 
             if ( !movedPosition ) {
                 continue;

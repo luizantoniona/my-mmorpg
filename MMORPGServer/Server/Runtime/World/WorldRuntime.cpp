@@ -156,11 +156,15 @@ std::vector<Engine::CharacterModel> WorldRuntime::connectedCharacters() {
 }
 
 Engine::CreatureModel* WorldRuntime::addCreature( std::unique_ptr<Engine::CreatureModel> creature ) {
+    return addCreature( std::move( creature ), nullptr );
+}
+
+Engine::CreatureModel* WorldRuntime::addCreature( std::unique_ptr<Engine::CreatureModel> creature, const WorldSpawnAreaRuntime* spawnArea ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
     const int idCreature = creature->idCreature();
 
-    auto creatureRuntime = std::make_unique<CreatureRuntime>( std::move( creature ) );
+    auto creatureRuntime = std::make_unique<CreatureRuntime>( std::move( creature ), spawnArea );
     Engine::CreatureModel* creaturePtr = creatureRuntime->creature();
     _creatures[ idCreature ] = std::move( creatureRuntime );
 
