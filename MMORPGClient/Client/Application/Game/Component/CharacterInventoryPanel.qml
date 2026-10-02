@@ -43,6 +43,7 @@ GamePanelBase {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 vItemName: entry ? control.itemName(entry.idItem) : ""
+                vIconSource: entry ? "image://ClientItemIcon/" + entry.idItem : ""
                 vAmount: entry ? entry.amount : 0
             }
         }

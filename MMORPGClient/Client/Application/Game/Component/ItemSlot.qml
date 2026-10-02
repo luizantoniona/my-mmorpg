@@ -6,6 +6,7 @@ Rectangle {
 
     property string vLabel: ""
     property string vItemName: ""
+    property string vIconSource: ""
     property int vAmount: 0
 
     readonly property bool vIsEmpty: root.vItemName === ""
@@ -39,6 +40,18 @@ Rectangle {
         visible: hoverHandler.hovered && !root.vIsEmpty
         vTitle: root.vItemName
         vText: root.vLabel
+    }
+
+    Image {
+        anchors {
+            fill: parent
+            margins: Spaces.spacing8
+        }
+        visible: root.vIconSource !== ""
+        source: root.vIconSource
+        fillMode: Image.PreserveAspectFit
+        smooth: false
+        asynchronous: true
     }
 
     Text {

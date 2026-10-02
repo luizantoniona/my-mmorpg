@@ -71,6 +71,7 @@ GamePanelBase {
                 Layout.fillHeight: true
                 vLabel: modelData.label
                 vItemName: idItem > 0 ? control.itemName(idItem) : ""
+                vIconSource: idItem > 0 ? "image://ClientItemIcon/" + idItem : ""
             }
         }
     }

@@ -7,6 +7,8 @@ set(PROJECT_SOURCES
     Application/Game/Component/CharacterEquipmentPanelControl.h
     Application/Game/Component/CharacterInventoryPanelControl.cpp
     Application/Game/Component/CharacterInventoryPanelControl.h
+    Application/Game/Component/ItemIconProvider.cpp
+    Application/Game/Component/ItemIconProvider.h
     Application/Game/GamePageControl.cpp
     Application/Game/GamePageControl.h
     Application/Login/LoginPageControl.cpp
