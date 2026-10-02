@@ -6,8 +6,9 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Entity/Character/CharacterIntentAttackDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentActionDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentMoveDTO.h>
+#include <MMORPGEngine/Entity/CombatActionHelper.h>
 #include <MMORPGEngine/Network/WebSocket/ClientMessageTypeHelper.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Runtime/World/Command/AttackCharacterCommand.h>
@@ -35,8 +36,8 @@ void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& conne
     case Engine::ClientMessageType::CHARACTER_INTENT_MOVE:
         receiveMove( connection, idCharacter, messageJson );
         break;
-    case Engine::ClientMessageType::CHARACTER_INTENT_ATTACK:
-        receiveAttack( connection, idCharacter, messageJson );
+    case Engine::ClientMessageType::CHARACTER_INTENT_ACTION:
+        receiveAction( idCharacter, messageJson );
         break;
     default:
         break;
@@ -58,8 +59,27 @@ void ClientMessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& c
     } ) );
 }
 
-void ClientMessageReceiver::receiveAttack( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
-    const Engine::CharacterIntentAttackDTO input = Engine::CharacterIntentAttackDTO::fromJson( messageJson );
+void ClientMessageReceiver::receiveAction( int idCharacter, const Json::Value& messageJson ) {
+    const Engine::CharacterIntentActionDTO input = Engine::CharacterIntentActionDTO::fromJson( messageJson );
+
+    if ( !input.action() ) {
+        qWarning() << "[ClientMessageReceiver] Rejected action: unknown action [CHARACTER]" << idCharacter;
+        return;
+    }
+
+    switch ( *input.action() ) {
+    case Engine::CombatActionEnum::ATTACK:
+        receiveAttack( idCharacter, input );
+        break;
+    case Engine::CombatActionEnum::DODGE:
+    case Engine::CombatActionEnum::BLOCK:
+        // TODO: Esquiva e Bloqueio ainda não existem no WorldCombatSystem; por ora só registra a intenção
+        qInfo() << "[ClientMessageReceiver] Action intent ignored [CHARACTER]" << idCharacter << "[ACTION]" << Engine::CombatActionHelper::toString( *input.action() ).c_str();
+        break;
+    }
+}
+
+void ClientMessageReceiver::receiveAttack( int idCharacter, const Engine::CharacterIntentActionDTO& input ) {
     const int dx = input.dx();
     const int dy = input.dy();
 
