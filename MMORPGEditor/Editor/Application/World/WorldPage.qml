@@ -177,9 +177,9 @@ Item {
 
                             if (Object.keys(existing).length > 0) {
                                 worldControl.removeSpawnArea(x, y, z)
-                                spawnAreaPanel.loadFrom(existing.width, existing.height, existing.creatures)
+                                spawnAreaPanel.loadFrom(existing.width, existing.height, existing.respawnSeconds, existing.creatures)
                             } else {
-                                worldControl.paintSpawnArea(x, y, z, spawnAreaPanel.vWidth, spawnAreaPanel.vHeight, spawnAreaPanel.creaturesList())
+                                worldControl.paintSpawnArea(x, y, z, spawnAreaPanel.vWidth, spawnAreaPanel.vHeight, spawnAreaPanel.vRespawnSeconds, spawnAreaPanel.creaturesList())
                             }
 
                             root.refreshSpawnOverlay()

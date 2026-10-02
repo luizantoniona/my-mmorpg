@@ -38,7 +38,7 @@ public slots:
 
     void paintTile( int x, int y, int z, int tileType );
     void paintObject( int x, int y, int z, int objectType );
-    void paintSpawnArea( int x, int y, int z, int width, int height, const QVariantList& creatures );
+    void paintSpawnArea( int x, int y, int z, int width, int height, double respawnSeconds, const QVariantList& creatures );
 
     QVariantList spawnAreas( int z ) const;
     QVariantMap spawnAreaAt( int x, int y, int z ) const;

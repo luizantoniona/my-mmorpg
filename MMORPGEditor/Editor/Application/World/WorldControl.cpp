@@ -1,5 +1,7 @@
 #include "WorldControl.h"
 
+#include <QDebug>
+
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/Creature/CreatureSpawnAreaModel.h>
 #include <MMORPGEngine/Data/Creature/CreatureSpawnEntryModel.h>
@@ -119,8 +121,13 @@ void WorldControl::paintObject( int x, int y, int z, int objectType ) {
     _world->setObject( x, y, z, static_cast<uint32_t>( objectType ) );
 }
 
-void WorldControl::paintSpawnArea( int x, int y, int z, int width, int height, const QVariantList& creatures ) {
+void WorldControl::paintSpawnArea( int x, int y, int z, int width, int height, double respawnSeconds, const QVariantList& creatures ) {
     if ( !_world ) {
+        return;
+    }
+
+    if ( respawnSeconds <= 0.0 ) {
+        qWarning() << "WorldControl::paintSpawnArea Respawn seconds is required, spawn area not created";
         return;
     }
 
@@ -129,6 +136,7 @@ void WorldControl::paintSpawnArea( int x, int y, int z, int width, int height, c
     area.setY( y );
     area.setWidth( static_cast<uint32_t>( width ) );
     area.setHeight( static_cast<uint32_t>( height ) );
+    area.setRespawnSeconds( respawnSeconds );
 
     std::vector<Engine::CreatureSpawnEntryModel> entries;
     for ( const QVariant& creatureVariant : creatures ) {
@@ -181,6 +189,7 @@ QVariantMap WorldControl::spawnAreaAt( int x, int y, int z ) const {
     result[ "y" ] = area->y();
     result[ "width" ] = area->width();
     result[ "height" ] = area->height();
+    result[ "respawnSeconds" ] = area->respawnSeconds();
 
     const Engine::CreatureTypeCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog();
 

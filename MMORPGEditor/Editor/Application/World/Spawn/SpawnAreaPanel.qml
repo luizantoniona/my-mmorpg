@@ -7,6 +7,7 @@ Item {
 
     readonly property int vWidth: parseInt(widthInput.vText, 10) || 1
     readonly property int vHeight: parseInt(heightInput.vText, 10) || 1
+    readonly property real vRespawnSeconds: parseFloat(respawnInput.vText) > 0 ? parseFloat(respawnInput.vText) : 0
 
     function creaturesList() {
         const result = []
@@ -22,9 +23,10 @@ Item {
         return result
     }
 
-    function loadFrom(width, height, creatures) {
+    function loadFrom(width, height, respawnSeconds, creatures) {
         widthInput.vText = String(width)
         heightInput.vText = String(height)
+        respawnInput.vText = String(respawnSeconds)
 
         creaturesModel.clear()
         for (let i = 0; i < creatures.length; i++) {
@@ -41,7 +43,7 @@ Item {
     }
 
     implicitWidth: 260
-    implicitHeight: 360
+    implicitHeight: 420
 
     PanelFrame {
         anchors.fill: parent
@@ -79,6 +81,15 @@ Item {
                     Layout.fillWidth: true
                     vTitle: "Height"
                     vText: "4"
+                }
+
+                InputBase {
+                    id: respawnInput
+
+                    Layout.fillWidth: true
+                    Layout.columnSpan: 2
+                    vTitle: "Respawn (seconds)"
+                    vPlaceholder: "Required"
                 }
             }
 
