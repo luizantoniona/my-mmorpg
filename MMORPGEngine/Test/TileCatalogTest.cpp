@@ -36,6 +36,38 @@ TEST( TileCatalogTest, AddTile_DuplicateType_KeepsFirstEntry ) {
     EXPECT_EQ( catalog.tile( 1 )->name(), "Grass" );
 }
 
+TEST( TileCatalogTest, ReplaceTile_ExistingType_OverwritesAndKeepsAddress ) {
+    Engine::TileCatalog catalog;
+
+    Engine::TileModel first;
+    first.setType( 1 );
+    first.setName( "Grass" );
+    catalog.addTile( first );
+
+    const Engine::TileModel* before = catalog.tile( 1 );
+
+    Engine::TileModel second;
+    second.setType( 1 );
+    second.setName( "Sand" );
+    catalog.replaceTile( second );
+
+    EXPECT_EQ( catalog.tile( 1 )->name(), "Sand" );
+    EXPECT_EQ( catalog.tile( 1 ), before );
+    EXPECT_EQ( catalog.tiles().size(), 1u );
+}
+
+TEST( TileCatalogTest, ReplaceTile_NewType_Adds ) {
+    Engine::TileCatalog catalog;
+
+    Engine::TileModel tile;
+    tile.setType( 7 );
+    tile.setName( "Sand" );
+    catalog.replaceTile( tile );
+
+    ASSERT_NE( catalog.tile( 7 ), nullptr );
+    EXPECT_EQ( catalog.tile( 7 )->name(), "Sand" );
+}
+
 TEST( TileCatalogTest, Tiles_ReturnsAllAddedEntries ) {
     Engine::TileCatalog catalog;
 

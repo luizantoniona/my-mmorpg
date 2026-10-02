@@ -15,8 +15,11 @@ public:
     int nextType() const;
     QString lastError() const;
 
+    Q_INVOKABLE int nextFreeType( int after ) const;
+    Q_INVOKABLE QString typeName( int type ) const;
+
 public slots:
-    bool createObject( const QString& name, const QString& textureFile, int width, int height, int frameDurationMs );
+    bool createObject( int type, const QString& name, const QString& textureFile, int width, int height, int frameDurationMs, bool replace );
 
 signals:
     void catalogChanged();

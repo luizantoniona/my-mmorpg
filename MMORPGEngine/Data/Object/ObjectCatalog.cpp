@@ -24,4 +24,8 @@ void ObjectCatalog::addObject( const ObjectModel& object ) {
     _objects.insert( { object.type(), object } );
 }
 
+void ObjectCatalog::replaceObject( const ObjectModel& object ) {
+    _objects[ object.type() ] = object;
+}
+
 } // namespace Engine

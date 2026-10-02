@@ -68,12 +68,20 @@ void DataManager::addObject( const ObjectModel& object ) {
     _objectCatalog.addObject( object );
 }
 
+void DataManager::replaceObject( const ObjectModel& object ) {
+    _objectCatalog.replaceObject( object );
+}
+
 const TileCatalog& DataManager::tileCatalog() const {
     return _tileCatalog;
 }
 
 void DataManager::addTile( const TileModel& tile ) {
     _tileCatalog.addTile( tile );
+}
+
+void DataManager::replaceTile( const TileModel& tile ) {
+    _tileCatalog.replaceTile( tile );
 }
 
 const ItemTypeCatalog& DataManager::itemTypeCatalog() const {

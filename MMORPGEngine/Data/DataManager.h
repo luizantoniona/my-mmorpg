@@ -28,9 +28,11 @@ public:
 
     const ObjectCatalog& objectCatalog() const;
     void addObject( const ObjectModel& object );
+    void replaceObject( const ObjectModel& object );
 
     const TileCatalog& tileCatalog() const;
     void addTile( const TileModel& tile );
+    void replaceTile( const TileModel& tile );
 
     const ItemTypeCatalog& itemTypeCatalog() const;
     void addItemType( const ItemTypeModel& itemType );

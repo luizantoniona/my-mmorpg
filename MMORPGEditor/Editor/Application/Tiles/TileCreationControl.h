@@ -15,8 +15,11 @@ public:
     int nextType() const;
     QString lastError() const;
 
+    Q_INVOKABLE int nextFreeType( int after ) const;
+    Q_INVOKABLE QString typeName( int type ) const;
+
 public slots:
-    bool createTile( const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable );
+    bool createTile( int type, const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable, bool replace );
 
 signals:
     void catalogChanged();

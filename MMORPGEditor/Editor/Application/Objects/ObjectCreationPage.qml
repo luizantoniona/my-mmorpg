@@ -9,11 +9,57 @@ Item {
     id: root
 
     readonly property bool isAnimated: textureInput.vText.toLowerCase().endsWith(".gif")
-    readonly property bool canSave: nameInput.vText.trim().length > 0 && textureInput.vText.length > 0
+    readonly property int typeValue: parseInt(typeInput.vText, 10) || 0
+    readonly property string existingName: {
+        creationControl.nextType
+        return creationControl.typeName(root.typeValue)
+    }
+    readonly property bool canSave: root.typeValue >= 1 && nameInput.vText.trim().length > 0 && textureInput.vText.length > 0
+
+    function save(replace) {
+        const frameDurationMs = root.isAnimated ? (parseInt(frameDurationInput.vText, 10) || 100) : 100
+        const width = parseInt(widthInput.vText, 10) || 1
+        const height = parseInt(heightInput.vText, 10) || 1
+        const savedType = root.typeValue
+        const ok = creationControl.createObject(savedType, nameInput.vText, textureInput.vText, width, height, frameDurationMs, replace)
+
+        if (ok) {
+            statusText.text = replace ? "Object replaced successfully." : "Object created successfully."
+            statusText.color = Colors.success
+            nameInput.vText = ""
+            textureInput.vText = ""
+            frameDurationInput.vText = "100"
+            widthInput.vText = "1"
+            heightInput.vText = "1"
+            typeInput.vText = String(creationControl.nextFreeType(savedType))
+        } else {
+            statusText.text = creationControl.lastError
+            statusText.color = Colors.error
+        }
+    }
 
     ObjectCreationControl {
         id: creationControl
     }
+
+    Dialog {
+        id: replaceDialog
+
+        anchors.centerIn: parent
+        modal: true
+        title: "Replace Object"
+        standardButtons: Dialog.Yes | Dialog.No
+
+        Text {
+            color: Colors.text
+            font: Fonts.bodyBold
+            text: "Type " + root.typeValue + " is used by '" + root.existingName + "'. Replace it?\nObjects already placed in the world will change."
+        }
+
+        onAccepted: root.save(true)
+    }
+
+    Component.onCompleted: typeInput.vText = String(creationControl.nextType)
 
     FileDialog {
         id: textureDialog
@@ -104,10 +150,20 @@ Item {
                     }
                 }
 
+                InputBase {
+                    id: typeInput
+                    Layout.preferredWidth: 160
+                    vTitle: "Type (ID)"
+                    vPlaceholder: String(creationControl.nextType)
+                }
+
                 Text {
-                    color: Colors.text
+                    Layout.fillWidth: true
+                    visible: root.existingName !== "" || root.typeValue < 1
+                    color: root.typeValue < 1 ? Colors.error : Colors.warning
                     font: Fonts.bodyBold
-                    text: "Type (auto): " + creationControl.nextType
+                    wrapMode: Text.WordWrap
+                    text: root.typeValue < 1 ? "Type must be 1 or higher." : "Type " + root.typeValue + " is used by '" + root.existingName + "'. Saving will replace it."
                 }
 
                 Item {
@@ -136,6 +192,7 @@ Item {
                             frameDurationInput.vText = "100"
                             widthInput.vText = "1"
                             heightInput.vText = "1"
+                            typeInput.vText = String(creationControl.nextType)
                             statusText.text = ""
                         }
                     }
@@ -146,22 +203,10 @@ Item {
                         vEnabled: root.canSave
 
                         onClicked: {
-                            const frameDurationMs = root.isAnimated ? (parseInt(frameDurationInput.vText, 10) || 100) : 100
-                            const width = parseInt(widthInput.vText, 10) || 1
-                            const height = parseInt(heightInput.vText, 10) || 1
-                            const ok = creationControl.createObject(nameInput.vText, textureInput.vText, width, height, frameDurationMs)
-
-                            if (ok) {
-                                statusText.text = "Object created successfully."
-                                statusText.color = Colors.success
-                                nameInput.vText = ""
-                                textureInput.vText = ""
-                                frameDurationInput.vText = "100"
-                                widthInput.vText = "1"
-                                heightInput.vText = "1"
+                            if (root.existingName !== "") {
+                                replaceDialog.open()
                             } else {
-                                statusText.text = creationControl.lastError
-                                statusText.color = Colors.error
+                                root.save(false)
                             }
                         }
                     }
