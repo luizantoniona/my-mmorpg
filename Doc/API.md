@@ -294,6 +294,13 @@ connecting client only:
    The client uses it as the duration of its tile-to-tile movement animation,
    so the slide always lasts exactly one step — it is not a client-side
    constant.
+   `OWN_COMBAT` (`Engine::OwnCombatDTO`) follows with the combat actions the
+   character can currently use (`ATTACK`, `DODGE`, `BLOCK`):
+   ```json
+   { "type": "OWN_COMBAT", "idCharacter": 10, "actions": ["ATTACK", "DODGE"] }
+   ```
+   The client reads it to decide what its second-action key does: `BLOCK` when
+   present (a shield replaces the dodge), otherwise `DODGE`.
 3. `CHARACTER` (`Engine::CharacterDTO`) — one per character already nearby
    (same fields as `OWN_CHARACTER`, minus the "own" semantics):
    ```json
@@ -320,7 +327,7 @@ connection whenever something relevant changes nearby:
   ```json
   { "type": "CHARACTER_EVENT_LEAVE", "idCharacter": 11 }
   ```
-- `CREATURE` — a creature moved or took damage.
+- `CREATURE` — a creature spawned (or respawned), moved or took damage.
 - `CREATURE_EVENT_LEAVE` (`Engine::CreatureEventLeaveDTO`) — a creature died:
   ```json
   { "type": "CREATURE_EVENT_LEAVE", "idCreature": 1 }
@@ -365,9 +372,15 @@ connection whenever something relevant changes nearby:
   not get a `CHARACTER` broadcast about themselves, only nearby characters
   do.
 
-- `CHARACTER_INTENT_ATTACK` (`Engine::CharacterIntentAttackDTO`):
+- `CHARACTER_INTENT_ACTION` (`Engine::CharacterIntentActionDTO`) — one message
+  for every combat action, with `action` set to a `CombatActionEnum` name
+  (`ATTACK`, `DODGE` or `BLOCK`) and a direction (`dx`/`dy`, each `-1`, `0` or
+  `1`) that only `ATTACK` uses for now. An unknown or missing `action` is
+  rejected.
+
+  `ATTACK`:
   ```json
-  { "type": "CHARACTER_INTENT_ATTACK", "dx": 1, "dy": 0 }
+  { "type": "CHARACTER_INTENT_ACTION", "action": "ATTACK", "dx": 1, "dy": 0 }
   ```
   A melee attack on the adjacent tile at `dx`/`dy`. The server checks the
   attack cooldown and the character's stamina; when both hold, the swing
@@ -378,6 +391,13 @@ connection whenever something relevant changes nearby:
   published alongside. An attack rejected for cooldown, stamina or an
   already running cast gets no reply, and moving during the cast cancels the
   blow (the stamina is not refunded).
+
+  `DODGE` / `BLOCK`:
+  ```json
+  { "type": "CHARACTER_INTENT_ACTION", "action": "BLOCK", "dx": 0, "dy": 0 }
+  ```
+  The client's second action. The server accepts them but does not act on
+  them yet (logged and ignored).
 
 Movement does not carry a facing/orientation — `EntityModel` (and every DTO
 built on top of it) has no orientation field.
