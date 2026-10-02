@@ -6,8 +6,8 @@ std::string ClientMessageTypeHelper::toString( ClientMessageType type ) {
     switch ( type ) {
     case ClientMessageType::CHARACTER_INTENT_MOVE:
         return "CHARACTER_INTENT_MOVE";
-    case ClientMessageType::CHARACTER_INTENT_ATTACK:
-        return "CHARACTER_INTENT_ATTACK";
+    case ClientMessageType::CHARACTER_INTENT_ACTION:
+        return "CHARACTER_INTENT_ACTION";
     case ClientMessageType::UNKNOWN:
         return "UNKNOWN";
     }
@@ -20,8 +20,8 @@ ClientMessageType ClientMessageTypeHelper::fromString( const std::string& value 
         return ClientMessageType::CHARACTER_INTENT_MOVE;
     }
 
-    if ( value == "CHARACTER_INTENT_ATTACK" ) {
-        return ClientMessageType::CHARACTER_INTENT_ATTACK;
+    if ( value == "CHARACTER_INTENT_ACTION" ) {
+        return ClientMessageType::CHARACTER_INTENT_ACTION;
     }
 
     return ClientMessageType::UNKNOWN;

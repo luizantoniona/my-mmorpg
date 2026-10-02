@@ -5,6 +5,7 @@
 #include <QString>
 
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCombatDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnInventoryDTO.h>
 
@@ -24,6 +25,7 @@ signals:
     void errorReceived( const QString& error );
 
     void ownCharacterReceived( const Engine::OwnCharacterDTO& state );
+    void ownCombatReceived( const Engine::OwnCombatDTO& state );
     void ownEquipmentReceived( const Engine::OwnEquipmentDTO& state );
     void ownInventoryReceived( const Engine::OwnInventoryDTO& state );
 

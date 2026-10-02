@@ -108,8 +108,8 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterEventAttackStartDTO.h
     Entity/Character/CharacterEventLeaveDTO.cpp
     Entity/Character/CharacterEventLeaveDTO.h
-    Entity/Character/CharacterIntentAttackDTO.cpp
-    Entity/Character/CharacterIntentAttackDTO.h
+    Entity/Character/CharacterIntentActionDTO.cpp
+    Entity/Character/CharacterIntentActionDTO.h
     Entity/Character/CharacterIntentMoveDTO.cpp
     Entity/Character/CharacterIntentMoveDTO.h
     Entity/Character/CharacterInventoryDTO.cpp
@@ -125,6 +125,8 @@ set(PROJECT_SOURCES
     Entity/Character/EquipmentSlotHelper.h
     Entity/Character/OwnCharacterDTO.cpp
     Entity/Character/OwnCharacterDTO.h
+    Entity/Character/OwnCombatDTO.cpp
+    Entity/Character/OwnCombatDTO.h
     Entity/Character/OwnEquipmentDTO.cpp
     Entity/Character/OwnEquipmentDTO.h
     Entity/Character/OwnInventoryDTO.cpp
@@ -139,6 +141,9 @@ set(PROJECT_SOURCES
     Entity/Creature/CreatureEventAttackStartDTO.h
     Entity/Creature/CreatureEventLeaveDTO.cpp
     Entity/Creature/CreatureEventLeaveDTO.h
+    Entity/CombatActionEnum.h
+    Entity/CombatActionHelper.cpp
+    Entity/CombatActionHelper.h
     Entity/EntityCombatModel.cpp
     Entity/EntityCombatModel.h
     Entity/EntityModel.cpp

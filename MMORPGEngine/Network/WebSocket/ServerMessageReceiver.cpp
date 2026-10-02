@@ -41,6 +41,12 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
         return;
     }
 
+    case ServerMessageType::OWN_COMBAT: {
+        const OwnCombatDTO state = OwnCombatDTO::fromJson( json );
+        emit ownCombatReceived( state );
+        return;
+    }
+
     case ServerMessageType::OWN_EQUIPMENT: {
         const OwnEquipmentDTO state = OwnEquipmentDTO::fromJson( json );
         emit ownEquipmentReceived( state );

@@ -7,6 +7,7 @@ enum class ServerMessageType {
     UNKNOWN,
     WORLD_BASIC,
     OWN_CHARACTER,
+    OWN_COMBAT,
     OWN_EQUIPMENT,
     OWN_INVENTORY,
     CHARACTER,

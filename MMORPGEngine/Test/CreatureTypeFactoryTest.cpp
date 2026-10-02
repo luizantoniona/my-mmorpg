@@ -136,6 +136,7 @@ TEST_F( CreatureTypeFactoryTest, SaveCreatureTypeCatalog_ThenCreateCreatureTypeC
     creatureType.setName( "Goblin" );
     creatureType.vitals().setMaxHealth( 10 );
     creatureType.setAggroRadius( 5 );
+    creatureType.setAttackRange( 4 );
     original.addCreatureType( creatureType );
 
     Engine::CreatureTypeFactory::saveCreatureTypeCatalog( configPath(), original );
@@ -147,6 +148,24 @@ TEST_F( CreatureTypeFactoryTest, SaveCreatureTypeCatalog_ThenCreateCreatureTypeC
     EXPECT_EQ( reloaded.creatureType( 1 )->name(), "Goblin" );
     EXPECT_DOUBLE_EQ( reloaded.creatureType( 1 )->vitals().maxHealth(), 10.0 );
     EXPECT_EQ( reloaded.creatureType( 1 )->aggroRadius(), 5u );
+    EXPECT_EQ( reloaded.creatureType( 1 )->attackRange(), 4u );
+}
+
+TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MissingAttackRange_DefaultsToMelee ) {
+    Json::Value creatureType;
+    creatureType[ "Type" ] = 1;
+    creatureType[ "Name" ] = "Rat";
+    creatureType[ "Vitals" ][ "MaxHealth" ] = 3;
+
+    Json::Value creatureTypes( Json::arrayValue );
+    creatureTypes.append( creatureType );
+    writeCreaturesJson( creatureTypes );
+
+    Engine::CreatureTypeCatalog catalog;
+    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.creatureType( 1 ), nullptr );
+    EXPECT_EQ( catalog.creatureType( 1 )->attackRange(), 1u );
 }
 
 TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MissingAggroRadius_DefaultsToPassive ) {

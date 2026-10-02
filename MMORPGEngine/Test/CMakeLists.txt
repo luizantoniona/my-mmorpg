@@ -20,6 +20,7 @@ add_executable(
   CreatureTypeFactoryTest.cpp
   ObjectCatalogTest.cpp
   ObjectFactoryTest.cpp
+  OwnCombatDTOTest.cpp
   RenderWorldTest.cpp
   StreamRenderWorldTest.cpp
   SkillCatalogTest.cpp

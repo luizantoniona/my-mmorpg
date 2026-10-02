@@ -5,7 +5,8 @@ namespace Engine {
 CreatureTypeModel::CreatureTypeModel() :
     _name( "" ),
     _type( 0 ),
-    _aggroRadius( 0 ) {
+    _aggroRadius( 0 ),
+    _attackRange( 1 ) {
 }
 
 uint32_t CreatureTypeModel::type() const {
@@ -30,6 +31,14 @@ uint32_t CreatureTypeModel::aggroRadius() const {
 
 void CreatureTypeModel::setAggroRadius( uint32_t aggroRadius ) {
     _aggroRadius = aggroRadius;
+}
+
+uint32_t CreatureTypeModel::attackRange() const {
+    return _attackRange;
+}
+
+void CreatureTypeModel::setAttackRange( uint32_t attackRange ) {
+    _attackRange = attackRange;
 }
 
 CreatureTypeVitalsModel& CreatureTypeModel::vitals() {

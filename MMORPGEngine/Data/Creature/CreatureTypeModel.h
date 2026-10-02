@@ -22,6 +22,9 @@ public:
     uint32_t aggroRadius() const;
     void setAggroRadius( uint32_t aggroRadius );
 
+    uint32_t attackRange() const;
+    void setAttackRange( uint32_t attackRange );
+
     CreatureTypeVitalsModel& vitals();
     const CreatureTypeVitalsModel& vitals() const;
 
@@ -30,6 +33,7 @@ private:
     CreatureTypeVitalsModel _vitals;
     uint32_t _type;
     uint32_t _aggroRadius;
+    uint32_t _attackRange;
 };
 
 } // namespace Engine
