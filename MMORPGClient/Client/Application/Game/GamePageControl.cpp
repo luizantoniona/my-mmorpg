@@ -6,9 +6,10 @@
 #include <MMORPGClient/Client/Manager/ServerManager.h>
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Entity/Character/CharacterIntentAttackDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentActionDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentMoveDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
+#include <MMORPGEngine/Entity/CombatActionHelper.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/Network/WebSocket/ServerMessageReceiver.h>
 #include <MMORPGEngine/World/WorldFactory.h>
@@ -29,6 +30,7 @@ GamePageControl::GamePageControl( QObject* parent ) :
 
     connect( &messageReceiver, &Engine::ServerMessageReceiver::errorReceived, this, &GamePageControl::worldEntryFailed );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCharacterReceived, this, &GamePageControl::onOwnCharacterReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCombatReceived, this, &GamePageControl::onOwnCombatReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackStartReceived, this, &GamePageControl::characterEventAttackStartReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackReceived, this, &GamePageControl::characterEventAttackReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &GamePageControl::creatureEventAttackStartReceived );
@@ -115,6 +117,20 @@ int GamePageControl::characterZ() const {
     return _character.position().z();
 }
 
+QString GamePageControl::secondAction() const {
+    const Engine::EntityCombatModel& combat = _character.combat();
+
+    if ( combat.isActionAvailable( Engine::CombatActionEnum::BLOCK ) ) {
+        return QString::fromStdString( Engine::CombatActionHelper::toString( Engine::CombatActionEnum::BLOCK ) );
+    }
+
+    if ( combat.isActionAvailable( Engine::CombatActionEnum::DODGE ) ) {
+        return QString::fromStdString( Engine::CombatActionHelper::toString( Engine::CombatActionEnum::DODGE ) );
+    }
+
+    return "";
+}
+
 void GamePageControl::loadWorld() {
     ServerManager& serverManager = Engine::Singleton<ServerManager>::instance();
 
@@ -152,11 +168,17 @@ void GamePageControl::move( int dx, int dy ) {
 }
 
 void GamePageControl::attack( int dx, int dy ) {
-    Engine::CharacterIntentAttackDTO input;
-    input.setDx( dx );
-    input.setDy( dy );
+    sendAction( Engine::CombatActionEnum::ATTACK, dx, dy );
+}
 
-    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
+void GamePageControl::useSecondAction() {
+    const Engine::EntityCombatModel& combat = _character.combat();
+
+    if ( combat.isActionAvailable( Engine::CombatActionEnum::BLOCK ) ) {
+        sendAction( Engine::CombatActionEnum::BLOCK, 0, 0 );
+    } else if ( combat.isActionAvailable( Engine::CombatActionEnum::DODGE ) ) {
+        sendAction( Engine::CombatActionEnum::DODGE, 0, 0 );
+    }
 }
 
 void GamePageControl::leaveWorld() {
@@ -178,4 +200,19 @@ void GamePageControl::onOwnCharacterReceived( const Engine::OwnCharacterDTO& sta
     emit positionChanged();
     emit vitalsChanged();
     emit worldEntryReceived();
+}
+
+void GamePageControl::onOwnCombatReceived( const Engine::OwnCombatDTO& state ) {
+    _character.combat().setAvailableActions( state.actions() );
+
+    emit combatChanged();
+}
+
+void GamePageControl::sendAction( Engine::CombatActionEnum action, int dx, int dy ) {
+    Engine::CharacterIntentActionDTO input;
+    input.setAction( action );
+    input.setDx( dx );
+    input.setDy( dy );
+
+    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
 }

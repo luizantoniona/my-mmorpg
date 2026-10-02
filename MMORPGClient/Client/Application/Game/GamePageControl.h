@@ -8,6 +8,8 @@
 
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
+#include <MMORPGEngine/Entity/Character/OwnCombatDTO.h>
+#include <MMORPGEngine/Entity/CombatActionEnum.h>
 #include <MMORPGEngine/Network/WebSocketClient.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
@@ -27,6 +29,7 @@ class GamePageControl : public QObject {
     Q_PROPERTY( int characterX READ characterX NOTIFY positionChanged )
     Q_PROPERTY( int characterY READ characterY NOTIFY positionChanged )
     Q_PROPERTY( int characterZ READ characterZ NOTIFY positionChanged )
+    Q_PROPERTY( QString secondAction READ secondAction NOTIFY combatChanged )
 
 public:
     explicit GamePageControl( QObject* parent = nullptr );
@@ -52,12 +55,15 @@ public:
     int characterY() const;
     int characterZ() const;
 
+    QString secondAction() const;
+
 public slots:
     void loadWorld();
     void connectToWorld( int idCharacter );
 
     void move( int dx, int dy );
     void attack( int dx, int dy );
+    void useSecondAction();
 
     void leaveWorld();
 
@@ -65,6 +71,7 @@ signals:
     void worldChanged();
     void vitalsChanged();
     void positionChanged();
+    void combatChanged();
 
     void worldEntryReceived();
     void worldEntryFailed( const QString& error );
@@ -78,6 +85,10 @@ signals:
 
 private slots:
     void onOwnCharacterReceived( const Engine::OwnCharacterDTO& state );
+    void onOwnCombatReceived( const Engine::OwnCombatDTO& state );
+
+private:
+    void sendAction( Engine::CombatActionEnum action, int dx, int dy );
 
 private:
     std::unique_ptr<Engine::WorldModel> _world;

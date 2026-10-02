@@ -219,6 +219,9 @@ Item {
             }
             break
         }
+        case Qt.Key_E:
+            control.useSecondAction()
+            break
         }
     }
 }
