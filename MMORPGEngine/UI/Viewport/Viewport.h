@@ -62,11 +62,14 @@ signals:
     void hoveredTileChanged();
     void tileClicked( int x, int y, int z );
     void tileRightClicked( int x, int y, int z );
+    void tileDragged( int x, int y, int z );
 
 protected:
     void geometryChange( const QRectF& newGeometry, const QRectF& oldGeometry ) override;
 
     void mousePressEvent( QMouseEvent* event ) override;
+    void mouseMoveEvent( QMouseEvent* event ) override;
+    void mouseReleaseEvent( QMouseEvent* event ) override;
     void hoverMoveEvent( QHoverEvent* event ) override;
 
     QSGNode* updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData ) override;
@@ -75,6 +78,7 @@ private:
     void updateWorldBounds();
     void updateFollowedCamera();
     QPoint screenToTile( const QPointF& screenPosition ) const;
+    bool isInsideWorld( const QPoint& tile ) const;
 
 private:
     Camera* _camera;
@@ -84,9 +88,11 @@ private:
     QTimer* _animationTimer;
     TextureCache _textureCache;
     QPoint _hoveredTile;
+    QPoint _lastDraggedTile;
 
     int _activeFloor;
     int _followedEntity;
+    bool _isDragging;
 };
 
 } // namespace Engine

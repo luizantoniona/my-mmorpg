@@ -1,5 +1,7 @@
 #include "Viewport.h"
 
+#include <cstdlib>
+
 #include <QColor>
 #include <QCursor>
 #include <QHoverEvent>
@@ -22,8 +24,10 @@ Viewport::Viewport( QQuickItem* parent ) :
     _world( nullptr ),
     _animationTimer( new QTimer( this ) ),
     _hoveredTile( 0, 0 ),
+    _lastDraggedTile( 0, 0 ),
     _activeFloor( 0 ),
-    _followedEntity( NO_FOLLOWED_ENTITY ) {
+    _followedEntity( NO_FOLLOWED_ENTITY ),
+    _isDragging( false ) {
 
     setFlag( ItemHasContents, true );
 
@@ -241,7 +245,7 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
     const int y = tile.y();
     const int z = _activeFloor;
 
-    if ( x < 0 || y < 0 || x >= static_cast<int>( _world->width() ) || y >= static_cast<int>( _world->height() ) ) {
+    if ( !isInsideWorld( tile ) ) {
         return;
     }
 
@@ -250,7 +254,62 @@ void Viewport::mousePressEvent( QMouseEvent* event ) {
         return;
     }
 
+    _isDragging = true;
+    _lastDraggedTile = tile;
+
     emit tileClicked( x, y, z );
+}
+
+void Viewport::mouseMoveEvent( QMouseEvent* event ) {
+    if ( !_world ) {
+        return;
+    }
+
+    const QPoint tile = screenToTile( event->position() );
+
+    if ( tile != _hoveredTile ) {
+        _hoveredTile = tile;
+
+        emit hoveredTileChanged();
+    }
+
+    if ( !_isDragging || tile == _lastDraggedTile ) {
+        return;
+    }
+
+    int x = _lastDraggedTile.x();
+    int y = _lastDraggedTile.y();
+    const int deltaX = std::abs( tile.x() - x );
+    const int deltaY = std::abs( tile.y() - y );
+    const int stepX = x < tile.x() ? 1 : -1;
+    const int stepY = y < tile.y() ? 1 : -1;
+    int error = deltaX - deltaY;
+
+    while ( x != tile.x() || y != tile.y() ) {
+        const int doubledError = 2 * error;
+
+        if ( doubledError > -deltaY ) {
+            error -= deltaY;
+            x += stepX;
+        }
+
+        if ( doubledError < deltaX ) {
+            error += deltaX;
+            y += stepY;
+        }
+
+        if ( isInsideWorld( QPoint( x, y ) ) ) {
+            emit tileDragged( x, y, _activeFloor );
+        }
+    }
+
+    _lastDraggedTile = tile;
+}
+
+void Viewport::mouseReleaseEvent( QMouseEvent* event ) {
+    if ( event->button() == Qt::LeftButton ) {
+        _isDragging = false;
+    }
 }
 
 void Viewport::hoverMoveEvent( QHoverEvent* event ) {
@@ -274,6 +333,10 @@ QPoint Viewport::screenToTile( const QPointF& screenPosition ) const {
     const int y = static_cast<int>( std::floor( worldPosition.y() / tileSize ) );
 
     return QPoint( x, y );
+}
+
+bool Viewport::isInsideWorld( const QPoint& tile ) const {
+    return _world && tile.x() >= 0 && tile.y() >= 0 && tile.x() < static_cast<int>( _world->width() ) && tile.y() < static_cast<int>( _world->height() );
 }
 
 QSGNode* Viewport::updatePaintNode( QSGNode* oldNode, UpdatePaintNodeData* ) {

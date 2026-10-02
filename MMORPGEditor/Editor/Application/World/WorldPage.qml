@@ -162,13 +162,23 @@ Item {
                         return Qt.ArrowCursor
                     }
 
+                    function paintAt(x, y, z) {
+                        if (root.activeBrush === BrushMode.Tile && root.activeTileType >= 0) {
+                            worldControl.paintTile(x, y, z, root.activeTileType)
+                        } else if (root.activeBrush === BrushMode.Object && root.activeObjectType >= 0) {
+                            worldControl.paintObject(x, y, z, root.activeObjectType)
+                        }
+                    }
+
+                    onTileDragged: function (x, y, z) {
+                        if (root.toolMode === ToolMode.Paint) {
+                            viewport.paintAt(x, y, z)
+                        }
+                    }
+
                     onTileClicked: function (x, y, z) {
                         if (root.toolMode === ToolMode.Paint) {
-                            if (root.activeBrush === BrushMode.Tile && root.activeTileType >= 0) {
-                                worldControl.paintTile(x, y, z, root.activeTileType)
-                            } else if (root.activeBrush === BrushMode.Object && root.activeObjectType >= 0) {
-                                worldControl.paintObject(x, y, z, root.activeObjectType)
-                            }
+                            viewport.paintAt(x, y, z)
                             return
                         }
 
