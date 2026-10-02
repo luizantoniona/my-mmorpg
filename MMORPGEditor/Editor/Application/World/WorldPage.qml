@@ -23,6 +23,8 @@ Item {
         viewport.setOverlayRects(worldControl.spawnAreas(root.currentFloor), root.spawnOverlayColor)
     }
 
+    onToolModeChanged: root.forceActiveFocus()
+
     TileSelectionControl {
         id: selectionControl
 
@@ -179,6 +181,8 @@ Item {
                     }
 
                     onTileClicked: function (x, y, z) {
+                        root.forceActiveFocus()
+
                         if (root.toolMode === ToolMode.Paint) {
                             viewport.paintAt(x, y, z)
                             return
