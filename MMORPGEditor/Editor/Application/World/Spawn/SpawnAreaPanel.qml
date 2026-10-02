@@ -72,6 +72,7 @@ Item {
 
                     Layout.fillWidth: true
                     vTitle: "Width"
+                    vInputType: InputBase.Numeric
                     vText: "4"
                 }
 
@@ -80,6 +81,7 @@ Item {
 
                     Layout.fillWidth: true
                     vTitle: "Height"
+                    vInputType: InputBase.Numeric
                     vText: "4"
                 }
 
@@ -89,6 +91,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.columnSpan: 2
                     vTitle: "Respawn (seconds)"
+                    vInputType: InputBase.Numeric
                     vPlaceholder: "Required"
                 }
             }
@@ -132,6 +135,7 @@ Item {
                     InputBase {
                         Layout.preferredWidth: 60
                         Layout.preferredHeight: 40
+                        vInputType: InputBase.Numeric
                         vText: String(creatureRow.quantity)
 
                         onVTextChanged: {

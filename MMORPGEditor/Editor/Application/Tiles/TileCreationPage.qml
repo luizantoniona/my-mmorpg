@@ -117,6 +117,7 @@ Item {
                     visible: root.isAnimated
                     Layout.preferredWidth: 160
                     vTitle: "Frame duration (ms)"
+                    vInputType: InputBase.Numeric
                     vPlaceholder: "100"
                     vText: "100"
                 }
@@ -141,6 +142,7 @@ Item {
                     id: typeInput
                     Layout.preferredWidth: 160
                     vTitle: "Type (ID)"
+                    vInputType: InputBase.Numeric
                     vPlaceholder: String(creationControl.nextType)
                 }
 

@@ -119,6 +119,7 @@ Item {
                     visible: root.isAnimated
                     Layout.preferredWidth: 160
                     vTitle: "Frame duration (ms)"
+                    vInputType: InputBase.Numeric
                     vPlaceholder: "100"
                     vText: "100"
                 }
@@ -135,6 +136,7 @@ Item {
                         Layout.column: 0
                         Layout.preferredWidth: 120
                         vTitle: "Width (tiles)"
+                        vInputType: InputBase.Numeric
                         vPlaceholder: "1"
                         vText: "1"
                     }
@@ -145,6 +147,7 @@ Item {
                         Layout.column: 1
                         Layout.preferredWidth: 120
                         vTitle: "Height (tiles)"
+                        vInputType: InputBase.Numeric
                         vPlaceholder: "1"
                         vText: "1"
                     }
@@ -154,6 +157,7 @@ Item {
                     id: typeInput
                     Layout.preferredWidth: 160
                     vTitle: "Type (ID)"
+                    vInputType: InputBase.Numeric
                     vPlaceholder: String(creationControl.nextType)
                 }
 

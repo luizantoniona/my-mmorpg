@@ -102,6 +102,7 @@ Item {
                         Layout.column: 0
                         Layout.preferredWidth: 120
                         vTitle: "Width (tiles)"
+                        vInputType: InputBase.Numeric
                         vText: String(configurationControl.mapWidth)
                     }
 
@@ -111,6 +112,7 @@ Item {
                         Layout.column: 1
                         Layout.preferredWidth: 120
                         vTitle: "Height (tiles)"
+                        vInputType: InputBase.Numeric
                         vText: String(configurationControl.mapHeight)
                     }
                 }
