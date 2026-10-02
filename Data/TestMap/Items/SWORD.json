@@ -1,0 +1,27 @@
+{
+    "Name": "Sword",
+    "Category": "WEAPON",
+    "Slot": "Hand",
+    "HandRequirement": "ONE_HANDED",
+    "SkillTree": [
+        {
+            "Type": 1,
+            "Name": "Sword Mastery",
+            "ProficiencyLevel": 1,
+            "Prerequisites": []
+        },
+        {
+            "Type": 2,
+            "Name": "Whirlwind Strike",
+            "ProficiencyLevel": 5,
+            "Prerequisites": [ 1 ]
+        }
+    ],
+    "Items": [
+        {
+            "Id": 1,
+            "Name": "Iron Sword",
+            "TextureFolder": "Textures/Items/Iron Sword"
+        }
+    ]
+}
