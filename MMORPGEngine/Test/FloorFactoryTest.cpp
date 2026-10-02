@@ -85,6 +85,7 @@ TEST_F( FloorFactoryTest, SaveFloor_PreservesExistingZ_AndWritesWorldGrid ) {
     area.setY( 0 );
     area.setWidth( 2 );
     area.setHeight( 2 );
+    area.setRespawnSeconds( 30.0 );
     area.setCreatures( { entry } );
     world.addSpawnArea( 5, area );
 
@@ -101,6 +102,7 @@ TEST_F( FloorFactoryTest, SaveFloor_PreservesExistingZ_AndWritesWorldGrid ) {
     ASSERT_EQ( savedJson[ "SpawnAreas" ].size(), 1u );
     EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "X" ].asInt(), 0 );
     EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Width" ].asUInt(), 2u );
+    EXPECT_DOUBLE_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "RespawnSeconds" ].asDouble(), 30.0 );
     ASSERT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ].size(), 1u );
     EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ][ 0 ][ "Type" ].asUInt(), 1u );
     EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ][ 0 ][ "Quantity" ].asUInt(), 3u );
@@ -189,6 +191,7 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownCreat
     area[ "Y" ] = 20;
     area[ "Width" ] = 5;
     area[ "Height" ] = 5;
+    area[ "RespawnSeconds" ] = 45.0;
     Json::Value knownEntry;
     knownEntry[ "Type" ] = 9104;
     knownEntry[ "Quantity" ] = 2;
@@ -211,9 +214,40 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownCreat
     EXPECT_EQ( areas[ 0 ].y(), 20 );
     EXPECT_EQ( areas[ 0 ].width(), 5u );
     EXPECT_EQ( areas[ 0 ].height(), 5u );
+    EXPECT_DOUBLE_EQ( areas[ 0 ].respawnSeconds(), 45.0 );
     ASSERT_EQ( areas[ 0 ].creatures().size(), 1u );
     EXPECT_EQ( areas[ 0 ].creatures()[ 0 ].type(), 9104u );
     EXPECT_EQ( areas[ 0 ].creatures()[ 0 ].quantity(), 2u );
+}
+
+TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_MissingOrInvalidRespawnSeconds_SkipsEntry ) {
+    Json::Value floorJson;
+    floorJson[ "Z" ] = 8;
+    floorJson[ "Tiles" ] = Json::Value( Json::arrayValue );
+    floorJson[ "Objects" ] = Json::Value( Json::arrayValue );
+
+    Json::Value missing;
+    missing[ "X" ] = 0;
+    missing[ "Y" ] = 0;
+    missing[ "Width" ] = 2;
+    missing[ "Height" ] = 2;
+    floorJson[ "SpawnAreas" ].append( missing );
+
+    Json::Value zero = missing;
+    zero[ "RespawnSeconds" ] = 0;
+    floorJson[ "SpawnAreas" ].append( zero );
+
+    Json::Value text = missing;
+    text[ "RespawnSeconds" ] = "soon";
+    floorJson[ "SpawnAreas" ].append( text );
+
+    const std::string path = floorPath( "no_respawn_spawn_area.json" );
+    ASSERT_TRUE( Engine::JsonHelper::saveJsonFile( path, floorJson ) );
+
+    Engine::WorldModel world;
+    Engine::FloorFactory::createFloor( path, &world );
+
+    EXPECT_TRUE( world.spawnAreas( 8 ).empty() );
 }
 
 TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_MissingDimensions_SkipsEntry ) {

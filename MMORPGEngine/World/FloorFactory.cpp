@@ -14,10 +14,12 @@
 namespace Engine {
 
 void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world ) {
-    qInfo() << "FloorFactory::createFloor" << "[FLOOR_FILE_PATH]" << floorFile;
+    qInfo() << "FloorFactory::createFloor"
+            << "[FLOOR_FILE_PATH]" << floorFile;
 
     if ( !world ) {
-        qInfo() << "FloorFactory::createFloor" << "World is nullptr";
+        qInfo() << "FloorFactory::createFloor"
+                << "World is nullptr";
         return;
     }
 
@@ -28,7 +30,8 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
     world->addFloor( z );
 
     // --- Tiles
-    qInfo() << "FloorFactory::createFloor" << "Creating Tiles";
+    qInfo() << "FloorFactory::createFloor"
+            << "Creating Tiles";
 
     const Json::Value& tilesRows = floorJson[ "Tiles" ];
     if ( tilesRows.isArray() && !tilesRows.empty() ) {
@@ -51,7 +54,8 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
                 const TileModel* tileModel = tileCatalog.tile( tileType );
 
                 if ( !tileModel ) {
-                    qWarning() << "FloorFactory::createFloor" << "Unknown tile type:" << tileType << "at x y z:" << x << y << z;
+                    qWarning() << "FloorFactory::createFloor"
+                               << "Unknown tile type:" << tileType << "at x y z:" << x << y << z;
                     continue;
                 }
 
@@ -76,7 +80,8 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
     }
 
     // --- Objects
-    qInfo() << "FloorFactory::createFloor" << "Creating Objects";
+    qInfo() << "FloorFactory::createFloor"
+            << "Creating Objects";
 
     const Json::Value& objects = floorJson[ "Objects" ];
     if ( objects.isArray() ) {
@@ -86,7 +91,8 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
         for ( const Json::Value& objectJson : objects ) {
 
             if ( !objectJson.isMember( "X" ) || !objectJson.isMember( "Y" ) || !objectJson.isMember( "Type" ) ) {
-                qWarning() << "FloorFactory::createFloor" << "Invalid Object entry, skipping";
+                qWarning() << "FloorFactory::createFloor"
+                           << "Invalid Object entry, skipping";
                 continue;
             }
 
@@ -97,7 +103,8 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
             const ObjectModel* objectModel = objectCatalog.object( objectType );
 
             if ( !objectModel ) {
-                qWarning() << "FloorFactory::createFloor" << "Unknown object type:" << objectType << "at x y z:" << x << y << z;
+                qWarning() << "FloorFactory::createFloor"
+                           << "Unknown object type:" << objectType << "at x y z:" << x << y << z;
                 continue;
             }
 
@@ -121,7 +128,8 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
     }
 
     // --- Spawn Areas
-    qInfo() << "FloorFactory::createFloor" << "Creating Spawn Areas";
+    qInfo() << "FloorFactory::createFloor"
+            << "Creating Spawn Areas";
 
     const Json::Value& spawnAreas = floorJson[ "SpawnAreas" ];
     if ( spawnAreas.isArray() ) {
@@ -131,7 +139,14 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
         for ( const Json::Value& areaJson : spawnAreas ) {
 
             if ( !areaJson.isMember( "X" ) || !areaJson.isMember( "Y" ) || !areaJson.isMember( "Width" ) || !areaJson.isMember( "Height" ) ) {
-                qWarning() << "FloorFactory::createFloor" << "Invalid SpawnArea entry, skipping";
+                qWarning() << "FloorFactory::createFloor"
+                           << "Invalid SpawnArea entry, skipping";
+                continue;
+            }
+
+            if ( !areaJson.isMember( "RespawnSeconds" ) || !areaJson[ "RespawnSeconds" ].isNumeric() || areaJson[ "RespawnSeconds" ].asDouble() <= 0.0 ) {
+                qWarning() << "FloorFactory::createFloor"
+                           << "SpawnArea without a valid RespawnSeconds, skipping, at x y z:" << areaJson[ "X" ].asInt() << areaJson[ "Y" ].asInt() << z;
                 continue;
             }
 
@@ -141,18 +156,22 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
             area.setWidth( areaJson[ "Width" ].asUInt() );
             area.setHeight( areaJson[ "Height" ].asUInt() );
 
+            area.setRespawnSeconds( areaJson[ "RespawnSeconds" ].asDouble() );
+
             std::vector<CreatureSpawnEntryModel> entries;
             for ( const Json::Value& entryJson : areaJson[ "Creatures" ] ) {
 
                 if ( !entryJson.isMember( "Type" ) || !entryJson.isMember( "Quantity" ) ) {
-                    qWarning() << "FloorFactory::createFloor" << "Invalid SpawnArea Creature entry, skipping";
+                    qWarning() << "FloorFactory::createFloor"
+                               << "Invalid SpawnArea Creature entry, skipping";
                     continue;
                 }
 
                 const uint32_t creatureType = entryJson[ "Type" ].asUInt();
 
                 if ( !creatureTypeCatalog.creatureType( creatureType ) ) {
-                    qWarning() << "FloorFactory::createFloor" << "Unknown creature type:" << creatureType << "in SpawnArea at x y z:" << area.x() << area.y() << z;
+                    qWarning() << "FloorFactory::createFloor"
+                               << "Unknown creature type:" << creatureType << "in SpawnArea at x y z:" << area.x() << area.y() << z;
                     continue;
                 }
 
@@ -170,7 +189,8 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
 }
 
 void FloorFactory::saveFloor( const std::string& floorFile, const WorldModel& world ) {
-    qInfo() << "FloorFactory::saveFloor" << "[FLOOR_FILE_PATH]" << floorFile;
+    qInfo() << "FloorFactory::saveFloor"
+            << "[FLOOR_FILE_PATH]" << floorFile;
 
     Json::Value existingFloorJson = JsonHelper::loadJsonFile( floorFile );
     const int z = existingFloorJson[ "Z" ].asInt();
@@ -217,6 +237,7 @@ void FloorFactory::saveFloor( const std::string& floorFile, const WorldModel& wo
         areaJson[ "Y" ] = area.y();
         areaJson[ "Width" ] = area.width();
         areaJson[ "Height" ] = area.height();
+        areaJson[ "RespawnSeconds" ] = area.respawnSeconds();
 
         Json::Value creaturesJson( Json::arrayValue );
         for ( const CreatureSpawnEntryModel& entry : area.creatures() ) {
@@ -236,7 +257,8 @@ void FloorFactory::saveFloor( const std::string& floorFile, const WorldModel& wo
 }
 
 bool FloorFactory::createEmptyFloor( const std::string& floorFile, int z, uint32_t width, uint32_t height ) {
-    qInfo() << "FloorFactory::createEmptyFloor" << "[FLOOR_FILE_PATH]" << floorFile;
+    qInfo() << "FloorFactory::createEmptyFloor"
+            << "[FLOOR_FILE_PATH]" << floorFile;
 
     Json::Value floorJson;
     floorJson[ "Z" ] = z;
@@ -258,7 +280,8 @@ bool FloorFactory::createEmptyFloor( const std::string& floorFile, int z, uint32
 }
 
 void FloorFactory::deleteFloor( const std::string& floorFile ) {
-    qInfo() << "FloorFactory::deleteFloor" << "[FLOOR_FILE_PATH]" << floorFile;
+    qInfo() << "FloorFactory::deleteFloor"
+            << "[FLOOR_FILE_PATH]" << floorFile;
 
     std::remove( floorFile.c_str() );
 }

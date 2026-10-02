@@ -24,11 +24,15 @@ public:
     uint32_t height() const;
     void setHeight( uint32_t height );
 
+    double respawnSeconds() const;
+    void setRespawnSeconds( double respawnSeconds );
+
     const std::vector<CreatureSpawnEntryModel>& creatures() const;
     void setCreatures( const std::vector<CreatureSpawnEntryModel>& creatures );
 
 private:
     std::vector<CreatureSpawnEntryModel> _creatures;
+    double _respawnSeconds;
     int _x;
     int _y;
     uint32_t _width;

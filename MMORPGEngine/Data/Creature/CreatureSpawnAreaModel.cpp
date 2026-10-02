@@ -4,6 +4,7 @@ namespace Engine {
 
 CreatureSpawnAreaModel::CreatureSpawnAreaModel() :
     _creatures(),
+    _respawnSeconds( 0.0 ),
     _x( 0 ),
     _y( 0 ),
     _width( 0 ),
@@ -40,6 +41,14 @@ uint32_t CreatureSpawnAreaModel::height() const {
 
 void CreatureSpawnAreaModel::setHeight( uint32_t height ) {
     _height = height;
+}
+
+double CreatureSpawnAreaModel::respawnSeconds() const {
+    return _respawnSeconds;
+}
+
+void CreatureSpawnAreaModel::setRespawnSeconds( double respawnSeconds ) {
+    _respawnSeconds = respawnSeconds;
 }
 
 const std::vector<CreatureSpawnEntryModel>& CreatureSpawnAreaModel::creatures() const {
