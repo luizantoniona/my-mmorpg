@@ -7,6 +7,7 @@ Item {
 
     property int selectedType: -1
     property bool hasSelection: false
+    property bool isActive: true
 
     signal tileSelected(int type)
 
@@ -33,7 +34,7 @@ Item {
             width: grid.cellWidth - 4
             height: grid.cellHeight - 4
 
-            vSelected: root.hasSelection && root.selectedType === type
+            vSelected: root.isActive && root.hasSelection && root.selectedType === type
 
             Image {
                 anchors.fill: parent

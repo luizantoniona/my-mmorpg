@@ -64,6 +64,8 @@ Item {
 
             Layout.fillHeight: true
             width: 220
+            tileActive: root.activeBrush === BrushMode.Tile
+            objectActive: root.activeBrush === BrushMode.Object
 
             onTileSelected: function (type) {
                 root.activeTileType = type
