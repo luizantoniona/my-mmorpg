@@ -24,4 +24,4 @@ The game client — this is the app players run to actually play.
 - **Stuck on sync**: this needs a working connection to the server for the
   whole download — if it fails partway, just retry.
 
-Technical details: [`Doc/MMORPGClient.md`](../Doc/MMORPGClient.md).
+More about it: [`Doc/MMORPGClient.md`](../Doc/MMORPGClient.md).

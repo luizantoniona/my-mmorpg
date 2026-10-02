@@ -4,6 +4,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QUrl>
 
 #include <MMORPGEngine/Commons/Singleton.h>
@@ -23,6 +24,20 @@ QString toLocalFilePath( const QString& path ) {
     }
 
     return path;
+}
+
+void removeUnusedFolder( const QString& mapPath, const QString& folder, const Engine::ObjectCatalog& catalog ) {
+    if ( folder.isEmpty() ) {
+        return;
+    }
+
+    for ( const auto& entry : catalog.objects() ) {
+        if ( entry.second.folder() == folder ) {
+            return;
+        }
+    }
+
+    QDir( mapPath + folder ).removeRecursively();
 }
 } // namespace
 
@@ -46,13 +61,50 @@ QString ObjectCreationControl::lastError() const {
     return _lastError;
 }
 
+int ObjectCreationControl::nextFreeType( int after ) const {
+    const Engine::ObjectCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().objectCatalog();
+
+    uint32_t type = static_cast<uint32_t>( std::max( after, 0 ) ) + 1;
+    while ( catalog.object( type ) != nullptr ) {
+        ++type;
+    }
+
+    return static_cast<int>( type );
+}
+
+QString ObjectCreationControl::typeName( int type ) const {
+    if ( type < 1 ) {
+        return "";
+    }
+
+    const Engine::ObjectCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().objectCatalog();
+    const Engine::ObjectModel* object = catalog.object( static_cast<uint32_t>( type ) );
+
+    return object ? object->name() : "";
+}
+
 void ObjectCreationControl::setLastError( const QString& error ) {
     _lastError = error;
 
     emit lastErrorChanged();
 }
 
-bool ObjectCreationControl::createObject( const QString& name, const QString& textureFile, int width, int height, int frameDurationMs ) {
+bool ObjectCreationControl::createObject( int type, const QString& name, const QString& textureFile, int width, int height, int frameDurationMs, bool replace ) {
+    if ( type < 1 ) {
+        setLastError( "Type must be 1 or higher." );
+        return false;
+    }
+
+    Engine::DataManager& dataManager = Engine::Singleton<Engine::DataManager>::instance();
+    const Engine::ObjectModel* existing = dataManager.objectCatalog().object( static_cast<uint32_t>( type ) );
+
+    if ( existing && !replace ) {
+        setLastError( "Type " + QString::number( type ) + " is already used by '" + existing->name() + "'." );
+        return false;
+    }
+
+    const QString replacedFolder = existing ? existing->folder() : QString();
+
     const QString trimmedName = name.trimmed();
 
     if ( trimmedName.isEmpty() ) {
@@ -72,8 +124,9 @@ bool ObjectCreationControl::createObject( const QString& name, const QString& te
         return false;
     }
 
-    const bool isAnimated = sourcePath.endsWith( ".gif", Qt::CaseInsensitive );
-    const QString extension = isAnimated ? ".gif" : ".png";
+    const QString sourceExtension = "." + QFileInfo( sourcePath ).suffix().toLower();
+    const bool isAnimated = Engine::DataFactory::textureExtensions().value( sourceExtension, false );
+    const QString extension = isAnimated ? sourceExtension : ".png";
 
     const QString mapPath = Engine::DataFactory::mapPath( DATA_PATH );
     const QString folder = "Textures/Objects/" + trimmedName;
@@ -103,14 +156,21 @@ bool ObjectCreationControl::createObject( const QString& name, const QString& te
     size.setHeight( height );
 
     Engine::ObjectModel object;
-    object.setType( static_cast<uint32_t>( nextType() ) );
+    object.setType( static_cast<uint32_t>( type ) );
     object.setName( trimmedName );
     object.setFolder( folder );
     object.setAnimation( animation );
     object.setSize( size );
 
-    Engine::Singleton<Engine::DataManager>::instance().addObject( object );
-    Engine::ObjectFactory::saveObjectCatalog( DATA_PATH, Engine::Singleton<Engine::DataManager>::instance().objectCatalog() );
+    if ( existing ) {
+        dataManager.replaceObject( object );
+        removeUnusedFolder( mapPath, replacedFolder, dataManager.objectCatalog() );
+
+    } else {
+        dataManager.addObject( object );
+    }
+
+    Engine::ObjectFactory::saveObjectCatalog( DATA_PATH, dataManager.objectCatalog() );
 
     setLastError( "" );
     emit catalogChanged();

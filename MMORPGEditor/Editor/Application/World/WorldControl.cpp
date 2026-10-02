@@ -1,5 +1,13 @@
 #include "WorldControl.h"
 
+#include <QDebug>
+
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnAreaModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureSpawnEntryModel.h>
+#include <MMORPGEngine/Data/Creature/CreatureTypeCatalog.h>
+#include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
+#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/World/WorldFactory.h>
 
 namespace {
@@ -111,4 +119,100 @@ void WorldControl::paintObject( int x, int y, int z, int objectType ) {
     }
 
     _world->setObject( x, y, z, static_cast<uint32_t>( objectType ) );
+}
+
+void WorldControl::paintSpawnArea( int x, int y, int z, int width, int height, double respawnSeconds, const QVariantList& creatures ) {
+    if ( !_world ) {
+        return;
+    }
+
+    if ( respawnSeconds <= 0.0 ) {
+        qWarning() << "WorldControl::paintSpawnArea Respawn seconds is required, spawn area not created";
+        return;
+    }
+
+    Engine::CreatureSpawnAreaModel area;
+    area.setX( x );
+    area.setY( y );
+    area.setWidth( static_cast<uint32_t>( width ) );
+    area.setHeight( static_cast<uint32_t>( height ) );
+    area.setRespawnSeconds( respawnSeconds );
+
+    std::vector<Engine::CreatureSpawnEntryModel> entries;
+    for ( const QVariant& creatureVariant : creatures ) {
+        const QVariantMap creatureMap = creatureVariant.toMap();
+
+        Engine::CreatureSpawnEntryModel entry;
+        entry.setType( creatureMap.value( "type" ).toUInt() );
+        entry.setQuantity( creatureMap.value( "quantity" ).toUInt() );
+
+        entries.push_back( entry );
+    }
+    area.setCreatures( entries );
+
+    _world->addSpawnArea( z, area );
+}
+
+QVariantList WorldControl::spawnAreas( int z ) const {
+    QVariantList result;
+
+    if ( !_world ) {
+        return result;
+    }
+
+    for ( const Engine::CreatureSpawnAreaModel& area : _world->spawnAreas( z ) ) {
+        QVariantMap areaMap;
+        areaMap[ "x" ] = area.x();
+        areaMap[ "y" ] = area.y();
+        areaMap[ "width" ] = area.width();
+        areaMap[ "height" ] = area.height();
+
+        result.append( areaMap );
+    }
+
+    return result;
+}
+
+QVariantMap WorldControl::spawnAreaAt( int x, int y, int z ) const {
+    QVariantMap result;
+
+    if ( !_world ) {
+        return result;
+    }
+
+    const Engine::CreatureSpawnAreaModel* area = _world->spawnAreaAt( x, y, z );
+    if ( !area ) {
+        return result;
+    }
+
+    result[ "x" ] = area->x();
+    result[ "y" ] = area->y();
+    result[ "width" ] = area->width();
+    result[ "height" ] = area->height();
+    result[ "respawnSeconds" ] = area->respawnSeconds();
+
+    const Engine::CreatureTypeCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog();
+
+    QVariantList creatures;
+    for ( const Engine::CreatureSpawnEntryModel& entry : area->creatures() ) {
+        const Engine::CreatureTypeModel* creatureType = catalog.creatureType( entry.type() );
+
+        QVariantMap entryMap;
+        entryMap[ "type" ] = entry.type();
+        entryMap[ "quantity" ] = entry.quantity();
+        entryMap[ "name" ] = creatureType ? creatureType->name() : QString();
+
+        creatures.append( entryMap );
+    }
+    result[ "creatures" ] = creatures;
+
+    return result;
+}
+
+bool WorldControl::removeSpawnArea( int x, int y, int z ) {
+    if ( !_world ) {
+        return false;
+    }
+
+    return _world->removeSpawnArea( x, y, z );
 }

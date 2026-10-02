@@ -1,9 +1,19 @@
 #include "ClientRenderWorld.h"
 
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Network/WebSocket/ServerMessageReceiver.h>
+
 ClientRenderWorld::ClientRenderWorld( QObject* parent ) :
-    Engine::RenderWorld( parent ),
-    _world( nullptr ),
-    _entities() {
+    Engine::StreamRenderWorld( parent ),
+    _world( nullptr ) {
+
+    Engine::ServerMessageReceiver& messageReceiver = Engine::Singleton<Engine::ServerMessageReceiver>::instance();
+
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCharacterReceived, this, &ClientRenderWorld::onOwnCharacterReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::characterStateReceived, this, &ClientRenderWorld::addCharacter );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureStateReceived, this, &ClientRenderWorld::addCreature );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventLeaveReceived, this, &ClientRenderWorld::removeCharacter );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventLeaveReceived, this, &ClientRenderWorld::removeCreature );
 }
 
 Engine::WorldModel* ClientRenderWorld::world() const {
@@ -32,20 +42,6 @@ const Engine::WorldTileModel* ClientRenderWorld::tile( int x, int y, int z ) con
     return _world->tile( x, y, z );
 }
 
-QList<Engine::RenderWorld::Entity> ClientRenderWorld::entities( int z ) const {
-    QList<Engine::RenderWorld::Entity> result;
-
-    for ( auto it = _entities.constBegin(); it != _entities.constEnd(); ++it ) {
-        if ( it->z != z ) {
-            continue;
-        }
-
-        result.append( Engine::RenderWorld::Entity( it.key(), it->x, it->y ) );
-    }
-
-    return result;
-}
-
 std::vector<int> ClientRenderWorld::floors() const {
     if ( !_world ) {
         return {};
@@ -70,14 +66,6 @@ uint32_t ClientRenderWorld::height() const {
     return _world->height();
 }
 
-void ClientRenderWorld::setEntity( int idEntity, int x, int y, int z ) {
-    _entities.insert( idEntity, EntityPosition( x, y, z ) );
-}
-
-void ClientRenderWorld::removeEntity( int idEntity ) {
-    _entities.remove( idEntity );
-}
-
-void ClientRenderWorld::clearEntities() {
-    _entities.clear();
+void ClientRenderWorld::onOwnCharacterReceived( const Engine::OwnCharacterDTO& state ) {
+    setOwnCharacter( state.idCharacter(), state.x(), state.y(), state.z(), state.movementCooldownSeconds() );
 }

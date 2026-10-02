@@ -3,8 +3,12 @@
 
 #include <string>
 
+#include <MMORPGEngine/Data/Creature/CreatureTypeCatalog.h>
+#include <MMORPGEngine/Data/Item/ItemCatalog.h>
+#include <MMORPGEngine/Data/Item/ItemTypeCatalog.h>
 #include <MMORPGEngine/Data/Manifest/ManifestModel.h>
 #include <MMORPGEngine/Data/Object/ObjectCatalog.h>
+#include <MMORPGEngine/Data/Skill/SkillCatalog.h>
 #include <MMORPGEngine/Data/Tile/TileCatalog.h>
 
 namespace Engine {
@@ -24,14 +28,32 @@ public:
 
     const ObjectCatalog& objectCatalog() const;
     void addObject( const ObjectModel& object );
+    void replaceObject( const ObjectModel& object );
 
     const TileCatalog& tileCatalog() const;
     void addTile( const TileModel& tile );
+    void replaceTile( const TileModel& tile );
+
+    const ItemTypeCatalog& itemTypeCatalog() const;
+    void addItemType( const ItemTypeModel& itemType );
+
+    const ItemCatalog& itemCatalog() const;
+    void addItem( const ItemModel& item );
+
+    const SkillCatalog& skillCatalog() const;
+    void addSkillTree( const SkillTreeModel& skillTree );
+
+    const CreatureTypeCatalog& creatureTypeCatalog() const;
+    void addCreatureType( const CreatureTypeModel& creatureType );
 
 private:
     std::string _configPath;
     ObjectCatalog _objectCatalog;
     TileCatalog _tileCatalog;
+    ItemTypeCatalog _itemTypeCatalog;
+    ItemCatalog _itemCatalog;
+    SkillCatalog _skillCatalog;
+    CreatureTypeCatalog _creatureTypeCatalog;
 };
 
 } // namespace Engine

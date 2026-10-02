@@ -15,8 +15,11 @@ bool CharacterPositionRepository::create( int idCharacter, const Engine::EntityP
             id_character,
             x,
             y,
-            z
-        ) VALUES (?, ?, ?, ?)
+            z,
+            respawn_x,
+            respawn_y,
+            respawn_z
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
     )SQL";
     Query query( _db, sql );
 
@@ -24,6 +27,9 @@ bool CharacterPositionRepository::create( int idCharacter, const Engine::EntityP
     query.bindInt( 2, position.x() );
     query.bindInt( 3, position.y() );
     query.bindInt( 4, position.z() );
+    query.bindInt( 5, position.respawnX() );
+    query.bindInt( 6, position.respawnY() );
+    query.bindInt( 7, position.respawnZ() );
 
     return query.exec();
 }
@@ -33,7 +39,10 @@ std::unique_ptr<Engine::EntityPositionModel> CharacterPositionRepository::find( 
         SELECT
             x,
             y,
-            z
+            z,
+            respawn_x,
+            respawn_y,
+            respawn_z
         FROM character_position
         WHERE id_character = ?
     )SQL";
@@ -49,6 +58,9 @@ std::unique_ptr<Engine::EntityPositionModel> CharacterPositionRepository::find( 
     position->setX( query.getColumnInt( 0 ) );
     position->setY( query.getColumnInt( 1 ) );
     position->setZ( query.getColumnInt( 2 ) );
+    position->setRespawnX( query.getColumnInt( 3 ) );
+    position->setRespawnY( query.getColumnInt( 4 ) );
+    position->setRespawnZ( query.getColumnInt( 5 ) );
 
     return position;
 }
@@ -59,12 +71,18 @@ bool CharacterPositionRepository::save( int idCharacter, const Engine::EntityPos
             id_character,
             x,
             y,
-            z
-        ) VALUES (?, ?, ?, ?)
+            z,
+            respawn_x,
+            respawn_y,
+            respawn_z
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT (id_character) DO UPDATE SET
             x = excluded.x,
             y = excluded.y,
-            z = excluded.z
+            z = excluded.z,
+            respawn_x = excluded.respawn_x,
+            respawn_y = excluded.respawn_y,
+            respawn_z = excluded.respawn_z
     )SQL";
     Query query( _db, sql );
 
@@ -72,6 +90,9 @@ bool CharacterPositionRepository::save( int idCharacter, const Engine::EntityPos
     query.bindInt( 2, position.x() );
     query.bindInt( 3, position.y() );
     query.bindInt( 4, position.z() );
+    query.bindInt( 5, position.respawnX() );
+    query.bindInt( 6, position.respawnY() );
+    query.bindInt( 7, position.respawnZ() );
 
     return query.exec();
 }

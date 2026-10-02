@@ -25,4 +25,7 @@ QtObject {
     readonly property color primaryEnabled: "#252B32"
     readonly property color primaryHovered: "#1E252B"
     readonly property color primaryPressed: "#12263C"
+
+    // Utility
+    readonly property color transparent: "#00000000"
 }

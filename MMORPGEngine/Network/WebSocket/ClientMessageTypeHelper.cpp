@@ -4,8 +4,10 @@ namespace Engine {
 
 std::string ClientMessageTypeHelper::toString( ClientMessageType type ) {
     switch ( type ) {
-    case ClientMessageType::CHARACTER_MOVE:
-        return "CHARACTER_MOVE";
+    case ClientMessageType::CHARACTER_INTENT_MOVE:
+        return "CHARACTER_INTENT_MOVE";
+    case ClientMessageType::CHARACTER_INTENT_ACTION:
+        return "CHARACTER_INTENT_ACTION";
     case ClientMessageType::UNKNOWN:
         return "UNKNOWN";
     }
@@ -14,8 +16,12 @@ std::string ClientMessageTypeHelper::toString( ClientMessageType type ) {
 }
 
 ClientMessageType ClientMessageTypeHelper::fromString( const std::string& value ) {
-    if ( value == "CHARACTER_MOVE" ) {
-        return ClientMessageType::CHARACTER_MOVE;
+    if ( value == "CHARACTER_INTENT_MOVE" ) {
+        return ClientMessageType::CHARACTER_INTENT_MOVE;
+    }
+
+    if ( value == "CHARACTER_INTENT_ACTION" ) {
+        return ClientMessageType::CHARACTER_INTENT_ACTION;
     }
 
     return ClientMessageType::UNKNOWN;

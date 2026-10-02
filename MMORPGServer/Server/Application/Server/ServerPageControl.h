@@ -1,8 +1,13 @@
 #ifndef SERVERPAGECONTROL_H
 #define SERVERPAGECONTROL_H
 
+#include <memory>
+
 #include <QObject>
 #include <QVariantList>
+
+#include <MMORPGEngine/Network/WebSocket/ServerMessageReceiver.h>
+#include <MMORPGServer/Server/Network/Observer/GodObserver.h>
 
 namespace Server {
 
@@ -15,6 +20,7 @@ class ServerPageControl : public QObject {
 
 public:
     explicit ServerPageControl( QObject* parent = nullptr );
+    ~ServerPageControl();
 
     QString worldName() const;
     int worldWidth() const;
@@ -23,6 +29,22 @@ public:
 
     Q_INVOKABLE QVariantList connectedCharacters() const;
     Q_INVOKABLE void disconnectCharacter( int idCharacter );
+
+signals:
+    void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
+    void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds );
+
+    void characterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds );
+    void characterEventAttackReceived( int idCharacter, int x, int y, int z );
+    void creatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds );
+    void creatureEventAttackReceived( int idCreature, int x, int y, int z );
+
+    void characterEventLeaveReceived( int idCharacter );
+    void creatureEventLeaveReceived( int idCreature );
+
+private:
+    std::shared_ptr<GodObserver> _godObserver;
+    Engine::ServerMessageReceiver _messageReceiver;
 };
 
 } // namespace Server

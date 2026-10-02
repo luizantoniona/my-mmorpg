@@ -6,13 +6,12 @@
 #include <MMORPGClient/Client/Manager/ServerManager.h>
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Entity/Character/CharacterDTO.h>
-#include <MMORPGEngine/Entity/Character/CharacterMoveDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentActionDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentMoveDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
-#include <MMORPGEngine/Entity/Creature/CreatureDTO.h>
-#include <MMORPGEngine/Entity/EntityLeftDTO.h>
+#include <MMORPGEngine/Entity/CombatActionHelper.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
-#include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
+#include <MMORPGEngine/Network/WebSocket/ServerMessageReceiver.h>
 #include <MMORPGEngine/World/WorldFactory.h>
 
 GamePageControl::GamePageControl( QObject* parent ) :
@@ -23,8 +22,19 @@ GamePageControl::GamePageControl( QObject* parent ) :
 
     _character.setIdCharacter( -1 );
 
-    connect( &_webSocket, &Engine::WebSocketClient::messageReceived, this, &GamePageControl::onMessageReceived );
+    Engine::ServerMessageReceiver& messageReceiver = Engine::Singleton<Engine::ServerMessageReceiver>::instance();
+
+    connect( &_webSocket, &Engine::WebSocketClient::messageReceived, &messageReceiver, &Engine::ServerMessageReceiver::receiveMessage );
     connect( &_webSocket, &Engine::WebSocketClient::errorOccurred, this, &GamePageControl::worldEntryFailed );
+    connect( &_webSocket, &Engine::WebSocketClient::disconnected, this, &GamePageControl::worldLeft );
+
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::errorReceived, this, &GamePageControl::worldEntryFailed );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCharacterReceived, this, &GamePageControl::onOwnCharacterReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCombatReceived, this, &GamePageControl::onOwnCombatReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackStartReceived, this, &GamePageControl::characterEventAttackStartReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackReceived, this, &GamePageControl::characterEventAttackReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &GamePageControl::creatureEventAttackStartReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackReceived, this, &GamePageControl::creatureEventAttackReceived );
 }
 
 GamePageControl::~GamePageControl() = default;
@@ -71,18 +81,6 @@ int GamePageControl::worldHeight() const {
     return static_cast<int>( _world->height() );
 }
 
-int GamePageControl::spawnFloor() const {
-    return _character.position().z();
-}
-
-int GamePageControl::spawnX() const {
-    return _character.position().x();
-}
-
-int GamePageControl::spawnY() const {
-    return _character.position().y();
-}
-
 double GamePageControl::health() const {
     return _character.vitals().health();
 }
@@ -105,6 +103,32 @@ double GamePageControl::stamina() const {
 
 double GamePageControl::maxStamina() const {
     return _character.vitals().maxStamina();
+}
+
+int GamePageControl::characterX() const {
+    return _character.position().x();
+}
+
+int GamePageControl::characterY() const {
+    return _character.position().y();
+}
+
+int GamePageControl::characterZ() const {
+    return _character.position().z();
+}
+
+QString GamePageControl::secondAction() const {
+    const Engine::EntityCombatModel& combat = _character.combat();
+
+    if ( combat.isActionAvailable( Engine::CombatActionEnum::BLOCK ) ) {
+        return QString::fromStdString( Engine::CombatActionHelper::toString( Engine::CombatActionEnum::BLOCK ) );
+    }
+
+    if ( combat.isActionAvailable( Engine::CombatActionEnum::DODGE ) ) {
+        return QString::fromStdString( Engine::CombatActionHelper::toString( Engine::CombatActionEnum::DODGE ) );
+    }
+
+    return "";
 }
 
 void GamePageControl::loadWorld() {
@@ -136,76 +160,59 @@ void GamePageControl::connectToWorld( int idCharacter ) {
 }
 
 void GamePageControl::move( int dx, int dy ) {
-    Engine::CharacterMoveDTO input;
+    Engine::CharacterIntentMoveDTO input;
     input.setDx( dx );
     input.setDy( dy );
 
     _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
 }
 
-void GamePageControl::onMessageReceived( const QString& message ) {
-    Json::Value json = Engine::JsonHelper::parseJsonString( message.toStdString() );
+void GamePageControl::attack( int dx, int dy ) {
+    sendAction( Engine::CombatActionEnum::ATTACK, dx, dy );
+}
 
-    if ( json.isNull() || !json.isObject() ) {
-        emit worldEntryFailed( tr( "Invalid server response" ) );
-        return;
+void GamePageControl::useSecondAction() {
+    const Engine::EntityCombatModel& combat = _character.combat();
+
+    if ( combat.isActionAvailable( Engine::CombatActionEnum::BLOCK ) ) {
+        sendAction( Engine::CombatActionEnum::BLOCK, 0, 0 );
+    } else if ( combat.isActionAvailable( Engine::CombatActionEnum::DODGE ) ) {
+        sendAction( Engine::CombatActionEnum::DODGE, 0, 0 );
     }
+}
 
-    if ( json.isMember( "error" ) ) {
-        emit worldEntryFailed( QString::fromStdString( json[ "error" ].asString() ) );
-        return;
-    }
+void GamePageControl::leaveWorld() {
+    _webSocket.disconnectFromServer();
+}
 
-    const Engine::ServerMessageType type = Engine::ServerMessageTypeHelper::fromMessage( json );
+void GamePageControl::onOwnCharacterReceived( const Engine::OwnCharacterDTO& state ) {
+    _character.position().setX( state.x() );
+    _character.position().setY( state.y() );
+    _character.position().setZ( state.z() );
 
-    switch ( type ) {
-    case Engine::ServerMessageType::ENTITY_LEFT: {
-        const Engine::EntityLeftDTO entityLeft = Engine::EntityLeftDTO::fromJson( json );
-        emit entityLeftReceived( entityLeft.idCharacter() );
-        return;
-    }
+    _character.vitals().setHealth( state.health() );
+    _character.vitals().setMaxHealth( state.maxHealth() );
+    _character.vitals().setMana( state.mana() );
+    _character.vitals().setMaxMana( state.maxMana() );
+    _character.vitals().setStamina( state.stamina() );
+    _character.vitals().setMaxStamina( state.maxStamina() );
 
-    case Engine::ServerMessageType::OWN_CHARACTER: {
-        Engine::OwnCharacterDTO state = Engine::OwnCharacterDTO::fromJson( json );
+    emit positionChanged();
+    emit vitalsChanged();
+    emit worldEntryReceived();
+}
 
-        emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z() );
+void GamePageControl::onOwnCombatReceived( const Engine::OwnCombatDTO& state ) {
+    _character.combat().setAvailableActions( state.actions() );
 
-        Engine::EntityPositionModel position = _character.position();
-        position.setX( state.x() );
-        position.setY( state.y() );
-        position.setZ( state.z() );
-        _character.setPosition( position );
+    emit combatChanged();
+}
 
-        Engine::EntityVitalsModel vitalsModel = _character.vitals();
-        vitalsModel.setHealth( state.health() );
-        vitalsModel.setMaxHealth( state.maxHealth() );
-        vitalsModel.setMana( state.mana() );
-        vitalsModel.setMaxMana( state.maxMana() );
-        vitalsModel.setStamina( state.stamina() );
-        vitalsModel.setMaxStamina( state.maxStamina() );
-        _character.setVitals( vitalsModel );
+void GamePageControl::sendAction( Engine::CombatActionEnum action, int dx, int dy ) {
+    Engine::CharacterIntentActionDTO input;
+    input.setAction( action );
+    input.setDx( dx );
+    input.setDy( dy );
 
-        emit vitalsChanged();
-        emit worldEntryReceived();
-        return;
-    }
-
-    case Engine::ServerMessageType::CHARACTER: {
-        Engine::CharacterDTO state = Engine::CharacterDTO::fromJson( json );
-
-        emit entityStateReceived( state.idCharacter(), state.x(), state.y(), state.z() );
-        return;
-    }
-
-    case Engine::ServerMessageType::CREATURE: {
-        Engine::CreatureDTO state = Engine::CreatureDTO::fromJson( json );
-
-        emit entityStateReceived( state.idCreature(), state.x(), state.y(), state.z() );
-        return;
-    }
-
-    case Engine::ServerMessageType::WORLD_BASIC:
-    case Engine::ServerMessageType::UNKNOWN:
-        return;
-    }
+    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
 }

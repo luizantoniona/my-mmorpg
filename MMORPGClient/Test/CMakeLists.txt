@@ -1,4 +1,5 @@
 find_package(GTest REQUIRED)
+include(GoogleTest)
 
 add_executable(
   MMORPGClientTests
@@ -8,4 +9,4 @@ add_executable(
 
 target_link_libraries(MMORPGClientTests PRIVATE MMORPG::MMORPGEngine GTest::gtest_main)
 
-add_test(NAME MMORPGClientTests COMMAND MMORPGClientTests)
+gtest_discover_tests(MMORPGClientTests DISCOVERY_MODE PRE_TEST)

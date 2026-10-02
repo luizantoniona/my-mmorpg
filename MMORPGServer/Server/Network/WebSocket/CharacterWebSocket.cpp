@@ -1,13 +1,16 @@
 #include "CharacterWebSocket.h"
 
+#include <memory>
+
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
+#include <MMORPGServer/Server/Network/Observer/CharacterObserver.h>
+#include <MMORPGServer/Server/Network/Observer/ObserverRegistry.h>
 #include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionContext.h>
-#include <MMORPGServer/Server/Network/WebSocket/CharacterConnectionRegistry.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterRepository.h>
 
 namespace Server {
@@ -76,7 +79,7 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     connection->setContext( std::make_shared<CharacterConnectionContext>( sessionId, idCharacter ) );
 
-    Engine::Singleton<CharacterConnectionRegistry>::instance().registerConnection( idCharacter, connection );
+    Engine::Singleton<ObserverRegistry>::instance().registerCharacterObserver( idCharacter, std::make_shared<CharacterObserver>( connection ) );
 
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
@@ -107,7 +110,7 @@ void CharacterWebSocket::handleConnectionClosed( const drogon::WebSocketConnecti
 
     worldRuntime.removeCharacter( contextPtr->idCharacter() );
 
-    Engine::Singleton<CharacterConnectionRegistry>::instance().unregisterConnection( contextPtr->idCharacter() );
+    Engine::Singleton<ObserverRegistry>::instance().unregisterCharacterObserver( contextPtr->idCharacter() );
 
     qInfo() << "[WebSocket] Character left world [CHARACTER]" << contextPtr->idCharacter();
 }

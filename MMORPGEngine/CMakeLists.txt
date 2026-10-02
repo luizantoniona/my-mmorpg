@@ -22,14 +22,60 @@ set(PROJECT_SOURCES
     Commons/Singleton.h
     Data/Animation/AnimationModel.cpp
     Data/Animation/AnimationModel.h
+    Data/Item/HandRequirementEnum.h
+    Data/Item/HandRequirementHelper.cpp
+    Data/Item/HandRequirementHelper.h
+    Data/Item/ItemCatalog.cpp
+    Data/Item/ItemCatalog.h
+    Data/Item/ItemCategoryEnum.h
+    Data/Item/ItemCategoryHelper.cpp
+    Data/Item/ItemCategoryHelper.h
+    Data/Item/ItemFactory.cpp
+    Data/Item/ItemFactory.h
+    Data/Item/ItemModel.cpp
+    Data/Item/ItemModel.h
+    Data/Item/ItemSlotEnum.h
+    Data/Item/ItemSlotHelper.cpp
+    Data/Item/ItemSlotHelper.h
+    Data/Item/ItemTypeCatalog.cpp
+    Data/Item/ItemTypeCatalog.h
+    Data/Item/ItemTypeFactory.cpp
+    Data/Item/ItemTypeFactory.h
+    Data/Item/ItemTypeModel.cpp
+    Data/Item/ItemTypeModel.h
+    Data/Creature/CreatureSpawnAreaModel.cpp
+    Data/Creature/CreatureSpawnAreaModel.h
+    Data/Creature/CreatureSpawnEntryModel.cpp
+    Data/Creature/CreatureSpawnEntryModel.h
+    Data/Creature/CreatureTypeCatalog.cpp
+    Data/Creature/CreatureTypeCatalog.h
+    Data/Creature/CreatureTypeFactory.cpp
+    Data/Creature/CreatureTypeFactory.h
+    Data/Creature/CreatureTypeModel.cpp
+    Data/Creature/CreatureTypeModel.h
+    Data/Creature/CreatureTypeVitalsModel.cpp
+    Data/Creature/CreatureTypeVitalsModel.h
     Data/Object/ObjectCatalog.cpp
     Data/Object/ObjectCatalog.h
     Data/Object/ObjectFactory.cpp
     Data/Object/ObjectFactory.h
+    Data/Object/ObjectInteractionEnum.h
+    Data/Object/ObjectInteractionHelper.cpp
+    Data/Object/ObjectInteractionHelper.h
+    Data/Object/ObjectInteractionModel.cpp
+    Data/Object/ObjectInteractionModel.h
     Data/Object/ObjectModel.cpp
     Data/Object/ObjectModel.h
     Data/Object/ObjectSizeModel.cpp
     Data/Object/ObjectSizeModel.h
+    Data/Skill/SkillCatalog.cpp
+    Data/Skill/SkillCatalog.h
+    Data/Skill/SkillFactory.cpp
+    Data/Skill/SkillFactory.h
+    Data/Skill/SkillNodeModel.cpp
+    Data/Skill/SkillNodeModel.h
+    Data/Skill/SkillTreeModel.cpp
+    Data/Skill/SkillTreeModel.h
     Data/Tile/TileCatalog.cpp
     Data/Tile/TileCatalog.h
     Data/Tile/TileFactory.cpp
@@ -52,20 +98,58 @@ set(PROJECT_SOURCES
     Data/DataManager.h
     Entity/Character/CharacterDTO.cpp
     Entity/Character/CharacterDTO.h
+    Entity/Character/CharacterEquipmentDTO.cpp
+    Entity/Character/CharacterEquipmentDTO.h
+    Entity/Character/CharacterEquipmentModel.cpp
+    Entity/Character/CharacterEquipmentModel.h
+    Entity/Character/CharacterEventAttackDTO.cpp
+    Entity/Character/CharacterEventAttackDTO.h
+    Entity/Character/CharacterEventAttackStartDTO.cpp
+    Entity/Character/CharacterEventAttackStartDTO.h
+    Entity/Character/CharacterEventLeaveDTO.cpp
+    Entity/Character/CharacterEventLeaveDTO.h
+    Entity/Character/CharacterIntentActionDTO.cpp
+    Entity/Character/CharacterIntentActionDTO.h
+    Entity/Character/CharacterIntentMoveDTO.cpp
+    Entity/Character/CharacterIntentMoveDTO.h
+    Entity/Character/CharacterInventoryDTO.cpp
+    Entity/Character/CharacterInventoryDTO.h
+    Entity/Character/CharacterInventoryModel.cpp
+    Entity/Character/CharacterInventoryModel.h
     Entity/Character/CharacterModel.cpp
     Entity/Character/CharacterModel.h
-    Entity/Character/CharacterMoveDTO.cpp
-    Entity/Character/CharacterMoveDTO.h
+    Entity/Character/CharacterProficiencyModel.cpp
+    Entity/Character/CharacterProficiencyModel.h
+    Entity/Character/EquipmentSlotEnum.h
+    Entity/Character/EquipmentSlotHelper.cpp
+    Entity/Character/EquipmentSlotHelper.h
     Entity/Character/OwnCharacterDTO.cpp
     Entity/Character/OwnCharacterDTO.h
+    Entity/Character/OwnCombatDTO.cpp
+    Entity/Character/OwnCombatDTO.h
+    Entity/Character/OwnEquipmentDTO.cpp
+    Entity/Character/OwnEquipmentDTO.h
+    Entity/Character/OwnInventoryDTO.cpp
+    Entity/Character/OwnInventoryDTO.h
     Entity/Creature/CreatureModel.cpp
     Entity/Creature/CreatureModel.h
     Entity/Creature/CreatureDTO.cpp
     Entity/Creature/CreatureDTO.h
-    Entity/EntityLeftDTO.cpp
-    Entity/EntityLeftDTO.h
+    Entity/Creature/CreatureEventAttackDTO.cpp
+    Entity/Creature/CreatureEventAttackDTO.h
+    Entity/Creature/CreatureEventAttackStartDTO.cpp
+    Entity/Creature/CreatureEventAttackStartDTO.h
+    Entity/Creature/CreatureEventLeaveDTO.cpp
+    Entity/Creature/CreatureEventLeaveDTO.h
+    Entity/CombatActionEnum.h
+    Entity/CombatActionHelper.cpp
+    Entity/CombatActionHelper.h
+    Entity/EntityCombatModel.cpp
+    Entity/EntityCombatModel.h
     Entity/EntityModel.cpp
     Entity/EntityModel.h
+    Entity/EntityMovementModel.cpp
+    Entity/EntityMovementModel.h
     Entity/EntityPositionModel.cpp
     Entity/EntityPositionModel.h
     Entity/EntitySizeModel.cpp
@@ -77,6 +161,8 @@ set(PROJECT_SOURCES
     Network/WebSocket/ClientMessageTypeEnum.h
     Network/WebSocket/ClientMessageTypeHelper.cpp
     Network/WebSocket/ClientMessageTypeHelper.h
+    Network/WebSocket/ServerMessageReceiver.cpp
+    Network/WebSocket/ServerMessageReceiver.h
     Network/WebSocket/ServerMessageTypeEnum.h
     Network/WebSocket/ServerMessageTypeHelper.cpp
     Network/WebSocket/ServerMessageTypeHelper.h
@@ -88,14 +174,25 @@ set(PROJECT_SOURCES
     Renderer/Scene/RenderScene.h
     Renderer/Scene/RenderSceneItem.cpp
     Renderer/Scene/RenderSceneItem.h
+    Renderer/Scene/RenderSceneLayerEnum.h
     Renderer/Scene/TextureCache.cpp
     Renderer/Scene/TextureCache.h
     Renderer/World/RenderWorld.cpp
     Renderer/World/RenderWorld.h
+    Renderer/World/StreamRenderWorld.cpp
+    Renderer/World/StreamRenderWorld.h
+    Renderer/EffectRenderer.cpp
+    Renderer/EffectRenderer.h
+    Renderer/OverlayRenderer.cpp
+    Renderer/OverlayRenderer.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
+    Renderer/EntityAnimationModel.cpp
+    Renderer/EntityAnimationModel.h
     Renderer/EntityRenderer.cpp
     Renderer/EntityRenderer.h
+    Renderer/EntityTextureModel.cpp
+    Renderer/EntityTextureModel.h
     Renderer/ObjectRenderer.cpp
     Renderer/ObjectRenderer.h
     Renderer/TileRenderer.cpp

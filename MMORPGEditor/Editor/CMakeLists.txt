@@ -13,6 +13,8 @@ set(PROJECT_SOURCES
     Application/World/Object/ObjectPaletteModel.h
     Application/World/Object/ObjectSelectionControl.cpp
     Application/World/Object/ObjectSelectionControl.h
+    Application/World/Spawn/CreatureTypePaletteModel.cpp
+    Application/World/Spawn/CreatureTypePaletteModel.h
     Application/World/Tile/TileIconProvider.cpp
     Application/World/Tile/TileIconProvider.h
     Application/World/Tile/TilePaletteModel.cpp
@@ -48,6 +50,8 @@ qt_add_qml_module(
   Application/World/Tool/ToolMode.qml
   Application/World/Tool/ToolSelector.qml
   Application/World/Object/ObjectPalette.qml
+  Application/World/Spawn/CreatureTypePicker.qml
+  Application/World/Spawn/SpawnAreaPanel.qml
   Application/World/Tile/TilePalette.qml
   Application/World/BrushMode.qml
   Application/World/EditorSidebar.qml

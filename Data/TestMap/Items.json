@@ -1,0 +1,27 @@
+{
+    "ItemTypes": [
+        "SWORD",
+        "AXE",
+        "DAGGER",
+        "MACE",
+        "BOW",
+        "GAUNTLETS",
+        "STAFF",
+        "WAND",
+        "PYROMANCY",
+        "HYDROMANCY",
+        "GEOMANCY",
+        "AEROMANCY",
+        "CERAUNOMANCY",
+        "HIEROMANCY",
+        "NYCTOMANCY",
+        "SHIELD",
+        "HELMET",
+        "ARMOR",
+        "LEGS",
+        "BOOTS",
+        "GLOVES",
+        "RING",
+        "NECKLACE"
+    ]
+}

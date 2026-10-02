@@ -28,6 +28,14 @@ set(PROJECT_SOURCES
     Network/NetworkSession.h
     Network/Filter/AuthFilter.cpp
     Network/Filter/AuthFilter.h
+    Network/Observer/CharacterObserver.cpp
+    Network/Observer/CharacterObserver.h
+    Network/Observer/EntityObserver.cpp
+    Network/Observer/EntityObserver.h
+    Network/Observer/GodObserver.cpp
+    Network/Observer/GodObserver.h
+    Network/Observer/ObserverRegistry.cpp
+    Network/Observer/ObserverRegistry.h
     Network/Rest/AuthController.cpp
     Network/Rest/AuthController.h
     Network/Rest/CharacterController.cpp
@@ -38,18 +46,22 @@ set(PROJECT_SOURCES
     Network/Rest/StatusController.h
     Network/WebSocket/CharacterConnectionContext.cpp
     Network/WebSocket/CharacterConnectionContext.h
-    Network/WebSocket/CharacterConnectionRegistry.cpp
-    Network/WebSocket/CharacterConnectionRegistry.h
     Network/WebSocket/CharacterWebSocket.cpp
     Network/WebSocket/CharacterWebSocket.h
-    Network/WebSocket/MessageReceiver.cpp
-    Network/WebSocket/MessageReceiver.h
+    Network/WebSocket/ClientMessageReceiver.cpp
+    Network/WebSocket/ClientMessageReceiver.h
     Renderer/ServerRenderWorld.cpp
     Renderer/ServerRenderWorld.h
     Repository/Account/AccountRepository.cpp
     Repository/Account/AccountRepository.h
+    Repository/Character/CharacterEquipmentRepository.cpp
+    Repository/Character/CharacterEquipmentRepository.h
+    Repository/Character/CharacterInventoryRepository.cpp
+    Repository/Character/CharacterInventoryRepository.h
     Repository/Character/CharacterPositionRepository.cpp
     Repository/Character/CharacterPositionRepository.h
+    Repository/Character/CharacterProficiencyRepository.cpp
+    Repository/Character/CharacterProficiencyRepository.h
     Repository/Character/CharacterRepository.cpp
     Repository/Character/CharacterRepository.h
     Repository/Character/CharacterVitalsRepository.cpp
@@ -58,14 +70,40 @@ set(PROJECT_SOURCES
     Repository/Repository.h
     Runtime/Character/CharacterRuntime.cpp
     Runtime/Character/CharacterRuntime.h
+    Runtime/Character/System/CharacterCombatSystem.cpp
+    Runtime/Character/System/CharacterCombatSystem.h
+    Runtime/Character/System/CharacterMovementSystem.cpp
+    Runtime/Character/System/CharacterMovementSystem.h
     Runtime/Character/System/CharacterSystem.cpp
     Runtime/Character/System/CharacterSystem.h
+    Runtime/Character/System/CharacterVitalsSystem.cpp
+    Runtime/Character/System/CharacterVitalsSystem.h
+    Runtime/Creature/CreaturePathfinder.cpp
+    Runtime/Creature/CreaturePathfinder.h
     Runtime/Creature/CreatureRuntime.cpp
     Runtime/Creature/CreatureRuntime.h
+    Runtime/World/Command/AttackCharacterCommand.cpp
+    Runtime/World/Command/AttackCharacterCommand.h
+    Runtime/World/Command/MoveCharacterCommand.cpp
+    Runtime/World/Command/MoveCharacterCommand.h
+    Runtime/World/Command/WorldCommand.cpp
+    Runtime/World/Command/WorldCommand.h
+    Runtime/World/Spawn/WorldSpawnAreaRuntime.cpp
+    Runtime/World/Spawn/WorldSpawnAreaRuntime.h
+    Runtime/World/System/WorldCombatSystem.cpp
+    Runtime/World/System/WorldCombatSystem.h
+    Runtime/World/System/WorldCreatureSystem.cpp
+    Runtime/World/System/WorldCreatureSystem.h
+    Runtime/World/System/WorldMovementSystem.cpp
+    Runtime/World/System/WorldMovementSystem.h
+    Runtime/World/System/WorldSpawnSystem.cpp
+    Runtime/World/System/WorldSpawnSystem.h
     Runtime/World/System/WorldSystem.cpp
     Runtime/World/System/WorldSystem.h
     Runtime/World/WorldRuntime.cpp
-    Runtime/World/WorldRuntime.h)
+    Runtime/World/WorldRuntime.h
+    Runtime/World/WorldSpatialIndex.cpp
+    Runtime/World/WorldSpatialIndex.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 

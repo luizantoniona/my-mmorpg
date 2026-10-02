@@ -1,0 +1,13 @@
+{
+    "Name": "Shield",
+    "Category": "SHIELD",
+    "Slot": "Hand",
+    "HandRequirement": "ONE_HANDED",
+    "Items": [
+        {
+            "Id": 2,
+            "Name": "Wooden Shield",
+            "TextureFolder": "Textures/Items/Wooden Shield"
+        }
+    ]
+}

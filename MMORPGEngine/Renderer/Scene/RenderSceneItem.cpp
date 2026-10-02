@@ -6,21 +6,32 @@ RenderSceneItem::RenderSceneItem() :
     _position( 0, 0 ),
     _size( 0, 0 ),
     _image(),
-    _color() {
+    _color(),
+    _layer( RenderSceneLayerEnum::Tile ) {
 }
 
-RenderSceneItem::RenderSceneItem( const QPointF& position, const QSizeF& size, const QImage& image ) :
+RenderSceneItem::RenderSceneItem( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QImage& image ) :
     _position( position ),
     _size( size ),
     _image( image ),
-    _color() {
+    _color(),
+    _layer( layer ) {
 }
 
-RenderSceneItem::RenderSceneItem( const QPointF& position, const QSizeF& size, const QColor& color ) :
+RenderSceneItem::RenderSceneItem( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QColor& color ) :
     _position( position ),
     _size( size ),
     _image(),
-    _color( color ) {
+    _color( color ),
+    _layer( layer ) {
+}
+
+RenderSceneLayerEnum RenderSceneItem::layer() const {
+    return _layer;
+}
+
+void RenderSceneItem::setLayer( RenderSceneLayerEnum layer ) {
+    _layer = layer;
 }
 
 QPointF RenderSceneItem::position() const {

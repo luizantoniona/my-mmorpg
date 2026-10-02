@@ -24,4 +24,8 @@ void TileCatalog::addTile( const TileModel& tile ) {
     _tiles.insert( { tile.type(), tile } );
 }
 
+void TileCatalog::replaceTile( const TileModel& tile ) {
+    _tiles[ tile.type() ] = tile;
+}
+
 } // namespace Engine

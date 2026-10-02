@@ -68,13 +68,7 @@ protected:
         tiles.append( row );
         floorJson[ "Tiles" ] = tiles;
 
-        Json::Value emptyRow( Json::arrayValue );
-        emptyRow.append( 0 );
-        emptyRow.append( 0 );
-        Json::Value objects( Json::arrayValue );
-        objects.append( emptyRow );
-        objects.append( emptyRow );
-        floorJson[ "Objects" ] = objects;
+        floorJson[ "Objects" ] = Json::Value( Json::arrayValue );
 
         Engine::JsonHelper::saveJsonFile( ( _tempDir / "TestMap" / "Floors" / fileName ).string(), floorJson );
     }

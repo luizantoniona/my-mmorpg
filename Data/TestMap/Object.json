@@ -1,3 +1,25 @@
 {
-    "Objects": []
+    "Objects" : 
+    [
+        {
+            "Footprint" : 
+            {
+                "Height" : 1,
+                "Width" : 1
+            },
+            "Name" : "wall_stone0",
+            "TextureFolder" : "Textures/Objects/wall_stone0",
+            "Type" : 1
+        },
+        {
+            "Footprint" : 
+            {
+                "Height" : 1,
+                "Width" : 1
+            },
+            "Name" : "wall_stone1",
+            "TextureFolder" : "Textures/Objects/wall_stone1",
+            "Type" : 2
+        }
+    ]
 }

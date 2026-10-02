@@ -4,6 +4,7 @@
 #include <QQuickStyle>
 #include <QSurfaceFormat>
 
+#include <MMORPGClient/Client/Application/Game/Component/ItemIconProvider.h>
 #include <MMORPGClient/Client/Manager/AccountManager.h>
 #include <MMORPGClient/Client/Manager/ServerManager.h>
 #include <MMORPGClient/Client/RegisterClientTypes.h>
@@ -20,6 +21,8 @@ int main( int argc, char* argv[] ) {
     format.setSamples( 8 );
     QSurfaceFormat::setDefaultFormat( format );
     QQmlApplicationEngine engine;
+
+    engine.addImageProvider( "ClientItemIcon", new ItemIconProvider() );
 
     // --- Register Types Engine
     Engine::RegisterEngineTypes::registerTypes();

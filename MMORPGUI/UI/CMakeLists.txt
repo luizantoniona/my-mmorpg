@@ -43,6 +43,7 @@ qt_add_qml_module(
   Component/Spacer/SpacerVertical.qml
   Component/Text/TextSubTitle.qml
   Component/Text/TextTitle.qml
+  Component/Tooltip/TooltipBase.qml
   Theme/Borders.qml
   Theme/Colors.qml
   Theme/Fonts.qml

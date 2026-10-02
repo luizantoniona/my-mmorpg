@@ -8,9 +8,45 @@ Item {
     id: root
 
     property int currentFloor: 0
+    readonly property color attackFlashColor: Qt.rgba(Colors.error.r, Colors.error.g, Colors.error.b, 0.55)
+    readonly property int attackFlashDurationMs: 220
+    readonly property color attackWarningColor: Qt.rgba(Colors.warning.r, Colors.warning.g, Colors.warning.b, 0.45)
 
     ServerPageControl {
         id: control
+
+        onCharacterStateReceived: function (idCharacter, x, y, z, movementSeconds) {
+            serverWorld.addCharacter(idCharacter, x, y, z, movementSeconds)
+        }
+        onCreatureStateReceived: function (idCreature, x, y, z, movementSeconds) {
+            serverWorld.addCreature(idCreature, x, y, z, movementSeconds)
+        }
+        onCharacterEventAttackStartReceived: function (idCharacter, x, y, z, castSeconds) {
+            if (z === root.currentFloor) {
+                viewport.addTileWarning(x, y, root.attackWarningColor, castSeconds * 1000)
+            }
+        }
+        onCreatureEventAttackStartReceived: function (idCreature, x, y, z, castSeconds) {
+            if (z === root.currentFloor) {
+                viewport.addTileWarning(x, y, root.attackWarningColor, castSeconds * 1000)
+            }
+        }
+        onCreatureEventAttackReceived: function (idCreature, x, y, z) {
+            if (z === root.currentFloor) {
+                viewport.addTileFlash(x, y, root.attackFlashColor, root.attackFlashDurationMs)
+            }
+        }
+        onCharacterEventAttackReceived: function (idCharacter, x, y, z) {
+            if (z === root.currentFloor) {
+                viewport.addTileFlash(x, y, root.attackFlashColor, root.attackFlashDurationMs)
+            }
+        }
+        onCharacterEventLeaveReceived: function (idCharacter) {
+            serverWorld.removeCharacter(idCharacter)
+        }
+        onCreatureEventLeaveReceived: function (idCreature) {
+            serverWorld.removeCreature(idCreature)
+        }
     }
 
     ServerRenderWorld {
@@ -63,7 +99,7 @@ Item {
             Rectangle {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                color: "transparent"
+                color: Colors.transparent
                 border.color: Colors.border
                 border.width: Borders.border1
                 clip: true

@@ -34,4 +34,4 @@ handles accounts/characters and keeps track of where everyone is.
   or public IP, not `127.0.0.1` — that only works from the same machine.
 
 Route reference for developers: [`Doc/API.md`](../Doc/API.md).
-Technical details: [`Doc/MMORPGServer.md`](../Doc/MMORPGServer.md).
+More about it: [`Doc/MMORPGServer.md`](../Doc/MMORPGServer.md).

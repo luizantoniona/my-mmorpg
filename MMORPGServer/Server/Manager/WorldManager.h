@@ -15,7 +15,7 @@ public:
     WorldManager();
     ~WorldManager();
 
-    void initialize( const std::string& worldPath );
+    bool initialize( const std::string& worldPath );
     void finalize();
 
     WorldRuntime& runtime();

@@ -88,6 +88,10 @@ Item {
             id: game
 
             idCharacter: root.selectedIdCharacter
+
+            onLeftWorld: function () {
+                root.updatePage("AccountPage")
+            }
         }
     }
 

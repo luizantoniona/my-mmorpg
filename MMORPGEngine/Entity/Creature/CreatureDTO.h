@@ -28,7 +28,19 @@ public:
     int z() const;
     void setZ( int z );
 
+    double health() const;
+    void setHealth( double health );
+
+    double maxHealth() const;
+    void setMaxHealth( double maxHealth );
+
+    double movementCooldownSeconds() const;
+    void setMovementCooldownSeconds( double movementCooldownSeconds );
+
 private:
+    double _health;
+    double _maxHealth;
+    double _movementCooldownSeconds;
     int _idCreature;
     int _x;
     int _y;

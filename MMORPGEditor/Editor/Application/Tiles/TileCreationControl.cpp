@@ -4,6 +4,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QUrl>
 
 #include <MMORPGEngine/Commons/Singleton.h>
@@ -37,6 +38,20 @@ QStringList parseTags( const QString& tagsText ) {
 
     return tags;
 }
+
+void removeUnusedFolder( const QString& mapPath, const QString& folder, const Engine::TileCatalog& catalog ) {
+    if ( folder.isEmpty() ) {
+        return;
+    }
+
+    for ( const auto& entry : catalog.tiles() ) {
+        if ( entry.second.folder() == folder ) {
+            return;
+        }
+    }
+
+    QDir( mapPath + folder ).removeRecursively();
+}
 } // namespace
 
 TileCreationControl::TileCreationControl( QObject* parent ) :
@@ -59,13 +74,50 @@ QString TileCreationControl::lastError() const {
     return _lastError;
 }
 
+int TileCreationControl::nextFreeType( int after ) const {
+    const Engine::TileCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().tileCatalog();
+
+    uint32_t type = static_cast<uint32_t>( std::max( after, 0 ) ) + 1;
+    while ( catalog.tile( type ) != nullptr ) {
+        ++type;
+    }
+
+    return static_cast<int>( type );
+}
+
+QString TileCreationControl::typeName( int type ) const {
+    if ( type < 1 ) {
+        return "";
+    }
+
+    const Engine::TileCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().tileCatalog();
+    const Engine::TileModel* tile = catalog.tile( static_cast<uint32_t>( type ) );
+
+    return tile ? tile->name() : "";
+}
+
 void TileCreationControl::setLastError( const QString& error ) {
     _lastError = error;
 
     emit lastErrorChanged();
 }
 
-bool TileCreationControl::createTile( const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable ) {
+bool TileCreationControl::createTile( int type, const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable, bool replace ) {
+    if ( type < 1 ) {
+        setLastError( "Type must be 1 or higher." );
+        return false;
+    }
+
+    Engine::DataManager& dataManager = Engine::Singleton<Engine::DataManager>::instance();
+    const Engine::TileModel* existing = dataManager.tileCatalog().tile( static_cast<uint32_t>( type ) );
+
+    if ( existing && !replace ) {
+        setLastError( "Type " + QString::number( type ) + " is already used by '" + existing->name() + "'." );
+        return false;
+    }
+
+    const QString replacedFolder = existing ? existing->folder() : QString();
+
     const QString trimmedName = name.trimmed();
 
     if ( trimmedName.isEmpty() ) {
@@ -80,8 +132,9 @@ bool TileCreationControl::createTile( const QString& name, const QString& textur
         return false;
     }
 
-    const bool isAnimated = sourcePath.endsWith( ".gif", Qt::CaseInsensitive );
-    const QString extension = isAnimated ? ".gif" : ".png";
+    const QString sourceExtension = "." + QFileInfo( sourcePath ).suffix().toLower();
+    const bool isAnimated = Engine::DataFactory::textureExtensions().value( sourceExtension, false );
+    const QString extension = isAnimated ? sourceExtension : ".png";
 
     const QString mapPath = Engine::DataFactory::mapPath( DATA_PATH );
     const QString folder = "Textures/Tiles/" + trimmedName;
@@ -107,15 +160,22 @@ bool TileCreationControl::createTile( const QString& name, const QString& textur
     }
 
     Engine::TileModel tile;
-    tile.setType( static_cast<uint32_t>( nextType() ) );
+    tile.setType( static_cast<uint32_t>( type ) );
     tile.setName( trimmedName );
     tile.setFolder( folder );
     tile.setAnimation( animation );
     tile.setTags( parseTags( tagsText ) );
     tile.setIsWalkable( isWalkable );
 
-    Engine::Singleton<Engine::DataManager>::instance().addTile( tile );
-    Engine::TileFactory::saveTileCatalog( DATA_PATH, Engine::Singleton<Engine::DataManager>::instance().tileCatalog() );
+    if ( existing ) {
+        dataManager.replaceTile( tile );
+        removeUnusedFolder( mapPath, replacedFolder, dataManager.tileCatalog() );
+
+    } else {
+        dataManager.addTile( tile );
+    }
+
+    Engine::TileFactory::saveTileCatalog( DATA_PATH, dataManager.tileCatalog() );
 
     setLastError( "" );
     emit catalogChanged();

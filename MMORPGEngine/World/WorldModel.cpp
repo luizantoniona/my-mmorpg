@@ -181,6 +181,55 @@ void WorldModel::setTile( int x, int y, int z, uint32_t tileType ) {
     worldTile->setTileType( tileType );
 }
 
+std::vector<CreatureSpawnAreaModel> WorldModel::spawnAreas( int z ) const {
+    const auto iterator = _spawnAreas.find( z );
+
+    if ( iterator == _spawnAreas.end() ) {
+        return {};
+    }
+
+    return iterator->second;
+}
+
+void WorldModel::addSpawnArea( int z, const CreatureSpawnAreaModel& spawnArea ) {
+    _spawnAreas[ z ].push_back( spawnArea );
+}
+
+const CreatureSpawnAreaModel* WorldModel::spawnAreaAt( int x, int y, int z ) const {
+    const auto iterator = _spawnAreas.find( z );
+
+    if ( iterator == _spawnAreas.end() ) {
+        return nullptr;
+    }
+
+    for ( const CreatureSpawnAreaModel& area : iterator->second ) {
+        if ( x >= area.x() && x < area.x() + static_cast<int>( area.width() ) && y >= area.y() && y < area.y() + static_cast<int>( area.height() ) ) {
+            return &area;
+        }
+    }
+
+    return nullptr;
+}
+
+bool WorldModel::removeSpawnArea( int x, int y, int z ) {
+    auto iterator = _spawnAreas.find( z );
+
+    if ( iterator == _spawnAreas.end() ) {
+        return false;
+    }
+
+    std::vector<CreatureSpawnAreaModel>& areas = iterator->second;
+
+    for ( auto it = areas.begin(); it != areas.end(); ++it ) {
+        if ( x >= it->x() && x < it->x() + static_cast<int>( it->width() ) && y >= it->y() && y < it->y() + static_cast<int>( it->height() ) ) {
+            areas.erase( it );
+            return true;
+        }
+    }
+
+    return false;
+}
+
 QString WorldModel::chunkKey( int x, int y ) const {
     return QStringLiteral( "%1:%2" ).arg( x ).arg( y );
 }

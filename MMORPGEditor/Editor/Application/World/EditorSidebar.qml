@@ -6,6 +6,9 @@ import MMORPGEditorComponents
 Item {
     id: root
 
+    property bool tileActive: true
+    property bool objectActive: false
+
     signal tileSelected(int type)
     signal objectSelected(int type)
 
@@ -27,6 +30,7 @@ Item {
         TilePalette {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            isActive: root.tileActive
 
             onTileSelected: function (type) {
                 root.tileSelected(type)
@@ -48,6 +52,7 @@ Item {
         ObjectPalette {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            isActive: root.objectActive
 
             onObjectSelected: function (type) {
                 root.objectSelected(type)

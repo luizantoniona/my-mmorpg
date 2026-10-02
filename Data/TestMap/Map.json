@@ -1,17 +1,17 @@
 {
-    "Catalogs" : 
-    {
-        "Objects" : "Object.json",
-        "Tiles" : "Tile.json"
+    "Catalogs": {
+        "Creatures": "Creature.json",
+        "Items": "Items.json",
+        "Objects": "Object.json",
+        "Tiles": "Tile.json"
     },
-    "Floors" : 
-    [
+    "Floors": [
         "0.json"
     ],
-    "Height" : 64,
-    "Name" : "Test Map",
-    "SpawnX" : 32,
-    "SpawnY" : 32,
-    "SpawnZ" : 0,
-    "Width" : 64
+    "Height": 96,
+    "Name": "Test Map",
+    "SpawnX": 42,
+    "SpawnY": 42,
+    "SpawnZ": 0,
+    "Width": 96
 }

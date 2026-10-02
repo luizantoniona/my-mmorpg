@@ -7,7 +7,8 @@ ObjectModel::ObjectModel() :
     _name( "" ),
     _folder( "" ),
     _animation(),
-    _size() {
+    _size(),
+    _interaction( std::nullopt ) {
 }
 
 ObjectModel::~ObjectModel() = default;
@@ -58,6 +59,14 @@ ObjectSizeModel ObjectModel::size() const {
 
 void ObjectModel::setSize( const ObjectSizeModel& size ) {
     _size = size;
+}
+
+const std::optional<ObjectInteractionModel>& ObjectModel::interaction() const {
+    return _interaction;
+}
+
+void ObjectModel::setInteraction( const ObjectInteractionModel& interaction ) {
+    _interaction = interaction;
 }
 
 } // namespace Engine

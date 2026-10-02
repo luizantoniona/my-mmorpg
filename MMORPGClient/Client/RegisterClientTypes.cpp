@@ -3,6 +3,8 @@
 #include <QQmlEngine>
 
 #include <MMORPGClient/Client/Application/Account/AccountPageControl.h>
+#include <MMORPGClient/Client/Application/Game/Component/CharacterEquipmentPanelControl.h>
+#include <MMORPGClient/Client/Application/Game/Component/CharacterInventoryPanelControl.h>
 #include <MMORPGClient/Client/Application/Game/GamePageControl.h>
 #include <MMORPGClient/Client/Application/Login/LoginPageControl.h>
 #include <MMORPGClient/Client/Application/Sync/SyncPageControl.h>
@@ -16,7 +18,9 @@ namespace Client {
 void RegisterClientTypes::registerTypes() {
     // --- Controls
     qmlRegisterType<AccountPageControl>( "MMORPGClientControls", 1, 0, "AccountPageControl" );
+    qmlRegisterType<CharacterEquipmentPanelControl>( "MMORPGClientControls", 1, 0, "CharacterEquipmentPanelControl" );
     qmlRegisterType<GamePageControl>( "MMORPGClientControls", 1, 0, "GamePageControl" );
+    qmlRegisterType<CharacterInventoryPanelControl>( "MMORPGClientControls", 1, 0, "CharacterInventoryPanelControl" );
     qmlRegisterType<LoginPageControl>( "MMORPGClientControls", 1, 0, "LoginPageControl" );
     qmlRegisterType<SyncPageControl>( "MMORPGClientControls", 1, 0, "SyncPageControl" );
 

@@ -1,7 +1,12 @@
 #ifndef ENTITYBROADCASTER_H
 #define ENTITYBROADCASTER_H
 
+#include <string>
+#include <vector>
+
+#include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
+#include <MMORPGServer/Server/Network/Observer/EntityObserver.h>
 
 namespace Server {
 
@@ -9,17 +14,39 @@ class EntityBroadcaster {
 public:
     EntityBroadcaster();
 
+    void sendSnapshot( EntityObserver& observer );
+
 private:
-    void onEntityEntered( const WorldEvent& event );
-    void onEntityMoved( const WorldEvent& event );
-    void onEntityLeft( const WorldEvent& event );
-    void onEntityVitalsChanged( const WorldEvent& event );
+    void onCharacterEntered( const WorldEvent& event );
+    void onCharacterMoved( const WorldEvent& event );
+    void onCharacterLeft( const WorldEvent& event );
+    void onCharacterVitalsChanged( const WorldEvent& event );
+    void onCharacterAttackStarted( const WorldEvent& event );
+    void onCharacterAttacked( const WorldEvent& event );
+    void onCreatureEntered( const WorldEvent& event );
+    void onCreatureMoved( const WorldEvent& event );
+    void onCreatureVitalsChanged( const WorldEvent& event );
+    void onCreatureLeft( const WorldEvent& event );
+    void onCreatureAttackStarted( const WorldEvent& event );
+    void onCreatureAttacked( const WorldEvent& event );
 
     void sendWorldBasic( const WorldEvent& event );
     void sendOwnCharacter( const WorldEvent& event );
+    void sendOwnCombat( const WorldEvent& event );
+    void sendOwnEquipment( const WorldEvent& event );
+    void sendOwnInventory( const WorldEvent& event );
     void sendNearbyCharacters( const WorldEvent& event );
     void sendCreatures( const WorldEvent& event );
     void broadcastCharacter( const WorldEvent& event );
+    void broadcastAttackStart( const WorldEvent& event );
+    void broadcastAttack( const WorldEvent& event );
+    void broadcastCreature( const Json::Value& payload );
+
+    void sendToCharacter( int idCharacter, const std::string& message );
+    void broadcast( const std::vector<int>& idCharacters, const std::string& message );
+    void broadcastNear( const Json::Value& payload, const std::string& message );
+
+    static Engine::EntityPositionModel positionFromPayload( const Json::Value& payload );
 };
 
 } // namespace Server

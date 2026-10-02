@@ -40,7 +40,10 @@ int main( int argc, char* argv[] ) {
     Engine::Singleton<Engine::DataManager>::instance().initialize( DATA_PATH );
 
     // --- World ---
-    Engine::Singleton<Server::WorldManager>::instance().initialize( DATA_PATH );
+    if ( !Engine::Singleton<Server::WorldManager>::instance().initialize( DATA_PATH ) ) {
+        qCritical() << "ABORTING SERVER: world initialization failed";
+        return -1;
+    }
 
     // --- Entity broadcast ---
     Engine::Singleton<Server::EntityBroadcaster>::instance();
@@ -48,7 +51,8 @@ int main( int argc, char* argv[] ) {
     // --- Network ---
     Engine::Singleton<Server::NetworkManager>::instance().initialize();
 
-    QObject::connect( &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
+    QObject::connect(
+        &engine, &QQmlApplicationEngine::objectCreationFailed, &app, []() { QCoreApplication::exit( -1 ); }, Qt::QueuedConnection );
     engine.loadFromModule( "MMORPGServerComponents", "Main" );
 
     app.exec();

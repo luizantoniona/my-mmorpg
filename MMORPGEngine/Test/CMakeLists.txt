@@ -1,4 +1,5 @@
 find_package(GTest REQUIRED)
+include(GoogleTest)
 
 add_executable(
   MMORPGEngineTests
@@ -6,12 +7,25 @@ add_executable(
   CameraTest.cpp
   CharacterDTOTest.cpp
   ChunkModelTest.cpp
+  EntityCombatModelTest.cpp
+  EntityMovementModelTest.cpp
   FloorFactoryTest.cpp
+  ItemCatalogTest.cpp
+  ItemFactoryTest.cpp
+  ItemTypeCatalogTest.cpp
+  ItemTypeFactoryTest.cpp
   JsonHelperTest.cpp
   ManifestFactoryTest.cpp
+  CreatureTypeCatalogTest.cpp
+  CreatureTypeFactoryTest.cpp
   ObjectCatalogTest.cpp
   ObjectFactoryTest.cpp
+  OwnCombatDTOTest.cpp
   RenderWorldTest.cpp
+  StreamRenderWorldTest.cpp
+  SkillCatalogTest.cpp
+  SkillFactoryTest.cpp
+  SkillTreeModelTest.cpp
   TileCatalogTest.cpp
   TileFactoryTest.cpp
   WorldFactoryTest.cpp
@@ -20,4 +34,4 @@ add_executable(
 
 target_link_libraries(MMORPGEngineTests PRIVATE MMORPG::MMORPGEngine GTest::gtest_main)
 
-add_test(NAME MMORPGEngineTests COMMAND MMORPGEngineTests)
+gtest_discover_tests(MMORPGEngineTests DISCOVERY_MODE PRE_TEST)

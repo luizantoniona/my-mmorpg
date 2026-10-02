@@ -18,8 +18,7 @@ void TileFactory::createTileCatalog( const QString& configPath, TileCatalog& til
 
     const QString tilesFile = mapPath + QString( mapJson[ "Catalogs" ][ "Tiles" ].asCString() );
 
-    qInfo() << "TileFactory::createTileCatalog"
-            << "[TILES_FILE_PATH]" << tilesFile;
+    qInfo() << "TileFactory::createTileCatalog" << "[TILES_FILE_PATH]" << tilesFile;
 
     Json::Value json = JsonHelper::loadJsonFile( tilesFile );
 
@@ -44,18 +43,15 @@ void TileFactory::createTileCatalog( const QString& configPath, TileCatalog& til
 
         const bool isAnimated = tileJson.get( "IsAnimated", false ).asBool();
         const int frameDurationMs = tileJson.get( "FrameDurationMs", 100 ).asInt();
-        const QString extension = isAnimated ? ".gif" : ".png";
-        const QString texturePath = mapPath + tile.folder() + "/" + tile.name() + extension;
+        const QString texturePath = DataFactory::resolveTexturePath( mapPath + tile.folder() + "/" + tile.name(), isAnimated );
 
         const AnimationModel animation = DataFactory::loadAnimation( texturePath, isAnimated, frameDurationMs );
         if ( animation.isNull() ) {
-            qWarning() << "TileFactory::createTileCatalog"
-                       << "Failed to load texture:" << texturePath;
+            qWarning() << "TileFactory::createTileCatalog" << "Failed to load texture:" << texturePath;
 
         } else {
             tile.setAnimation( animation );
-            qInfo() << "TileFactory::createTileCatalog"
-                    << "Loaded texture:" << texturePath;
+            qInfo() << "TileFactory::createTileCatalog" << "Loaded texture:" << texturePath;
         }
 
         tileCatalog.addTile( std::move( tile ) );
@@ -97,8 +93,7 @@ void TileFactory::saveTileCatalog( const QString& configPath, const TileCatalog&
         json[ "Tiles" ].append( tileJson );
     }
 
-    qInfo() << "TileFactory::saveTileCatalog"
-            << "[TILES_FILE_PATH]" << tilesFile;
+    qInfo() << "TileFactory::saveTileCatalog" << "[TILES_FILE_PATH]" << tilesFile;
 
     JsonHelper::saveJsonFile( tilesFile, json );
 }

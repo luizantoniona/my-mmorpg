@@ -7,6 +7,8 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Data/Animation/AnimationModel.h>
 #include <MMORPGEngine/Data/DataFactory.h>
+#include <MMORPGEngine/Data/Object/ObjectInteractionHelper.h>
+#include <MMORPGEngine/Data/Object/ObjectInteractionModel.h>
 #include <MMORPGEngine/Data/Object/ObjectModel.h>
 #include <MMORPGEngine/Data/Object/ObjectSizeModel.h>
 
@@ -19,8 +21,7 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
 
     const QString objectsFile = mapPath + QString( mapJson[ "Catalogs" ][ "Objects" ].asCString() );
 
-    qInfo() << "ObjectFactory::createObjectCatalog"
-            << "[OBJECTS_FILE_PATH]" << objectsFile;
+    qInfo() << "ObjectFactory::createObjectCatalog" << "[OBJECTS_FILE_PATH]" << objectsFile;
 
     Json::Value json = JsonHelper::loadJsonFile( objectsFile );
 
@@ -40,20 +41,31 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
 
         object.setFolder( QString( objectJson[ "TextureFolder" ].asCString() ) );
 
+        if ( objectJson.isMember( "Interaction" ) ) {
+            const std::optional<ObjectInteractionEnum> interactionType = ObjectInteractionHelper::fromString( objectJson[ "Interaction" ].asString() );
+
+            if ( interactionType.has_value() ) {
+                ObjectInteractionModel interaction;
+                interaction.setType( interactionType.value() );
+                interaction.setContainerCapacity( objectJson.get( "ContainerCapacity", 0 ).asUInt() );
+                object.setInteraction( interaction );
+
+            } else {
+                qWarning() << "ObjectFactory::createObjectCatalog" << "Unknown Interaction, ignoring:" << QString::fromStdString( objectJson[ "Interaction" ].asString() );
+            }
+        }
+
         const bool isAnimated = objectJson.get( "IsAnimated", false ).asBool();
         const int frameDurationMs = objectJson.get( "FrameDurationMs", 100 ).asInt();
-        const QString extension = isAnimated ? ".gif" : ".png";
-        const QString texturePath = mapPath + object.folder() + "/" + object.name() + extension;
+        const QString texturePath = DataFactory::resolveTexturePath( mapPath + object.folder() + "/" + object.name(), isAnimated );
 
         const AnimationModel animation = DataFactory::loadAnimation( texturePath, isAnimated, frameDurationMs );
         if ( animation.isNull() ) {
-            qWarning() << "ObjectFactory::createObjectCatalog"
-                       << "Failed to load texture:" << texturePath;
+            qWarning() << "ObjectFactory::createObjectCatalog" << "Failed to load texture:" << texturePath;
 
         } else {
             object.setAnimation( animation );
-            qInfo() << "ObjectFactory::createObjectCatalog"
-                    << "Loaded texture:" << texturePath;
+            qInfo() << "ObjectFactory::createObjectCatalog" << "Loaded texture:" << texturePath;
         }
 
         objectCatalog.addObject( std::move( object ) );
@@ -86,6 +98,11 @@ void ObjectFactory::saveObjectCatalog( const QString& configPath, const ObjectCa
 
         objectJson[ "TextureFolder" ] = object.folder().toStdString();
 
+        if ( object.interaction().has_value() ) {
+            objectJson[ "Interaction" ] = ObjectInteractionHelper::toString( object.interaction()->type() );
+            objectJson[ "ContainerCapacity" ] = object.interaction()->containerCapacity();
+        }
+
         if ( object.animation().isAnimated() ) {
             objectJson[ "IsAnimated" ] = true;
             objectJson[ "FrameDurationMs" ] = object.animation().frameDurationMs();
@@ -94,8 +111,7 @@ void ObjectFactory::saveObjectCatalog( const QString& configPath, const ObjectCa
         json[ "Objects" ].append( objectJson );
     }
 
-    qInfo() << "ObjectFactory::saveObjectCatalog"
-            << "[OBJECTS_FILE_PATH]" << objectsFile;
+    qInfo() << "ObjectFactory::saveObjectCatalog" << "[OBJECTS_FILE_PATH]" << objectsFile;
 
     JsonHelper::saveJsonFile( objectsFile, json );
 }

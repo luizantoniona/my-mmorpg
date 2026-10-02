@@ -14,6 +14,7 @@ public:
     const TileModel* tile( uint32_t type ) const;
     const std::unordered_map<uint32_t, TileModel>& tiles() const;
     void addTile( const TileModel& tile );
+    void replaceTile( const TileModel& tile );
 
 private:
     std::unordered_map<uint32_t, TileModel> _tiles;
