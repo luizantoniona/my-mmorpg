@@ -163,6 +163,9 @@ Item {
                         visible: false
 
                         onClosed: inventoryPanel.visible = false
+                        onEquipRequested: function (position) {
+                            control.equip(position)
+                        }
                     }
 
                     CharacterEquipmentPanel {
@@ -172,6 +175,9 @@ Item {
                         visible: false
 
                         onClosed: equipmentPanel.visible = false
+                        onUnequipRequested: function (slot) {
+                            control.unequip(slot)
+                        }
                     }
                 }
             }

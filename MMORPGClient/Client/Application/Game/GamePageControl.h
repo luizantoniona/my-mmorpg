@@ -65,6 +65,9 @@ public slots:
     void attack( int dx, int dy );
     void useSecondAction();
 
+    void equip( int inventoryPosition );
+    void unequip( const QString& slot );
+
     void leaveWorld();
 
 signals:

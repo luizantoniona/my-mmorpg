@@ -1,5 +1,7 @@
 #include "GamePageControl.h"
 
+#include <optional>
+
 #include <QUrl>
 
 #include <MMORPGClient/Client/Manager/AccountManager.h>
@@ -7,7 +9,10 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentActionDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentEquipDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentMoveDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentUnequipDTO.h>
+#include <MMORPGEngine/Entity/Character/EquipmentSlotHelper.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
 #include <MMORPGEngine/Entity/CombatActionHelper.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
@@ -179,6 +184,29 @@ void GamePageControl::useSecondAction() {
     } else if ( combat.isActionAvailable( Engine::CombatActionEnum::DODGE ) ) {
         sendAction( Engine::CombatActionEnum::DODGE, 0, 0 );
     }
+}
+
+void GamePageControl::equip( int inventoryPosition ) {
+    if ( inventoryPosition < 0 ) {
+        return;
+    }
+
+    Engine::CharacterIntentEquipDTO input;
+    input.setPosition( static_cast<uint32_t>( inventoryPosition ) );
+
+    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
+}
+
+void GamePageControl::unequip( const QString& slot ) {
+    const std::optional<Engine::EquipmentSlotEnum> equipmentSlot = Engine::EquipmentSlotHelper::fromString( slot.toStdString() );
+    if ( !equipmentSlot ) {
+        return;
+    }
+
+    Engine::CharacterIntentUnequipDTO input;
+    input.setSlot( *equipmentSlot );
+
+    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
 }
 
 void GamePageControl::leaveWorld() {

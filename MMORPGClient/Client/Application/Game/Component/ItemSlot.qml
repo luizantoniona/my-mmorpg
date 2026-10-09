@@ -11,6 +11,8 @@ Rectangle {
 
     readonly property bool vIsEmpty: root.vItemName === ""
 
+    signal doubleClicked()
+
     color: Colors.background2
     border.color: root.vIsEmpty ? Colors.border : Colors.info
     border.width: Borders.border1
@@ -34,6 +36,12 @@ Rectangle {
 
     HoverHandler {
         id: hoverHandler
+    }
+
+    TapHandler {
+        enabled: !root.vIsEmpty
+
+        onDoubleTapped: root.doubleClicked()
     }
 
     TooltipBase {

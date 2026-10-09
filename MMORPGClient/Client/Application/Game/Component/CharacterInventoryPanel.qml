@@ -10,6 +10,8 @@ GamePanelBase {
     // (ROADMAP.md, Fase P passo 5), possivelmente por Level quando esse sistema existir.
     readonly property int vCapacity: 20
 
+    signal equipRequested(int position)
+
     CharacterInventoryPanelControl {
         id: control
     }
@@ -45,6 +47,8 @@ GamePanelBase {
                 vItemName: entry ? control.itemName(entry.idItem) : ""
                 vIconSource: entry ? "image://ClientItemIcon/" + entry.idItem : ""
                 vAmount: entry ? entry.amount : 0
+
+                onDoubleClicked: root.equipRequested(index)
             }
         }
     }

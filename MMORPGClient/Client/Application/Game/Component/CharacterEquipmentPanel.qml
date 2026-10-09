@@ -42,6 +42,8 @@ GamePanelBase {
             "label": qsTr("Feet")
         }]
 
+    signal unequipRequested(string slot)
+
     function equippedIdItem(slot) {
         for (var i = 0; i < control.equipment.length; i++) {
             if (control.equipment[i].slot === slot) {
@@ -72,6 +74,8 @@ GamePanelBase {
                 vLabel: modelData.label
                 vItemName: idItem > 0 ? control.itemName(idItem) : ""
                 vIconSource: idItem > 0 ? "image://ClientItemIcon/" + idItem : ""
+
+                onDoubleClicked: root.unequipRequested(modelData.slot)
             }
         }
     }
