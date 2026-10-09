@@ -45,6 +45,15 @@ TEST( CreaturePathfinderTest, NextStep_RangedReach_StopsAtRangeInsteadOfAdjacent
     EXPECT_EQ( step->x(), 1 );
 }
 
+TEST( CreaturePathfinderTest, NextStep_LargeFootprint_StopsWhenEdgeIsWithinReach ) {
+    EXPECT_FALSE( Server::CreaturePathfinder::nextStep( positionAt( 0, 0 ), positionAt( 3, 1 ), 1, alwaysWalkable, neverOccupied, 3 ).has_value() );
+
+    const auto step = Server::CreaturePathfinder::nextStep( positionAt( 0, 0 ), positionAt( 6, 1 ), 1, alwaysWalkable, neverOccupied, 3 );
+
+    ASSERT_TRUE( step.has_value() );
+    EXPECT_EQ( step->x(), 1 );
+}
+
 TEST( CreaturePathfinderTest, NextStep_WallInTheWay_GoesAround ) {
     const auto isWalkable = []( int x, int y, int ) { return !( x == 1 && y >= -1 && y <= 1 ); };
 

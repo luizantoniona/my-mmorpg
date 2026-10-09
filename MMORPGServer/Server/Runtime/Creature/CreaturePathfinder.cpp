@@ -25,8 +25,16 @@ int unpackY( int64_t key ) {
     return static_cast<int>( static_cast<uint32_t>( key & 0xFFFFFFFF ) );
 }
 
-int distance( int x, int y, int goalX, int goalY ) {
-    return std::max( std::abs( x - goalX ), std::abs( y - goalY ) );
+int axisGap( int start, int size, int goal ) {
+    if ( goal < start ) {
+        return start - goal;
+    }
+
+    return std::max( 0, goal - ( start + size - 1 ) );
+}
+
+int distance( int x, int y, int goalX, int goalY, int footprint ) {
+    return std::max( axisGap( x, footprint, goalX ), axisGap( y, footprint, goalY ) );
 }
 
 } // namespace
@@ -38,9 +46,10 @@ std::optional<Engine::EntityPositionModel> CreaturePathfinder::nextStep(
     const Engine::EntityPositionModel& goal,
     int reach,
     const PositionPredicate& isWalkable,
-    const PositionPredicate& isOccupied ) {
+    const PositionPredicate& isOccupied,
+    int footprint ) {
 
-    if ( from.z() != goal.z() || distance( from.x(), from.y(), goal.x(), goal.y() ) <= reach ) {
+    if ( from.z() != goal.z() || distance( from.x(), from.y(), goal.x(), goal.y(), footprint ) <= reach ) {
         return std::nullopt;
     }
 
@@ -52,7 +61,7 @@ std::optional<Engine::EntityPositionModel> CreaturePathfinder::nextStep(
     std::unordered_map<int64_t, int64_t> parents;
     std::unordered_map<int64_t, int> costs;
 
-    open.push( QueueEntry( distance( from.x(), from.y(), goal.x(), goal.y() ), startKey ) );
+    open.push( QueueEntry( distance( from.x(), from.y(), goal.x(), goal.y(), footprint ), startKey ) );
     parents[ startKey ] = startKey;
     costs[ startKey ] = 0;
 
@@ -66,7 +75,7 @@ std::optional<Engine::EntityPositionModel> CreaturePathfinder::nextStep(
         const int currentX = unpackX( currentKey );
         const int currentY = unpackY( currentKey );
 
-        if ( distance( currentX, currentY, goal.x(), goal.y() ) <= reach ) {
+        if ( distance( currentX, currentY, goal.x(), goal.y(), footprint ) <= reach ) {
             int64_t stepKey = currentKey;
             while ( parents[ stepKey ] != startKey ) {
                 stepKey = parents[ stepKey ];
@@ -102,7 +111,7 @@ std::optional<Engine::EntityPositionModel> CreaturePathfinder::nextStep(
 
                 costs[ nextKey ] = nextCost;
                 parents[ nextKey ] = currentKey;
-                open.push( QueueEntry( nextCost + distance( nextX, nextY, goal.x(), goal.y() ), nextKey ) );
+                open.push( QueueEntry( nextCost + distance( nextX, nextY, goal.x(), goal.y(), footprint ), nextKey ) );
             }
         }
     }

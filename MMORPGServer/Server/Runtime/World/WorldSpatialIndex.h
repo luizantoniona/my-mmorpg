@@ -35,6 +35,7 @@ public:
     Engine::CreatureModel* creatureAt( int x, int y, int z ) const;
 
     bool isPositionOccupied( const Engine::EntityPositionModel& position ) const;
+    bool isAreaOccupied( int x, int y, int z, int width, int height, int ignoredIdCreature = -1 ) const;
 
 private:
     std::unordered_map<ChunkCoordinate, std::vector<Engine::CharacterModel*>, ChunkCoordinateHash> _charactersByChunk;

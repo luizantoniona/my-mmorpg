@@ -84,7 +84,7 @@ std::optional<Engine::EntityPositionModel> CreatureRuntime::chase(
         return std::nullopt;
     }
 
-    const auto step = CreaturePathfinder::nextStep( _creature->position(), targetPosition, attackRange, isWalkable, isOccupied );
+    const auto step = CreaturePathfinder::nextStep( _creature->position(), targetPosition, attackRange, isWalkable, isOccupied, _creature->size().width() );
     if ( !step ) {
         return std::nullopt;
     }

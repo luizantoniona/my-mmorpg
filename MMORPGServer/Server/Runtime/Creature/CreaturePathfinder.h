@@ -17,7 +17,8 @@ public:
         const Engine::EntityPositionModel& goal,
         int reach,
         const PositionPredicate& isWalkable,
-        const PositionPredicate& isOccupied );
+        const PositionPredicate& isOccupied,
+        int footprint = 1 );
 };
 
 } // namespace Server

@@ -95,9 +95,8 @@ bool WorldSpatialIndex::hasCharacterNear( const Engine::EntityPositionModel& pos
 Engine::CharacterModel* WorldSpatialIndex::characterAt( int x, int y, int z ) const {
     for ( const auto& entry : _characters ) {
         Engine::CharacterModel* characterPtr = entry.second->character();
-        const Engine::EntityPositionModel& position = characterPtr->position();
 
-        if ( position.x() == x && position.y() == y && position.z() == z ) {
+        if ( characterPtr->occupies( x, y, z ) ) {
             return characterPtr;
         }
     }
@@ -154,9 +153,8 @@ std::vector<Engine::CreatureModel> WorldSpatialIndex::creaturesNear( const Engin
 Engine::CreatureModel* WorldSpatialIndex::creatureAt( int x, int y, int z ) const {
     for ( const auto& entry : _creatures ) {
         Engine::CreatureModel* creaturePtr = entry.second->creature();
-        const Engine::EntityPositionModel& position = creaturePtr->position();
 
-        if ( position.x() == x && position.y() == y && position.z() == z ) {
+        if ( creaturePtr->occupies( x, y, z ) ) {
             return creaturePtr;
         }
     }
@@ -165,15 +163,25 @@ Engine::CreatureModel* WorldSpatialIndex::creatureAt( int x, int y, int z ) cons
 }
 
 bool WorldSpatialIndex::isPositionOccupied( const Engine::EntityPositionModel& position ) const {
-    for ( const auto& entry : _characters ) {
-        const Engine::EntityPositionModel& characterPosition = entry.second->character()->position();
+    return isAreaOccupied( position.x(), position.y(), position.z(), 1, 1 );
+}
 
-        if ( characterPosition.x() == position.x() && characterPosition.y() == position.y() && characterPosition.z() == position.z() ) {
+bool WorldSpatialIndex::isAreaOccupied( int x, int y, int z, int width, int height, int ignoredIdCreature ) const {
+    for ( const auto& entry : _characters ) {
+        if ( entry.second->character()->overlaps( x, y, z, width, height ) ) {
             return true;
         }
     }
 
-    return creatureAt( position.x(), position.y(), position.z() ) != nullptr;
+    for ( const auto& entry : _creatures ) {
+        const Engine::CreatureModel* creaturePtr = entry.second->creature();
+
+        if ( creaturePtr->idCreature() != ignoredIdCreature && creaturePtr->overlaps( x, y, z, width, height ) ) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 } // namespace Server

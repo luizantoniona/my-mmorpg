@@ -2,7 +2,7 @@
 
 namespace Server {
 
-WorldSpawnAreaRuntime::Pending::Pending( uint32_t type, int64_t dueTick ) :
+WorldSpawnAreaRuntime::Pending::Pending( const QString& type, int64_t dueTick ) :
     type( type ),
     dueTick( dueTick ) {
 }
@@ -33,7 +33,7 @@ std::vector<WorldSpawnAreaRuntime::Pending>& WorldSpawnAreaRuntime::pending() {
     return _pending;
 }
 
-void WorldSpawnAreaRuntime::addPending( uint32_t type, int64_t dueTick ) {
+void WorldSpawnAreaRuntime::addPending( const QString& type, int64_t dueTick ) {
     _pending.emplace_back( type, dueTick );
 }
 

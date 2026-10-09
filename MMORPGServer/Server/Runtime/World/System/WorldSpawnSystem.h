@@ -27,7 +27,7 @@ private:
     void onCreatureDied( const WorldEvent& event );
 
     void spawnDue( WorldSpawnAreaRuntime& area );
-    bool spawnCreature( WorldSpawnAreaRuntime& area, uint32_t type );
+    bool spawnCreature( WorldSpawnAreaRuntime& area, const QString& type );
 
     int64_t ticksFromSeconds( double seconds ) const;
 

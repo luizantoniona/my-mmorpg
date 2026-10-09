@@ -1,5 +1,6 @@
 #include "WorldCreatureSystem.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <optional>
 #include <vector>
@@ -32,8 +33,16 @@ public:
 };
 
 // TODO: ranged attackers also need line of sight, not only distance
-bool isWithinRange( const Engine::EntityPositionModel& from, const Engine::EntityPositionModel& to, int range ) {
-    return from.z() == to.z() && std::abs( from.x() - to.x() ) <= range && std::abs( from.y() - to.y() ) <= range;
+int axisGap( int start, int size, int target ) {
+    if ( target < start ) {
+        return start - target;
+    }
+
+    return std::max( 0, target - ( start + size - 1 ) );
+}
+
+bool isWithinRange( const Engine::EntityPositionModel& from, int footprint, const Engine::EntityPositionModel& to, int range ) {
+    return from.z() == to.z() && axisGap( from.x(), footprint, to.x() ) <= range && axisGap( from.y(), footprint, to.y() ) <= range;
 }
 
 } // namespace
@@ -55,22 +64,32 @@ void WorldCreatureSystem::onTick() {
         const Engine::CreatureTypeCatalog& creatureTypeCatalog = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog();
         const Engine::WorldModel* world = _runtime.world();
 
-        const auto isWalkable = [ world ]( int x, int y, int z ) {
-            const Engine::WorldTileModel* worldTile = world ? world->tile( x, y, z ) : nullptr;
-            return worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable();
-        };
-
-        const auto isOccupied = [ &spatialIndex ]( int x, int y, int z ) {
-            Engine::EntityPositionModel position;
-            position.setX( x );
-            position.setY( y );
-            position.setZ( z );
-            return spatialIndex.isPositionOccupied( position );
+        const auto isTileWalkable = [ world ]( int x, int y, int z ) {
+            return world && world->isWalkable( x, y, z );
         };
 
         for ( auto& entry : _runtime.creaturesLocked() ) {
             CreatureRuntime& creatureRuntime = *entry.second;
             Engine::CreatureModel* creaturePtr = creatureRuntime.creature();
+
+            const int footprint = creaturePtr->size().width();
+            const int idCreature = creaturePtr->idCreature();
+
+            const auto isWalkable = [ &isTileWalkable, footprint ]( int x, int y, int z ) {
+                for ( int offsetX = 0; offsetX < footprint; ++offsetX ) {
+                    for ( int offsetY = 0; offsetY < footprint; ++offsetY ) {
+                        if ( !isTileWalkable( x + offsetX, y + offsetY, z ) ) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            };
+
+            const auto isOccupied = [ &spatialIndex, footprint, idCreature ]( int x, int y, int z ) {
+                return spatialIndex.isAreaOccupied( x, y, z, footprint, footprint, idCreature );
+            };
 
             Engine::EntityCombatModel& combat = creaturePtr->combat();
             combat.setCounter( combat.counter() + 1 );
@@ -86,7 +105,7 @@ void WorldCreatureSystem::onTick() {
             if ( target ) {
                 const int attackRange = combat.attackRange();
 
-                if ( !isWithinRange( creaturePtr->position(), target->position(), attackRange ) ) {
+                if ( !isWithinRange( creaturePtr->position(), footprint, target->position(), attackRange ) ) {
                     movedPosition = creatureRuntime.chase( target->position(), attackRange, isWalkable, isOccupied, _runtime.tickRate() );
                 } else if ( combat.isReady( _runtime.tickRate() ) && !_runtime.combatSystem().hasPendingCreatureAttack( creaturePtr->idCreature() ) ) {
                     attackIntents.push_back( CreatureAttackIntent( creaturePtr->idCreature(), target->position().x(), target->position().y(), target->position().z() ) );
@@ -111,6 +130,7 @@ void WorldCreatureSystem::onTick() {
             payload[ "health" ] = creaturePtr->vitals().health();
             payload[ "maxHealth" ] = creaturePtr->vitals().maxHealth();
             payload[ "movementCooldownSeconds" ] = creaturePtr->movement().cooldownSeconds();
+            payload[ "footprint" ] = footprint;
 
             movedCreaturePayloads.push_back( payload );
         }

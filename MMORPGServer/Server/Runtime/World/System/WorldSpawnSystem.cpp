@@ -107,7 +107,7 @@ void WorldSpawnSystem::onCreatureDied( const WorldEvent& event ) {
     WorldSpawnAreaRuntime* area = it->second;
     _creatureAreas.erase( it );
 
-    area->addPending( payload[ "type" ].asUInt(), _currentTick + ticksFromSeconds( area->area().respawnSeconds() ) );
+    area->addPending( QString::fromStdString( payload[ "type" ].asString() ), _currentTick + ticksFromSeconds( area->area().respawnSeconds() ) );
 
     if ( std::find( _activeAreas.begin(), _activeAreas.end(), area ) == _activeAreas.end() ) {
         _activeAreas.push_back( area );
@@ -132,21 +132,33 @@ void WorldSpawnSystem::spawnDue( WorldSpawnAreaRuntime& area ) {
     }
 }
 
-bool WorldSpawnSystem::spawnCreature( WorldSpawnAreaRuntime& area, uint32_t type ) {
+bool WorldSpawnSystem::spawnCreature( WorldSpawnAreaRuntime& area, const QString& type ) {
     const Engine::WorldModel* world = _runtime.world();
     const Engine::CreatureSpawnAreaModel& areaModel = area.area();
 
     std::uniform_int_distribution<int> xDistribution( areaModel.x(), areaModel.x() + static_cast<int>( areaModel.width() ) - 1 );
     std::uniform_int_distribution<int> yDistribution( areaModel.y(), areaModel.y() + static_cast<int>( areaModel.height() ) - 1 );
 
+    const Engine::CreatureTypeModel* creatureType = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog().creatureType( type );
+    const int footprint = creatureType ? static_cast<int>( creatureType->footprint() ) : 1;
+
+    const auto isFootprintWalkable = [ world, &area, footprint ]( int x, int y ) {
+        for ( int offsetX = 0; offsetX < footprint; ++offsetX ) {
+            for ( int offsetY = 0; offsetY < footprint; ++offsetY ) {
+                if ( !world->isWalkable( x + offsetX, y + offsetY, area.z() ) ) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    };
+
     for ( int attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; ++attempt ) {
         const int x = xDistribution( _randomEngine );
         const int y = yDistribution( _randomEngine );
 
-        const Engine::WorldTileModel* worldTile = world->tile( x, y, area.z() );
-        const bool walkable = worldTile && worldTile->tileModel() && worldTile->tileModel()->isWalkable();
-
-        if ( !walkable || _runtime.isPositionOccupied( x, y, area.z() ) ) {
+        if ( !isFootprintWalkable( x, y ) || _runtime.isAreaOccupied( x, y, area.z(), footprint, footprint ) ) {
             continue;
         }
 
@@ -156,8 +168,9 @@ bool WorldSpawnSystem::spawnCreature( WorldSpawnAreaRuntime& area, uint32_t type
         creature->position().setX( x );
         creature->position().setY( y );
         creature->position().setZ( area.z() );
+        creature->size().setWidth( footprint );
+        creature->size().setHeight( footprint );
 
-        const Engine::CreatureTypeModel* creatureType = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog().creatureType( type );
         if ( creatureType ) {
             creature->vitals().setMaxHealth( creatureType->vitals().maxHealth() );
             creature->vitals().setHealth( creatureType->vitals().maxHealth() );
@@ -175,6 +188,7 @@ bool WorldSpawnSystem::spawnCreature( WorldSpawnAreaRuntime& area, uint32_t type
         payload[ "health" ] = creaturePtr->vitals().health();
         payload[ "maxHealth" ] = creaturePtr->vitals().maxHealth();
         payload[ "movementCooldownSeconds" ] = creaturePtr->movement().cooldownSeconds();
+        payload[ "footprint" ] = footprint;
         _runtime.eventBus().publish( WorldEvent( WorldEventType::CREATURE_ENTERED, payload ) );
 
         return true;
