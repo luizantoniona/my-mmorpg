@@ -4,7 +4,7 @@ namespace Engine {
 
 TileModel::TileModel() :
     _name( "" ),
-    _folder( "" ),
+    _textureFile( "" ),
     _animation(),
     _tags(),
     _type( 0 ),
@@ -27,12 +27,12 @@ void TileModel::setName( const QString& name ) {
     _name = name;
 }
 
-QString TileModel::folder() const {
-    return _folder;
+QString TileModel::textureFile() const {
+    return _textureFile;
 }
 
-void TileModel::setFolder( const QString& folder ) {
-    _folder = folder;
+void TileModel::setTextureFile( const QString& textureFile ) {
+    _textureFile = textureFile;
 }
 
 QImage TileModel::texture() const {

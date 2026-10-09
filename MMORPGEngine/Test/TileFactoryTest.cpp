@@ -46,7 +46,7 @@ TEST_F( TileFactoryTest, CreateTileCatalog_ParsesFields ) {
     Json::Value tile;
     tile[ "Type" ] = 1;
     tile[ "Name" ] = "Grass";
-    tile[ "TextureFolder" ] = "Textures/Tiles/Grass";
+    tile[ "TextureFile" ] = "Textures/Tiles/grass_01";
     tile[ "IsWalkable" ] = false;
     Json::Value tags( Json::arrayValue );
     tags.append( "nature" );
@@ -61,7 +61,7 @@ TEST_F( TileFactoryTest, CreateTileCatalog_ParsesFields ) {
 
     ASSERT_NE( catalog.tile( 1 ), nullptr );
     EXPECT_EQ( catalog.tile( 1 )->name(), "Grass" );
-    EXPECT_EQ( catalog.tile( 1 )->folder(), "Textures/Tiles/Grass" );
+    EXPECT_EQ( catalog.tile( 1 )->textureFile(), "Textures/Tiles/grass_01" );
     EXPECT_FALSE( catalog.tile( 1 )->isWalkable() );
     ASSERT_EQ( catalog.tile( 1 )->tags().size(), 1 );
     EXPECT_EQ( catalog.tile( 1 )->tags().first(), "nature" );
@@ -71,7 +71,7 @@ TEST_F( TileFactoryTest, CreateTileCatalog_MissingIsWalkable_DefaultsToTrue ) {
     Json::Value tile;
     tile[ "Type" ] = 1;
     tile[ "Name" ] = "Grass";
-    tile[ "TextureFolder" ] = "Textures/Tiles/Grass";
+    tile[ "TextureFile" ] = "Textures/Tiles/grass_01";
 
     Json::Value tiles( Json::arrayValue );
     tiles.append( tile );
@@ -88,12 +88,12 @@ TEST_F( TileFactoryTest, CreateTileCatalog_MultipleTiles_AllAdded ) {
     Json::Value first;
     first[ "Type" ] = 1;
     first[ "Name" ] = "Grass";
-    first[ "TextureFolder" ] = "Textures/Tiles/Grass";
+    first[ "TextureFile" ] = "Textures/Tiles/grass_01";
 
     Json::Value second;
     second[ "Type" ] = 2;
     second[ "Name" ] = "Sand";
-    second[ "TextureFolder" ] = "Textures/Tiles/Sand";
+    second[ "TextureFile" ] = "Textures/Tiles/sand_01";
 
     Json::Value tiles( Json::arrayValue );
     tiles.append( first );
@@ -106,12 +106,37 @@ TEST_F( TileFactoryTest, CreateTileCatalog_MultipleTiles_AllAdded ) {
     EXPECT_EQ( catalog.tiles().size(), 2u );
 }
 
+TEST_F( TileFactoryTest, CreateTileCatalog_SameNameDifferentTextureFile_BothKept ) {
+    Json::Value first;
+    first[ "Type" ] = 1;
+    first[ "Name" ] = "Stone ground";
+    first[ "TextureFile" ] = "Textures/Tiles/stone_01";
+
+    Json::Value second;
+    second[ "Type" ] = 2;
+    second[ "Name" ] = "Stone ground";
+    second[ "TextureFile" ] = "Textures/Tiles/stone_02";
+
+    Json::Value tiles( Json::arrayValue );
+    tiles.append( first );
+    tiles.append( second );
+    writeTilesJson( tiles );
+
+    Engine::TileCatalog catalog;
+    Engine::TileFactory::createTileCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.tile( 1 ), nullptr );
+    ASSERT_NE( catalog.tile( 2 ), nullptr );
+    EXPECT_EQ( catalog.tile( 1 )->name(), catalog.tile( 2 )->name() );
+    EXPECT_NE( catalog.tile( 1 )->textureFile(), catalog.tile( 2 )->textureFile() );
+}
+
 TEST_F( TileFactoryTest, SaveTileCatalog_ThenCreateTileCatalog_RoundTripsFields ) {
     Engine::TileCatalog original;
     Engine::TileModel tile;
     tile.setType( 4 );
     tile.setName( "Stone" );
-    tile.setFolder( "Textures/Tiles/Stone" );
+    tile.setTextureFile( "Textures/Tiles/stone_01" );
     tile.setIsWalkable( false );
     tile.setTags( { "solid" } );
     original.addTile( tile );
@@ -123,7 +148,7 @@ TEST_F( TileFactoryTest, SaveTileCatalog_ThenCreateTileCatalog_RoundTripsFields 
 
     ASSERT_NE( reloaded.tile( 4 ), nullptr );
     EXPECT_EQ( reloaded.tile( 4 )->name(), "Stone" );
-    EXPECT_EQ( reloaded.tile( 4 )->folder(), "Textures/Tiles/Stone" );
+    EXPECT_EQ( reloaded.tile( 4 )->textureFile(), "Textures/Tiles/stone_01" );
     EXPECT_FALSE( reloaded.tile( 4 )->isWalkable() );
     ASSERT_EQ( reloaded.tile( 4 )->tags().size(), 1 );
     EXPECT_EQ( reloaded.tile( 4 )->tags().first(), "solid" );

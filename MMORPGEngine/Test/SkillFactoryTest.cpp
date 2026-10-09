@@ -190,7 +190,7 @@ TEST_F( SkillFactoryTest, SaveSkillCatalog_PreservesItemTypeFields ) {
     Json::Value itemType;
     itemType[ "Name" ] = "Sword";
     itemType[ "Category" ] = "WEAPON";
-    itemType[ "Slot" ] = "Hand";
+    itemType[ "Slot" ] = "HAND";
     writeItemTypeJson( "SWORD", itemType );
 
     Engine::SkillCatalog original;

@@ -84,6 +84,10 @@ void DataManager::replaceTile( const TileModel& tile ) {
     _tileCatalog.replaceTile( tile );
 }
 
+void DataManager::removeTile( uint32_t type ) {
+    _tileCatalog.removeTile( type );
+}
+
 const ItemTypeCatalog& DataManager::itemTypeCatalog() const {
     return _itemTypeCatalog;
 }

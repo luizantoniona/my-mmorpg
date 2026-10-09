@@ -20,8 +20,8 @@ public:
     QString name() const;
     void setName( const QString& name );
 
-    QString folder() const;
-    void setFolder( const QString& folder );
+    QString textureFile() const;
+    void setTextureFile( const QString& textureFile );
 
     QImage texture() const;
     void setTexture( const QImage& texture );
@@ -37,7 +37,7 @@ public:
 
 private:
     QString _name;
-    QString _folder;
+    QString _textureFile;
     AnimationModel _animation;
     QList<QString> _tags;
     uint32_t _type;

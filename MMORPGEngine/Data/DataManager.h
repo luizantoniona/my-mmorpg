@@ -33,6 +33,7 @@ public:
     const TileCatalog& tileCatalog() const;
     void addTile( const TileModel& tile );
     void replaceTile( const TileModel& tile );
+    void removeTile( uint32_t type );
 
     const ItemTypeCatalog& itemTypeCatalog() const;
     void addItemType( const ItemTypeModel& itemType );

@@ -28,4 +28,8 @@ void TileCatalog::replaceTile( const TileModel& tile ) {
     _tiles[ tile.type() ] = tile;
 }
 
+void TileCatalog::removeTile( uint32_t type ) {
+    _tiles.erase( type );
+}
+
 } // namespace Engine

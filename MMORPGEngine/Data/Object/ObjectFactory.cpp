@@ -21,7 +21,8 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
 
     const QString objectsFile = mapPath + QString( mapJson[ "Catalogs" ][ "Objects" ].asCString() );
 
-    qInfo() << "ObjectFactory::createObjectCatalog" << "[OBJECTS_FILE_PATH]" << objectsFile;
+    qInfo() << "ObjectFactory::createObjectCatalog"
+            << "[OBJECTS_FILE_PATH]" << objectsFile;
 
     Json::Value json = JsonHelper::loadJsonFile( objectsFile );
 
@@ -40,6 +41,7 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
         object.setSize( size );
 
         object.setFolder( QString( objectJson[ "TextureFolder" ].asCString() ) );
+        object.setIsWalkable( objectJson.get( "IsWalkable", true ).asBool() );
 
         if ( objectJson.isMember( "Interaction" ) ) {
             const std::optional<ObjectInteractionEnum> interactionType = ObjectInteractionHelper::fromString( objectJson[ "Interaction" ].asString() );
@@ -51,7 +53,8 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
                 object.setInteraction( interaction );
 
             } else {
-                qWarning() << "ObjectFactory::createObjectCatalog" << "Unknown Interaction, ignoring:" << QString::fromStdString( objectJson[ "Interaction" ].asString() );
+                qWarning() << "ObjectFactory::createObjectCatalog"
+                           << "Unknown Interaction, ignoring:" << QString::fromStdString( objectJson[ "Interaction" ].asString() );
             }
         }
 
@@ -61,11 +64,13 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
 
         const AnimationModel animation = DataFactory::loadAnimation( texturePath, isAnimated, frameDurationMs );
         if ( animation.isNull() ) {
-            qWarning() << "ObjectFactory::createObjectCatalog" << "Failed to load texture:" << texturePath;
+            qWarning() << "ObjectFactory::createObjectCatalog"
+                       << "Failed to load texture:" << texturePath;
 
         } else {
             object.setAnimation( animation );
-            qInfo() << "ObjectFactory::createObjectCatalog" << "Loaded texture:" << texturePath;
+            qInfo() << "ObjectFactory::createObjectCatalog"
+                    << "Loaded texture:" << texturePath;
         }
 
         objectCatalog.addObject( std::move( object ) );
@@ -98,6 +103,10 @@ void ObjectFactory::saveObjectCatalog( const QString& configPath, const ObjectCa
 
         objectJson[ "TextureFolder" ] = object.folder().toStdString();
 
+        if ( !object.isWalkable() ) {
+            objectJson[ "IsWalkable" ] = false;
+        }
+
         if ( object.interaction().has_value() ) {
             objectJson[ "Interaction" ] = ObjectInteractionHelper::toString( object.interaction()->type() );
             objectJson[ "ContainerCapacity" ] = object.interaction()->containerCapacity();
@@ -111,7 +120,8 @@ void ObjectFactory::saveObjectCatalog( const QString& configPath, const ObjectCa
         json[ "Objects" ].append( objectJson );
     }
 
-    qInfo() << "ObjectFactory::saveObjectCatalog" << "[OBJECTS_FILE_PATH]" << objectsFile;
+    qInfo() << "ObjectFactory::saveObjectCatalog"
+            << "[OBJECTS_FILE_PATH]" << objectsFile;
 
     JsonHelper::saveJsonFile( objectsFile, json );
 }

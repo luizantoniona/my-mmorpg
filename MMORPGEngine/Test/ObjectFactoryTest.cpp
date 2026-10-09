@@ -108,6 +108,49 @@ TEST_F( ObjectFactoryTest, SaveObjectCatalog_ThenCreateObjectCatalog_RoundTripsF
     EXPECT_EQ( reloaded.object( 5 )->size().height(), 1 );
 }
 
+TEST_F( ObjectFactoryTest, CreateObjectCatalog_MissingIsWalkable_DefaultsToWalkable ) {
+    Json::Value object;
+    object[ "Type" ] = 1;
+    object[ "Name" ] = "StoneWall";
+    object[ "TextureFolder" ] = "Textures/Objects/StoneWall";
+
+    Json::Value objects( Json::arrayValue );
+    objects.append( object );
+    writeObjectsJson( objects );
+
+    Engine::ObjectCatalog catalog;
+    Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.object( 1 ), nullptr );
+    EXPECT_TRUE( catalog.object( 1 )->isWalkable() );
+    EXPECT_EQ( catalog.maxBlockingFootprintWidth(), 0 );
+    EXPECT_EQ( catalog.maxBlockingFootprintHeight(), 0 );
+}
+
+TEST_F( ObjectFactoryTest, SaveObjectCatalog_NotWalkable_ThenCreateObjectCatalog_RoundTripsAndTracksMaxFootprint ) {
+    Engine::ObjectCatalog original;
+    Engine::ObjectModel object;
+    object.setType( 5 );
+    object.setName( "Tree" );
+    object.setFolder( "Textures/Objects/Tree" );
+    Engine::ObjectSizeModel size;
+    size.setWidth( 2 );
+    size.setHeight( 3 );
+    object.setSize( size );
+    object.setIsWalkable( false );
+    original.addObject( object );
+
+    Engine::ObjectFactory::saveObjectCatalog( configPath(), original );
+
+    Engine::ObjectCatalog reloaded;
+    Engine::ObjectFactory::createObjectCatalog( configPath(), reloaded );
+
+    ASSERT_NE( reloaded.object( 5 ), nullptr );
+    EXPECT_FALSE( reloaded.object( 5 )->isWalkable() );
+    EXPECT_EQ( reloaded.maxBlockingFootprintWidth(), 2 );
+    EXPECT_EQ( reloaded.maxBlockingFootprintHeight(), 3 );
+}
+
 TEST_F( ObjectFactoryTest, CreateObjectCatalog_MissingInteraction_IsEmpty ) {
     Json::Value object;
     object[ "Type" ] = 1;

@@ -39,6 +39,9 @@ public:
     const std::optional<ObjectInteractionModel>& interaction() const;
     void setInteraction( const ObjectInteractionModel& interaction );
 
+    bool isWalkable() const;
+    void setIsWalkable( bool isWalkable );
+
 private:
     uint32_t _type;
     QString _name;
@@ -46,6 +49,7 @@ private:
     AnimationModel _animation;
     ObjectSizeModel _size;
     std::optional<ObjectInteractionModel> _interaction;
+    bool _isWalkable;
 };
 
 } // namespace Engine

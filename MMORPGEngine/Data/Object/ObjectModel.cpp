@@ -8,7 +8,8 @@ ObjectModel::ObjectModel() :
     _folder( "" ),
     _animation(),
     _size(),
-    _interaction( std::nullopt ) {
+    _interaction( std::nullopt ),
+    _isWalkable( true ) {
 }
 
 ObjectModel::~ObjectModel() = default;
@@ -67,6 +68,14 @@ const std::optional<ObjectInteractionModel>& ObjectModel::interaction() const {
 
 void ObjectModel::setInteraction( const ObjectInteractionModel& interaction ) {
     _interaction = interaction;
+}
+
+bool ObjectModel::isWalkable() const {
+    return _isWalkable;
+}
+
+void ObjectModel::setIsWalkable( bool isWalkable ) {
+    _isWalkable = isWalkable;
 }
 
 } // namespace Engine

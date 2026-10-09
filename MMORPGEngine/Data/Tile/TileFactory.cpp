@@ -18,7 +18,8 @@ void TileFactory::createTileCatalog( const QString& configPath, TileCatalog& til
 
     const QString tilesFile = mapPath + QString( mapJson[ "Catalogs" ][ "Tiles" ].asCString() );
 
-    qInfo() << "TileFactory::createTileCatalog" << "[TILES_FILE_PATH]" << tilesFile;
+    qInfo() << "TileFactory::createTileCatalog"
+            << "[TILES_FILE_PATH]" << tilesFile;
 
     Json::Value json = JsonHelper::loadJsonFile( tilesFile );
 
@@ -29,7 +30,7 @@ void TileFactory::createTileCatalog( const QString& configPath, TileCatalog& til
         TileModel tile;
         tile.setType( tileJson[ "Type" ].asUInt() );
         tile.setName( QString( tileJson[ "Name" ].asCString() ) );
-        tile.setFolder( QString( tileJson[ "TextureFolder" ].asCString() ) );
+        tile.setTextureFile( QString( tileJson[ "TextureFile" ].asCString() ) );
 
         QStringList tags;
         const Json::Value& tagsJson = tileJson[ "Tags" ];
@@ -43,15 +44,17 @@ void TileFactory::createTileCatalog( const QString& configPath, TileCatalog& til
 
         const bool isAnimated = tileJson.get( "IsAnimated", false ).asBool();
         const int frameDurationMs = tileJson.get( "FrameDurationMs", 100 ).asInt();
-        const QString texturePath = DataFactory::resolveTexturePath( mapPath + tile.folder() + "/" + tile.name(), isAnimated );
+        const QString texturePath = DataFactory::resolveTexturePath( mapPath + tile.textureFile(), isAnimated );
 
         const AnimationModel animation = DataFactory::loadAnimation( texturePath, isAnimated, frameDurationMs );
         if ( animation.isNull() ) {
-            qWarning() << "TileFactory::createTileCatalog" << "Failed to load texture:" << texturePath;
+            qWarning() << "TileFactory::createTileCatalog"
+                       << "Failed to load texture:" << texturePath;
 
         } else {
             tile.setAnimation( animation );
-            qInfo() << "TileFactory::createTileCatalog" << "Loaded texture:" << texturePath;
+            qInfo() << "TileFactory::createTileCatalog"
+                    << "Loaded texture:" << texturePath;
         }
 
         tileCatalog.addTile( std::move( tile ) );
@@ -76,7 +79,7 @@ void TileFactory::saveTileCatalog( const QString& configPath, const TileCatalog&
         Json::Value tileJson;
         tileJson[ "Type" ] = tile.type();
         tileJson[ "Name" ] = tile.name().toStdString();
-        tileJson[ "TextureFolder" ] = tile.folder().toStdString();
+        tileJson[ "TextureFile" ] = tile.textureFile().toStdString();
         tileJson[ "IsWalkable" ] = tile.isWalkable();
 
         if ( tile.animation().isAnimated() ) {
@@ -93,7 +96,8 @@ void TileFactory::saveTileCatalog( const QString& configPath, const TileCatalog&
         json[ "Tiles" ].append( tileJson );
     }
 
-    qInfo() << "TileFactory::saveTileCatalog" << "[TILES_FILE_PATH]" << tilesFile;
+    qInfo() << "TileFactory::saveTileCatalog"
+            << "[TILES_FILE_PATH]" << tilesFile;
 
     JsonHelper::saveJsonFile( tilesFile, json );
 }

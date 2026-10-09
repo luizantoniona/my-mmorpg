@@ -16,8 +16,16 @@ public:
     void addObject( const ObjectModel& object );
     void replaceObject( const ObjectModel& object );
 
+    int maxBlockingFootprintWidth() const;
+    int maxBlockingFootprintHeight() const;
+
+private:
+    void recomputeMaxBlockingFootprint();
+
 private:
     std::unordered_map<uint32_t, ObjectModel> _objects;
+    int _maxBlockingFootprintWidth;
+    int _maxBlockingFootprintHeight;
 };
 
 } // namespace Engine
