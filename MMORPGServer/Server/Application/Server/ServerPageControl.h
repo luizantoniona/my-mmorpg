@@ -16,6 +16,9 @@ class ServerPageControl : public QObject {
     Q_PROPERTY( QString worldName READ worldName CONSTANT )
     Q_PROPERTY( int worldWidth READ worldWidth CONSTANT )
     Q_PROPERTY( int worldHeight READ worldHeight CONSTANT )
+    Q_PROPERTY( int spawnX READ spawnX CONSTANT )
+    Q_PROPERTY( int spawnY READ spawnY CONSTANT )
+    Q_PROPERTY( int spawnZ READ spawnZ CONSTANT )
     Q_PROPERTY( QVariantList floors READ floors CONSTANT )
 
 public:
@@ -25,6 +28,9 @@ public:
     QString worldName() const;
     int worldWidth() const;
     int worldHeight() const;
+    int spawnX() const;
+    int spawnY() const;
+    int spawnZ() const;
     QVariantList floors() const;
 
     Q_INVOKABLE QVariantList connectedCharacters() const;
@@ -32,7 +38,7 @@ public:
 
 signals:
     void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
-    void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds );
+    void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds, int footprint );
 
     void characterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds );
     void characterEventAttackReceived( int idCharacter, int x, int y, int z );

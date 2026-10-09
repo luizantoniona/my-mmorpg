@@ -51,6 +51,21 @@ int ServerPageControl::worldHeight() const {
     return world ? static_cast<int>( world->height() ) : 0;
 }
 
+int ServerPageControl::spawnX() const {
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
+    return world ? world->spawnX() : 0;
+}
+
+int ServerPageControl::spawnY() const {
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
+    return world ? world->spawnY() : 0;
+}
+
+int ServerPageControl::spawnZ() const {
+    const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
+    return world ? world->spawnZ() : 0;
+}
+
 QVariantList ServerPageControl::floors() const {
     QVariantList result;
 

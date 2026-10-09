@@ -117,7 +117,8 @@ Item {
     }
 
     Component.onCompleted: {
-        viewport.centerCameraOnTile(control.worldWidth / 2, control.worldHeight / 2)
+        root.currentFloor = control.spawnZ
+        viewport.centerCameraOnTile(control.spawnX, control.spawnY)
     }
 
     Shortcut {
