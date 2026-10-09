@@ -3,17 +3,18 @@
 namespace Engine {
 
 CreatureTypeModel::CreatureTypeModel() :
+    _type( "" ),
     _name( "" ),
-    _type( 0 ),
     _aggroRadius( 0 ),
-    _attackRange( 1 ) {
+    _attackRange( 1 ),
+    _footprint( 1 ) {
 }
 
-uint32_t CreatureTypeModel::type() const {
+QString CreatureTypeModel::type() const {
     return _type;
 }
 
-void CreatureTypeModel::setType( uint32_t type ) {
+void CreatureTypeModel::setType( const QString& type ) {
     _type = type;
 }
 
@@ -39,6 +40,14 @@ uint32_t CreatureTypeModel::attackRange() const {
 
 void CreatureTypeModel::setAttackRange( uint32_t attackRange ) {
     _attackRange = attackRange;
+}
+
+uint32_t CreatureTypeModel::footprint() const {
+    return _footprint;
+}
+
+void CreatureTypeModel::setFootprint( uint32_t footprint ) {
+    _footprint = footprint;
 }
 
 CreatureTypeVitalsModel& CreatureTypeModel::vitals() {

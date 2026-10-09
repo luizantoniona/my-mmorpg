@@ -3,20 +3,22 @@
 
 #include <cstdint>
 
+#include <QString>
+
 namespace Engine {
 
 class CreatureSpawnEntryModel {
 public:
     CreatureSpawnEntryModel();
 
-    uint32_t type() const;
-    void setType( uint32_t type );
+    QString type() const;
+    void setType( const QString& type );
 
     uint32_t quantity() const;
     void setQuantity( uint32_t quantity );
 
 private:
-    uint32_t _type;
+    QString _type;
     uint32_t _quantity;
 };
 

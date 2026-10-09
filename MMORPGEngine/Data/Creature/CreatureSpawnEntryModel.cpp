@@ -3,15 +3,15 @@
 namespace Engine {
 
 CreatureSpawnEntryModel::CreatureSpawnEntryModel() :
-    _type( 0 ),
+    _type( "" ),
     _quantity( 0 ) {
 }
 
-uint32_t CreatureSpawnEntryModel::type() const {
+QString CreatureSpawnEntryModel::type() const {
     return _type;
 }
 
-void CreatureSpawnEntryModel::setType( uint32_t type ) {
+void CreatureSpawnEntryModel::setType( const QString& type ) {
     _type = type;
 }
 

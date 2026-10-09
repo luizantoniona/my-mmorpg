@@ -6,7 +6,7 @@ CreatureTypeCatalog::CreatureTypeCatalog() :
     _creatureTypes() {
 }
 
-const CreatureTypeModel* CreatureTypeCatalog::creatureType( uint32_t type ) const {
+const CreatureTypeModel* CreatureTypeCatalog::creatureType( const QString& type ) const {
     auto iterator = _creatureTypes.find( type );
 
     if ( iterator == _creatureTypes.end() ) {
@@ -16,7 +16,7 @@ const CreatureTypeModel* CreatureTypeCatalog::creatureType( uint32_t type ) cons
     return &iterator->second;
 }
 
-const std::unordered_map<uint32_t, CreatureTypeModel>& CreatureTypeCatalog::creatureTypes() const {
+const std::map<QString, CreatureTypeModel>& CreatureTypeCatalog::creatureTypes() const {
     return _creatureTypes;
 }
 

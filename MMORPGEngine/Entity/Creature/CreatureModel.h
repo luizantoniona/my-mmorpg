@@ -1,7 +1,7 @@
 #ifndef CREATUREMODEL_H
 #define CREATUREMODEL_H
 
-#include <cstdint>
+#include <QString>
 
 #include <MMORPGEngine/Entity/EntityModel.h>
 
@@ -14,12 +14,12 @@ public:
     int idCreature() const;
     void setIdCreature( int idCreature );
 
-    uint32_t type() const;
-    void setType( uint32_t type );
+    QString type() const;
+    void setType( const QString& type );
 
 private:
+    QString _type;
     int _idCreature;
-    uint32_t _type;
 };
 
 } // namespace Engine

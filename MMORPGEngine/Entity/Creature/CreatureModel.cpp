@@ -3,8 +3,8 @@
 namespace Engine {
 
 CreatureModel::CreatureModel() :
-    _idCreature( 0 ),
-    _type( 0 ) {
+    _type( "" ),
+    _idCreature( 0 ) {
 }
 
 int CreatureModel::idCreature() const {
@@ -15,11 +15,11 @@ void CreatureModel::setIdCreature( int idCreature ) {
     _idCreature = idCreature;
 }
 
-uint32_t CreatureModel::type() const {
+QString CreatureModel::type() const {
     return _type;
 }
 
-void CreatureModel::setType( uint32_t type ) {
+void CreatureModel::setType( const QString& type ) {
     _type = type;
 }
 

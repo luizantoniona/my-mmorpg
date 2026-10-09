@@ -3,8 +3,8 @@
 namespace Engine {
 
 EntitySizeModel::EntitySizeModel() :
-    _width( 0 ),
-    _height( 0 ) {
+    _width( 1 ),
+    _height( 1 ) {
 }
 
 EntitySizeModel::~EntitySizeModel() {

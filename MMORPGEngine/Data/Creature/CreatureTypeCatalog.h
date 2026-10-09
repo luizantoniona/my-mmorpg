@@ -1,7 +1,9 @@
 #ifndef CREATURETYPECATALOG_H
 #define CREATURETYPECATALOG_H
 
-#include <unordered_map>
+#include <map>
+
+#include <QString>
 
 #include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 
@@ -11,12 +13,12 @@ class CreatureTypeCatalog {
 public:
     CreatureTypeCatalog();
 
-    const CreatureTypeModel* creatureType( uint32_t type ) const;
-    const std::unordered_map<uint32_t, CreatureTypeModel>& creatureTypes() const;
+    const CreatureTypeModel* creatureType( const QString& type ) const;
+    const std::map<QString, CreatureTypeModel>& creatureTypes() const;
     void addCreatureType( const CreatureTypeModel& creatureType );
 
 private:
-    std::unordered_map<uint32_t, CreatureTypeModel> _creatureTypes;
+    std::map<QString, CreatureTypeModel> _creatureTypes;
 };
 
 } // namespace Engine

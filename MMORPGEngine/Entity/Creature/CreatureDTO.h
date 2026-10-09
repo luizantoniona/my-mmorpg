@@ -37,6 +37,9 @@ public:
     double movementCooldownSeconds() const;
     void setMovementCooldownSeconds( double movementCooldownSeconds );
 
+    int footprint() const;
+    void setFootprint( int footprint );
+
 private:
     double _health;
     double _maxHealth;
@@ -45,6 +48,7 @@ private:
     int _x;
     int _y;
     int _z;
+    int _footprint;
 };
 
 } // namespace Engine

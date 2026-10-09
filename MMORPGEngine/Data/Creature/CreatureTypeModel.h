@@ -13,8 +13,8 @@ class CreatureTypeModel {
 public:
     CreatureTypeModel();
 
-    uint32_t type() const;
-    void setType( uint32_t type );
+    QString type() const;
+    void setType( const QString& type );
 
     QString name() const;
     void setName( const QString& name );
@@ -25,15 +25,19 @@ public:
     uint32_t attackRange() const;
     void setAttackRange( uint32_t attackRange );
 
+    uint32_t footprint() const;
+    void setFootprint( uint32_t footprint );
+
     CreatureTypeVitalsModel& vitals();
     const CreatureTypeVitalsModel& vitals() const;
 
 private:
+    QString _type;
     QString _name;
     CreatureTypeVitalsModel _vitals;
-    uint32_t _type;
     uint32_t _aggroRadius;
     uint32_t _attackRange;
+    uint32_t _footprint;
 };
 
 } // namespace Engine

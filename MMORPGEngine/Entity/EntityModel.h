@@ -29,6 +29,9 @@ public:
     EntityCombatModel& combat();
     const EntityCombatModel& combat() const;
 
+    bool occupies( int x, int y, int z ) const;
+    bool overlaps( int x, int y, int z, int width, int height ) const;
+
 private:
     EntityPositionModel _position;
     EntitySizeModel _size;

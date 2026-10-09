@@ -52,4 +52,19 @@ const EntityCombatModel& EntityModel::combat() const {
     return _combat;
 }
 
+bool EntityModel::occupies( int x, int y, int z ) const {
+    return overlaps( x, y, z, 1, 1 );
+}
+
+bool EntityModel::overlaps( int x, int y, int z, int width, int height ) const {
+    if ( _position.z() != z ) {
+        return false;
+    }
+
+    const bool overlapsX = x < _position.x() + _size.width() && _position.x() < x + width;
+    const bool overlapsY = y < _position.y() + _size.height() && _position.y() < y + height;
+
+    return overlapsX && overlapsY;
+}
+
 } // namespace Engine

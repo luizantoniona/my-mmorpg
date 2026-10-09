@@ -14,7 +14,8 @@ CreatureDTO::CreatureDTO() :
     _idCreature( 0 ),
     _x( 0 ),
     _y( 0 ),
-    _z( 0 ) {
+    _z( 0 ),
+    _footprint( 1 ) {
 }
 
 CreatureDTO::~CreatureDTO() = default;
@@ -32,6 +33,7 @@ CreatureDTO CreatureDTO::fromModel( const CreatureModel* creature ) {
     dto._health = vitals.health();
     dto._maxHealth = vitals.maxHealth();
     dto._movementCooldownSeconds = creature->movement().cooldownSeconds();
+    dto._footprint = creature->size().width();
 
     return dto;
 }
@@ -67,6 +69,10 @@ CreatureDTO CreatureDTO::fromJson( const Json::Value& json ) {
         dto._movementCooldownSeconds = json[ "movementCooldownSeconds" ].asDouble();
     }
 
+    if ( json.isMember( "footprint" ) && json[ "footprint" ].isInt() && json[ "footprint" ].asInt() >= 1 ) {
+        dto._footprint = json[ "footprint" ].asInt();
+    }
+
     return dto;
 }
 
@@ -81,6 +87,7 @@ Json::Value CreatureDTO::toJson() const {
     json[ "health" ] = _health;
     json[ "maxHealth" ] = _maxHealth;
     json[ "movementCooldownSeconds" ] = _movementCooldownSeconds;
+    json[ "footprint" ] = _footprint;
 
     return json;
 }
@@ -139,6 +146,14 @@ double CreatureDTO::movementCooldownSeconds() const {
 
 void CreatureDTO::setMovementCooldownSeconds( double movementCooldownSeconds ) {
     _movementCooldownSeconds = movementCooldownSeconds;
+}
+
+int CreatureDTO::footprint() const {
+    return _footprint;
+}
+
+void CreatureDTO::setFootprint( int footprint ) {
+    _footprint = footprint;
 }
 
 } // namespace Engine
