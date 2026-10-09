@@ -6,11 +6,13 @@ add_executable(
   AnimationModelTest.cpp
   CameraTest.cpp
   CharacterDTOTest.cpp
+  CharacterIntentEquipDTOTest.cpp
   ChunkModelTest.cpp
   EntityCombatModelTest.cpp
   EntityMovementModelTest.cpp
   FloorFactoryTest.cpp
   ItemCatalogTest.cpp
+  ItemCategoryHelperTest.cpp
   ItemFactoryTest.cpp
   ItemTypeCatalogTest.cpp
   ItemTypeFactoryTest.cpp

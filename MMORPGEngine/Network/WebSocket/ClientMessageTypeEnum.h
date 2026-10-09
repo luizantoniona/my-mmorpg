@@ -7,6 +7,8 @@ enum class ClientMessageType {
     UNKNOWN,
     CHARACTER_INTENT_MOVE,
     CHARACTER_INTENT_ACTION,
+    CHARACTER_INTENT_EQUIP,
+    CHARACTER_INTENT_UNEQUIP,
 };
 
 } // namespace Engine

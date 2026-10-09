@@ -1,5 +1,8 @@
 #include "ItemTypeFactory.h"
 
+#include <optional>
+#include <set>
+
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -13,6 +16,7 @@
 #include <MMORPGEngine/Data/Item/ItemCategoryHelper.h>
 #include <MMORPGEngine/Data/Item/ItemSlotHelper.h>
 #include <MMORPGEngine/Data/Item/ItemTypeModel.h>
+#include <MMORPGEngine/Entity/CombatActionHelper.h>
 
 namespace Engine {
 
@@ -116,6 +120,20 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
             }
         }
 
+        std::set<CombatActionEnum> disabledActions;
+        for ( const Json::Value& actionJson : itemTypeJson[ "DisabledActions" ] ) {
+            const std::optional<CombatActionEnum> action = actionJson.isString() ? CombatActionHelper::fromString( actionJson.asString() ) : std::nullopt;
+
+            if ( !action.has_value() ) {
+                qWarning() << "ItemTypeFactory::createItemTypeCatalog"
+                           << "Unknown DisabledActions entry, skipping" << key;
+                continue;
+            }
+
+            disabledActions.insert( action.value() );
+        }
+        itemType.setDisabledActions( disabledActions );
+
         itemTypeCatalog.addItemType( std::move( itemType ) );
     }
 
@@ -164,6 +182,15 @@ void ItemTypeFactory::saveItemTypeCatalog( const QString& configPath, const Item
             itemTypeJson[ "HandRequirement" ] = HandRequirementHelper::toString( itemType.handRequirement().value() );
         } else {
             itemTypeJson.removeMember( "HandRequirement" );
+        }
+
+        if ( itemType.disabledActions().empty() ) {
+            itemTypeJson.removeMember( "DisabledActions" );
+        } else {
+            itemTypeJson[ "DisabledActions" ] = Json::Value( Json::arrayValue );
+            for ( const CombatActionEnum action : itemType.disabledActions() ) {
+                itemTypeJson[ "DisabledActions" ].append( CombatActionHelper::toString( action ) );
+            }
         }
 
         JsonHelper::saveJsonFile( file, itemTypeJson );

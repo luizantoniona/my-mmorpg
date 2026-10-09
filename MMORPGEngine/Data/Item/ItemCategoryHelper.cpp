@@ -34,4 +34,19 @@ ItemCategoryEnum ItemCategoryHelper::fromString( const std::string& value ) {
     return ItemCategoryEnum::UNKNOWN;
 }
 
+std::set<CombatActionEnum> ItemCategoryHelper::grantedActions( ItemCategoryEnum category ) {
+    switch ( category ) {
+    case ItemCategoryEnum::WEAPON:
+        return { CombatActionEnum::ATTACK };
+    case ItemCategoryEnum::SHIELD:
+        return { CombatActionEnum::BLOCK };
+    case ItemCategoryEnum::UNKNOWN:
+    case ItemCategoryEnum::OFFHAND:
+    case ItemCategoryEnum::ARMOR:
+        return {};
+    }
+
+    return {};
+}
+
 } // namespace Engine

@@ -8,6 +8,10 @@ std::string ClientMessageTypeHelper::toString( ClientMessageType type ) {
         return "CHARACTER_INTENT_MOVE";
     case ClientMessageType::CHARACTER_INTENT_ACTION:
         return "CHARACTER_INTENT_ACTION";
+    case ClientMessageType::CHARACTER_INTENT_EQUIP:
+        return "CHARACTER_INTENT_EQUIP";
+    case ClientMessageType::CHARACTER_INTENT_UNEQUIP:
+        return "CHARACTER_INTENT_UNEQUIP";
     case ClientMessageType::UNKNOWN:
         return "UNKNOWN";
     }
@@ -22,6 +26,14 @@ ClientMessageType ClientMessageTypeHelper::fromString( const std::string& value 
 
     if ( value == "CHARACTER_INTENT_ACTION" ) {
         return ClientMessageType::CHARACTER_INTENT_ACTION;
+    }
+
+    if ( value == "CHARACTER_INTENT_EQUIP" ) {
+        return ClientMessageType::CHARACTER_INTENT_EQUIP;
+    }
+
+    if ( value == "CHARACTER_INTENT_UNEQUIP" ) {
+        return ClientMessageType::CHARACTER_INTENT_UNEQUIP;
     }
 
     return ClientMessageType::UNKNOWN;

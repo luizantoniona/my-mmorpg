@@ -50,4 +50,12 @@ void ItemTypeModel::setHandRequirement( HandRequirementEnum handRequirement ) {
     _handRequirement = handRequirement;
 }
 
+const std::set<CombatActionEnum>& ItemTypeModel::disabledActions() const {
+    return _disabledActions;
+}
+
+void ItemTypeModel::setDisabledActions( const std::set<CombatActionEnum>& disabledActions ) {
+    _disabledActions = disabledActions;
+}
+
 } // namespace Engine

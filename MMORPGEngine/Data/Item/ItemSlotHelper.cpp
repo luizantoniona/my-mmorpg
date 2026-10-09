@@ -5,49 +5,49 @@ namespace Engine {
 std::string ItemSlotHelper::toString( ItemSlotEnum slot ) {
     switch ( slot ) {
     case ItemSlotEnum::HAND:
-        return "Hand";
+        return "HAND";
     case ItemSlotEnum::HEAD:
-        return "Head";
+        return "HEAD";
     case ItemSlotEnum::CHEST:
-        return "Chest";
+        return "CHEST";
     case ItemSlotEnum::LEGS:
-        return "Legs";
+        return "LEGS";
     case ItemSlotEnum::FEET:
-        return "Feet";
+        return "FEET";
     case ItemSlotEnum::GLOVE:
-        return "Glove";
+        return "GLOVE";
     case ItemSlotEnum::RING:
-        return "Ring";
+        return "RING";
     case ItemSlotEnum::NECK:
-        return "Neck";
+        return "NECK";
     }
 
     return "";
 }
 
 ItemSlotEnum ItemSlotHelper::fromString( const std::string& value ) {
-    if ( value == "Hand" ) {
+    if ( value == "HAND" ) {
         return ItemSlotEnum::HAND;
     }
-    if ( value == "Head" ) {
+    if ( value == "HEAD" ) {
         return ItemSlotEnum::HEAD;
     }
-    if ( value == "Chest" ) {
+    if ( value == "CHEST" ) {
         return ItemSlotEnum::CHEST;
     }
-    if ( value == "Legs" ) {
+    if ( value == "LEGS" ) {
         return ItemSlotEnum::LEGS;
     }
-    if ( value == "Feet" ) {
+    if ( value == "FEET" ) {
         return ItemSlotEnum::FEET;
     }
-    if ( value == "Glove" ) {
+    if ( value == "GLOVE" ) {
         return ItemSlotEnum::GLOVE;
     }
-    if ( value == "Ring" ) {
+    if ( value == "RING" ) {
         return ItemSlotEnum::RING;
     }
-    if ( value == "Neck" ) {
+    if ( value == "NECK" ) {
         return ItemSlotEnum::NECK;
     }
 

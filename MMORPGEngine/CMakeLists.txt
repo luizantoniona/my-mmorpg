@@ -110,8 +110,12 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterEventLeaveDTO.h
     Entity/Character/CharacterIntentActionDTO.cpp
     Entity/Character/CharacterIntentActionDTO.h
+    Entity/Character/CharacterIntentEquipDTO.cpp
+    Entity/Character/CharacterIntentEquipDTO.h
     Entity/Character/CharacterIntentMoveDTO.cpp
     Entity/Character/CharacterIntentMoveDTO.h
+    Entity/Character/CharacterIntentUnequipDTO.cpp
+    Entity/Character/CharacterIntentUnequipDTO.h
     Entity/Character/CharacterInventoryDTO.cpp
     Entity/Character/CharacterInventoryDTO.h
     Entity/Character/CharacterInventoryModel.cpp
