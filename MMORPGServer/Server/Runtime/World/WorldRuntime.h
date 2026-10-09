@@ -69,6 +69,7 @@ public:
     std::vector<int> charactersNear( const Engine::EntityPositionModel& position );
 
     bool isPositionOccupied( int x, int y, int z );
+    bool isAreaOccupied( int x, int y, int z, int width, int height );
 
     void enqueueCommand( std::unique_ptr<WorldCommand> command );
 

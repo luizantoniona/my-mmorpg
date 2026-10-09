@@ -11,6 +11,8 @@
 #include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Data/Item/ItemModel.h>
 #include <MMORPGEngine/Data/Item/ItemTypeModel.h>
+#include <MMORPGEngine/Data/Object/ObjectModel.h>
+#include <MMORPGEngine/Data/Object/ObjectSizeModel.h>
 #include <MMORPGEngine/Data/Tile/TileModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
@@ -59,6 +61,20 @@ std::unique_ptr<Engine::CreatureModel> makeCreature( int idCreature, int x, int 
 }
 
 constexpr uint32_t WALKABLE_TILE_TYPE = 777;
+constexpr uint32_t BLOCKING_OBJECT_TYPE = 888;
+constexpr uint32_t WALKABLE_OBJECT_TYPE = 889;
+
+void addObjectType( uint32_t type, bool isWalkable, int width, int height ) {
+    Engine::ObjectSizeModel size;
+    size.setWidth( width );
+    size.setHeight( height );
+
+    Engine::ObjectModel object;
+    object.setType( type );
+    object.setIsWalkable( isWalkable );
+    object.setSize( size );
+    Engine::Singleton<Engine::DataManager>::instance().addObject( object );
+}
 
 void tickTimes( Server::WorldRuntime& worldRuntime, int ticks ) {
     for ( int tick = 0; tick < ticks; ++tick ) {
@@ -81,7 +97,7 @@ void paintWalkableTiles( Engine::WorldModel& world, int z, int x, int y, int wid
 
 std::unique_ptr<Engine::WorldModel> makeWorldWithSpawnArea( int z, int x, int y, uint32_t width, uint32_t height, uint32_t type, uint32_t quantity, double respawnSeconds = 60.0 ) {
     Engine::CreatureSpawnEntryModel entry;
-    entry.setType( type );
+    entry.setType( QString::number( type ) );
     entry.setQuantity( quantity );
 
     Engine::CreatureSpawnAreaModel area;
@@ -415,6 +431,95 @@ TEST( WorldRuntimeTest, IsPositionOccupied_CreatureThere_ReturnsTrue ) {
     EXPECT_TRUE( worldRuntime.isPositionOccupied( 5, 5, 0 ) );
 }
 
+TEST( WorldRuntimeTest, IsPositionOccupied_InsideCreatureFootprint_ReturnsTrue ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    auto creature = makeCreature( 1, 5, 5, 0 );
+    creature->size().setWidth( 3 );
+    creature->size().setHeight( 3 );
+    worldRuntime.addCreature( std::move( creature ) );
+
+    EXPECT_TRUE( worldRuntime.isPositionOccupied( 7, 7, 0 ) );
+    EXPECT_TRUE( worldRuntime.isPositionOccupied( 5, 7, 0 ) );
+}
+
+TEST( WorldRuntimeTest, IsPositionOccupied_OutsideCreatureFootprint_ReturnsFalse ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    auto creature = makeCreature( 1, 5, 5, 0 );
+    creature->size().setWidth( 3 );
+    creature->size().setHeight( 3 );
+    worldRuntime.addCreature( std::move( creature ) );
+
+    EXPECT_FALSE( worldRuntime.isPositionOccupied( 8, 5, 0 ) );
+    EXPECT_FALSE( worldRuntime.isPositionOccupied( 4, 5, 0 ) );
+    EXPECT_FALSE( worldRuntime.isPositionOccupied( 6, 6, 1 ) );
+}
+
+TEST( WorldRuntimeTest, IsAreaOccupied_OverlapsCreatureFootprint_ReturnsTrue ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    auto creature = makeCreature( 1, 5, 5, 0 );
+    creature->size().setWidth( 3 );
+    creature->size().setHeight( 3 );
+    worldRuntime.addCreature( std::move( creature ) );
+
+    EXPECT_TRUE( worldRuntime.isAreaOccupied( 7, 7, 0, 2, 2 ) );
+    EXPECT_FALSE( worldRuntime.isAreaOccupied( 8, 5, 0, 2, 2 ) );
+}
+
+TEST( WorldRuntimeTest, SpatialIndex_IsAreaOccupied_IgnoresGivenCreature ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    auto creature = makeCreature( 1, 5, 5, 0 );
+    creature->size().setWidth( 3 );
+    creature->size().setHeight( 3 );
+    worldRuntime.addCreature( std::move( creature ) );
+
+    EXPECT_TRUE( worldRuntime.spatialIndex().isAreaOccupied( 6, 6, 0, 3, 3 ) );
+    EXPECT_FALSE( worldRuntime.spatialIndex().isAreaOccupied( 6, 6, 0, 3, 3, 1 ) );
+}
+
+TEST( WorldRuntimeTest, SpawnSystem_CreatureTypeWithFootprint_SpawnsWithSizeAndFullyOnWalkableTiles ) {
+    Engine::CreatureTypeModel creatureType;
+    creatureType.setType( "7" );
+    creatureType.setName( "BigTestCreature" );
+    creatureType.vitals().setMaxHealth( 10 );
+    creatureType.setFootprint( 2 );
+    Engine::Singleton<Engine::DataManager>::instance().addCreatureType( creatureType );
+
+    Server::WorldRuntime worldRuntime( makeWorldWithSpawnArea( 0, 10, 10, 6, 6, 7, 1 ) );
+
+    worldRuntime.tick();
+
+    const std::vector<Engine::CreatureModel> creatures = worldRuntime.creatures();
+
+    ASSERT_EQ( creatures.size(), 1u );
+    EXPECT_EQ( creatures[ 0 ].size().width(), 2 );
+    EXPECT_EQ( creatures[ 0 ].size().height(), 2 );
+    EXPECT_LE( creatures[ 0 ].position().x(), 14 );
+    EXPECT_LE( creatures[ 0 ].position().y(), 14 );
+}
+
+TEST( WorldRuntimeTest, AttackTile_OnNonAnchorFootprintCell_AppliesDamageAndKeepsCreaturePosition ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 4, 7, 0 ) );
+    auto creature = makeCreature( 2, 5, 5, 0 );
+    creature->size().setWidth( 3 );
+    creature->size().setHeight( 3 );
+    creature->vitals().setHealth( 100.0 );
+    worldRuntime.addCreature( std::move( creature ) );
+
+    Json::Value vitalsPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CREATURE_VITALS_CHANGED, [ &vitalsPayload ]( const Server::WorldEvent& event ) {
+        vitalsPayload = event.payload();
+    } );
+
+    worldRuntime.combatSystem().resolveCharacterAttack( 1, 5, 7, 0, 30.0 );
+
+    ASSERT_NE( worldRuntime.creature( 2 ), nullptr );
+    EXPECT_DOUBLE_EQ( worldRuntime.creature( 2 )->vitals().health(), 70.0 );
+    EXPECT_EQ( vitalsPayload[ "x" ].asInt(), 5 );
+    EXPECT_EQ( vitalsPayload[ "y" ].asInt(), 5 );
+    EXPECT_EQ( vitalsPayload[ "footprint" ].asInt(), 3 );
+}
+
 TEST( WorldRuntimeTest, AddCreature_ThenGet_ReturnsSameCreature ) {
     Server::WorldRuntime worldRuntime( nullptr );
 
@@ -483,7 +588,7 @@ TEST( WorldRuntimeTest, SpawnSystem_FirstTick_SpawnsQuantityWithinArea ) {
 
     ASSERT_EQ( creatures.size(), 4u );
     for ( const Engine::CreatureModel& creature : creatures ) {
-        EXPECT_EQ( creature.type(), 3u );
+        EXPECT_EQ( creature.type(), "3" );
         EXPECT_GE( creature.position().x(), 10 );
         EXPECT_LT( creature.position().x(), 15 );
         EXPECT_GE( creature.position().y(), 10 );
@@ -595,6 +700,58 @@ TEST( WorldRuntimeTest, SpawnSystem_Respawn_PublishesCreatureEntered ) {
     worldRuntime.tick();
 
     EXPECT_EQ( entered, 1 );
+}
+
+TEST( WorldRuntimeTest, Move_OntoUpperRowOfBlockingObjectFootprint_IsBlocked ) {
+    auto world = std::make_unique<Engine::WorldModel>();
+    world->addFloor( 0 );
+    paintWalkableTiles( *world, 0, 5, 5, 10, 10 );
+    addObjectType( BLOCKING_OBJECT_TYPE, false, 2, 2 );
+    world->setObject( 10, 10, 0, BLOCKING_OBJECT_TYPE );
+    Server::WorldRuntime worldRuntime( std::move( world ) );
+    worldRuntime.addCharacter( makeCharacter( 1, 11, 8, 0 ) );
+
+    EXPECT_FALSE( worldRuntime.movementSystem().move( 1, 0, 1 ) );
+    EXPECT_EQ( worldRuntime.character( 1 )->position().y(), 8 );
+}
+
+TEST( WorldRuntimeTest, Move_OntoRightColumnOfBlockingObjectFootprint_IsBlocked ) {
+    auto world = std::make_unique<Engine::WorldModel>();
+    world->addFloor( 0 );
+    paintWalkableTiles( *world, 0, 5, 5, 10, 10 );
+    addObjectType( BLOCKING_OBJECT_TYPE, false, 2, 2 );
+    world->setObject( 10, 10, 0, BLOCKING_OBJECT_TYPE );
+    Server::WorldRuntime worldRuntime( std::move( world ) );
+    worldRuntime.addCharacter( makeCharacter( 1, 12, 10, 0 ) );
+
+    EXPECT_FALSE( worldRuntime.movementSystem().move( 1, -1, 0 ) );
+    EXPECT_EQ( worldRuntime.character( 1 )->position().x(), 12 );
+}
+
+TEST( WorldRuntimeTest, Move_OntoCellsAroundBlockingObjectFootprint_IsAllowed ) {
+    auto world = std::make_unique<Engine::WorldModel>();
+    world->addFloor( 0 );
+    paintWalkableTiles( *world, 0, 5, 5, 10, 10 );
+    addObjectType( BLOCKING_OBJECT_TYPE, false, 2, 2 );
+    world->setObject( 10, 10, 0, BLOCKING_OBJECT_TYPE );
+    Server::WorldRuntime worldRuntime( std::move( world ) );
+    worldRuntime.addCharacter( makeCharacter( 1, 10, 12, 0 ) );
+
+    EXPECT_TRUE( worldRuntime.movementSystem().move( 1, 0, -1 ) );
+    EXPECT_EQ( worldRuntime.character( 1 )->position().y(), 11 );
+}
+
+TEST( WorldRuntimeTest, Move_OntoWalkableObject_IsAllowed ) {
+    auto world = std::make_unique<Engine::WorldModel>();
+    world->addFloor( 0 );
+    paintWalkableTiles( *world, 0, 5, 5, 10, 10 );
+    addObjectType( WALKABLE_OBJECT_TYPE, true, 2, 2 );
+    world->setObject( 10, 10, 0, WALKABLE_OBJECT_TYPE );
+    Server::WorldRuntime worldRuntime( std::move( world ) );
+    worldRuntime.addCharacter( makeCharacter( 1, 9, 10, 0 ) );
+
+    EXPECT_TRUE( worldRuntime.movementSystem().move( 1, 1, 0 ) );
+    EXPECT_EQ( worldRuntime.character( 1 )->position().x(), 10 );
 }
 
 TEST( WorldRuntimeTest, Tick_CreatureDoesNotWalkOntoEmptyTile ) {
@@ -985,11 +1142,11 @@ TEST( WorldRuntimeTest, Tick_PublishesVitalsChanged_OnlyWhenRegenChangesVitals )
 
 namespace {
 
-constexpr uint32_t AGGRESSIVE_CREATURE_TYPE = 900;
-constexpr uint32_t SHORT_SIGHTED_CREATURE_TYPE = 901;
-constexpr uint32_t PASSIVE_CREATURE_TYPE = 902;
+const QString AGGRESSIVE_CREATURE_TYPE = "AGGRESSIVE_TEST_CREATURE";
+const QString SHORT_SIGHTED_CREATURE_TYPE = "SHORT_SIGHTED_TEST_CREATURE";
+const QString PASSIVE_CREATURE_TYPE = "PASSIVE_TEST_CREATURE";
 
-void registerCreatureType( uint32_t type, uint32_t aggroRadius ) {
+void registerCreatureType( const QString& type, uint32_t aggroRadius ) {
     Engine::CreatureTypeModel creatureType;
     creatureType.setType( type );
     creatureType.setName( "TestCreature" );
@@ -998,7 +1155,7 @@ void registerCreatureType( uint32_t type, uint32_t aggroRadius ) {
     Engine::Singleton<Engine::DataManager>::instance().addCreatureType( std::move( creatureType ) );
 }
 
-std::unique_ptr<Engine::CreatureModel> makeCreatureOfType( uint32_t type, int idCreature, int x, int y, int z ) {
+std::unique_ptr<Engine::CreatureModel> makeCreatureOfType( const QString& type, int idCreature, int x, int y, int z ) {
     auto creature = makeCreature( idCreature, x, y, z );
     creature->setType( type );
 

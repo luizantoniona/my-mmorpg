@@ -287,6 +287,12 @@ bool WorldRuntime::isPositionOccupied( int x, int y, int z ) {
     return _spatialIndex.isPositionOccupied( position );
 }
 
+bool WorldRuntime::isAreaOccupied( int x, int y, int z, int width, int height ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    return _spatialIndex.isAreaOccupied( x, y, z, width, height );
+}
+
 void WorldRuntime::enqueueCommand( std::unique_ptr<WorldCommand> command ) {
     std::lock_guard<std::mutex> lock( _commandMutex );
 

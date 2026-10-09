@@ -29,9 +29,8 @@ bool WorldMovementSystem::move( int idCharacter, int dx, int dy ) {
     const int z = currentPosition.z();
 
     const Engine::WorldModel* world = _runtime.world();
-    const Engine::WorldTileModel* worldTile = world ? world->tile( newX, newY, z ) : nullptr;
 
-    if ( !worldTile || !worldTile->tileModel() || !worldTile->tileModel()->isWalkable() || _runtime.isPositionOccupied( newX, newY, z ) || !character->movement().isReady( _runtime.tickRate() ) ) {
+    if ( !world || !world->isWalkable( newX, newY, z ) || _runtime.isPositionOccupied( newX, newY, z ) || !character->movement().isReady( _runtime.tickRate() ) ) {
         qInfo() << "[WorldMovementSystem] Move blocked [CHARACTER]" << idCharacter << "[X]" << newX << "[Y]" << newY << "[Z]" << z;
         return false;
     }
