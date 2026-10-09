@@ -13,11 +13,14 @@ namespace Engine {
 class RenderSceneItem {
 public:
     RenderSceneItem();
-    RenderSceneItem( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QImage& image );
-    RenderSceneItem( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QColor& color );
+    RenderSceneItem( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QImage& image );
+    RenderSceneItem( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QColor& color );
 
     RenderSceneLayerEnum layer() const;
     void setLayer( RenderSceneLayerEnum layer );
+
+    int row() const;
+    void setRow( int row );
 
     QPointF position() const;
     void setPosition( QPointF position );
@@ -37,6 +40,7 @@ private:
     QImage _image;
     QColor _color;
     RenderSceneLayerEnum _layer;
+    int _row;
 };
 
 } // namespace Engine

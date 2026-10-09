@@ -64,7 +64,7 @@ void EffectRenderer::renderTileFlash( RenderScene& scene, const TileFlash& flash
     QColor color = flash.color;
     color.setAlphaF( color.alphaF() * ( flash.intensifying ? progress : 1.0 - progress ) );
 
-    scene.addRect( RenderSceneLayerEnum::Effect, position, size, color );
+    scene.addRect( RenderSceneLayerEnum::Effect, 0, position, size, color );
 }
 
 } // namespace Engine

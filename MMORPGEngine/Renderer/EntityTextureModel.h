@@ -9,10 +9,10 @@ namespace Engine {
 class EntityTextureModel {
 public:
     static const QImage& characterTexture();
-    static const QImage& creatureTexture();
+    static const QImage& creatureTexture( int footprint = 1 );
 
 private:
-    static QImage createPlaceholder( const QColor& color );
+    static QImage createPlaceholder( const QColor& color, int footprint = 1 );
 };
 
 } // namespace Engine

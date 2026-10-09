@@ -104,6 +104,18 @@ TEST( StreamRenderWorldTest, AddCharacterAndCreature_SameId_AreIndependent ) {
     EXPECT_TRUE( hasCreature );
 }
 
+TEST( StreamRenderWorldTest, AddCreature_WithFootprint_ExposesFootprintAndScaledTexture ) {
+    TestStreamRenderWorld renderWorld;
+
+    renderWorld.addCreature( 1, 30, 40, 0, 0.0, 3 );
+
+    const QList<Engine::RenderWorld::Entity> entities = renderWorld.entities( 0 );
+
+    ASSERT_EQ( entities.size(), 1 );
+    EXPECT_EQ( entities.first().footprint, 3 );
+    EXPECT_EQ( entities.first().texture.width(), Engine::WorldConstants::TILE_SIZE * 3 );
+}
+
 TEST( StreamRenderWorldTest, RemoveCreature_DoesNotAffectCharacterWithSameId ) {
     TestStreamRenderWorld renderWorld;
 

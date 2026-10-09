@@ -21,8 +21,8 @@ public:
 
     void clear();
 
-    void addTexture( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QImage& image );
-    void addRect( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QColor& color );
+    void addTexture( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QImage& image );
+    void addRect( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QColor& color );
 
     void build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera, TextureCache& textureCache );
 

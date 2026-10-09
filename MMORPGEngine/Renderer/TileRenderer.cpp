@@ -36,7 +36,7 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
                 const QPointF position( x * WorldConstants::TILE_SIZE, y * WorldConstants::TILE_SIZE );
                 const QSizeF size( WorldConstants::TILE_SIZE, WorldConstants::TILE_SIZE );
 
-                scene.addRect( RenderSceneLayerEnum::Tile, position, size, QColor( 0, 0, 0, 130 ) );
+                scene.addRect( RenderSceneLayerEnum::Tile, y, position, size, QColor( 0, 0, 0, 130 ) );
             }
         }
     }
@@ -45,15 +45,22 @@ void TileRenderer::render( RenderScene& scene, const Camera& camera, const Rende
 void TileRenderer::renderTile( RenderScene& scene, int x, int y, int z, const WorldTileModel& worldTile, qint64 elapsedMs ) {
     Q_UNUSED( z );
 
-    const QImage frame = worldTile.tileModel()->animation().frameAt( elapsedMs );
-    if ( frame.isNull() ) {
-        return;
-    }
-
     const QPointF position( x * WorldConstants::TILE_SIZE, y * WorldConstants::TILE_SIZE );
     const QSizeF size( WorldConstants::TILE_SIZE, WorldConstants::TILE_SIZE );
 
-    scene.addTexture( RenderSceneLayerEnum::Tile, position, size, frame );
+    const QImage frame = worldTile.tileModel()->animation().frameAt( elapsedMs );
+    if ( !frame.isNull() ) {
+        scene.addTexture( RenderSceneLayerEnum::Tile, y, position, size, frame );
+    }
+
+    if ( !worldTile.overlayModel() ) {
+        return;
+    }
+
+    const QImage overlayFrame = worldTile.overlayModel()->animation().frameAt( elapsedMs );
+    if ( !overlayFrame.isNull() ) {
+        scene.addTexture( RenderSceneLayerEnum::Tile, y, position, size, overlayFrame );
+    }
 }
 
 } // namespace Engine

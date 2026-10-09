@@ -20,7 +20,7 @@ void EntityRenderer::render( RenderScene& scene, const Camera& camera, const Ren
     const int endY = static_cast<int>( std::ceil( visibleRect.bottom() / WorldConstants::TILE_SIZE ) ) + ENTITY_CULLING_MARGIN_TILES;
 
     for ( const RenderWorld::Entity& entity : world.entities( z ) ) {
-        if ( entity.x < startX || entity.x > endX || entity.y < startY || entity.y > endY ) {
+        if ( entity.x + entity.footprint < startX || entity.x > endX || entity.y + entity.footprint < startY || entity.y > endY ) {
             continue;
         }
 
@@ -28,10 +28,12 @@ void EntityRenderer::render( RenderScene& scene, const Camera& camera, const Ren
             continue;
         }
 
-        const QPointF position( entity.x * WorldConstants::TILE_SIZE + entity.offsetX, ( entity.y + 1 ) * WorldConstants::TILE_SIZE - entity.texture.height() + entity.offsetY );
+        const QPointF position( entity.x * WorldConstants::TILE_SIZE + entity.offsetX, ( entity.y + entity.footprint ) * WorldConstants::TILE_SIZE - entity.texture.height() + entity.offsetY );
         const QSizeF size( entity.texture.width(), entity.texture.height() );
 
-        scene.addTexture( RenderSceneLayerEnum::Entity, position, size, entity.texture );
+        const int row = static_cast<int>( std::floor( ( entity.y * WorldConstants::TILE_SIZE + entity.offsetY ) / WorldConstants::TILE_SIZE ) ) + entity.footprint - 1;
+
+        scene.addTexture( RenderSceneLayerEnum::Entity, row, position, size, entity.texture );
     }
 }
 

@@ -5,6 +5,26 @@
 #include <QSGSimpleRectNode>
 #include <QSGSimpleTextureNode>
 
+namespace {
+
+int sortBand( Engine::RenderSceneLayerEnum layer ) {
+    switch ( layer ) {
+    case Engine::RenderSceneLayerEnum::Tile:
+        return 0;
+    case Engine::RenderSceneLayerEnum::Object:
+    case Engine::RenderSceneLayerEnum::Entity:
+        return 1;
+    case Engine::RenderSceneLayerEnum::Overlay:
+        return 2;
+    case Engine::RenderSceneLayerEnum::Effect:
+        return 3;
+    }
+
+    return 0;
+}
+
+} // namespace
+
 namespace Engine {
 
 RenderScene::RenderScene() {
@@ -18,13 +38,13 @@ void RenderScene::clear() {
     _items.clear();
 }
 
-void RenderScene::addTexture( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QImage& image ) {
-    RenderSceneItem item( layer, position, size, image );
+void RenderScene::addTexture( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QImage& image ) {
+    RenderSceneItem item( layer, row, position, size, image );
     _items.append( item );
 }
 
-void RenderScene::addRect( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QColor& color ) {
-    RenderSceneItem item( layer, position, size, color );
+void RenderScene::addRect( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QColor& color ) {
+    RenderSceneItem item( layer, row, position, size, color );
     _items.append( item );
 }
 
@@ -34,6 +54,17 @@ void RenderScene::build( QSGNode* rootNode, QQuickWindow* window, const Camera& 
     }
 
     std::stable_sort( _items.begin(), _items.end(), []( const RenderSceneItem& left, const RenderSceneItem& right ) {
+        const int leftBand = sortBand( left.layer() );
+        const int rightBand = sortBand( right.layer() );
+
+        if ( leftBand != rightBand ) {
+            return leftBand < rightBand;
+        }
+
+        if ( leftBand == sortBand( RenderSceneLayerEnum::Object ) && left.row() != right.row() ) {
+            return left.row() < right.row();
+        }
+
         return left.layer() < right.layer();
     } );
 

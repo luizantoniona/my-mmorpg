@@ -13,7 +13,21 @@ QList<RenderWorld::Entity> StreamRenderWorld::entities( int z ) const {
 
     appendEntities( result, _ownCharacter, z, EntityTextureModel::characterTexture() );
     appendEntities( result, _characters, z, EntityTextureModel::characterTexture() );
-    appendEntities( result, _creatures, z, EntityTextureModel::creatureTexture() );
+
+    for ( auto it = _creatures.constBegin(); it != _creatures.constEnd(); ++it ) {
+        if ( it->z() != z ) {
+            continue;
+        }
+
+        const int footprint = _creatureFootprints.value( it.key(), 1 );
+
+        Entity entity( it.key(), it->x(), it->y(), EntityTextureModel::creatureTexture( footprint ) );
+        entity.offsetX = it->offsetX();
+        entity.offsetY = it->offsetY();
+        entity.footprint = footprint;
+
+        result.append( entity );
+    }
 
     return result;
 }
@@ -34,18 +48,21 @@ void StreamRenderWorld::removeCharacter( int idCharacter ) {
     _characters.remove( idCharacter );
 }
 
-void StreamRenderWorld::addCreature( int idCreature, int x, int y, int z, double movementSeconds ) {
+void StreamRenderWorld::addCreature( int idCreature, int x, int y, int z, double movementSeconds, int footprint ) {
     updateEntity( _creatures, idCreature, x, y, z, movementSeconds );
+    _creatureFootprints.insert( idCreature, footprint );
 }
 
 void StreamRenderWorld::removeCreature( int idCreature ) {
     _creatures.remove( idCreature );
+    _creatureFootprints.remove( idCreature );
 }
 
 void StreamRenderWorld::clearEntities() {
     _ownCharacter.clear();
     _characters.clear();
     _creatures.clear();
+    _creatureFootprints.clear();
 }
 
 void StreamRenderWorld::updateEntity( QHash<int, EntityAnimationModel>& entities, int idEntity, int x, int y, int z, double movementSeconds ) {

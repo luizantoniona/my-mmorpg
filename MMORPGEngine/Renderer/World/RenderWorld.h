@@ -25,6 +25,7 @@ public:
         QImage texture;
         double offsetX = 0.0;
         double offsetY = 0.0;
+        int footprint = 1;
     };
 
     explicit RenderWorld( QObject* parent = nullptr );

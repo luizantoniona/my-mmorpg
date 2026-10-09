@@ -22,7 +22,7 @@ public:
     Q_INVOKABLE void addCharacter( int idCharacter, int x, int y, int z, double movementSeconds = 0.0 );
     Q_INVOKABLE void removeCharacter( int idCharacter );
 
-    Q_INVOKABLE void addCreature( int idCreature, int x, int y, int z, double movementSeconds = 0.0 );
+    Q_INVOKABLE void addCreature( int idCreature, int x, int y, int z, double movementSeconds = 0.0, int footprint = 1 );
     Q_INVOKABLE void removeCreature( int idCreature );
 
     Q_INVOKABLE void clearEntities();
@@ -35,6 +35,7 @@ private:
     QHash<int, EntityAnimationModel> _ownCharacter;
     QHash<int, EntityAnimationModel> _characters;
     QHash<int, EntityAnimationModel> _creatures;
+    QHash<int, int> _creatureFootprints;
 };
 
 } // namespace Engine

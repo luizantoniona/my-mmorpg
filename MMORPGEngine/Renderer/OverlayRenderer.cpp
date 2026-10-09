@@ -62,7 +62,7 @@ void OverlayRenderer::renderRect( RenderScene& scene, const OverlayRect& rect ) 
     const QPointF position( rect.x * tileSize, rect.y * tileSize );
     const QSizeF size( rect.width * tileSize, rect.height * tileSize );
 
-    scene.addRect( RenderSceneLayerEnum::Overlay, position, size, rect.color );
+    scene.addRect( RenderSceneLayerEnum::Overlay, 0, position, size, rect.color );
 }
 
 } // namespace Engine

@@ -1,5 +1,8 @@
 #include "EntityTextureModel.h"
 
+#include <algorithm>
+#include <map>
+
 #include <QPainter>
 
 #include <MMORPGEngine/World/WorldConstants.h>
@@ -11,13 +14,21 @@ const QImage& EntityTextureModel::characterTexture() {
     return texture;
 }
 
-const QImage& EntityTextureModel::creatureTexture() {
-    static const QImage texture = createPlaceholder( QColor( 214, 61, 61 ) );
-    return texture;
+const QImage& EntityTextureModel::creatureTexture( int footprint ) {
+    static std::map<int, QImage> textures;
+
+    const int clampedFootprint = std::max( footprint, 1 );
+
+    auto it = textures.find( clampedFootprint );
+    if ( it == textures.end() ) {
+        it = textures.emplace( clampedFootprint, createPlaceholder( QColor( 214, 61, 61 ), clampedFootprint ) ).first;
+    }
+
+    return it->second;
 }
 
-QImage EntityTextureModel::createPlaceholder( const QColor& color ) {
-    const int size = WorldConstants::TILE_SIZE;
+QImage EntityTextureModel::createPlaceholder( const QColor& color, int footprint ) {
+    const int size = WorldConstants::TILE_SIZE * footprint;
 
     QImage image( size, size, QImage::Format_ARGB32_Premultiplied );
     image.fill( Qt::transparent );

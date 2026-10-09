@@ -7,23 +7,26 @@ RenderSceneItem::RenderSceneItem() :
     _size( 0, 0 ),
     _image(),
     _color(),
-    _layer( RenderSceneLayerEnum::Tile ) {
+    _layer( RenderSceneLayerEnum::Tile ),
+    _row( 0 ) {
 }
 
-RenderSceneItem::RenderSceneItem( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QImage& image ) :
+RenderSceneItem::RenderSceneItem( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QImage& image ) :
     _position( position ),
     _size( size ),
     _image( image ),
     _color(),
-    _layer( layer ) {
+    _layer( layer ),
+    _row( row ) {
 }
 
-RenderSceneItem::RenderSceneItem( RenderSceneLayerEnum layer, const QPointF& position, const QSizeF& size, const QColor& color ) :
+RenderSceneItem::RenderSceneItem( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QColor& color ) :
     _position( position ),
     _size( size ),
     _image(),
     _color( color ),
-    _layer( layer ) {
+    _layer( layer ),
+    _row( row ) {
 }
 
 RenderSceneLayerEnum RenderSceneItem::layer() const {
@@ -32,6 +35,14 @@ RenderSceneLayerEnum RenderSceneItem::layer() const {
 
 void RenderSceneItem::setLayer( RenderSceneLayerEnum layer ) {
     _layer = layer;
+}
+
+int RenderSceneItem::row() const {
+    return _row;
+}
+
+void RenderSceneItem::setRow( int row ) {
+    _row = row;
 }
 
 QPointF RenderSceneItem::position() const {
