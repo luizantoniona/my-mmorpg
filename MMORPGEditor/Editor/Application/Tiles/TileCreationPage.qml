@@ -57,6 +57,35 @@ Item {
         onAccepted: root.save(true)
     }
 
+    Dialog {
+        id: removeDialog
+
+        anchors.centerIn: parent
+        modal: true
+        title: "Remove Tile"
+        standardButtons: Dialog.Yes | Dialog.No
+
+        Text {
+            color: Colors.text
+            font: Fonts.bodyBold
+            text: "Remove '" + root.existingName + "' (type " + root.typeValue + ")?\nIts texture will be deleted and tiles placed in the world will no longer render."
+        }
+
+        onAccepted: {
+            const removedType = root.typeValue
+            const ok = creationControl.removeTile(removedType)
+
+            if (ok) {
+                statusText.text = "Tile removed successfully."
+                statusText.color = Colors.success
+                typeInput.vText = String(creationControl.nextType)
+            } else {
+                statusText.text = creationControl.lastError
+                statusText.color = Colors.error
+            }
+        }
+    }
+
     Component.onCompleted: typeInput.vText = String(creationControl.nextType)
 
     FileDialog {
@@ -89,8 +118,8 @@ Item {
                 InputBase {
                     id: nameInput
                     Layout.fillWidth: true
-                    vTitle: "Name"
-                    vPlaceholder: "e.g. Grass"
+                    vTitle: "Name (shown when inspected)"
+                    vPlaceholder: "e.g. Stone ground"
                 }
 
                 RowLayout {
@@ -100,7 +129,7 @@ Item {
                     InputBase {
                         id: textureInput
                         Layout.fillWidth: true
-                        vTitle: "Texture (.png, .gif or .webp)"
+                        vTitle: "Texture (.png, .gif or .webp; the file name becomes its id)"
                         vPlaceholder: "No texture selected"
                     }
 
@@ -184,6 +213,15 @@ Item {
                             typeInput.vText = String(creationControl.nextType)
                             statusText.text = ""
                         }
+                    }
+
+                    ButtonBase {
+                        vText: "Remove Tile"
+                        vEnabled: root.existingName !== ""
+                        vBackgroundColor: Colors.background1
+                        vHoverColor: Colors.background2
+
+                        onClicked: removeDialog.open()
                     }
 
                     ButtonBase {

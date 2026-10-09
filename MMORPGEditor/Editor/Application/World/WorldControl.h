@@ -16,6 +16,9 @@ class WorldControl : public QObject {
     Q_PROPERTY( QString worldName READ worldName NOTIFY worldChanged )
     Q_PROPERTY( int worldWidth READ worldWidth NOTIFY worldChanged )
     Q_PROPERTY( int worldHeight READ worldHeight NOTIFY worldChanged )
+    Q_PROPERTY( int spawnX READ spawnX NOTIFY spawnPointChanged )
+    Q_PROPERTY( int spawnY READ spawnY NOTIFY spawnPointChanged )
+    Q_PROPERTY( int spawnZ READ spawnZ NOTIFY spawnPointChanged )
 
 public:
     explicit WorldControl( QObject* parent = nullptr );
@@ -29,6 +32,10 @@ public:
     int worldWidth() const;
     int worldHeight() const;
 
+    int spawnX() const;
+    int spawnY() const;
+    int spawnZ() const;
+
 public slots:
     void loadWorld();
     bool saveWorld();
@@ -37,6 +44,7 @@ public slots:
     bool removeFloor( int z );
 
     void paintTile( int x, int y, int z, int tileType );
+    void paintOverlay( int x, int y, int z, int tileType );
     void paintObject( int x, int y, int z, int objectType );
     void paintSpawnArea( int x, int y, int z, int width, int height, double respawnSeconds, const QVariantList& creatures );
 
@@ -44,8 +52,11 @@ public slots:
     QVariantMap spawnAreaAt( int x, int y, int z ) const;
     bool removeSpawnArea( int x, int y, int z );
 
+    void setSpawnPoint( int x, int y, int z );
+
 signals:
     void worldChanged();
+    void spawnPointChanged();
 
 private:
     std::unique_ptr<Engine::WorldModel> _world;

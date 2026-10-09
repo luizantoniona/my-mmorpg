@@ -21,7 +21,7 @@ Item {
         const width = parseInt(widthInput.vText, 10) || 1
         const height = parseInt(heightInput.vText, 10) || 1
         const savedType = root.typeValue
-        const ok = creationControl.createObject(savedType, nameInput.vText, textureInput.vText, width, height, frameDurationMs, replace)
+        const ok = creationControl.createObject(savedType, nameInput.vText, textureInput.vText, width, height, frameDurationMs, walkableToggle.vSelected, replace)
 
         if (ok) {
             statusText.text = replace ? "Object replaced successfully." : "Object created successfully."
@@ -31,6 +31,7 @@ Item {
             frameDurationInput.vText = "100"
             widthInput.vText = "1"
             heightInput.vText = "1"
+            walkableToggle.vSelected = true
             typeInput.vText = String(creationControl.nextFreeType(savedType))
         } else {
             statusText.text = creationControl.lastError
@@ -153,6 +154,15 @@ Item {
                     }
                 }
 
+                ButtonToggle {
+                    id: walkableToggle
+                    Layout.preferredWidth: 160
+                    vText: walkableToggle.vSelected ? "Walkable" : "Not Walkable"
+                    vSelected: true
+
+                    onClicked: walkableToggle.vSelected = !walkableToggle.vSelected
+                }
+
                 InputBase {
                     id: typeInput
                     Layout.preferredWidth: 160
@@ -196,6 +206,7 @@ Item {
                             frameDurationInput.vText = "100"
                             widthInput.vText = "1"
                             heightInput.vText = "1"
+                            walkableToggle.vSelected = true
                             typeInput.vText = String(creationControl.nextType)
                             statusText.text = ""
                         }

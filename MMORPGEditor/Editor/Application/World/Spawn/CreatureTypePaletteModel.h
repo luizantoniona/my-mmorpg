@@ -1,10 +1,8 @@
 #ifndef CREATURETYPEPALETTEMODEL_H
 #define CREATURETYPEPALETTEMODEL_H
 
-#include <cstdint>
-
 #include <QAbstractListModel>
-#include <QList>
+#include <QStringList>
 
 class CreatureTypePaletteModel : public QAbstractListModel {
     Q_OBJECT
@@ -22,7 +20,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    QList<uint32_t> _types;
+    QStringList _types;
 };
 
 #endif // CREATURETYPEPALETTEMODEL_H

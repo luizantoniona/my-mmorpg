@@ -12,6 +12,8 @@ Item {
     property int activeTileType: -1
     property int activeObjectType: -1
 
+    property bool overlayLayer: false
+
     property int activeBrush: BrushMode.Tile
     property int toolMode: ToolMode.Select
 
@@ -20,10 +22,24 @@ Item {
     readonly property color spawnOverlayColor: Qt.rgba(Colors.warning.r, Colors.warning.g, Colors.warning.b, 0.35)
 
     function refreshSpawnOverlay() {
+        if (root.toolMode === ToolMode.SpawnPoint) {
+            const rects = worldControl.spawnZ === root.currentFloor ? [{
+                        "x": worldControl.spawnX,
+                        "y": worldControl.spawnY,
+                        "width": 1,
+                        "height": 1
+                    }] : []
+            viewport.setOverlayRects(rects, Colors.success)
+            return
+        }
+
         viewport.setOverlayRects(worldControl.spawnAreas(root.currentFloor), root.spawnOverlayColor)
     }
 
-    onToolModeChanged: root.forceActiveFocus()
+    onToolModeChanged: {
+        root.forceActiveFocus()
+        root.refreshSpawnOverlay()
+    }
 
     TileSelectionControl {
         id: selectionControl
@@ -68,6 +84,11 @@ Item {
             width: 220
             tileActive: root.activeBrush === BrushMode.Tile
             objectActive: root.activeBrush === BrushMode.Object
+            overlayLayer: root.overlayLayer
+
+            onOverlayLayerRequested: function (overlay) {
+                root.overlayLayer = overlay
+            }
 
             onTileSelected: function (type) {
                 root.activeTileType = type
@@ -97,7 +118,7 @@ Item {
                 onModeRequested: function (mode) {
                     root.toolMode = mode
 
-                    if (mode === ToolMode.Paint || mode === ToolMode.Spawn) {
+                    if (mode !== ToolMode.Select) {
                         selectionControl.clearSelection()
                         objectSelectionControl.clearSelection()
                     }
@@ -160,7 +181,7 @@ Item {
                         if (root.toolMode === ToolMode.Paint) {
                             return Qt.CrossCursor
                         }
-                        if (root.toolMode === ToolMode.Spawn) {
+                        if (root.toolMode === ToolMode.Spawn || root.toolMode === ToolMode.SpawnPoint) {
                             return Qt.PointingHandCursor
                         }
                         return Qt.ArrowCursor
@@ -168,9 +189,25 @@ Item {
 
                     function paintAt(x, y, z) {
                         if (root.activeBrush === BrushMode.Tile && root.activeTileType >= 0) {
-                            worldControl.paintTile(x, y, z, root.activeTileType)
+                            if (root.overlayLayer) {
+                                worldControl.paintOverlay(x, y, z, root.activeTileType)
+                            } else {
+                                worldControl.paintTile(x, y, z, root.activeTileType)
+                            }
                         } else if (root.activeBrush === BrushMode.Object && root.activeObjectType >= 0) {
                             worldControl.paintObject(x, y, z, root.activeObjectType)
+                        }
+                    }
+
+                    function clearAt(x, y, z) {
+                        if (root.activeBrush === BrushMode.Tile) {
+                            if (root.overlayLayer) {
+                                worldControl.paintOverlay(x, y, z, 0)
+                            } else {
+                                worldControl.paintTile(x, y, z, 0)
+                            }
+                        } else if (root.activeBrush === BrushMode.Object) {
+                            worldControl.paintObject(x, y, z, 0)
                         }
                     }
 
@@ -185,6 +222,12 @@ Item {
 
                         if (root.toolMode === ToolMode.Paint) {
                             viewport.paintAt(x, y, z)
+                            return
+                        }
+
+                        if (root.toolMode === ToolMode.SpawnPoint) {
+                            worldControl.setSpawnPoint(x, y, z)
+                            root.refreshSpawnOverlay()
                             return
                         }
 
@@ -212,6 +255,11 @@ Item {
                     }
 
                     onTileRightClicked: function (x, y, z) {
+                        if (root.toolMode === ToolMode.Paint) {
+                            viewport.clearAt(x, y, z)
+                            return
+                        }
+
                         if (root.toolMode !== ToolMode.Spawn) {
                             return
                         }
@@ -271,7 +319,8 @@ Item {
         worldControl.loadWorld()
         editorWorld.world = worldControl.world
         forceActiveFocus()
-        viewport.centerCameraOnTile(worldControl.worldWidth / 2, worldControl.worldHeight / 2)
+        root.currentFloor = worldControl.spawnZ
+        viewport.centerCameraOnTile(worldControl.spawnX, worldControl.spawnY)
         root.refreshSpawnOverlay()
     }
 

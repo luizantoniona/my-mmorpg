@@ -61,10 +61,23 @@ int WorldControl::worldHeight() const {
     return static_cast<int>( _world->height() );
 }
 
+int WorldControl::spawnX() const {
+    return _world ? _world->spawnX() : 0;
+}
+
+int WorldControl::spawnY() const {
+    return _world ? _world->spawnY() : 0;
+}
+
+int WorldControl::spawnZ() const {
+    return _world ? _world->spawnZ() : 0;
+}
+
 void WorldControl::loadWorld() {
     _world = Engine::WorldFactory::createWorld( DATA_PATH );
 
     emit worldChanged();
+    emit spawnPointChanged();
 }
 
 bool WorldControl::saveWorld() {
@@ -113,6 +126,20 @@ void WorldControl::paintTile( int x, int y, int z, int tileType ) {
     _world->setTile( x, y, z, static_cast<uint32_t>( tileType ) );
 }
 
+void WorldControl::paintOverlay( int x, int y, int z, int tileType ) {
+    if ( !_world ) {
+        return;
+    }
+
+    const Engine::WorldTileModel* worldTile = _world->tile( x, y, z );
+
+    if ( tileType != 0 && ( !worldTile || !worldTile->tileModel() ) ) {
+        return;
+    }
+
+    _world->setOverlay( x, y, z, static_cast<uint32_t>( tileType ) );
+}
+
 void WorldControl::paintObject( int x, int y, int z, int objectType ) {
     if ( !_world ) {
         return;
@@ -143,7 +170,7 @@ void WorldControl::paintSpawnArea( int x, int y, int z, int width, int height, d
         const QVariantMap creatureMap = creatureVariant.toMap();
 
         Engine::CreatureSpawnEntryModel entry;
-        entry.setType( creatureMap.value( "type" ).toUInt() );
+        entry.setType( creatureMap.value( "type" ).toString() );
         entry.setQuantity( creatureMap.value( "quantity" ).toUInt() );
 
         entries.push_back( entry );
@@ -215,4 +242,16 @@ bool WorldControl::removeSpawnArea( int x, int y, int z ) {
     }
 
     return _world->removeSpawnArea( x, y, z );
+}
+
+void WorldControl::setSpawnPoint( int x, int y, int z ) {
+    if ( !_world ) {
+        return;
+    }
+
+    _world->setSpawnX( x );
+    _world->setSpawnY( y );
+    _world->setSpawnZ( z );
+
+    emit spawnPointChanged();
 }

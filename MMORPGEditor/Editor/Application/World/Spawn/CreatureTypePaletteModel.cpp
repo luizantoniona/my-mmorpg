@@ -33,7 +33,7 @@ QVariant CreatureTypePaletteModel::data( const QModelIndex& index, int role ) co
         return QVariant();
     }
 
-    const uint32_t type = _types.at( index.row() );
+    const QString type = _types.at( index.row() );
 
     const Engine::CreatureTypeCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog();
     const Engine::CreatureTypeModel* creatureType = catalog.creatureType( type );

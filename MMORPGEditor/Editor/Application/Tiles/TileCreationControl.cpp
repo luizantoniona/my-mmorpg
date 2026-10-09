@@ -39,18 +39,24 @@ QStringList parseTags( const QString& tagsText ) {
     return tags;
 }
 
-void removeUnusedFolder( const QString& mapPath, const QString& folder, const Engine::TileCatalog& catalog ) {
-    if ( folder.isEmpty() ) {
+void removeTextureFiles( const QString& mapPath, const QString& textureFile ) {
+    for ( auto it = Engine::DataFactory::textureExtensions().constBegin(); it != Engine::DataFactory::textureExtensions().constEnd(); ++it ) {
+        QFile::remove( mapPath + textureFile + it.key() );
+    }
+}
+
+void removeUnusedTexture( const QString& mapPath, const QString& textureFile, const Engine::TileCatalog& catalog ) {
+    if ( textureFile.isEmpty() ) {
         return;
     }
 
     for ( const auto& entry : catalog.tiles() ) {
-        if ( entry.second.folder() == folder ) {
+        if ( entry.second.textureFile() == textureFile ) {
             return;
         }
     }
 
-    QDir( mapPath + folder ).removeRecursively();
+    removeTextureFiles( mapPath, textureFile );
 }
 } // namespace
 
@@ -102,6 +108,28 @@ void TileCreationControl::setLastError( const QString& error ) {
     emit lastErrorChanged();
 }
 
+bool TileCreationControl::removeTile( int type ) {
+    Engine::DataManager& dataManager = Engine::Singleton<Engine::DataManager>::instance();
+    const Engine::TileModel* existing = type < 1 ? nullptr : dataManager.tileCatalog().tile( static_cast<uint32_t>( type ) );
+
+    if ( !existing ) {
+        setLastError( "Type " + QString::number( type ) + " does not exist." );
+        return false;
+    }
+
+    const QString textureFile = existing->textureFile();
+
+    dataManager.removeTile( static_cast<uint32_t>( type ) );
+    removeUnusedTexture( Engine::DataFactory::mapPath( DATA_PATH ), textureFile, dataManager.tileCatalog() );
+
+    Engine::TileFactory::saveTileCatalog( DATA_PATH, dataManager.tileCatalog() );
+
+    setLastError( "" );
+    emit catalogChanged();
+
+    return true;
+}
+
 bool TileCreationControl::createTile( int type, const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable, bool replace ) {
     if ( type < 1 ) {
         setLastError( "Type must be 1 or higher." );
@@ -116,7 +144,7 @@ bool TileCreationControl::createTile( int type, const QString& name, const QStri
         return false;
     }
 
-    const QString replacedFolder = existing ? existing->folder() : QString();
+    const QString replacedTextureFile = existing ? existing->textureFile() : QString();
 
     const QString trimmedName = name.trimmed();
 
@@ -136,17 +164,27 @@ bool TileCreationControl::createTile( int type, const QString& name, const QStri
     const bool isAnimated = Engine::DataFactory::textureExtensions().value( sourceExtension, false );
     const QString extension = isAnimated ? sourceExtension : ".png";
 
-    const QString mapPath = Engine::DataFactory::mapPath( DATA_PATH );
-    const QString folder = "Textures/Tiles/" + trimmedName;
-    const QString destDir = mapPath + folder;
+    const QString textureName = QFileInfo( sourcePath ).completeBaseName();
 
-    QDir().mkpath( destDir );
-
-    const QString destPath = destDir + "/" + trimmedName + extension;
-
-    if ( QFile::exists( destPath ) ) {
-        QFile::remove( destPath );
+    if ( textureName.isEmpty() ) {
+        setLastError( "Invalid texture file name." );
+        return false;
     }
+
+    const QString textureFile = "Textures/Tiles/" + textureName;
+
+    for ( const auto& entry : dataManager.tileCatalog().tiles() ) {
+        if ( entry.second.textureFile() == textureFile && entry.first != static_cast<uint32_t>( type ) ) {
+            setLastError( "Texture file '" + textureName + "' is already used by type " + QString::number( entry.first ) + " ('" + entry.second.name() + "'). Rename the file." );
+            return false;
+        }
+    }
+
+    const QString mapPath = Engine::DataFactory::mapPath( DATA_PATH );
+    const QString destPath = mapPath + textureFile + extension;
+
+    QDir().mkpath( QFileInfo( destPath ).absolutePath() );
+    removeTextureFiles( mapPath, textureFile );
 
     if ( !QFile::copy( sourcePath, destPath ) ) {
         setLastError( "Failed to copy texture." );
@@ -162,14 +200,14 @@ bool TileCreationControl::createTile( int type, const QString& name, const QStri
     Engine::TileModel tile;
     tile.setType( static_cast<uint32_t>( type ) );
     tile.setName( trimmedName );
-    tile.setFolder( folder );
+    tile.setTextureFile( textureFile );
     tile.setAnimation( animation );
     tile.setTags( parseTags( tagsText ) );
     tile.setIsWalkable( isWalkable );
 
     if ( existing ) {
         dataManager.replaceTile( tile );
-        removeUnusedFolder( mapPath, replacedFolder, dataManager.tileCatalog() );
+        removeUnusedTexture( mapPath, replacedTextureFile, dataManager.tileCatalog() );
 
     } else {
         dataManager.addTile( tile );

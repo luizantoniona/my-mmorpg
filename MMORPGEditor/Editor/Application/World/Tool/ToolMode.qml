@@ -6,6 +6,7 @@ QtObject {
     enum Value {
         Select,
         Paint,
-        Spawn
+        Spawn,
+        SpawnPoint
     }
 }

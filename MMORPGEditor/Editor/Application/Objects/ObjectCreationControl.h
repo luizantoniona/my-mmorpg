@@ -19,7 +19,7 @@ public:
     Q_INVOKABLE QString typeName( int type ) const;
 
 public slots:
-    bool createObject( int type, const QString& name, const QString& textureFile, int width, int height, int frameDurationMs, bool replace );
+    bool createObject( int type, const QString& name, const QString& textureFile, int width, int height, int frameDurationMs, bool isWalkable, bool replace );
 
 signals:
     void catalogChanged();

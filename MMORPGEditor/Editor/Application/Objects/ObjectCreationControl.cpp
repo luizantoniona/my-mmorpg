@@ -89,7 +89,7 @@ void ObjectCreationControl::setLastError( const QString& error ) {
     emit lastErrorChanged();
 }
 
-bool ObjectCreationControl::createObject( int type, const QString& name, const QString& textureFile, int width, int height, int frameDurationMs, bool replace ) {
+bool ObjectCreationControl::createObject( int type, const QString& name, const QString& textureFile, int width, int height, int frameDurationMs, bool isWalkable, bool replace ) {
     if ( type < 1 ) {
         setLastError( "Type must be 1 or higher." );
         return false;
@@ -161,6 +161,7 @@ bool ObjectCreationControl::createObject( int type, const QString& name, const Q
     object.setFolder( folder );
     object.setAnimation( animation );
     object.setSize( size );
+    object.setIsWalkable( isWalkable );
 
     if ( existing ) {
         dataManager.replaceObject( object );

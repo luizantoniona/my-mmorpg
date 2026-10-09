@@ -6,7 +6,7 @@ import MMORPGEditorControls
 Popup {
     id: root
 
-    signal creatureTypeSelected(int type, string name)
+    signal creatureTypeSelected(string type, string name)
 
     width: 220
     height: 280
@@ -33,7 +33,7 @@ Popup {
         model: paletteModel
 
         delegate: ButtonBase {
-            required property int type
+            required property string type
             required property string name
 
             width: ListView.view.width

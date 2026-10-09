@@ -96,7 +96,7 @@ bool ConfigurationControl::selectFolder( const QString& folder ) {
         return false;
     }
 
-    Json::Value configJson;
+    Json::Value configJson = Engine::JsonHelper::loadJsonFile( QString( DATA_PATH ) + "Config.json" );
     configJson[ "ActiveFolder" ] = folder.toStdString();
 
     if ( !Engine::JsonHelper::saveJsonFile( QString( DATA_PATH ) + "Config.json", configJson ) ) {

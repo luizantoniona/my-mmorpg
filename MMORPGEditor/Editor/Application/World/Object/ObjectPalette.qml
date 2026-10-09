@@ -21,6 +21,8 @@ Item {
         anchors.fill: parent
         anchors.margins: Spaces.spacing8
 
+        clip: true
+
         cellWidth: 48
         cellHeight: 48
 
