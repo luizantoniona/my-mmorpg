@@ -1,8 +1,11 @@
 #ifndef WORLDCOMBATSYSTEM_H
 #define WORLDCOMBATSYSTEM_H
 
+#include <memory>
 #include <vector>
 
+#include <MMORPGServer/Server/Runtime/World/Action/WorldCombatAction.h>
+#include <MMORPGServer/Server/Runtime/World/Action/WorldCombatAttackAction.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldCombatAttackerEnum.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldSystem.h>
 
@@ -17,40 +20,18 @@ public:
     bool attack( int idCharacter, int dx, int dy );
     bool attackCreature( int idCreature, int x, int y, int z );
 
-    void cancelCharacterAttack( int idCharacter );
+    void cancelCharacterActions( int idCharacter );
     bool hasPendingCreatureAttack( int idCreature ) const;
 
     bool resolveCharacterAttack( int idCharacter, int x, int y, int z, double damage );
     void resolveCreatureAttack( int idCreature, int x, int y, int z, double damage );
 
 private:
-    class PendingAttack {
-    public:
-        PendingAttack( WorldCombatAttackerEnum attacker, int idAttacker, int x, int y, int z, double damage, int ticksRemaining ) :
-            damage( damage ),
-            attacker( attacker ),
-            idAttacker( idAttacker ),
-            x( x ),
-            y( y ),
-            z( z ),
-            ticksRemaining( ticksRemaining ) {
-        }
-
-        double damage;
-        WorldCombatAttackerEnum attacker;
-        int idAttacker;
-        int x;
-        int y;
-        int z;
-        int ticksRemaining;
-    };
+    bool perform( Engine::CombatActionEnum action, WorldCombatAttackerEnum attacker, int idAttacker, int targetX, int targetY, int targetZ );
 
 private:
-    bool hasPendingAttack( WorldCombatAttackerEnum attacker, int idAttacker ) const;
-    int castTicks() const;
-
-private:
-    std::vector<PendingAttack> _pendingAttacks;
+    std::vector<std::unique_ptr<WorldCombatAction>> _actions;
+    WorldCombatAttackAction* _attackAction;
 };
 
 } // namespace Server

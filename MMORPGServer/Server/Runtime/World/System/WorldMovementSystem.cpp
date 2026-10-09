@@ -44,7 +44,7 @@ bool WorldMovementSystem::move( int idCharacter, int dx, int dy ) {
 }
 
 void WorldMovementSystem::moveCharacter( int idCharacter, int x, int y, int z ) {
-    _runtime.combatSystem().cancelCharacterAttack( idCharacter );
+    _runtime.combatSystem().cancelCharacterActions( idCharacter );
 
     {
         std::lock_guard<std::mutex> lock( _runtime.mutex() );

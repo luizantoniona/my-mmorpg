@@ -9,6 +9,8 @@
 #include <MMORPGEngine/Data/Creature/CreatureSpawnEntryModel.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 #include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/Data/Item/ItemModel.h>
+#include <MMORPGEngine/Data/Item/ItemTypeModel.h>
 #include <MMORPGEngine/Data/Tile/TileModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
@@ -1157,4 +1159,267 @@ TEST( WorldRuntimeTest, Tick_PassiveCreature_NeverAttacks ) {
     tickTimes( worldRuntime, worldRuntime.tickRate() * 3 );
 
     EXPECT_DOUBLE_EQ( character->vitals().health(), 100.0 );
+}
+
+namespace {
+
+constexpr uint32_t SWORD_ITEM = 9101;
+constexpr uint32_t GREATSWORD_ITEM = 9102;
+constexpr uint32_t HEAVY_SHIELD_ITEM = 9103;
+constexpr uint32_t SMALL_SHIELD_ITEM = 9104;
+constexpr uint32_t HELMET_ITEM = 9105;
+constexpr uint32_t RING_ITEM = 9106;
+constexpr uint32_t INVENTORY_CAPACITY = 20;
+
+void registerEquipmentItem( uint32_t idItem, const QString& type, Engine::ItemCategoryEnum category, Engine::ItemSlotEnum slot, Engine::HandRequirementEnum handRequirement, const std::set<Engine::CombatActionEnum>& disabledActions ) {
+    Engine::ItemTypeModel itemType;
+    itemType.setType( type );
+    itemType.setName( type );
+    itemType.setCategory( category );
+    itemType.setSlot( slot );
+    itemType.setDisabledActions( disabledActions );
+    if ( handRequirement != Engine::HandRequirementEnum::UNKNOWN ) {
+        itemType.setHandRequirement( handRequirement );
+    }
+    Engine::Singleton<Engine::DataManager>::instance().addItemType( itemType );
+
+    Engine::ItemModel item;
+    item.setId( idItem );
+    item.setIdItemType( type );
+    item.setName( type );
+    Engine::Singleton<Engine::DataManager>::instance().addItem( item );
+}
+
+void registerEquipmentItems() {
+    registerEquipmentItem( SWORD_ITEM, "EQTEST_SWORD", Engine::ItemCategoryEnum::WEAPON, Engine::ItemSlotEnum::HAND, Engine::HandRequirementEnum::ONE_HANDED, {} );
+    registerEquipmentItem( GREATSWORD_ITEM, "EQTEST_GREATSWORD", Engine::ItemCategoryEnum::WEAPON, Engine::ItemSlotEnum::HAND, Engine::HandRequirementEnum::TWO_HANDED, {} );
+    registerEquipmentItem( HEAVY_SHIELD_ITEM, "EQTEST_HEAVY_SHIELD", Engine::ItemCategoryEnum::SHIELD, Engine::ItemSlotEnum::HAND, Engine::HandRequirementEnum::ONE_HANDED, { Engine::CombatActionEnum::DODGE } );
+    registerEquipmentItem( SMALL_SHIELD_ITEM, "EQTEST_SMALL_SHIELD", Engine::ItemCategoryEnum::SHIELD, Engine::ItemSlotEnum::HAND, Engine::HandRequirementEnum::ONE_HANDED, {} );
+    registerEquipmentItem( HELMET_ITEM, "EQTEST_HELMET", Engine::ItemCategoryEnum::ARMOR, Engine::ItemSlotEnum::HEAD, Engine::HandRequirementEnum::UNKNOWN, {} );
+    registerEquipmentItem( RING_ITEM, "EQTEST_RING", Engine::ItemCategoryEnum::ARMOR, Engine::ItemSlotEnum::RING, Engine::HandRequirementEnum::UNKNOWN, {} );
+}
+
+Engine::CharacterInventoryModel inventoryEntry( uint32_t position, uint32_t idItem ) {
+    Engine::CharacterInventoryModel entry;
+    entry.setPosition( position );
+    entry.setIdItem( idItem );
+    entry.setAmount( 1 );
+
+    return entry;
+}
+
+Engine::CharacterEquipmentModel equipmentEntry( Engine::EquipmentSlotEnum slot, uint32_t idItem ) {
+    Engine::CharacterEquipmentModel entry;
+    entry.setSlot( slot );
+    entry.setIdItem( idItem );
+
+    return entry;
+}
+
+uint32_t equippedItem( const Engine::CharacterModel& character, Engine::EquipmentSlotEnum slot ) {
+    for ( const Engine::CharacterEquipmentModel& entry : character.equipment() ) {
+        if ( entry.slot() == slot ) {
+            return entry.idItem();
+        }
+    }
+
+    return 0;
+}
+
+uint32_t inventoryItem( const Engine::CharacterModel& character, uint32_t position ) {
+    for ( const Engine::CharacterInventoryModel& entry : character.inventory() ) {
+        if ( entry.position() == position ) {
+            return entry.idItem();
+        }
+    }
+
+    return 0;
+}
+
+Engine::CharacterModel* addEquipmentCharacter( Server::WorldRuntime& worldRuntime, const std::vector<Engine::CharacterInventoryModel>& inventory, const std::vector<Engine::CharacterEquipmentModel>& equipment ) {
+    registerEquipmentItems();
+
+    auto character = makeCharacter( 1, 0, 0, 0 );
+    character->setInventory( inventory );
+    character->setEquipment( equipment );
+
+    return worldRuntime.addCharacter( std::move( character ) );
+}
+
+} // namespace
+
+TEST( WorldRuntimeTest, AddCharacter_WithoutEquipment_HasBareHandsAttackAndDodge ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, {}, {} );
+
+    EXPECT_EQ( character->combat().availableActions(), std::set<Engine::CombatActionEnum>( { Engine::CombatActionEnum::ATTACK, Engine::CombatActionEnum::DODGE } ) );
+}
+
+TEST( WorldRuntimeTest, AddCharacter_WithHeavyShieldEquipped_HasBlockButNoDodge ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, {}, { equipmentEntry( Engine::EquipmentSlotEnum::LEFT_HAND, HEAVY_SHIELD_ITEM ) } );
+
+    EXPECT_EQ( character->combat().availableActions(), std::set<Engine::CombatActionEnum>( { Engine::CombatActionEnum::ATTACK, Engine::CombatActionEnum::BLOCK } ) );
+}
+
+TEST( WorldRuntimeTest, Equip_Weapon_GoesToRightHandAndLeavesInventory ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 3, SWORD_ITEM ) }, {} );
+
+    EXPECT_TRUE( worldRuntime.equipCharacter( 1, 3 ) );
+
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), SWORD_ITEM );
+    EXPECT_EQ( inventoryItem( *character, 3 ), 0u );
+    EXPECT_TRUE( character->combat().isActionAvailable( Engine::CombatActionEnum::ATTACK ) );
+}
+
+TEST( WorldRuntimeTest, Equip_HeavyShield_GoesToLeftHandAndDisablesDodge ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, HEAVY_SHIELD_ITEM ) }, {} );
+
+    EXPECT_TRUE( worldRuntime.equipCharacter( 1, 0 ) );
+
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), HEAVY_SHIELD_ITEM );
+    EXPECT_TRUE( character->combat().isActionAvailable( Engine::CombatActionEnum::BLOCK ) );
+    EXPECT_FALSE( character->combat().isActionAvailable( Engine::CombatActionEnum::DODGE ) );
+}
+
+TEST( WorldRuntimeTest, Equip_SmallShield_KeepsDodgeAndGrantsBlock ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SMALL_SHIELD_ITEM ) }, {} );
+
+    EXPECT_TRUE( worldRuntime.equipCharacter( 1, 0 ) );
+
+    EXPECT_TRUE( character->combat().isActionAvailable( Engine::CombatActionEnum::BLOCK ) );
+    EXPECT_TRUE( character->combat().isActionAvailable( Engine::CombatActionEnum::DODGE ) );
+}
+
+TEST( WorldRuntimeTest, Equip_TwoHandedOverEquippedWeapon_SendsWeaponToFirstFreePosition ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 5, GREATSWORD_ITEM ) }, { equipmentEntry( Engine::EquipmentSlotEnum::RIGHT_HAND, SWORD_ITEM ) } );
+
+    EXPECT_TRUE( worldRuntime.equipCharacter( 1, 5 ) );
+
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), GREATSWORD_ITEM );
+    EXPECT_EQ( inventoryItem( *character, 0 ), SWORD_ITEM );
+    EXPECT_EQ( inventoryItem( *character, 5 ), 0u );
+}
+
+TEST( WorldRuntimeTest, Equip_TwoHandedWeapon_SendsShieldBackToInventory ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, GREATSWORD_ITEM ) }, { equipmentEntry( Engine::EquipmentSlotEnum::LEFT_HAND, SMALL_SHIELD_ITEM ) } );
+
+    EXPECT_TRUE( worldRuntime.equipCharacter( 1, 0 ) );
+
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), GREATSWORD_ITEM );
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), 0u );
+    EXPECT_EQ( inventoryItem( *character, 0 ), SMALL_SHIELD_ITEM );
+    EXPECT_FALSE( character->combat().isActionAvailable( Engine::CombatActionEnum::BLOCK ) );
+}
+
+TEST( WorldRuntimeTest, Equip_ShieldWhileTwoHandedEquipped_SendsTwoHandedBackToInventory ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SMALL_SHIELD_ITEM ) }, { equipmentEntry( Engine::EquipmentSlotEnum::RIGHT_HAND, GREATSWORD_ITEM ) } );
+
+    EXPECT_TRUE( worldRuntime.equipCharacter( 1, 0 ) );
+
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), SMALL_SHIELD_ITEM );
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), 0u );
+    EXPECT_EQ( inventoryItem( *character, 0 ), GREATSWORD_ITEM );
+}
+
+TEST( WorldRuntimeTest, Equip_WhenDisplacedItemsDoNotFit_RejectsAndChangesNothing ) {
+    std::vector<Engine::CharacterInventoryModel> inventory = { inventoryEntry( 0, GREATSWORD_ITEM ) };
+    for ( uint32_t position = 1; position < INVENTORY_CAPACITY; ++position ) {
+        inventory.push_back( inventoryEntry( position, HELMET_ITEM ) );
+    }
+
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, inventory, { equipmentEntry( Engine::EquipmentSlotEnum::RIGHT_HAND, SWORD_ITEM ), equipmentEntry( Engine::EquipmentSlotEnum::LEFT_HAND, SMALL_SHIELD_ITEM ) } );
+
+    EXPECT_FALSE( worldRuntime.equipCharacter( 1, 0 ) );
+
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), SWORD_ITEM );
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), SMALL_SHIELD_ITEM );
+    EXPECT_EQ( inventoryItem( *character, 0 ), GREATSWORD_ITEM );
+}
+
+TEST( WorldRuntimeTest, Equip_Rings_FillLeftThenRight ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, RING_ITEM ), inventoryEntry( 1, RING_ITEM ) }, {} );
+
+    EXPECT_TRUE( worldRuntime.equipCharacter( 1, 0 ) );
+    EXPECT_TRUE( worldRuntime.equipCharacter( 1, 1 ) );
+
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_RING ), RING_ITEM );
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_RING ), RING_ITEM );
+}
+
+TEST( WorldRuntimeTest, Equip_EmptyPositionOrUnknownCharacter_IsRejected ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    addEquipmentCharacter( worldRuntime, {}, {} );
+
+    EXPECT_FALSE( worldRuntime.equipCharacter( 1, 4 ) );
+    EXPECT_FALSE( worldRuntime.equipCharacter( 99, 0 ) );
+}
+
+TEST( WorldRuntimeTest, Equip_PublishesEquipmentChangedOnlyOnSuccess ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+
+    int published = 0;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_EQUIPMENT_CHANGED, [ &published ]( const Server::WorldEvent& ) {
+        ++published;
+    } );
+
+    worldRuntime.equipCharacter( 1, 7 );
+    EXPECT_EQ( published, 0 );
+
+    worldRuntime.equipCharacter( 1, 0 );
+    EXPECT_EQ( published, 1 );
+}
+
+TEST( WorldRuntimeTest, Unequip_ReturnsItemToFirstFreePositionAndRestoresActions ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, HELMET_ITEM ) }, { equipmentEntry( Engine::EquipmentSlotEnum::LEFT_HAND, HEAVY_SHIELD_ITEM ) } );
+
+    EXPECT_TRUE( worldRuntime.unequipCharacter( 1, Engine::EquipmentSlotEnum::LEFT_HAND ) );
+
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), 0u );
+    EXPECT_EQ( inventoryItem( *character, 1 ), HEAVY_SHIELD_ITEM );
+    EXPECT_FALSE( character->combat().isActionAvailable( Engine::CombatActionEnum::BLOCK ) );
+    EXPECT_TRUE( character->combat().isActionAvailable( Engine::CombatActionEnum::DODGE ) );
+}
+
+TEST( WorldRuntimeTest, Unequip_Weapon_KeepsBareHandsAttack ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, {}, { equipmentEntry( Engine::EquipmentSlotEnum::RIGHT_HAND, SWORD_ITEM ) } );
+
+    EXPECT_TRUE( worldRuntime.unequipCharacter( 1, Engine::EquipmentSlotEnum::RIGHT_HAND ) );
+
+    EXPECT_TRUE( character->combat().isActionAvailable( Engine::CombatActionEnum::ATTACK ) );
+}
+
+TEST( WorldRuntimeTest, Unequip_EmptySlotOrFullInventory_IsRejected ) {
+    std::vector<Engine::CharacterInventoryModel> fullInventory;
+    for ( uint32_t position = 0; position < INVENTORY_CAPACITY; ++position ) {
+        fullInventory.push_back( inventoryEntry( position, HELMET_ITEM ) );
+    }
+
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, fullInventory, { equipmentEntry( Engine::EquipmentSlotEnum::RIGHT_HAND, SWORD_ITEM ) } );
+
+    EXPECT_FALSE( worldRuntime.unequipCharacter( 1, Engine::EquipmentSlotEnum::LEFT_HAND ) );
+    EXPECT_FALSE( worldRuntime.unequipCharacter( 1, Engine::EquipmentSlotEnum::RIGHT_HAND ) );
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), SWORD_ITEM );
+}
+
+TEST( WorldRuntimeTest, Attack_WhenAttackActionUnavailable_IsBlocked ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    character->vitals().setStamina( 100.0 );
+    character->combat().setActionAvailable( Engine::CombatActionEnum::ATTACK, false );
+
+    EXPECT_FALSE( worldRuntime.combatSystem().attack( 1, 1, 0 ) );
+    EXPECT_DOUBLE_EQ( character->vitals().stamina(), 100.0 );
 }

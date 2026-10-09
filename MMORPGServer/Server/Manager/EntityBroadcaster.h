@@ -23,6 +23,7 @@ private:
     void onCharacterVitalsChanged( const WorldEvent& event );
     void onCharacterAttackStarted( const WorldEvent& event );
     void onCharacterAttacked( const WorldEvent& event );
+    void onCharacterEquipmentChanged( const WorldEvent& event );
     void onCreatureEntered( const WorldEvent& event );
     void onCreatureMoved( const WorldEvent& event );
     void onCreatureVitalsChanged( const WorldEvent& event );

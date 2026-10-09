@@ -131,6 +131,52 @@ Engine::CharacterModel* WorldRuntime::character( int idCharacter ) {
     return characterLocked( idCharacter );
 }
 
+bool WorldRuntime::equipCharacter( int idCharacter, uint32_t inventoryPosition ) {
+    std::vector<WorldEvent> events;
+    bool equipped = false;
+
+    {
+        std::lock_guard<std::mutex> lock( _mutex );
+
+        auto it = _characters.find( idCharacter );
+        if ( it == _characters.end() ) {
+            return false;
+        }
+
+        equipped = it->second->equipmentSystem().equip( inventoryPosition );
+        events = it->second->takePendingEvents();
+    }
+
+    for ( const WorldEvent& event : events ) {
+        _eventBus.publish( event );
+    }
+
+    return equipped;
+}
+
+bool WorldRuntime::unequipCharacter( int idCharacter, Engine::EquipmentSlotEnum slot ) {
+    std::vector<WorldEvent> events;
+    bool unequipped = false;
+
+    {
+        std::lock_guard<std::mutex> lock( _mutex );
+
+        auto it = _characters.find( idCharacter );
+        if ( it == _characters.end() ) {
+            return false;
+        }
+
+        unequipped = it->second->equipmentSystem().unequip( slot );
+        events = it->second->takePendingEvents();
+    }
+
+    for ( const WorldEvent& event : events ) {
+        _eventBus.publish( event );
+    }
+
+    return unequipped;
+}
+
 std::map<int, Engine::EntityPositionModel> WorldRuntime::characterPositions() {
     std::lock_guard<std::mutex> lock( _mutex );
 

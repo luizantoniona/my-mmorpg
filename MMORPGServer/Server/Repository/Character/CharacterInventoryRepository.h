@@ -19,6 +19,8 @@ public:
     std::vector<Engine::CharacterInventoryModel> findAll( int idCharacter );
 
     bool save( int idCharacter, const Engine::CharacterInventoryModel& inventory );
+
+    bool removeAll( int idCharacter );
 };
 
 } // namespace Server

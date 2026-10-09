@@ -10,13 +10,17 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Event/EventBus.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Event/WorldEvent.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Manager/ChunkCoordinate.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/CharacterCombatActionResolver.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/CharacterRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterCombatSystem.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterEquipmentSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterMovementSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterVitalsSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Creature/CreaturePathfinder.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Creature/CreatureRuntime.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Action/WorldCombatAction.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Action/WorldCombatAttackAction.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/WorldCommand.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Spawn/WorldSpawnAreaRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldCombatSystem.cpp

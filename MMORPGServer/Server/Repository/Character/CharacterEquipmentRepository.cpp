@@ -93,4 +93,16 @@ bool CharacterEquipmentRepository::save( int idCharacter, const Engine::Characte
     return query.exec();
 }
 
+bool CharacterEquipmentRepository::removeAll( int idCharacter ) {
+    const std::string sql = R"SQL(
+        DELETE FROM character_equipment
+        WHERE id_character = ?
+    )SQL";
+    Query query( _db, sql );
+
+    query.bindInt( 1, idCharacter );
+
+    return query.exec();
+}
+
 } // namespace Server

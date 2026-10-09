@@ -21,6 +21,8 @@ private:
     void receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson );
     void receiveAction( int idCharacter, const Json::Value& messageJson );
     void receiveAttack( int idCharacter, const Engine::CharacterIntentActionDTO& input );
+    void receiveEquip( int idCharacter, const Json::Value& messageJson );
+    void receiveUnequip( int idCharacter, const Json::Value& messageJson );
 
 private:
     WorldRuntime* _worldRuntime;

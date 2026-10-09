@@ -70,8 +70,12 @@ set(PROJECT_SOURCES
     Repository/Repository.h
     Runtime/Character/CharacterRuntime.cpp
     Runtime/Character/CharacterRuntime.h
+    Runtime/Character/CharacterCombatActionResolver.cpp
+    Runtime/Character/CharacterCombatActionResolver.h
     Runtime/Character/System/CharacterCombatSystem.cpp
     Runtime/Character/System/CharacterCombatSystem.h
+    Runtime/Character/System/CharacterEquipmentSystem.cpp
+    Runtime/Character/System/CharacterEquipmentSystem.h
     Runtime/Character/System/CharacterMovementSystem.cpp
     Runtime/Character/System/CharacterMovementSystem.h
     Runtime/Character/System/CharacterSystem.cpp
@@ -82,10 +86,18 @@ set(PROJECT_SOURCES
     Runtime/Creature/CreaturePathfinder.h
     Runtime/Creature/CreatureRuntime.cpp
     Runtime/Creature/CreatureRuntime.h
+    Runtime/World/Action/WorldCombatAction.cpp
+    Runtime/World/Action/WorldCombatAction.h
+    Runtime/World/Action/WorldCombatAttackAction.cpp
+    Runtime/World/Action/WorldCombatAttackAction.h
     Runtime/World/Command/AttackCharacterCommand.cpp
     Runtime/World/Command/AttackCharacterCommand.h
+    Runtime/World/Command/EquipCharacterCommand.cpp
+    Runtime/World/Command/EquipCharacterCommand.h
     Runtime/World/Command/MoveCharacterCommand.cpp
     Runtime/World/Command/MoveCharacterCommand.h
+    Runtime/World/Command/UnequipCharacterCommand.cpp
+    Runtime/World/Command/UnequipCharacterCommand.h
     Runtime/World/Command/WorldCommand.cpp
     Runtime/World/Command/WorldCommand.h
     Runtime/World/Spawn/WorldSpawnAreaRuntime.cpp

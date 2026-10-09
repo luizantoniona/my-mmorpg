@@ -48,6 +48,10 @@ EntityBroadcaster::EntityBroadcaster() {
         onCharacterAttacked( event );
     } );
 
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_EQUIPMENT_CHANGED, [ this ]( const WorldEvent& event ) {
+        onCharacterEquipmentChanged( event );
+    } );
+
     worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_ENTERED, [ this ]( const WorldEvent& event ) {
         onCreatureEntered( event );
     } );
@@ -126,6 +130,12 @@ void EntityBroadcaster::onCharacterAttackStarted( const WorldEvent& event ) {
 
 void EntityBroadcaster::onCharacterAttacked( const WorldEvent& event ) {
     broadcastAttack( event );
+}
+
+void EntityBroadcaster::onCharacterEquipmentChanged( const WorldEvent& event ) {
+    sendOwnEquipment( event );
+    sendOwnInventory( event );
+    sendOwnCombat( event );
 }
 
 void EntityBroadcaster::onCreatureEntered( const WorldEvent& event ) {

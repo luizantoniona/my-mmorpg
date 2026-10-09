@@ -54,6 +54,8 @@ bool CharacterRepository::deleteCharacter( int idCharacter ) {
 bool CharacterRepository::updateCharacter( Engine::CharacterModel character ) {
     const int idCharacter = character.idCharacter();
 
+    Query( _db, "BEGIN" ).exec();
+
     bool success = true;
 
     success &= CharacterPositionRepository().save( idCharacter, character.position() );
@@ -63,13 +65,17 @@ bool CharacterRepository::updateCharacter( Engine::CharacterModel character ) {
         success &= CharacterProficiencyRepository().save( idCharacter, proficiency );
     }
 
+    success &= CharacterEquipmentRepository().removeAll( idCharacter );
     for ( const Engine::CharacterEquipmentModel& equipment : character.equipment() ) {
         success &= CharacterEquipmentRepository().save( idCharacter, equipment );
     }
 
+    success &= CharacterInventoryRepository().removeAll( idCharacter );
     for ( const Engine::CharacterInventoryModel& inventory : character.inventory() ) {
         success &= CharacterInventoryRepository().save( idCharacter, inventory );
     }
+
+    Query( _db, success ? "COMMIT" : "ROLLBACK" ).exec();
 
     return success;
 }

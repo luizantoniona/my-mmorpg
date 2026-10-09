@@ -7,12 +7,16 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentActionDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentEquipDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentMoveDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentUnequipDTO.h>
 #include <MMORPGEngine/Entity/CombatActionHelper.h>
 #include <MMORPGEngine/Network/WebSocket/ClientMessageTypeHelper.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Runtime/World/Command/AttackCharacterCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/EquipCharacterCommand.h>
 #include <MMORPGServer/Server/Runtime/World/Command/MoveCharacterCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/UnequipCharacterCommand.h>
 
 namespace Server {
 
@@ -38,6 +42,12 @@ void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& conne
         break;
     case Engine::ClientMessageType::CHARACTER_INTENT_ACTION:
         receiveAction( idCharacter, messageJson );
+        break;
+    case Engine::ClientMessageType::CHARACTER_INTENT_EQUIP:
+        receiveEquip( idCharacter, messageJson );
+        break;
+    case Engine::ClientMessageType::CHARACTER_INTENT_UNEQUIP:
+        receiveUnequip( idCharacter, messageJson );
         break;
     default:
         break;
@@ -89,6 +99,28 @@ void ClientMessageReceiver::receiveAttack( int idCharacter, const Engine::Charac
     }
 
     _worldRuntime->enqueueCommand( std::make_unique<AttackCharacterCommand>( idCharacter, dx, dy ) );
+}
+
+void ClientMessageReceiver::receiveEquip( int idCharacter, const Json::Value& messageJson ) {
+    const Engine::CharacterIntentEquipDTO input = Engine::CharacterIntentEquipDTO::fromJson( messageJson );
+
+    if ( !input.position() ) {
+        qWarning() << "[ClientMessageReceiver] Rejected equip: invalid position [CHARACTER]" << idCharacter;
+        return;
+    }
+
+    _worldRuntime->enqueueCommand( std::make_unique<EquipCharacterCommand>( idCharacter, *input.position() ) );
+}
+
+void ClientMessageReceiver::receiveUnequip( int idCharacter, const Json::Value& messageJson ) {
+    const Engine::CharacterIntentUnequipDTO input = Engine::CharacterIntentUnequipDTO::fromJson( messageJson );
+
+    if ( !input.slot() || *input.slot() == Engine::EquipmentSlotEnum::NONE ) {
+        qWarning() << "[ClientMessageReceiver] Rejected unequip: invalid slot [CHARACTER]" << idCharacter;
+        return;
+    }
+
+    _worldRuntime->enqueueCommand( std::make_unique<UnequipCharacterCommand>( idCharacter, *input.slot() ) );
 }
 
 } // namespace Server

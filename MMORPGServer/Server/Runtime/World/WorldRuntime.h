@@ -46,6 +46,9 @@ public:
     void removeCharacter( int idCharacter );
     Engine::CharacterModel* character( int idCharacter );
 
+    bool equipCharacter( int idCharacter, uint32_t inventoryPosition );
+    bool unequipCharacter( int idCharacter, Engine::EquipmentSlotEnum slot );
+
     std::map<int, Engine::EntityPositionModel> characterPositions();
 
     std::vector<Engine::CharacterModel> connectedCharacters();
