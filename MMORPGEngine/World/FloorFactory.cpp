@@ -79,6 +79,37 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
         }
     }
 
+    // --- Overlays
+    qInfo() << "FloorFactory::createFloor"
+            << "Creating Overlays";
+
+    const Json::Value& overlays = floorJson[ "Overlays" ];
+    if ( overlays.isArray() ) {
+
+        const TileCatalog& tileCatalog = Singleton<DataManager>::instance().tileCatalog();
+
+        for ( const Json::Value& overlayJson : overlays ) {
+
+            if ( !overlayJson.isMember( "X" ) || !overlayJson.isMember( "Y" ) || !overlayJson.isMember( "Type" ) ) {
+                qWarning() << "FloorFactory::createFloor"
+                           << "Invalid Overlay entry, skipping";
+                continue;
+            }
+
+            const int x = overlayJson[ "X" ].asInt();
+            const int y = overlayJson[ "Y" ].asInt();
+            const uint32_t overlayType = overlayJson[ "Type" ].asUInt();
+
+            if ( !tileCatalog.tile( overlayType ) ) {
+                qWarning() << "FloorFactory::createFloor"
+                           << "Unknown overlay type:" << overlayType << "at x y z:" << x << y << z;
+                continue;
+            }
+
+            world->setOverlay( x, y, z, overlayType );
+        }
+    }
+
     // --- Objects
     qInfo() << "FloorFactory::createFloor"
             << "Creating Objects";
@@ -167,7 +198,7 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
                     continue;
                 }
 
-                const uint32_t creatureType = entryJson[ "Type" ].asUInt();
+                const QString creatureType = QString::fromStdString( entryJson[ "Type" ].asString() );
 
                 if ( !creatureTypeCatalog.creatureType( creatureType ) ) {
                     qWarning() << "FloorFactory::createFloor"
@@ -202,15 +233,26 @@ void FloorFactory::saveFloor( const std::string& floorFile, const WorldModel& wo
     floorJson[ "Z" ] = z;
 
     Json::Value tilesJson( Json::arrayValue );
+    Json::Value overlaysJson( Json::arrayValue );
     for ( uint32_t y = 0; y < height; ++y ) {
         Json::Value rowJson( Json::arrayValue );
         for ( uint32_t x = 0; x < width; ++x ) {
             const WorldTileModel* tile = world.tile( static_cast<int>( x ), static_cast<int>( y ), z );
             rowJson.append( tile ? tile->tileType() : 0u );
+
+            if ( tile && tile->overlayType() != 0 ) {
+                Json::Value overlayJson;
+                overlayJson[ "X" ] = x;
+                overlayJson[ "Y" ] = y;
+                overlayJson[ "Type" ] = tile->overlayType();
+
+                overlaysJson.append( overlayJson );
+            }
         }
         tilesJson.append( rowJson );
     }
     floorJson[ "Tiles" ] = tilesJson;
+    floorJson[ "Overlays" ] = overlaysJson;
 
     Json::Value objectsJson( Json::arrayValue );
     for ( uint32_t y = 0; y < height; ++y ) {
@@ -242,7 +284,7 @@ void FloorFactory::saveFloor( const std::string& floorFile, const WorldModel& wo
         Json::Value creaturesJson( Json::arrayValue );
         for ( const CreatureSpawnEntryModel& entry : area.creatures() ) {
             Json::Value entryJson;
-            entryJson[ "Type" ] = entry.type();
+            entryJson[ "Type" ] = entry.type().toStdString();
             entryJson[ "Quantity" ] = entry.quantity();
 
             creaturesJson.append( entryJson );
@@ -273,6 +315,7 @@ bool FloorFactory::createEmptyFloor( const std::string& floorFile, int z, uint32
     }
     floorJson[ "Tiles" ] = tilesJson;
 
+    floorJson[ "Overlays" ] = Json::Value( Json::arrayValue );
     floorJson[ "Objects" ] = Json::Value( Json::arrayValue );
     floorJson[ "SpawnAreas" ] = Json::Value( Json::arrayValue );
 

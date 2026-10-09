@@ -48,6 +48,9 @@ public:
 
     const WorldTileModel* tile( int x, int y, int z ) const;
     void setTile( int x, int y, int z, uint32_t tileType );
+    void setOverlay( int x, int y, int z, uint32_t overlayType );
+
+    bool isWalkable( int x, int y, int z ) const;
 
     std::vector<CreatureSpawnAreaModel> spawnAreas( int z ) const;
     void addSpawnArea( int z, const CreatureSpawnAreaModel& spawnArea );
@@ -55,6 +58,7 @@ public:
     bool removeSpawnArea( int x, int y, int z );
 
 private:
+    bool isBlockedByObject( int x, int y, int z ) const;
     QString chunkKey( int x, int y ) const;
 
 private:

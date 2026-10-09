@@ -78,7 +78,7 @@ TEST_F( FloorFactoryTest, SaveFloor_PreservesExistingZ_AndWritesWorldGrid ) {
     chunk->setObject( 0, 1, 5, std::move( object ) );
 
     Engine::CreatureSpawnEntryModel entry;
-    entry.setType( 1 );
+    entry.setType( "GOBLIN" );
     entry.setQuantity( 3 );
     Engine::CreatureSpawnAreaModel area;
     area.setX( 0 );
@@ -104,7 +104,7 @@ TEST_F( FloorFactoryTest, SaveFloor_PreservesExistingZ_AndWritesWorldGrid ) {
     EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Width" ].asUInt(), 2u );
     EXPECT_DOUBLE_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "RespawnSeconds" ].asDouble(), 30.0 );
     ASSERT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ].size(), 1u );
-    EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ][ 0 ][ "Type" ].asUInt(), 1u );
+    EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ][ 0 ][ "Type" ].asString(), "GOBLIN" );
     EXPECT_EQ( savedJson[ "SpawnAreas" ][ 0 ][ "Creatures" ][ 0 ][ "Quantity" ].asUInt(), 3u );
 }
 
@@ -157,6 +157,59 @@ TEST_F( FloorFactoryTest, CreateFloor_UnknownTypeInExistingChunk_YieldsDefaultTy
     EXPECT_EQ( world.object( 1, 0, 2 )->objectType(), 0u );
 }
 
+TEST_F( FloorFactoryTest, SaveFloor_ThenCreateFloor_RoundTripsOverlays ) {
+    Engine::TileModel base;
+    base.setType( 9111 );
+    base.setName( "FloorFactoryTestBase" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( base );
+
+    Engine::TileModel overlay;
+    overlay.setType( 9112 );
+    overlay.setName( "FloorFactoryTestOverlay" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( overlay );
+
+    const std::string path = floorPath( "overlay.json" );
+    ASSERT_TRUE( Engine::FloorFactory::createEmptyFloor( path, 1, 2, 2 ) );
+
+    Engine::WorldModel world;
+    world.setWidth( 2 );
+    world.setHeight( 2 );
+    world.setTile( 1, 1, 1, 9111 );
+    world.setOverlay( 1, 1, 1, 9112 );
+
+    Engine::FloorFactory::saveFloor( path, world );
+
+    const Json::Value savedJson = Engine::JsonHelper::loadJsonFile( path );
+    ASSERT_EQ( savedJson[ "Overlays" ].size(), 1u );
+    EXPECT_EQ( savedJson[ "Overlays" ][ 0 ][ "X" ].asInt(), 1 );
+    EXPECT_EQ( savedJson[ "Overlays" ][ 0 ][ "Y" ].asInt(), 1 );
+    EXPECT_EQ( savedJson[ "Overlays" ][ 0 ][ "Type" ].asUInt(), 9112u );
+
+    Engine::WorldModel loaded;
+    Engine::FloorFactory::createFloor( path, &loaded );
+
+    ASSERT_NE( loaded.tile( 1, 1, 1 ), nullptr );
+    EXPECT_EQ( loaded.tile( 1, 1, 1 )->tileType(), 9111u );
+    EXPECT_EQ( loaded.tile( 1, 1, 1 )->overlayType(), 9112u );
+}
+
+TEST_F( FloorFactoryTest, CreateFloor_FloorWithoutOverlays_LoadsWithoutOverlay ) {
+    Json::Value floorJson;
+    floorJson[ "Z" ] = 6;
+    Json::Value tilesRow( Json::arrayValue );
+    tilesRow.append( 0 );
+    floorJson[ "Tiles" ].append( tilesRow );
+
+    const std::string path = floorPath( "no_overlay.json" );
+    ASSERT_TRUE( Engine::JsonHelper::saveJsonFile( path, floorJson ) );
+
+    Engine::WorldModel world;
+    EXPECT_NO_THROW( Engine::FloorFactory::createFloor( path, &world ) );
+
+    const Engine::WorldModel& constWorld = world;
+    EXPECT_EQ( constWorld.chunk( 0, 0 ), nullptr );
+}
+
 TEST_F( FloorFactoryTest, CreateFloor_TileTypeZero_YieldsEmptyTileWithoutCatalogLookup ) {
     Json::Value floorJson;
     floorJson[ "Z" ] = 4;
@@ -177,7 +230,7 @@ TEST_F( FloorFactoryTest, CreateFloor_TileTypeZero_YieldsEmptyTileWithoutCatalog
 
 TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownCreature ) {
     Engine::CreatureTypeModel creatureType;
-    creatureType.setType( 9104 );
+    creatureType.setType( "FLOOR_FACTORY_TEST_CREATURE" );
     creatureType.setName( "FloorFactoryTestCreature" );
     Engine::Singleton<Engine::DataManager>::instance().addCreatureType( creatureType );
 
@@ -193,10 +246,10 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownCreat
     area[ "Height" ] = 5;
     area[ "RespawnSeconds" ] = 45.0;
     Json::Value knownEntry;
-    knownEntry[ "Type" ] = 9104;
+    knownEntry[ "Type" ] = "FLOOR_FACTORY_TEST_CREATURE";
     knownEntry[ "Quantity" ] = 2;
     Json::Value unknownEntry;
-    unknownEntry[ "Type" ] = 424242;
+    unknownEntry[ "Type" ] = "UNKNOWN_CREATURE";
     unknownEntry[ "Quantity" ] = 1;
     area[ "Creatures" ].append( knownEntry );
     area[ "Creatures" ].append( unknownEntry );
@@ -216,7 +269,7 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownCreat
     EXPECT_EQ( areas[ 0 ].height(), 5u );
     EXPECT_DOUBLE_EQ( areas[ 0 ].respawnSeconds(), 45.0 );
     ASSERT_EQ( areas[ 0 ].creatures().size(), 1u );
-    EXPECT_EQ( areas[ 0 ].creatures()[ 0 ].type(), 9104u );
+    EXPECT_EQ( areas[ 0 ].creatures()[ 0 ].type(), "FLOOR_FACTORY_TEST_CREATURE" );
     EXPECT_EQ( areas[ 0 ].creatures()[ 0 ].quantity(), 2u );
 }
 

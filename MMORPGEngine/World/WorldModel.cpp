@@ -1,5 +1,7 @@
 #include "WorldModel.h"
 
+#include <algorithm>
+
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Data/Object/ObjectCatalog.h>
@@ -164,6 +166,16 @@ void WorldModel::setTile( int x, int y, int z, uint32_t tileType ) {
     ChunkModel* chunkModel = chunk( chunkX, chunkY );
 
     if ( tileType == 0 ) {
+        const ChunkModel* constChunk = chunkModel;
+        const WorldTileModel* existingTile = constChunk->tile( localX, localY, z );
+
+        if ( existingTile && existingTile->overlayType() != 0 ) {
+            WorldTileModel* worldTile = chunkModel->tile( localX, localY, z );
+            worldTile->setTileModel( nullptr );
+            worldTile->setTileType( 0 );
+            return;
+        }
+
         chunkModel->setTile( localX, localY, z, nullptr );
         return;
     }
@@ -179,6 +191,59 @@ void WorldModel::setTile( int x, int y, int z, uint32_t tileType ) {
 
     worldTile->setTileModel( tileModel );
     worldTile->setTileType( tileType );
+}
+
+void WorldModel::setOverlay( int x, int y, int z, uint32_t overlayType ) {
+    const int chunkX = x / WorldConstants::CHUNK_SIZE;
+    const int chunkY = y / WorldConstants::CHUNK_SIZE;
+    const int localX = x % WorldConstants::CHUNK_SIZE;
+    const int localY = y % WorldConstants::CHUNK_SIZE;
+
+    ChunkModel* chunkModel = chunk( chunkX, chunkY );
+
+    if ( overlayType == 0 ) {
+        const ChunkModel* constChunk = chunkModel;
+        const WorldTileModel* existingTile = constChunk->tile( localX, localY, z );
+
+        if ( !existingTile ) {
+            return;
+        }
+
+        WorldTileModel* worldTile = chunkModel->tile( localX, localY, z );
+        worldTile->setOverlayModel( nullptr );
+        worldTile->setOverlayType( 0 );
+
+        if ( worldTile->tileType() == 0 ) {
+            chunkModel->setTile( localX, localY, z, nullptr );
+        }
+        return;
+    }
+
+    const TileCatalog& catalog = Singleton<DataManager>::instance().tileCatalog();
+    const TileModel* overlayModel = catalog.tile( overlayType );
+
+    if ( !overlayModel ) {
+        return;
+    }
+
+    WorldTileModel* worldTile = chunkModel->tile( localX, localY, z );
+
+    worldTile->setOverlayModel( overlayModel );
+    worldTile->setOverlayType( overlayType );
+}
+
+bool WorldModel::isWalkable( int x, int y, int z ) const {
+    const WorldTileModel* worldTile = tile( x, y, z );
+
+    if ( !worldTile || !worldTile->tileModel() || !worldTile->tileModel()->isWalkable() ) {
+        return false;
+    }
+
+    if ( worldTile->overlayModel() && !worldTile->overlayModel()->isWalkable() ) {
+        return false;
+    }
+
+    return !isBlockedByObject( x, y, z );
 }
 
 std::vector<CreatureSpawnAreaModel> WorldModel::spawnAreas( int z ) const {
@@ -224,6 +289,36 @@ bool WorldModel::removeSpawnArea( int x, int y, int z ) {
         if ( x >= it->x() && x < it->x() + static_cast<int>( it->width() ) && y >= it->y() && y < it->y() + static_cast<int>( it->height() ) ) {
             areas.erase( it );
             return true;
+        }
+    }
+
+    return false;
+}
+
+bool WorldModel::isBlockedByObject( int x, int y, int z ) const {
+    const ObjectCatalog& catalog = Singleton<DataManager>::instance().objectCatalog();
+    const int maxWidth = catalog.maxBlockingFootprintWidth();
+    const int maxHeight = catalog.maxBlockingFootprintHeight();
+
+    for ( int anchorY = y; anchorY < y + maxHeight; ++anchorY ) {
+        for ( int anchorX = x - maxWidth + 1; anchorX <= x; ++anchorX ) {
+            if ( anchorX < 0 || anchorY < 0 ) {
+                continue;
+            }
+
+            const WorldObjectModel* worldObject = object( anchorX, anchorY, z );
+            const ObjectModel* objectModel = worldObject ? worldObject->objectModel() : nullptr;
+
+            if ( !objectModel || objectModel->isWalkable() ) {
+                continue;
+            }
+
+            const int width = std::max( objectModel->size().width(), 1 );
+            const int height = std::max( objectModel->size().height(), 1 );
+
+            if ( anchorX + width > x && anchorY - height < y ) {
+                return true;
+            }
         }
     }
 

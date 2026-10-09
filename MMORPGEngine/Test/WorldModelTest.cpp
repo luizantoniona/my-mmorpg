@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <MMORPGEngine/Commons/Singleton.h>
-#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Data/Creature/CreatureSpawnAreaModel.h>
+#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Data/Tile/TileModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
@@ -92,6 +92,101 @@ TEST( WorldModelTest, SetTile_TypeZero_ClearsExistingTile ) {
     ASSERT_NE( world.tile( 0, 0, 0 ), nullptr );
     EXPECT_EQ( world.tile( 0, 0, 0 )->tileModel(), nullptr );
     EXPECT_EQ( world.tile( 0, 0, 0 )->tileType(), 0u );
+}
+
+TEST( WorldModelTest, SetOverlay_OnExistingTile_KeepsBaseAndStoresOverlay ) {
+    Engine::TileModel base;
+    base.setType( 9211 );
+    base.setName( "WorldModelTestBase" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( base );
+
+    Engine::TileModel overlay;
+    overlay.setType( 9212 );
+    overlay.setName( "WorldModelTestOverlay" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( overlay );
+
+    Engine::WorldModel world;
+    world.setTile( 0, 0, 0, 9211 );
+    world.setOverlay( 0, 0, 0, 9212 );
+
+    ASSERT_NE( world.tile( 0, 0, 0 ), nullptr );
+    EXPECT_EQ( world.tile( 0, 0, 0 )->tileType(), 9211u );
+    EXPECT_EQ( world.tile( 0, 0, 0 )->overlayType(), 9212u );
+    EXPECT_NE( world.tile( 0, 0, 0 )->overlayModel(), nullptr );
+}
+
+TEST( WorldModelTest, SetOverlay_TypeZero_ClearsOnlyTheOverlay ) {
+    Engine::TileModel base;
+    base.setType( 9221 );
+    base.setName( "WorldModelTestBaseKeep" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( base );
+
+    Engine::TileModel overlay;
+    overlay.setType( 9222 );
+    overlay.setName( "WorldModelTestOverlayClear" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( overlay );
+
+    Engine::WorldModel world;
+    world.setTile( 0, 0, 0, 9221 );
+    world.setOverlay( 0, 0, 0, 9222 );
+
+    world.setOverlay( 0, 0, 0, 0 );
+
+    ASSERT_NE( world.tile( 0, 0, 0 ), nullptr );
+    EXPECT_EQ( world.tile( 0, 0, 0 )->tileType(), 9221u );
+    EXPECT_EQ( world.tile( 0, 0, 0 )->overlayType(), 0u );
+    EXPECT_EQ( world.tile( 0, 0, 0 )->overlayModel(), nullptr );
+}
+
+TEST( WorldModelTest, SetTile_TypeZero_KeepsExistingOverlay ) {
+    Engine::TileModel base;
+    base.setType( 9231 );
+    base.setName( "WorldModelTestBaseRemoved" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( base );
+
+    Engine::TileModel overlay;
+    overlay.setType( 9232 );
+    overlay.setName( "WorldModelTestOverlayKept" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( overlay );
+
+    Engine::WorldModel world;
+    world.setTile( 0, 0, 0, 9231 );
+    world.setOverlay( 0, 0, 0, 9232 );
+
+    world.setTile( 0, 0, 0, 0 );
+
+    ASSERT_NE( world.tile( 0, 0, 0 ), nullptr );
+    EXPECT_EQ( world.tile( 0, 0, 0 )->tileModel(), nullptr );
+    EXPECT_EQ( world.tile( 0, 0, 0 )->overlayType(), 9232u );
+}
+
+TEST( WorldModelTest, SetOverlay_UnknownType_DoesNotCrash ) {
+    Engine::WorldModel world;
+
+    EXPECT_NO_THROW( world.setOverlay( 0, 0, 0, 999999 ) );
+}
+
+TEST( WorldModelTest, IsWalkable_NonWalkableOverlay_BlocksWalkableBase ) {
+    Engine::TileModel base;
+    base.setType( 9241 );
+    base.setName( "WorldModelTestWalkableBase" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( base );
+
+    Engine::TileModel overlay;
+    overlay.setType( 9242 );
+    overlay.setName( "WorldModelTestBlockingOverlay" );
+    overlay.setIsWalkable( false );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( overlay );
+
+    Engine::WorldModel world;
+    world.setTile( 0, 0, 0, 9241 );
+    EXPECT_TRUE( world.isWalkable( 0, 0, 0 ) );
+
+    world.setOverlay( 0, 0, 0, 9242 );
+    EXPECT_FALSE( world.isWalkable( 0, 0, 0 ) );
+
+    world.setOverlay( 0, 0, 0, 0 );
+    EXPECT_TRUE( world.isWalkable( 0, 0, 0 ) );
 }
 
 TEST( WorldModelTest, SetTile_UnknownType_DoesNotCrash ) {
