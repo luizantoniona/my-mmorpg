@@ -1,6 +1,6 @@
 {
-    "ActiveFolder" : "TestMap",
-    "Server" : {
-        "TickRate" : 30
+    "ActiveFolder": "ExampleMap",
+    "Server": {
+        "TickRate": 30
     }
 }
