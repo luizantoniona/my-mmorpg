@@ -30,7 +30,7 @@ signals:
     void ownInventoryReceived( const Engine::OwnInventoryDTO& state );
 
     void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
-    void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds );
+    void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds, int footprint );
     void characterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds );
     void characterEventAttackReceived( int idCharacter, int x, int y, int z );
     void characterEventLeaveReceived( int idCharacter );
