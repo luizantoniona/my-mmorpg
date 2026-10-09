@@ -399,5 +399,35 @@ connection whenever something relevant changes nearby:
   The client's second action. The server accepts them but does not act on
   them yet (logged and ignored).
 
+  An action the character does not currently have (see `OWN_COMBAT`) is
+  rejected without a reply.
+
+- `CHARACTER_INTENT_EQUIP` (`Engine::CharacterIntentEquipDTO`)
+  ```json
+  { "type": "CHARACTER_INTENT_EQUIP", "position": 3 }
+  ```
+  Equips the item at inventory `position`. The server picks the slot from the
+  item's type: a weapon goes to `RIGHT_HAND`, a shield or off-hand to
+  `LEFT_HAND`, rings fill `LEFT_RING` then `RIGHT_RING`, the rest map to the
+  slot of the same name. A `TWO_HANDED` item takes `RIGHT_HAND` and clears
+  `LEFT_HAND`, and equipping into `LEFT_HAND` while a two-handed item is
+  equipped clears `RIGHT_HAND`. Displaced items return to the first free
+  inventory positions; if they do not fit, the whole request is rejected and
+  nothing changes. A rejected request gets no reply.
+
+- `CHARACTER_INTENT_UNEQUIP` (`Engine::CharacterIntentUnequipDTO`)
+  ```json
+  { "type": "CHARACTER_INTENT_UNEQUIP", "slot": "LEFT_HAND" }
+  ```
+  Moves the item in `slot` to the first free inventory position. Rejected
+  (no reply) when the slot is empty or the inventory is full.
+
+  After a successful equip or unequip the server resends `OWN_EQUIPMENT`,
+  `OWN_INVENTORY` and `OWN_COMBAT` to that character. The available combat
+  actions are recomputed from the equipped items: `DODGE` is free, a weapon
+  grants `ATTACK` (bare hands count as a weapon, so `ATTACK` is always
+  available unless an item disables it), a shield grants `BLOCK`, and an item
+  type may list `DisabledActions` that remove an action while it is equipped.
+
 Movement does not carry a facing/orientation — `EntityModel` (and every DTO
 built on top of it) has no orientation field.
