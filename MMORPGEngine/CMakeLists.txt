@@ -15,6 +15,9 @@ set(PROJECT_SOURCES
     Account/AccountDTO.h
     Account/AccountModel.cpp
     Account/AccountModel.h
+    Commons/JsonFieldRule.cpp
+    Commons/JsonFieldRule.h
+    Commons/JsonFieldTypeEnum.h
     Commons/JsonHelper.cpp
     Commons/JsonHelper.h
     Commons/RegisterEngineTypes.cpp

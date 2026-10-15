@@ -84,6 +84,15 @@ void CreatureTypeFactory::createCreatureTypeCatalog( const QString& configPath, 
 
         const Json::Value creatureTypeJson = JsonHelper::loadJsonFile( file );
 
+        const bool hasValidCreatureFields = JsonHelper::hasValidFields( creatureTypeJson, { { "Name", JsonFieldTypeEnum::STRING }, { "Vitals", JsonFieldTypeEnum::OBJECT }, { "AggroRadius", JsonFieldTypeEnum::UINT }, { "AttackRange", JsonFieldTypeEnum::UINT }, { "Footprint", JsonFieldTypeEnum::UINT }, { "Appearance", JsonFieldTypeEnum::OBJECT } } );
+        const bool hasValidVitals = !hasValidCreatureFields || !creatureTypeJson.isMember( "Vitals" ) || JsonHelper::hasValidFields( creatureTypeJson[ "Vitals" ], { { "MaxHealth", JsonFieldTypeEnum::NUMBER } } );
+
+        if ( !hasValidCreatureFields || !hasValidVitals ) {
+            qWarning() << "CreatureTypeFactory::createCreatureTypeCatalog"
+                       << "Invalid Creature (wrong field type), skipping" << key;
+            continue;
+        }
+
         if ( !creatureTypeJson.isMember( "Name" ) || !creatureTypeJson.isMember( "Vitals" ) || !creatureTypeJson[ "Vitals" ].isMember( "MaxHealth" ) ) {
             qWarning() << "CreatureTypeFactory::createCreatureTypeCatalog"
                        << "Invalid Creature, skipping" << key;

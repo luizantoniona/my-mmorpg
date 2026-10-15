@@ -27,6 +27,12 @@ void TileFactory::createTileCatalog( const QString& configPath, TileCatalog& til
 
     for ( const Json::Value& tileJson : tiles ) {
 
+        if ( !JsonHelper::hasValidFields( tileJson, { { "Type", JsonFieldTypeEnum::UINT }, { "Name", JsonFieldTypeEnum::STRING }, { "TextureFile", JsonFieldTypeEnum::STRING }, { "Tags", JsonFieldTypeEnum::ARRAY }, { "IsWalkable", JsonFieldTypeEnum::BOOL }, { "IsAnimated", JsonFieldTypeEnum::BOOL }, { "FrameDurationMs", JsonFieldTypeEnum::INT } } ) ) {
+            qWarning() << "TileFactory::createTileCatalog"
+                       << "Invalid Tile (wrong field type), skipping";
+            continue;
+        }
+
         TileModel tile;
         tile.setType( tileJson[ "Type" ].asUInt() );
         tile.setName( QString( tileJson[ "Name" ].asCString() ) );
@@ -36,7 +42,9 @@ void TileFactory::createTileCatalog( const QString& configPath, TileCatalog& til
         const Json::Value& tagsJson = tileJson[ "Tags" ];
         if ( tagsJson.isArray() ) {
             for ( const Json::Value& tagJson : tagsJson ) {
-                tags.append( QString( tagJson.asCString() ) );
+                if ( tagJson.isString() ) {
+                    tags.append( QString::fromStdString( tagJson.asString() ) );
+                }
             }
         }
         tile.setTags( tags );

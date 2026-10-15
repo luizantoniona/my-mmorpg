@@ -43,7 +43,20 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
         for ( int y = 0; y < height; ++y ) {
             const Json::Value& row = tilesRows[ y ];
-            for ( int x = 0; x < width; ++x ) {
+
+            if ( !row.isArray() ) {
+                qWarning() << "FloorFactory::createFloor"
+                           << "Tiles row is not an array, skipping row:" << y << "z:" << z;
+                continue;
+            }
+
+            for ( int x = 0; x < width && x < static_cast<int>( row.size() ); ++x ) {
+
+                if ( !row[ x ].isUInt() ) {
+                    qWarning() << "FloorFactory::createFloor"
+                               << "Tile type is not an unsigned integer, skipping x y z:" << x << y << z;
+                    continue;
+                }
 
                 const uint32_t tileType = row[ x ].asUInt();
 
@@ -90,7 +103,7 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
         for ( const Json::Value& overlayJson : overlays ) {
 
-            if ( !overlayJson.isMember( "X" ) || !overlayJson.isMember( "Y" ) || !overlayJson.isMember( "Type" ) ) {
+            if ( !JsonHelper::hasValidFields( overlayJson, { { "X", JsonFieldTypeEnum::INT }, { "Y", JsonFieldTypeEnum::INT }, { "Type", JsonFieldTypeEnum::UINT } } ) || !overlayJson.isMember( "X" ) || !overlayJson.isMember( "Y" ) || !overlayJson.isMember( "Type" ) ) {
                 qWarning() << "FloorFactory::createFloor"
                            << "Invalid Overlay entry, skipping";
                 continue;
@@ -121,7 +134,7 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
         for ( const Json::Value& objectJson : objects ) {
 
-            if ( !objectJson.isMember( "X" ) || !objectJson.isMember( "Y" ) || !objectJson.isMember( "Type" ) ) {
+            if ( !JsonHelper::hasValidFields( objectJson, { { "X", JsonFieldTypeEnum::INT }, { "Y", JsonFieldTypeEnum::INT }, { "Type", JsonFieldTypeEnum::UINT } } ) || !objectJson.isMember( "X" ) || !objectJson.isMember( "Y" ) || !objectJson.isMember( "Type" ) ) {
                 qWarning() << "FloorFactory::createFloor"
                            << "Invalid Object entry, skipping";
                 continue;
@@ -169,7 +182,7 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
 
         for ( const Json::Value& areaJson : spawnAreas ) {
 
-            if ( !areaJson.isMember( "X" ) || !areaJson.isMember( "Y" ) || !areaJson.isMember( "Width" ) || !areaJson.isMember( "Height" ) ) {
+            if ( !JsonHelper::hasValidFields( areaJson, { { "X", JsonFieldTypeEnum::INT }, { "Y", JsonFieldTypeEnum::INT }, { "Width", JsonFieldTypeEnum::UINT }, { "Height", JsonFieldTypeEnum::UINT }, { "Creatures", JsonFieldTypeEnum::ARRAY } } ) || !areaJson.isMember( "X" ) || !areaJson.isMember( "Y" ) || !areaJson.isMember( "Width" ) || !areaJson.isMember( "Height" ) ) {
                 qWarning() << "FloorFactory::createFloor"
                            << "Invalid SpawnArea entry, skipping";
                 continue;
@@ -192,7 +205,7 @@ void FloorFactory::createFloor( const std::string& floorFile, WorldModel* world 
             std::vector<CreatureSpawnEntryModel> entries;
             for ( const Json::Value& entryJson : areaJson[ "Creatures" ] ) {
 
-                if ( !entryJson.isMember( "Type" ) || !entryJson.isMember( "Quantity" ) ) {
+                if ( !JsonHelper::hasValidFields( entryJson, { { "Type", JsonFieldTypeEnum::STRING }, { "Quantity", JsonFieldTypeEnum::UINT } } ) || !entryJson.isMember( "Type" ) || !entryJson.isMember( "Quantity" ) ) {
                     qWarning() << "FloorFactory::createFloor"
                                << "Invalid SpawnArea Creature entry, skipping";
                     continue;

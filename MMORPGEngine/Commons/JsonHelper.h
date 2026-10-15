@@ -1,11 +1,14 @@
 #ifndef JSONHELPER_H
 #define JSONHELPER_H
 
+#include <initializer_list>
 #include <string>
 
 #include <json/json.h>
 
 #include <QString>
+
+#include <MMORPGEngine/Commons/JsonFieldRule.h>
 
 namespace Engine {
 
@@ -21,6 +24,8 @@ public:
     static Json::Value parseJsonString( const std::string& content );
 
     static std::string writeJsonString( const Json::Value& value );
+
+    static bool hasValidFields( const Json::Value& json, std::initializer_list<JsonFieldRule> rules );
 };
 
 } // namespace Engine

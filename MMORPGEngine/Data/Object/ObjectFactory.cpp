@@ -30,6 +30,15 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
 
     for ( const Json::Value& objectJson : objects ) {
 
+        const bool hasValidObjectFields = JsonHelper::hasValidFields( objectJson, { { "Type", JsonFieldTypeEnum::UINT }, { "Name", JsonFieldTypeEnum::STRING }, { "TextureFile", JsonFieldTypeEnum::STRING }, { "Footprint", JsonFieldTypeEnum::OBJECT }, { "IsWalkable", JsonFieldTypeEnum::BOOL }, { "Interaction", JsonFieldTypeEnum::STRING }, { "ContainerCapacity", JsonFieldTypeEnum::UINT }, { "IsAnimated", JsonFieldTypeEnum::BOOL }, { "FrameDurationMs", JsonFieldTypeEnum::INT } } );
+        const bool hasValidFootprint = !hasValidObjectFields || !objectJson.isMember( "Footprint" ) || JsonHelper::hasValidFields( objectJson[ "Footprint" ], { { "Width", JsonFieldTypeEnum::INT }, { "Height", JsonFieldTypeEnum::INT } } );
+
+        if ( !hasValidObjectFields || !hasValidFootprint ) {
+            qWarning() << "ObjectFactory::createObjectCatalog"
+                       << "Invalid Object (wrong field type), skipping";
+            continue;
+        }
+
         ObjectModel object;
         object.setType( objectJson[ "Type" ].asUInt() );
         object.setName( QString( objectJson[ "Name" ].asCString() ) );

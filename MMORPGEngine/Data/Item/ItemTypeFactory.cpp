@@ -89,6 +89,12 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
 
         const Json::Value itemTypeJson = JsonHelper::loadJsonFile( file );
 
+        if ( !JsonHelper::hasValidFields( itemTypeJson, { { "Name", JsonFieldTypeEnum::STRING }, { "Category", JsonFieldTypeEnum::STRING }, { "Slot", JsonFieldTypeEnum::STRING }, { "HandRequirement", JsonFieldTypeEnum::STRING }, { "DisabledActions", JsonFieldTypeEnum::ARRAY } } ) ) {
+            qWarning() << "ItemTypeFactory::createItemTypeCatalog"
+                       << "Invalid ItemType (wrong field type), skipping" << key;
+            continue;
+        }
+
         if ( !itemTypeJson.isMember( "Name" ) ) {
             qWarning() << "ItemTypeFactory::createItemTypeCatalog"
                        << "Invalid ItemType, skipping" << key;

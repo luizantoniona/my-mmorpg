@@ -27,15 +27,31 @@ void SkillFactory::createSkillCatalog( const QString& configPath, const ItemType
             continue;
         }
 
+        const Json::Value& nodesJson = itemTypeJson[ "SkillTree" ];
+
+        if ( !nodesJson.isArray() ) {
+            qWarning() << "SkillFactory::createSkillCatalog"
+                       << "SkillTree is not an array, skipping SkillTree:" << itemTypeId;
+            continue;
+        }
+
         SkillTreeModel skillTree;
         skillTree.setItemType( itemTypeId );
 
-        const Json::Value& nodesJson = itemTypeJson[ "SkillTree" ];
         bool isTreeValid = true;
 
         for ( const Json::Value& nodeJson : nodesJson ) {
 
-            if ( !nodeJson.isMember( "Type" ) || !nodeJson.isMember( "Name" ) ) {
+            const bool hasValidNodeFields = nodeJson.isObject() && JsonHelper::hasValidFields( nodeJson, { { "Type", JsonFieldTypeEnum::UINT }, { "Name", JsonFieldTypeEnum::STRING }, { "ProficiencyLevel", JsonFieldTypeEnum::UINT }, { "Prerequisites", JsonFieldTypeEnum::ARRAY } } );
+
+            bool hasValidPrerequisites = true;
+            if ( hasValidNodeFields && nodeJson.isMember( "Prerequisites" ) ) {
+                for ( const Json::Value& prerequisiteJson : nodeJson[ "Prerequisites" ] ) {
+                    hasValidPrerequisites = hasValidPrerequisites && prerequisiteJson.isUInt();
+                }
+            }
+
+            if ( !hasValidNodeFields || !hasValidPrerequisites || !nodeJson.isMember( "Type" ) || !nodeJson.isMember( "Name" ) ) {
                 qWarning() << "SkillFactory::createSkillCatalog"
                            << "Invalid node, skipping SkillTree:" << itemTypeId;
                 isTreeValid = false;

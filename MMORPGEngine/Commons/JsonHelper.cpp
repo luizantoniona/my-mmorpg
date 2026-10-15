@@ -76,4 +76,53 @@ std::string JsonHelper::writeJsonString( const Json::Value& value ) {
     return Json::writeString( builder, value );
 }
 
+bool JsonHelper::hasValidFields( const Json::Value& json, std::initializer_list<JsonFieldRule> rules ) {
+    if ( !json.isObject() ) {
+        qWarning() << "JsonHelper::hasValidFields"
+                   << "Entry is not an object";
+        return false;
+    }
+
+    for ( const JsonFieldRule& rule : rules ) {
+        if ( !json.isMember( rule.key ) ) {
+            continue;
+        }
+
+        const Json::Value& field = json[ rule.key ];
+        bool isValid = false;
+
+        switch ( rule.type ) {
+        case JsonFieldTypeEnum::STRING:
+            isValid = field.isString();
+            break;
+        case JsonFieldTypeEnum::UINT:
+            isValid = field.isUInt();
+            break;
+        case JsonFieldTypeEnum::INT:
+            isValid = field.isInt();
+            break;
+        case JsonFieldTypeEnum::NUMBER:
+            isValid = field.isNumeric();
+            break;
+        case JsonFieldTypeEnum::BOOL:
+            isValid = field.isBool();
+            break;
+        case JsonFieldTypeEnum::ARRAY:
+            isValid = field.isArray();
+            break;
+        case JsonFieldTypeEnum::OBJECT:
+            isValid = field.isObject();
+            break;
+        }
+
+        if ( !isValid ) {
+            qWarning() << "JsonHelper::hasValidFields"
+                       << "Field with wrong type:" << rule.key;
+            return false;
+        }
+    }
+
+    return true;
+}
+
 } // namespace Engine
