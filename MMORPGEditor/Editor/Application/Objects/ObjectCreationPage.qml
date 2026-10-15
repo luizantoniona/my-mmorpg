@@ -8,7 +8,7 @@ import MMORPGEditorControls
 Item {
     id: root
 
-    readonly property bool isAnimated: textureInput.vText.toLowerCase().endsWith(".gif")
+    readonly property bool isAnimated: textureInput.vText.toLowerCase().endsWith(".gif") || textureInput.vText.toLowerCase().endsWith(".webp")
     readonly property int typeValue: parseInt(typeInput.vText, 10) || 0
     readonly property string existingName: {
         creationControl.nextType
@@ -92,8 +92,8 @@ Item {
                 InputBase {
                     id: nameInput
                     Layout.fillWidth: true
-                    vTitle: "Name"
-                    vPlaceholder: "e.g. StoneWall"
+                    vTitle: "Name (shown when inspected)"
+                    vPlaceholder: "e.g. Stone wall"
                 }
 
                 RowLayout {
@@ -103,7 +103,7 @@ Item {
                     InputBase {
                         id: textureInput
                         Layout.fillWidth: true
-                        vTitle: "Texture (.png, .gif or .webp)"
+                        vTitle: "Texture (.png, .gif or .webp; the file name becomes its id)"
                         vPlaceholder: "No texture selected"
                     }
 

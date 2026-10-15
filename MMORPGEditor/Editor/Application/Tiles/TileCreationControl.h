@@ -19,7 +19,7 @@ public:
     Q_INVOKABLE QString typeName( int type ) const;
 
 public slots:
-    bool createTile( int type, const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable, bool replace );
+    bool createTile( int type, const QString& name, const QString& sourceFile, const QString& tagsText, int frameDurationMs, bool isWalkable, bool replace );
     bool removeTile( int type );
 
 signals:

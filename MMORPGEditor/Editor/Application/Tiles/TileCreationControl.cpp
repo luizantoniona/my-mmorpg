@@ -2,11 +2,9 @@
 
 #include <algorithm>
 
-#include <QDir>
-#include <QFile>
 #include <QFileInfo>
-#include <QUrl>
 
+#include <MMORPGEditor/Editor/Application/Assets/TextureImportHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/Animation/AnimationModel.h>
 #include <MMORPGEngine/Data/DataFactory.h>
@@ -16,14 +14,6 @@
 
 namespace {
 constexpr const char* DATA_PATH = "../../../Data/";
-
-QString toLocalFilePath( const QString& path ) {
-    if ( path.startsWith( "file:" ) ) {
-        return QUrl( path ).toLocalFile();
-    }
-
-    return path;
-}
 
 QStringList parseTags( const QString& tagsText ) {
     QStringList tags;
@@ -39,24 +29,18 @@ QStringList parseTags( const QString& tagsText ) {
     return tags;
 }
 
-void removeTextureFiles( const QString& mapPath, const QString& textureFile ) {
-    for ( auto it = Engine::DataFactory::textureExtensions().constBegin(); it != Engine::DataFactory::textureExtensions().constEnd(); ++it ) {
-        QFile::remove( mapPath + textureFile + it.key() );
-    }
-}
-
 void removeUnusedTexture( const QString& mapPath, const QString& textureFile, const Engine::TileCatalog& catalog ) {
     if ( textureFile.isEmpty() ) {
         return;
     }
 
     for ( const auto& entry : catalog.tiles() ) {
-        if ( entry.second.textureFile() == textureFile ) {
+        if ( entry.second.textureFile().compare( textureFile, Qt::CaseInsensitive ) == 0 ) {
             return;
         }
     }
 
-    removeTextureFiles( mapPath, textureFile );
+    TextureImportHelper::removeTextureFiles( mapPath, textureFile );
 }
 } // namespace
 
@@ -130,7 +114,7 @@ bool TileCreationControl::removeTile( int type ) {
     return true;
 }
 
-bool TileCreationControl::createTile( int type, const QString& name, const QString& textureFile, const QString& tagsText, int frameDurationMs, bool isWalkable, bool replace ) {
+bool TileCreationControl::createTile( int type, const QString& name, const QString& sourceFile, const QString& tagsText, int frameDurationMs, bool isWalkable, bool replace ) {
     if ( type < 1 ) {
         setLastError( "Type must be 1 or higher." );
         return false;
@@ -153,47 +137,41 @@ bool TileCreationControl::createTile( int type, const QString& name, const QStri
         return false;
     }
 
-    const QString sourcePath = toLocalFilePath( textureFile.trimmed() );
+    const QString sourcePath = TextureImportHelper::toLocalFilePath( sourceFile.trimmed() );
 
     if ( sourcePath.isEmpty() ) {
         setLastError( "Select a texture." );
         return false;
     }
 
-    const QString sourceExtension = "." + QFileInfo( sourcePath ).suffix().toLower();
-    const bool isAnimated = Engine::DataFactory::textureExtensions().value( sourceExtension, false );
-    const QString extension = isAnimated ? sourceExtension : ".png";
-
     const QString textureName = QFileInfo( sourcePath ).completeBaseName();
 
-    if ( textureName.isEmpty() ) {
-        setLastError( "Invalid texture file name." );
+    if ( !TextureImportHelper::isValidFileName( textureName ) ) {
+        setLastError( "Texture file name '" + textureName + "' may only contain lowercase letters, digits, '_' and '-'. Rename the file." );
         return false;
     }
 
     const QString textureFile = "Textures/Tiles/" + textureName;
 
     for ( const auto& entry : dataManager.tileCatalog().tiles() ) {
-        if ( entry.second.textureFile() == textureFile && entry.first != static_cast<uint32_t>( type ) ) {
+        if ( entry.second.textureFile().compare( textureFile, Qt::CaseInsensitive ) == 0 && entry.first != static_cast<uint32_t>( type ) ) {
             setLastError( "Texture file '" + textureName + "' is already used by type " + QString::number( entry.first ) + " ('" + entry.second.name() + "'). Rename the file." );
             return false;
         }
     }
 
-    const QString mapPath = Engine::DataFactory::mapPath( DATA_PATH );
-    const QString destPath = mapPath + textureFile + extension;
+    const bool isAnimated = TextureImportHelper::isAnimatedSource( sourcePath );
+    const Engine::AnimationModel animation = Engine::DataFactory::loadAnimation( sourcePath, isAnimated, frameDurationMs > 0 ? frameDurationMs : 100 );
 
-    QDir().mkpath( QFileInfo( destPath ).absolutePath() );
-    removeTextureFiles( mapPath, textureFile );
-
-    if ( !QFile::copy( sourcePath, destPath ) ) {
-        setLastError( "Failed to copy texture." );
+    if ( animation.isNull() ) {
+        setLastError( "Failed to load the texture." );
         return false;
     }
 
-    const Engine::AnimationModel animation = Engine::DataFactory::loadAnimation( destPath, isAnimated, frameDurationMs > 0 ? frameDurationMs : 100 );
-    if ( animation.isNull() ) {
-        setLastError( "Failed to load the copied texture." );
+    const QString mapPath = Engine::DataFactory::mapPath( DATA_PATH );
+
+    if ( !TextureImportHelper::importTexture( sourcePath, mapPath, textureFile, TextureImportHelper::destinationExtension( sourcePath ) ) ) {
+        setLastError( "Failed to copy texture." );
         return false;
     }
 

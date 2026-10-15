@@ -5,7 +5,7 @@ namespace Engine {
 ObjectModel::ObjectModel() :
     _type( 0 ),
     _name( "" ),
-    _folder( "" ),
+    _textureFile( "" ),
     _animation(),
     _size(),
     _interaction( std::nullopt ),
@@ -30,12 +30,12 @@ void ObjectModel::setName( const QString& name ) {
     _name = name;
 }
 
-QString ObjectModel::folder() const {
-    return _folder;
+QString ObjectModel::textureFile() const {
+    return _textureFile;
 }
 
-void ObjectModel::setFolder( const QString& folder ) {
-    _folder = folder;
+void ObjectModel::setTextureFile( const QString& textureFile ) {
+    _textureFile = textureFile;
 }
 
 QImage ObjectModel::texture() const {

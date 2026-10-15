@@ -24,8 +24,8 @@ public:
     QString name() const;
     void setName( const QString& name );
 
-    QString folder() const;
-    void setFolder( const QString& folder );
+    QString textureFile() const;
+    void setTextureFile( const QString& textureFile );
 
     QImage texture() const;
     void setTexture( const QImage& texture );
@@ -45,7 +45,7 @@ public:
 private:
     uint32_t _type;
     QString _name;
-    QString _folder;
+    QString _textureFile;
     AnimationModel _animation;
     ObjectSizeModel _size;
     std::optional<ObjectInteractionModel> _interaction;

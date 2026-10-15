@@ -8,7 +8,7 @@ import MMORPGEditorControls
 Item {
     id: root
 
-    readonly property bool isAnimated: textureInput.vText.toLowerCase().endsWith(".gif")
+    readonly property bool isAnimated: textureInput.vText.toLowerCase().endsWith(".gif") || textureInput.vText.toLowerCase().endsWith(".webp")
     readonly property int typeValue: parseInt(typeInput.vText, 10) || 0
     readonly property string existingName: {
         creationControl.nextType

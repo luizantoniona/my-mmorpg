@@ -40,7 +40,7 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
         size.setHeight( footprintJson.get( "Height", 1 ).asInt() );
         object.setSize( size );
 
-        object.setFolder( QString( objectJson[ "TextureFolder" ].asCString() ) );
+        object.setTextureFile( QString( objectJson[ "TextureFile" ].asCString() ) );
         object.setIsWalkable( objectJson.get( "IsWalkable", true ).asBool() );
 
         if ( objectJson.isMember( "Interaction" ) ) {
@@ -60,7 +60,7 @@ void ObjectFactory::createObjectCatalog( const QString& configPath, ObjectCatalo
 
         const bool isAnimated = objectJson.get( "IsAnimated", false ).asBool();
         const int frameDurationMs = objectJson.get( "FrameDurationMs", 100 ).asInt();
-        const QString texturePath = DataFactory::resolveTexturePath( mapPath + object.folder() + "/" + object.name(), isAnimated );
+        const QString texturePath = DataFactory::resolveTexturePath( mapPath + object.textureFile(), isAnimated );
 
         const AnimationModel animation = DataFactory::loadAnimation( texturePath, isAnimated, frameDurationMs );
         if ( animation.isNull() ) {
@@ -101,7 +101,7 @@ void ObjectFactory::saveObjectCatalog( const QString& configPath, const ObjectCa
         footprintJson[ "Height" ] = object.size().height();
         objectJson[ "Footprint" ] = footprintJson;
 
-        objectJson[ "TextureFolder" ] = object.folder().toStdString();
+        objectJson[ "TextureFile" ] = object.textureFile().toStdString();
 
         if ( !object.isWalkable() ) {
             objectJson[ "IsWalkable" ] = false;

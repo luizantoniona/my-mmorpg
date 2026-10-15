@@ -1,6 +1,8 @@
 set(PROJECT_SOURCES
     RegisterEditorTypes.cpp
     RegisterEditorTypes.h
+    Application/Assets/TextureImportHelper.cpp
+    Application/Assets/TextureImportHelper.h
     Application/Configuration/ConfigurationControl.cpp
     Application/Configuration/ConfigurationControl.h
     Application/Objects/ObjectCreationControl.cpp
