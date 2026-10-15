@@ -213,6 +213,7 @@ bool WorldCombatAttackAction::resolveCharacterAttack( int idCharacter, int x, in
     creaturePayload[ "maxHealth" ] = creatureMaxHealth;
     creaturePayload[ "movementCooldownSeconds" ] = creatureMovementCooldownSeconds;
     creaturePayload[ "footprint" ] = creatureFootprint;
+    creaturePayload[ "creatureType" ] = creatureType.toStdString();
     eventBus.publish( WorldEvent( creatureDied ? WorldEventType::CREATURE_LEFT : WorldEventType::CREATURE_VITALS_CHANGED, creaturePayload ) );
 
     if ( creatureDied ) {

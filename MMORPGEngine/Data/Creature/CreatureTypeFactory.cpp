@@ -9,6 +9,7 @@
 #include <json/json.h>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Appearance/AppearanceFactory.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 #include <MMORPGEngine/Data/DataFactory.h>
 
@@ -103,6 +104,11 @@ void CreatureTypeFactory::createCreatureTypeCatalog( const QString& configPath, 
             continue;
         }
         creatureType.setFootprint( footprint );
+
+        if ( creatureTypeJson.isMember( "Appearance" ) ) {
+            const QString folder = QFileInfo( file ).absolutePath() + "/";
+            creatureType.setAppearance( AppearanceFactory::createAppearance( creatureTypeJson[ "Appearance" ], folder ) );
+        }
 
         creatureTypeCatalog.addCreatureType( std::move( creatureType ) );
     }

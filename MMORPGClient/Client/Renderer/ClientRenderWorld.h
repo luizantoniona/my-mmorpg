@@ -26,6 +26,7 @@ public:
 
 private slots:
     void onOwnCharacterReceived( const Engine::OwnCharacterDTO& state );
+    void onCreatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds );
 
 private:
     Engine::WorldModel* _world;

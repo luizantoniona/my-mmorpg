@@ -5,6 +5,7 @@
 
 #include <QString>
 
+#include <MMORPGEngine/Data/Appearance/AppearanceModel.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeVitalsModel.h>
 
 namespace Engine {
@@ -31,10 +32,14 @@ public:
     CreatureTypeVitalsModel& vitals();
     const CreatureTypeVitalsModel& vitals() const;
 
+    const AppearanceModel& appearance() const;
+    void setAppearance( const AppearanceModel& appearance );
+
 private:
     QString _type;
     QString _name;
     CreatureTypeVitalsModel _vitals;
+    AppearanceModel _appearance;
     uint32_t _aggroRadius;
     uint32_t _attackRange;
     uint32_t _footprint;

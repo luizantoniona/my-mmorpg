@@ -131,6 +131,7 @@ void WorldCreatureSystem::onTick() {
             payload[ "maxHealth" ] = creaturePtr->vitals().maxHealth();
             payload[ "movementCooldownSeconds" ] = creaturePtr->movement().cooldownSeconds();
             payload[ "footprint" ] = footprint;
+            payload[ "creatureType" ] = creaturePtr->type().toStdString();
 
             movedCreaturePayloads.push_back( payload );
         }

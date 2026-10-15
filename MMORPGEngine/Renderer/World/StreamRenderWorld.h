@@ -3,6 +3,7 @@
 
 #include <QHash>
 #include <QImage>
+#include <QString>
 
 #include <MMORPGEngine/Renderer/EntityAnimationModel.h>
 #include <MMORPGEngine/Renderer/World/RenderWorld.h>
@@ -22,7 +23,8 @@ public:
     Q_INVOKABLE void addCharacter( int idCharacter, int x, int y, int z, double movementSeconds = 0.0 );
     Q_INVOKABLE void removeCharacter( int idCharacter );
 
-    Q_INVOKABLE void addCreature( int idCreature, int x, int y, int z, double movementSeconds = 0.0, int footprint = 1 );
+    Q_INVOKABLE void addCreature( int idCreature, int x, int y, int z, double movementSeconds = 0.0, int footprint = 1, const QString& creatureType = QString() );
+    Q_INVOKABLE void startCreatureAttack( int idCreature, int targetX, int targetY, double castSeconds );
     Q_INVOKABLE void removeCreature( int idCreature );
 
     Q_INVOKABLE void clearEntities();
@@ -31,10 +33,13 @@ private:
     static void updateEntity( QHash<int, EntityAnimationModel>& entities, int idEntity, int x, int y, int z, double movementSeconds );
     static void appendEntities( QList<Entity>& result, const QHash<int, EntityAnimationModel>& entities, int z, const QImage& texture );
 
+    QImage creatureTexture( int idCreature, const EntityAnimationModel& animation ) const;
+
 private:
     QHash<int, EntityAnimationModel> _ownCharacter;
     QHash<int, EntityAnimationModel> _characters;
     QHash<int, EntityAnimationModel> _creatures;
+    QHash<int, QString> _creatureTypes;
     QHash<int, int> _creatureFootprints;
 };
 

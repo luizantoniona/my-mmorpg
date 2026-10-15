@@ -22,6 +22,16 @@ set(PROJECT_SOURCES
     Commons/Singleton.h
     Data/Animation/AnimationModel.cpp
     Data/Animation/AnimationModel.h
+    Data/Appearance/AppearanceDirectionEnum.h
+    Data/Appearance/AppearanceDirectionHelper.cpp
+    Data/Appearance/AppearanceDirectionHelper.h
+    Data/Appearance/AppearanceFactory.cpp
+    Data/Appearance/AppearanceFactory.h
+    Data/Appearance/AppearanceModel.cpp
+    Data/Appearance/AppearanceModel.h
+    Data/Appearance/AppearanceStateEnum.h
+    Data/Appearance/AppearanceStateHelper.cpp
+    Data/Appearance/AppearanceStateHelper.h
     Data/Item/HandRequirementEnum.h
     Data/Item/HandRequirementHelper.cpp
     Data/Item/HandRequirementHelper.h

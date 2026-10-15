@@ -38,7 +38,7 @@ public:
 
 signals:
     void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
-    void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds, int footprint );
+    void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds, int footprint, const QString& creatureType );
 
     void characterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds );
     void characterEventAttackReceived( int idCharacter, int x, int y, int z );

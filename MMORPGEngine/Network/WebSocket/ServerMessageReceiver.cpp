@@ -85,7 +85,7 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
 
     case ServerMessageType::CREATURE: {
         const CreatureDTO state = CreatureDTO::fromJson( json );
-        emit creatureStateReceived( state.idCreature(), state.x(), state.y(), state.z(), state.movementCooldownSeconds(), state.footprint() );
+        emit creatureStateReceived( state.idCreature(), state.x(), state.y(), state.z(), state.movementCooldownSeconds(), state.footprint(), state.creatureType() );
         return;
     }
 

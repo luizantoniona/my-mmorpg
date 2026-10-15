@@ -1,6 +1,8 @@
 #ifndef CREATUREDTO_H
 #define CREATUREDTO_H
 
+#include <QString>
+
 #include <json/json.h>
 
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
@@ -40,7 +42,11 @@ public:
     int footprint() const;
     void setFootprint( int footprint );
 
+    QString creatureType() const;
+    void setCreatureType( const QString& creatureType );
+
 private:
+    QString _creatureType;
     double _health;
     double _maxHealth;
     double _movementCooldownSeconds;

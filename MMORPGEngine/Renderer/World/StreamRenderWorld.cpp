@@ -1,5 +1,9 @@
 #include "StreamRenderWorld.h"
 
+#include <QDateTime>
+
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Renderer/EntityTextureModel.h>
 
 namespace Engine {
@@ -21,7 +25,12 @@ QList<RenderWorld::Entity> StreamRenderWorld::entities( int z ) const {
 
         const int footprint = _creatureFootprints.value( it.key(), 1 );
 
-        Entity entity( it.key(), it->x(), it->y(), EntityTextureModel::creatureTexture( footprint ) );
+        QImage texture = creatureTexture( it.key(), it.value() );
+        if ( texture.isNull() ) {
+            texture = EntityTextureModel::creatureTexture( footprint );
+        }
+
+        Entity entity( it.key(), it->x(), it->y(), texture );
         entity.offsetX = it->offsetX();
         entity.offsetY = it->offsetY();
         entity.footprint = footprint;
@@ -48,14 +57,24 @@ void StreamRenderWorld::removeCharacter( int idCharacter ) {
     _characters.remove( idCharacter );
 }
 
-void StreamRenderWorld::addCreature( int idCreature, int x, int y, int z, double movementSeconds, int footprint ) {
+void StreamRenderWorld::addCreature( int idCreature, int x, int y, int z, double movementSeconds, int footprint, const QString& creatureType ) {
     updateEntity( _creatures, idCreature, x, y, z, movementSeconds );
     _creatureFootprints.insert( idCreature, footprint );
+    _creatureTypes.insert( idCreature, creatureType );
+}
+
+void StreamRenderWorld::startCreatureAttack( int idCreature, int targetX, int targetY, double castSeconds ) {
+    auto it = _creatures.find( idCreature );
+
+    if ( it != _creatures.end() ) {
+        it->startAttack( targetX, targetY, castSeconds );
+    }
 }
 
 void StreamRenderWorld::removeCreature( int idCreature ) {
     _creatures.remove( idCreature );
     _creatureFootprints.remove( idCreature );
+    _creatureTypes.remove( idCreature );
 }
 
 void StreamRenderWorld::clearEntities() {
@@ -63,6 +82,7 @@ void StreamRenderWorld::clearEntities() {
     _characters.clear();
     _creatures.clear();
     _creatureFootprints.clear();
+    _creatureTypes.clear();
 }
 
 void StreamRenderWorld::updateEntity( QHash<int, EntityAnimationModel>& entities, int idEntity, int x, int y, int z, double movementSeconds ) {
@@ -88,6 +108,26 @@ void StreamRenderWorld::appendEntities( QList<Entity>& result, const QHash<int, 
 
         result.append( entity );
     }
+}
+
+QImage StreamRenderWorld::creatureTexture( int idCreature, const EntityAnimationModel& animation ) const {
+    const CreatureTypeModel* creatureType = Singleton<DataManager>::instance().creatureTypeCatalog().creatureType( _creatureTypes.value( idCreature ) );
+
+    if ( !creatureType ) {
+        return QImage();
+    }
+
+    AppearanceStateEnum state = AppearanceStateEnum::IDLE;
+    qint64 elapsedMs = QDateTime::currentMSecsSinceEpoch();
+
+    if ( animation.isAttacking() ) {
+        state = AppearanceStateEnum::ATTACK;
+        elapsedMs = animation.attackElapsedMs();
+    } else if ( animation.isMoving() ) {
+        state = AppearanceStateEnum::WALK;
+    }
+
+    return creatureType->appearance().animation( state, animation.facing() ).frameAt( elapsedMs );
 }
 
 } // namespace Engine

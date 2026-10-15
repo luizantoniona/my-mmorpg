@@ -3,6 +3,8 @@
 
 #include <QtTypes>
 
+#include <MMORPGEngine/Data/Appearance/AppearanceDirectionEnum.h>
+
 namespace Engine {
 
 class EntityAnimationModel {
@@ -19,18 +21,29 @@ public:
     double offsetX() const;
     double offsetY() const;
 
+    AppearanceDirectionEnum facing() const;
+
+    bool isMoving() const;
+
+    void startAttack( int targetX, int targetY, double castSeconds );
+    bool isAttacking() const;
+    qint64 attackElapsedMs() const;
+
 private:
     double remainingRatio() const;
     void snap();
 
 private:
     qint64 _startMs;
+    qint64 _attackStartMs;
     int _durationMs;
+    int _attackDurationMs;
     int _x;
     int _y;
     int _z;
     int _previousX;
     int _previousY;
+    AppearanceDirectionEnum _facing;
 };
 
 } // namespace Engine

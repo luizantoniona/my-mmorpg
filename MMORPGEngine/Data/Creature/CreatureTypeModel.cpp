@@ -5,6 +5,8 @@ namespace Engine {
 CreatureTypeModel::CreatureTypeModel() :
     _type( "" ),
     _name( "" ),
+    _vitals(),
+    _appearance(),
     _aggroRadius( 0 ),
     _attackRange( 1 ),
     _footprint( 1 ) {
@@ -56,6 +58,14 @@ CreatureTypeVitalsModel& CreatureTypeModel::vitals() {
 
 const CreatureTypeVitalsModel& CreatureTypeModel::vitals() const {
     return _vitals;
+}
+
+const AppearanceModel& CreatureTypeModel::appearance() const {
+    return _appearance;
+}
+
+void CreatureTypeModel::setAppearance( const AppearanceModel& appearance ) {
+    _appearance = appearance;
 }
 
 } // namespace Engine

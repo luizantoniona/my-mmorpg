@@ -5,6 +5,7 @@
 
 #include <QDateTime>
 
+#include <MMORPGEngine/Data/Appearance/AppearanceDirectionHelper.h>
 #include <MMORPGEngine/World/WorldConstants.h>
 
 namespace Engine {
@@ -21,12 +22,15 @@ EntityAnimationModel::EntityAnimationModel() :
 
 EntityAnimationModel::EntityAnimationModel( int x, int y, int z, double movementSeconds ) :
     _startMs( 0 ),
+    _attackStartMs( 0 ),
     _durationMs( static_cast<int>( movementSeconds * MILLISECONDS_PER_SECOND ) ),
+    _attackDurationMs( 0 ),
     _x( x ),
     _y( y ),
     _z( z ),
     _previousX( x ),
-    _previousY( y ) {
+    _previousY( y ),
+    _facing( AppearanceDirectionEnum::SOUTH ) {
 }
 
 int EntityAnimationModel::x() const {
@@ -53,6 +57,10 @@ void EntityAnimationModel::moveTo( int x, int y, int z, double movementSeconds )
 
     const bool isNeighbourTile = std::abs( x - _x ) <= 1 && std::abs( y - _y ) <= 1 && !changedFloor;
 
+    if ( isNeighbourTile ) {
+        _facing = AppearanceDirectionHelper::fromDelta( x - _x, y - _y, _facing );
+    }
+
     _previousX = _x;
     _previousY = _y;
     _x = x;
@@ -73,6 +81,28 @@ double EntityAnimationModel::offsetX() const {
 
 double EntityAnimationModel::offsetY() const {
     return ( _previousY - _y ) * WorldConstants::TILE_SIZE * remainingRatio();
+}
+
+AppearanceDirectionEnum EntityAnimationModel::facing() const {
+    return _facing;
+}
+
+bool EntityAnimationModel::isMoving() const {
+    return remainingRatio() > 0.0;
+}
+
+void EntityAnimationModel::startAttack( int targetX, int targetY, double castSeconds ) {
+    _facing = AppearanceDirectionHelper::fromDelta( targetX - _x, targetY - _y, _facing );
+    _attackDurationMs = static_cast<int>( castSeconds * MILLISECONDS_PER_SECOND );
+    _attackStartMs = QDateTime::currentMSecsSinceEpoch();
+}
+
+bool EntityAnimationModel::isAttacking() const {
+    return _attackDurationMs > 0 && attackElapsedMs() < _attackDurationMs;
+}
+
+qint64 EntityAnimationModel::attackElapsedMs() const {
+    return QDateTime::currentMSecsSinceEpoch() - _attackStartMs;
 }
 
 double EntityAnimationModel::remainingRatio() const {

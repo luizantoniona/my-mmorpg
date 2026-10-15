@@ -189,6 +189,7 @@ bool WorldSpawnSystem::spawnCreature( WorldSpawnAreaRuntime& area, const QString
         payload[ "maxHealth" ] = creaturePtr->vitals().maxHealth();
         payload[ "movementCooldownSeconds" ] = creaturePtr->movement().cooldownSeconds();
         payload[ "footprint" ] = footprint;
+        payload[ "creatureType" ] = type.toStdString();
         _runtime.eventBus().publish( WorldEvent( WorldEventType::CREATURE_ENTERED, payload ) );
 
         return true;

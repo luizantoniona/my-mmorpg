@@ -8,6 +8,7 @@
 namespace Engine {
 
 CreatureDTO::CreatureDTO() :
+    _creatureType(),
     _health( 0.0 ),
     _maxHealth( 0.0 ),
     _movementCooldownSeconds( 0.0 ),
@@ -34,6 +35,7 @@ CreatureDTO CreatureDTO::fromModel( const CreatureModel* creature ) {
     dto._maxHealth = vitals.maxHealth();
     dto._movementCooldownSeconds = creature->movement().cooldownSeconds();
     dto._footprint = creature->size().width();
+    dto._creatureType = creature->type();
 
     return dto;
 }
@@ -73,6 +75,10 @@ CreatureDTO CreatureDTO::fromJson( const Json::Value& json ) {
         dto._footprint = json[ "footprint" ].asInt();
     }
 
+    if ( json.isMember( "creatureType" ) && json[ "creatureType" ].isString() ) {
+        dto._creatureType = QString::fromStdString( json[ "creatureType" ].asString() );
+    }
+
     return dto;
 }
 
@@ -88,6 +94,7 @@ Json::Value CreatureDTO::toJson() const {
     json[ "maxHealth" ] = _maxHealth;
     json[ "movementCooldownSeconds" ] = _movementCooldownSeconds;
     json[ "footprint" ] = _footprint;
+    json[ "creatureType" ] = _creatureType.toStdString();
 
     return json;
 }
@@ -154,6 +161,14 @@ int CreatureDTO::footprint() const {
 
 void CreatureDTO::setFootprint( int footprint ) {
     _footprint = footprint;
+}
+
+QString CreatureDTO::creatureType() const {
+    return _creatureType;
+}
+
+void CreatureDTO::setCreatureType( const QString& creatureType ) {
+    _creatureType = creatureType;
 }
 
 } // namespace Engine

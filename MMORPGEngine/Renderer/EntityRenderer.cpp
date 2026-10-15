@@ -28,7 +28,8 @@ void EntityRenderer::render( RenderScene& scene, const Camera& camera, const Ren
             continue;
         }
 
-        const QPointF position( entity.x * WorldConstants::TILE_SIZE + entity.offsetX, ( entity.y + entity.footprint ) * WorldConstants::TILE_SIZE - entity.texture.height() + entity.offsetY );
+        const double footprintWidth = entity.footprint * WorldConstants::TILE_SIZE;
+        const QPointF position( entity.x * WorldConstants::TILE_SIZE + ( footprintWidth - entity.texture.width() ) / 2.0 + entity.offsetX, ( entity.y + entity.footprint ) * WorldConstants::TILE_SIZE - entity.texture.height() + entity.offsetY );
         const QSizeF size( entity.texture.width(), entity.texture.height() );
 
         const int row = static_cast<int>( std::floor( ( entity.y * WorldConstants::TILE_SIZE + entity.offsetY ) / WorldConstants::TILE_SIZE ) ) + entity.footprint - 1;

@@ -12,6 +12,7 @@ ClientRenderWorld::ClientRenderWorld( QObject* parent ) :
     connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCharacterReceived, this, &ClientRenderWorld::onOwnCharacterReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterStateReceived, this, &ClientRenderWorld::addCharacter );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureStateReceived, this, &ClientRenderWorld::addCreature );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &ClientRenderWorld::onCreatureEventAttackStartReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventLeaveReceived, this, &ClientRenderWorld::removeCharacter );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventLeaveReceived, this, &ClientRenderWorld::removeCreature );
 }
@@ -68,4 +69,10 @@ uint32_t ClientRenderWorld::height() const {
 
 void ClientRenderWorld::onOwnCharacterReceived( const Engine::OwnCharacterDTO& state ) {
     setOwnCharacter( state.idCharacter(), state.x(), state.y(), state.z(), state.movementCooldownSeconds() );
+}
+
+void ClientRenderWorld::onCreatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds ) {
+    Q_UNUSED( z );
+
+    startCreatureAttack( idCreature, x, y, castSeconds );
 }
