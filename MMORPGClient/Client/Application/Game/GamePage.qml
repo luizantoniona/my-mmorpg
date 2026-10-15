@@ -119,6 +119,13 @@ Item {
                 anchors.margins: Borders.border1
                 renderWorld: clientWorld
                 activeFloor: root.currentFloor
+
+                onTileClicked: function (x, y, z) {
+                    const idGroundItem = clientWorld.groundItemAt(x, y, z)
+                    if (idGroundItem > 0) {
+                        control.pickup(idGroundItem)
+                    }
+                }
             }
         }
 
@@ -165,6 +172,9 @@ Item {
                         onClosed: inventoryPanel.visible = false
                         onEquipRequested: function (position) {
                             control.equip(position)
+                        }
+                        onDropRequested: function (position) {
+                            control.drop(position)
                         }
                     }
 

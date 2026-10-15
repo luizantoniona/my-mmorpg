@@ -8,6 +8,7 @@
 #include <MMORPGServer/Server/Event/EventBus.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
 #include <MMORPGServer/Server/Runtime/Character/System/CharacterEquipmentSystem.h>
+#include <MMORPGServer/Server/Runtime/Character/System/CharacterInventorySystem.h>
 #include <MMORPGServer/Server/Runtime/Character/System/CharacterSystem.h>
 
 namespace Server {
@@ -20,6 +21,7 @@ public:
     const Engine::CharacterModel* character() const;
 
     CharacterEquipmentSystem& equipmentSystem();
+    CharacterInventorySystem& inventorySystem();
 
     void tick();
 
@@ -30,6 +32,7 @@ private:
     std::vector<WorldEvent> _pendingEvents;
     std::vector<std::unique_ptr<CharacterSystem>> _systems;
     CharacterEquipmentSystem* _equipmentSystem;
+    CharacterInventorySystem* _inventorySystem;
 };
 
 } // namespace Server

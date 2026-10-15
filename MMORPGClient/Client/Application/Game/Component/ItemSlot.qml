@@ -12,6 +12,7 @@ Rectangle {
     readonly property bool vIsEmpty: root.vItemName === ""
 
     signal doubleClicked()
+    signal rightClicked()
 
     color: Colors.background2
     border.color: root.vIsEmpty ? Colors.border : Colors.info
@@ -42,6 +43,13 @@ Rectangle {
         enabled: !root.vIsEmpty
 
         onDoubleTapped: root.doubleClicked()
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        enabled: !root.vIsEmpty
+
+        onTapped: root.rightClicked()
     }
 
     TooltipBase {

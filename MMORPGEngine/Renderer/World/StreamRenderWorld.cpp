@@ -4,6 +4,8 @@
 
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/Data/Item/ItemCatalog.h>
+#include <MMORPGEngine/Data/Item/ItemModel.h>
 #include <MMORPGEngine/Renderer/EntityTextureModel.h>
 
 namespace Engine {
@@ -36,6 +38,18 @@ QList<RenderWorld::Entity> StreamRenderWorld::entities( int z ) const {
         entity.footprint = footprint;
 
         result.append( entity );
+    }
+
+    const ItemCatalog& itemCatalog = Singleton<DataManager>::instance().itemCatalog();
+
+    for ( auto it = _groundItems.constBegin(); it != _groundItems.constEnd(); ++it ) {
+        if ( it->position().z() != z ) {
+            continue;
+        }
+
+        const ItemModel* item = itemCatalog.item( it->idItem() );
+
+        result.append( Entity( -it.key(), it->position().x(), it->position().y(), item ? item->texture() : QImage() ) );
     }
 
     return result;
@@ -77,12 +91,42 @@ void StreamRenderWorld::removeCreature( int idCreature ) {
     _creatureTypes.remove( idCreature );
 }
 
+void StreamRenderWorld::addGroundItem( int idGroundItem, const QString& idItem, int x, int y, int z ) {
+    GroundItemModel groundItem;
+    groundItem.setIdGroundItem( idGroundItem );
+    groundItem.setIdItem( idItem );
+    groundItem.position().setX( x );
+    groundItem.position().setY( y );
+    groundItem.position().setZ( z );
+
+    _groundItems.insert( idGroundItem, groundItem );
+}
+
+void StreamRenderWorld::removeGroundItem( int idGroundItem ) {
+    _groundItems.remove( idGroundItem );
+}
+
+int StreamRenderWorld::groundItemAt( int x, int y, int z ) const {
+    int topmost = 0;
+
+    for ( auto it = _groundItems.constBegin(); it != _groundItems.constEnd(); ++it ) {
+        const EntityPositionModel& position = it->position();
+
+        if ( position.x() == x && position.y() == y && position.z() == z && it.key() > topmost ) {
+            topmost = it.key();
+        }
+    }
+
+    return topmost;
+}
+
 void StreamRenderWorld::clearEntities() {
     _ownCharacter.clear();
     _characters.clear();
     _creatures.clear();
     _creatureFootprints.clear();
     _creatureTypes.clear();
+    _groundItems.clear();
 }
 
 void StreamRenderWorld::updateEntity( QHash<int, EntityAnimationModel>& entities, int idEntity, int x, int y, int z, double movementSeconds ) {

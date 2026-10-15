@@ -177,6 +177,95 @@ bool WorldRuntime::unequipCharacter( int idCharacter, Engine::EquipmentSlotEnum 
     return unequipped;
 }
 
+bool WorldRuntime::dropCharacterItem( int idCharacter, uint32_t inventoryPosition ) {
+    std::vector<WorldEvent> events;
+
+    {
+        std::lock_guard<std::mutex> lock( _mutex );
+
+        auto it = _characters.find( idCharacter );
+        if ( it == _characters.end() ) {
+            return false;
+        }
+
+        const std::optional<QString> idItem = it->second->inventorySystem().take( inventoryPosition );
+        if ( !idItem ) {
+            return false;
+        }
+
+        const Engine::GroundItemModel groundItem = _groundItemSystem.drop( *idItem, it->second->character()->position() );
+        events = it->second->takePendingEvents();
+
+        Json::Value payload;
+        payload[ "idGroundItem" ] = groundItem.idGroundItem();
+        payload[ "idItem" ] = groundItem.idItem().toStdString();
+        payload[ "x" ] = groundItem.position().x();
+        payload[ "y" ] = groundItem.position().y();
+        payload[ "z" ] = groundItem.position().z();
+        events.push_back( WorldEvent( WorldEventType::GROUND_ITEM_ENTERED, payload ) );
+
+        qInfo() << "[WorldRuntime] Item dropped [CHARACTER]" << idCharacter << "[GROUND ITEM]" << groundItem.idGroundItem();
+    }
+
+    for ( const WorldEvent& event : events ) {
+        _eventBus.publish( event );
+    }
+
+    return true;
+}
+
+bool WorldRuntime::pickupCharacterItem( int idCharacter, int idGroundItem ) {
+    std::vector<WorldEvent> events;
+
+    {
+        std::lock_guard<std::mutex> lock( _mutex );
+
+        auto it = _characters.find( idCharacter );
+        if ( it == _characters.end() ) {
+            return false;
+        }
+
+        const std::optional<Engine::GroundItemModel> groundItem = _groundItemSystem.find( idGroundItem );
+        if ( !groundItem ) {
+            qWarning() << "[WorldRuntime] Pickup rejected: unknown ground item [CHARACTER]" << idCharacter << "[GROUND ITEM]" << idGroundItem;
+            return false;
+        }
+
+        if ( !WorldGroundItemSystem::isReachable( *groundItem, it->second->character()->position() ) ) {
+            qWarning() << "[WorldRuntime] Pickup rejected: out of reach [CHARACTER]" << idCharacter << "[GROUND ITEM]" << idGroundItem;
+            return false;
+        }
+
+        if ( !it->second->inventorySystem().add( groundItem->idItem() ) ) {
+            return false;
+        }
+
+        _groundItemSystem.remove( idGroundItem );
+        events = it->second->takePendingEvents();
+
+        Json::Value payload;
+        payload[ "idGroundItem" ] = groundItem->idGroundItem();
+        payload[ "x" ] = groundItem->position().x();
+        payload[ "y" ] = groundItem->position().y();
+        payload[ "z" ] = groundItem->position().z();
+        events.push_back( WorldEvent( WorldEventType::GROUND_ITEM_LEFT, payload ) );
+
+        qInfo() << "[WorldRuntime] Item picked up [CHARACTER]" << idCharacter << "[GROUND ITEM]" << idGroundItem;
+    }
+
+    for ( const WorldEvent& event : events ) {
+        _eventBus.publish( event );
+    }
+
+    return true;
+}
+
+std::vector<Engine::GroundItemModel> WorldRuntime::groundItemsNear( const Engine::EntityPositionModel& position ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    return _groundItemSystem.itemsNear( position );
+}
+
 std::map<int, Engine::EntityPositionModel> WorldRuntime::characterPositions() {
     std::lock_guard<std::mutex> lock( _mutex );
 

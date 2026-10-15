@@ -7,15 +7,19 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentActionDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentDropDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentEquipDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentMoveDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentPickupDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentUnequipDTO.h>
 #include <MMORPGEngine/Entity/CombatActionHelper.h>
 #include <MMORPGEngine/Network/WebSocket/ClientMessageTypeHelper.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Runtime/World/Command/AttackCharacterCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/DropCharacterCommand.h>
 #include <MMORPGServer/Server/Runtime/World/Command/EquipCharacterCommand.h>
 #include <MMORPGServer/Server/Runtime/World/Command/MoveCharacterCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/PickupCharacterCommand.h>
 #include <MMORPGServer/Server/Runtime/World/Command/UnequipCharacterCommand.h>
 
 namespace Server {
@@ -48,6 +52,12 @@ void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& conne
         break;
     case Engine::ClientMessageType::CHARACTER_INTENT_UNEQUIP:
         receiveUnequip( idCharacter, messageJson );
+        break;
+    case Engine::ClientMessageType::CHARACTER_INTENT_DROP:
+        receiveDrop( idCharacter, messageJson );
+        break;
+    case Engine::ClientMessageType::CHARACTER_INTENT_PICKUP:
+        receivePickup( idCharacter, messageJson );
         break;
     default:
         break;
@@ -121,6 +131,28 @@ void ClientMessageReceiver::receiveUnequip( int idCharacter, const Json::Value& 
     }
 
     _worldRuntime->enqueueCommand( std::make_unique<UnequipCharacterCommand>( idCharacter, *input.slot() ) );
+}
+
+void ClientMessageReceiver::receiveDrop( int idCharacter, const Json::Value& messageJson ) {
+    const Engine::CharacterIntentDropDTO input = Engine::CharacterIntentDropDTO::fromJson( messageJson );
+
+    if ( !input.position() ) {
+        qWarning() << "[ClientMessageReceiver] Rejected drop: invalid position [CHARACTER]" << idCharacter;
+        return;
+    }
+
+    _worldRuntime->enqueueCommand( std::make_unique<DropCharacterCommand>( idCharacter, *input.position() ) );
+}
+
+void ClientMessageReceiver::receivePickup( int idCharacter, const Json::Value& messageJson ) {
+    const Engine::CharacterIntentPickupDTO input = Engine::CharacterIntentPickupDTO::fromJson( messageJson );
+
+    if ( !input.idGroundItem() ) {
+        qWarning() << "[ClientMessageReceiver] Rejected pickup: invalid ground item [CHARACTER]" << idCharacter;
+        return;
+    }
+
+    _worldRuntime->enqueueCommand( std::make_unique<PickupCharacterCommand>( idCharacter, *input.idGroundItem() ) );
 }
 
 } // namespace Server

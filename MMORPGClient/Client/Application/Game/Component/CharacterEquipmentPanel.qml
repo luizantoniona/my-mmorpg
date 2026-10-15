@@ -50,7 +50,7 @@ GamePanelBase {
                 return control.equipment[i].idItem
             }
         }
-        return 0
+        return ""
     }
 
     vTitle: qsTr("Equipment")
@@ -67,13 +67,13 @@ GamePanelBase {
             delegate: ItemSlot {
                 required property var modelData
 
-                readonly property int idItem: root.equippedIdItem(modelData.slot)
+                readonly property string idItem: root.equippedIdItem(modelData.slot)
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 vLabel: modelData.label
-                vItemName: idItem > 0 ? control.itemName(idItem) : ""
-                vIconSource: idItem > 0 ? "image://ClientItemIcon/" + idItem : ""
+                vItemName: idItem !== "" ? control.itemName(idItem) : ""
+                vIconSource: idItem !== "" ? "image://ClientItemIcon/" + idItem : ""
 
                 onDoubleClicked: root.unequipRequested(modelData.slot)
             }

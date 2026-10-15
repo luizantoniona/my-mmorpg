@@ -30,7 +30,7 @@ QVariantList CharacterInventoryPanelControl::inventory() const {
     return result;
 }
 
-QString CharacterInventoryPanelControl::itemName( uint32_t idItem ) const {
+QString CharacterInventoryPanelControl::itemName( const QString& idItem ) const {
     const Engine::ItemCatalog& catalog = Engine::Singleton<Engine::DataManager>::instance().itemCatalog();
 
     const Engine::ItemModel* item = catalog.item( idItem );

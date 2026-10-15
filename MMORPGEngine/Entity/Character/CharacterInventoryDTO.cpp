@@ -3,8 +3,8 @@
 namespace Engine {
 
 CharacterInventoryDTO::CharacterInventoryDTO() :
+    _idItem( "" ),
     _position( 0 ),
-    _idItem( 0 ),
     _amount( 0 ) {
 }
 
@@ -25,8 +25,8 @@ CharacterInventoryDTO CharacterInventoryDTO::fromJson( const Json::Value& json )
         dto._position = json[ "position" ].asUInt();
     }
 
-    if ( json.isMember( "idItem" ) && json[ "idItem" ].isUInt() ) {
-        dto._idItem = json[ "idItem" ].asUInt();
+    if ( json.isMember( "idItem" ) && json[ "idItem" ].isString() ) {
+        dto._idItem = QString::fromStdString( json[ "idItem" ].asString() );
     }
 
     if ( json.isMember( "amount" ) && json[ "amount" ].isUInt() ) {
@@ -40,7 +40,7 @@ Json::Value CharacterInventoryDTO::toJson() const {
     Json::Value json;
 
     json[ "position" ] = _position;
-    json[ "idItem" ] = _idItem;
+    json[ "idItem" ] = _idItem.toStdString();
     json[ "amount" ] = _amount;
 
     return json;
@@ -54,11 +54,11 @@ void CharacterInventoryDTO::setPosition( uint32_t position ) {
     _position = position;
 }
 
-uint32_t CharacterInventoryDTO::idItem() const {
+QString CharacterInventoryDTO::idItem() const {
     return _idItem;
 }
 
-void CharacterInventoryDTO::setIdItem( uint32_t idItem ) {
+void CharacterInventoryDTO::setIdItem( const QString& idItem ) {
     _idItem = idItem;
 }
 

@@ -12,6 +12,10 @@ std::string ClientMessageTypeHelper::toString( ClientMessageType type ) {
         return "CHARACTER_INTENT_EQUIP";
     case ClientMessageType::CHARACTER_INTENT_UNEQUIP:
         return "CHARACTER_INTENT_UNEQUIP";
+    case ClientMessageType::CHARACTER_INTENT_DROP:
+        return "CHARACTER_INTENT_DROP";
+    case ClientMessageType::CHARACTER_INTENT_PICKUP:
+        return "CHARACTER_INTENT_PICKUP";
     case ClientMessageType::UNKNOWN:
         return "UNKNOWN";
     }
@@ -34,6 +38,14 @@ ClientMessageType ClientMessageTypeHelper::fromString( const std::string& value 
 
     if ( value == "CHARACTER_INTENT_UNEQUIP" ) {
         return ClientMessageType::CHARACTER_INTENT_UNEQUIP;
+    }
+
+    if ( value == "CHARACTER_INTENT_DROP" ) {
+        return ClientMessageType::CHARACTER_INTENT_DROP;
+    }
+
+    if ( value == "CHARACTER_INTENT_PICKUP" ) {
+        return ClientMessageType::CHARACTER_INTENT_PICKUP;
     }
 
     return ClientMessageType::UNKNOWN;

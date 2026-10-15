@@ -3,8 +3,8 @@
 namespace Engine {
 
 CharacterInventoryModel::CharacterInventoryModel() :
+    _idItem( "" ),
     _position( 0 ),
-    _idItem( 0 ),
     _amount( 0 ) {
 }
 
@@ -16,11 +16,11 @@ void CharacterInventoryModel::setPosition( uint32_t position ) {
     _position = position;
 }
 
-uint32_t CharacterInventoryModel::idItem() const {
+QString CharacterInventoryModel::idItem() const {
     return _idItem;
 }
 
-void CharacterInventoryModel::setIdItem( uint32_t idItem ) {
+void CharacterInventoryModel::setIdItem( const QString& idItem ) {
     _idItem = idItem;
 }
 

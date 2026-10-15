@@ -5,6 +5,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QRegularExpression>
 
 #include <json/json.h>
 
@@ -12,6 +13,16 @@
 #include <MMORPGEngine/Data/DataFactory.h>
 #include <MMORPGEngine/Data/Item/ItemModel.h>
 #include <MMORPGEngine/Data/Item/ItemTypeFactory.h>
+
+namespace {
+
+bool isValidItemId( const Json::Value& idJson ) {
+    static const QRegularExpression pattern( "^[A-Z0-9_]+$" );
+
+    return idJson.isString() && pattern.match( QString::fromStdString( idJson.asString() ) ).hasMatch();
+}
+
+} // namespace
 
 namespace Engine {
 
@@ -30,13 +41,19 @@ void ItemFactory::createItemCatalog( const QString& configPath, const ItemTypeCa
 
         for ( const Json::Value& itemJson : json[ "Items" ] ) {
 
-            if ( !itemJson.isMember( "Id" ) || !itemJson.isMember( "Name" ) ) {
+            if ( !itemJson.isObject() || !itemJson.isMember( "Id" ) || !itemJson.isMember( "Name" ) ) {
                 qWarning() << "ItemFactory::createItemCatalog"
                            << "Invalid Item, skipping";
                 continue;
             }
 
-            const uint32_t id = itemJson[ "Id" ].asUInt();
+            if ( !JsonHelper::hasValidFields( itemJson, { { "Name", JsonFieldTypeEnum::STRING }, { "TextureFolder", JsonFieldTypeEnum::STRING }, { "IsAnimated", JsonFieldTypeEnum::BOOL }, { "FrameDurationMs", JsonFieldTypeEnum::INT } } ) || !isValidItemId( itemJson[ "Id" ] ) ) {
+                qWarning() << "ItemFactory::createItemCatalog"
+                           << "Item Id must be a key text (A-Z, 0-9, _) and Name a text, skipping";
+                continue;
+            }
+
+            const QString id = QString::fromStdString( itemJson[ "Id" ].asString() );
             if ( itemCatalog.item( id ) != nullptr ) {
                 qWarning() << "ItemFactory::createItemCatalog"
                            << "Duplicated Item Id, skipping:" << id;
@@ -110,7 +127,7 @@ void ItemFactory::saveItemCatalog( const QString& configPath, const ItemCatalog&
 
             for ( const ItemModel* item : items ) {
                 Json::Value itemJson;
-                itemJson[ "Id" ] = item->id();
+                itemJson[ "Id" ] = item->id().toStdString();
                 itemJson[ "Name" ] = item->name().toStdString();
 
                 if ( !item->folder().isEmpty() ) {

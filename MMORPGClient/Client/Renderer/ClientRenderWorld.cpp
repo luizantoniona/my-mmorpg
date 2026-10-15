@@ -15,6 +15,8 @@ ClientRenderWorld::ClientRenderWorld( QObject* parent ) :
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &ClientRenderWorld::onCreatureEventAttackStartReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventLeaveReceived, this, &ClientRenderWorld::removeCharacter );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventLeaveReceived, this, &ClientRenderWorld::removeCreature );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::groundItemStateReceived, this, &ClientRenderWorld::addGroundItem );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::groundItemEventLeaveReceived, this, &ClientRenderWorld::removeGroundItem );
 }
 
 Engine::WorldModel* ClientRenderWorld::world() const {

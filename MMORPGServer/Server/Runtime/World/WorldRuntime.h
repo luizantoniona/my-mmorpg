@@ -16,6 +16,7 @@
 #include <MMORPGServer/Server/Runtime/World/Command/WorldCommand.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldCombatSystem.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldCreatureSystem.h>
+#include <MMORPGServer/Server/Runtime/World/System/WorldGroundItemSystem.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldMovementSystem.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldSpawnSystem.h>
 #include <MMORPGServer/Server/Runtime/World/WorldSpatialIndex.h>
@@ -49,6 +50,10 @@ public:
     bool equipCharacter( int idCharacter, uint32_t inventoryPosition );
     bool unequipCharacter( int idCharacter, Engine::EquipmentSlotEnum slot );
 
+    bool dropCharacterItem( int idCharacter, uint32_t inventoryPosition );
+    bool pickupCharacterItem( int idCharacter, int idGroundItem );
+
+    std::vector<Engine::GroundItemModel> groundItemsNear( const Engine::EntityPositionModel& position );
     std::map<int, Engine::EntityPositionModel> characterPositions();
 
     std::vector<Engine::CharacterModel> connectedCharacters();
@@ -82,6 +87,7 @@ private:
     std::map<int, std::unique_ptr<CharacterRuntime>> _characters;
     std::map<int, std::unique_ptr<CreatureRuntime>> _creatures;
     WorldSpatialIndex _spatialIndex;
+    WorldGroundItemSystem _groundItemSystem;
     std::unique_ptr<WorldCombatSystem> _combatSystem;
     std::unique_ptr<WorldMovementSystem> _movementSystem;
     std::unique_ptr<WorldCreatureSystem> _creatureSystem;

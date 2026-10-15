@@ -22,7 +22,7 @@ public:
     QVariantList inventory() const;
 
 public slots:
-    QString itemName( uint32_t idItem ) const;
+    QString itemName( const QString& idItem ) const;
 
 signals:
     void inventoryChanged();

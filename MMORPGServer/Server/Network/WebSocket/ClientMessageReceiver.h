@@ -23,6 +23,8 @@ private:
     void receiveAttack( int idCharacter, const Engine::CharacterIntentActionDTO& input );
     void receiveEquip( int idCharacter, const Json::Value& messageJson );
     void receiveUnequip( int idCharacter, const Json::Value& messageJson );
+    void receiveDrop( int idCharacter, const Json::Value& messageJson );
+    void receivePickup( int idCharacter, const Json::Value& messageJson );
 
 private:
     WorldRuntime* _worldRuntime;

@@ -11,6 +11,7 @@ GamePanelBase {
     readonly property int vCapacity: 20
 
     signal equipRequested(int position)
+    signal dropRequested(int position)
 
     CharacterInventoryPanelControl {
         id: control
@@ -49,6 +50,7 @@ GamePanelBase {
                 vAmount: entry ? entry.amount : 0
 
                 onDoubleClicked: root.equipRequested(index)
+                onRightClicked: root.dropRequested(index)
             }
         }
     }

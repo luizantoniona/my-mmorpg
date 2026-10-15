@@ -15,6 +15,8 @@
 #include <MMORPGEngine/Entity/Creature/CreatureEventAttackStartDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
+#include <MMORPGEngine/Entity/GroundItem/GroundItemDTO.h>
+#include <MMORPGEngine/Entity/GroundItem/GroundItemEventLeaveDTO.h>
 #include <MMORPGEngine/World/WorldBasicDTO.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/Observer/ObserverRegistry.h>
@@ -50,6 +52,18 @@ EntityBroadcaster::EntityBroadcaster() {
 
     worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_EQUIPMENT_CHANGED, [ this ]( const WorldEvent& event ) {
         onCharacterEquipmentChanged( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_INVENTORY_CHANGED, [ this ]( const WorldEvent& event ) {
+        onCharacterInventoryChanged( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::GROUND_ITEM_ENTERED, [ this ]( const WorldEvent& event ) {
+        onGroundItemEntered( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::GROUND_ITEM_LEFT, [ this ]( const WorldEvent& event ) {
+        onGroundItemLeft( event );
     } );
 
     worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_ENTERED, [ this ]( const WorldEvent& event ) {
@@ -97,6 +111,7 @@ void EntityBroadcaster::onCharacterEntered( const WorldEvent& event ) {
     sendOwnInventory( event );
     sendNearbyCharacters( event );
     sendCreatures( event );
+    sendGroundItems( event );
     broadcastCharacter( event );
 }
 
@@ -136,6 +151,25 @@ void EntityBroadcaster::onCharacterEquipmentChanged( const WorldEvent& event ) {
     sendOwnEquipment( event );
     sendOwnInventory( event );
     sendOwnCombat( event );
+}
+
+void EntityBroadcaster::onCharacterInventoryChanged( const WorldEvent& event ) {
+    sendOwnInventory( event );
+}
+
+void EntityBroadcaster::onGroundItemEntered( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    broadcastNear( payload, Engine::JsonHelper::writeJsonString( Engine::GroundItemDTO::fromJson( payload ).toJson() ) );
+}
+
+void EntityBroadcaster::onGroundItemLeft( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    Engine::GroundItemEventLeaveDTO message;
+    message.setIdGroundItem( payload[ "idGroundItem" ].asInt() );
+
+    broadcastNear( payload, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
 
 void EntityBroadcaster::onCreatureEntered( const WorldEvent& event ) {
@@ -257,6 +291,16 @@ void EntityBroadcaster::sendCreatures( const WorldEvent& event ) {
 
     for ( const Engine::CreatureModel& creature : worldRuntime.creaturesNear( positionFromPayload( event.payload() ) ) ) {
         sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( &creature ).toJson() ) );
+    }
+}
+
+void EntityBroadcaster::sendGroundItems( const WorldEvent& event ) {
+    const int idCharacter = event.payload()[ "idCharacter" ].asInt();
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    for ( const Engine::GroundItemModel& groundItem : worldRuntime.groundItemsNear( positionFromPayload( event.payload() ) ) ) {
+        sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::GroundItemDTO::fromModel( &groundItem ).toJson() ) );
     }
 }
 

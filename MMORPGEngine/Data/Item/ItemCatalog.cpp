@@ -6,7 +6,7 @@ ItemCatalog::ItemCatalog() :
     _items() {
 }
 
-const ItemModel* ItemCatalog::item( uint32_t id ) const {
+const ItemModel* ItemCatalog::item( const QString& id ) const {
     auto iterator = _items.find( id );
 
     if ( iterator == _items.end() ) {
@@ -16,7 +16,7 @@ const ItemModel* ItemCatalog::item( uint32_t id ) const {
     return &iterator->second;
 }
 
-const std::unordered_map<uint32_t, ItemModel>& ItemCatalog::items() const {
+const std::map<QString, ItemModel>& ItemCatalog::items() const {
     return _items;
 }
 

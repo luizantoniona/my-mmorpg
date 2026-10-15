@@ -5,6 +5,7 @@
 #include <QImage>
 #include <QString>
 
+#include <MMORPGEngine/Entity/GroundItem/GroundItemModel.h>
 #include <MMORPGEngine/Renderer/EntityAnimationModel.h>
 #include <MMORPGEngine/Renderer/World/RenderWorld.h>
 
@@ -27,6 +28,10 @@ public:
     Q_INVOKABLE void startCreatureAttack( int idCreature, int targetX, int targetY, double castSeconds );
     Q_INVOKABLE void removeCreature( int idCreature );
 
+    Q_INVOKABLE void addGroundItem( int idGroundItem, const QString& idItem, int x, int y, int z );
+    Q_INVOKABLE void removeGroundItem( int idGroundItem );
+    Q_INVOKABLE int groundItemAt( int x, int y, int z ) const;
+
     Q_INVOKABLE void clearEntities();
 
 private:
@@ -41,6 +46,7 @@ private:
     QHash<int, EntityAnimationModel> _creatures;
     QHash<int, QString> _creatureTypes;
     QHash<int, int> _creatureFootprints;
+    QHash<int, GroundItemModel> _groundItems;
 };
 
 } // namespace Engine

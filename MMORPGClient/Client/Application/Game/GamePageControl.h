@@ -68,6 +68,9 @@ public slots:
     void equip( int inventoryPosition );
     void unequip( const QString& slot );
 
+    void drop( int inventoryPosition );
+    void pickup( int idGroundItem );
+
     void leaveWorld();
 
 signals:

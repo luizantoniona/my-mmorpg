@@ -5,8 +5,8 @@
 namespace Engine {
 
 CharacterEquipmentDTO::CharacterEquipmentDTO() :
-    _slot( EquipmentSlotEnum::NONE ),
-    _idItem( 0 ) {
+    _idItem( "" ),
+    _slot( EquipmentSlotEnum::NONE ) {
 }
 
 CharacterEquipmentDTO CharacterEquipmentDTO::fromModel( const CharacterEquipmentModel& equipment ) {
@@ -28,8 +28,8 @@ CharacterEquipmentDTO CharacterEquipmentDTO::fromJson( const Json::Value& json )
         }
     }
 
-    if ( json.isMember( "idItem" ) && json[ "idItem" ].isUInt() ) {
-        dto._idItem = json[ "idItem" ].asUInt();
+    if ( json.isMember( "idItem" ) && json[ "idItem" ].isString() ) {
+        dto._idItem = QString::fromStdString( json[ "idItem" ].asString() );
     }
 
     return dto;
@@ -39,7 +39,7 @@ Json::Value CharacterEquipmentDTO::toJson() const {
     Json::Value json;
 
     json[ "slot" ] = EquipmentSlotHelper::toString( _slot );
-    json[ "idItem" ] = _idItem;
+    json[ "idItem" ] = _idItem.toStdString();
 
     return json;
 }
@@ -52,11 +52,11 @@ void CharacterEquipmentDTO::setSlot( EquipmentSlotEnum slot ) {
     _slot = slot;
 }
 
-uint32_t CharacterEquipmentDTO::idItem() const {
+QString CharacterEquipmentDTO::idItem() const {
     return _idItem;
 }
 
-void CharacterEquipmentDTO::setIdItem( uint32_t idItem ) {
+void CharacterEquipmentDTO::setIdItem( const QString& idItem ) {
     _idItem = idItem;
 }
 

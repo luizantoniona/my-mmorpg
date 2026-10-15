@@ -18,6 +18,8 @@ enum class ServerMessageType {
     CREATURE_EVENT_ATTACK_START,
     CREATURE_EVENT_ATTACK,
     CREATURE_EVENT_LEAVE,
+    GROUND_ITEM,
+    GROUND_ITEM_EVENT_LEAVE,
 };
 
 } // namespace Engine

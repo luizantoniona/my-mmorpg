@@ -20,7 +20,7 @@ bool CharacterEquipmentRepository::create( int idCharacter, const Engine::Charac
 
     query.bindInt( 1, idCharacter );
     query.bindInt( 2, static_cast<int>( equipment.slot() ) );
-    query.bindInt( 3, static_cast<int>( equipment.idItem() ) );
+    query.bindText( 3, equipment.idItem().toStdString() );
 
     return query.exec();
 }
@@ -44,7 +44,7 @@ std::unique_ptr<Engine::CharacterEquipmentModel> CharacterEquipmentRepository::f
 
     auto equipment = std::make_unique<Engine::CharacterEquipmentModel>();
     equipment->setSlot( static_cast<Engine::EquipmentSlotEnum>( query.getColumnInt( 0 ) ) );
-    equipment->setIdItem( static_cast<uint32_t>( query.getColumnInt( 1 ) ) );
+    equipment->setIdItem( QString::fromStdString( query.getColumnText( 1 ) ) );
 
     return equipment;
 }
@@ -66,7 +66,7 @@ std::vector<Engine::CharacterEquipmentModel> CharacterEquipmentRepository::findA
     while ( query.step() ) {
         Engine::CharacterEquipmentModel entry;
         entry.setSlot( static_cast<Engine::EquipmentSlotEnum>( query.getColumnInt( 0 ) ) );
-        entry.setIdItem( static_cast<uint32_t>( query.getColumnInt( 1 ) ) );
+        entry.setIdItem( QString::fromStdString( query.getColumnText( 1 ) ) );
 
         equipment.push_back( std::move( entry ) );
     }
@@ -88,7 +88,7 @@ bool CharacterEquipmentRepository::save( int idCharacter, const Engine::Characte
 
     query.bindInt( 1, idCharacter );
     query.bindInt( 2, static_cast<int>( equipment.slot() ) );
-    query.bindInt( 3, static_cast<int>( equipment.idItem() ) );
+    query.bindText( 3, equipment.idItem().toStdString() );
 
     return query.exec();
 }

@@ -24,6 +24,9 @@ private:
     void onCharacterAttackStarted( const WorldEvent& event );
     void onCharacterAttacked( const WorldEvent& event );
     void onCharacterEquipmentChanged( const WorldEvent& event );
+    void onCharacterInventoryChanged( const WorldEvent& event );
+    void onGroundItemEntered( const WorldEvent& event );
+    void onGroundItemLeft( const WorldEvent& event );
     void onCreatureEntered( const WorldEvent& event );
     void onCreatureMoved( const WorldEvent& event );
     void onCreatureVitalsChanged( const WorldEvent& event );
@@ -38,6 +41,7 @@ private:
     void sendOwnInventory( const WorldEvent& event );
     void sendNearbyCharacters( const WorldEvent& event );
     void sendCreatures( const WorldEvent& event );
+    void sendGroundItems( const WorldEvent& event );
     void broadcastCharacter( const WorldEvent& event );
     void broadcastAttackStart( const WorldEvent& event );
     void broadcastAttack( const WorldEvent& event );

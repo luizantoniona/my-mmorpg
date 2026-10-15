@@ -76,6 +76,8 @@ set(PROJECT_SOURCES
     Runtime/Character/System/CharacterCombatSystem.h
     Runtime/Character/System/CharacterEquipmentSystem.cpp
     Runtime/Character/System/CharacterEquipmentSystem.h
+    Runtime/Character/System/CharacterInventorySystem.cpp
+    Runtime/Character/System/CharacterInventorySystem.h
     Runtime/Character/System/CharacterMovementSystem.cpp
     Runtime/Character/System/CharacterMovementSystem.h
     Runtime/Character/System/CharacterSystem.cpp
@@ -92,10 +94,14 @@ set(PROJECT_SOURCES
     Runtime/World/Action/WorldCombatAttackAction.h
     Runtime/World/Command/AttackCharacterCommand.cpp
     Runtime/World/Command/AttackCharacterCommand.h
+    Runtime/World/Command/DropCharacterCommand.cpp
+    Runtime/World/Command/DropCharacterCommand.h
     Runtime/World/Command/EquipCharacterCommand.cpp
     Runtime/World/Command/EquipCharacterCommand.h
     Runtime/World/Command/MoveCharacterCommand.cpp
     Runtime/World/Command/MoveCharacterCommand.h
+    Runtime/World/Command/PickupCharacterCommand.cpp
+    Runtime/World/Command/PickupCharacterCommand.h
     Runtime/World/Command/UnequipCharacterCommand.cpp
     Runtime/World/Command/UnequipCharacterCommand.h
     Runtime/World/Command/WorldCommand.cpp
@@ -106,6 +112,8 @@ set(PROJECT_SOURCES
     Runtime/World/System/WorldCombatSystem.h
     Runtime/World/System/WorldCreatureSystem.cpp
     Runtime/World/System/WorldCreatureSystem.h
+    Runtime/World/System/WorldGroundItemSystem.cpp
+    Runtime/World/System/WorldGroundItemSystem.h
     Runtime/World/System/WorldMovementSystem.cpp
     Runtime/World/System/WorldMovementSystem.h
     Runtime/World/System/WorldSpawnSystem.cpp

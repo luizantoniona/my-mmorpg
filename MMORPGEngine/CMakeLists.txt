@@ -123,10 +123,14 @@ set(PROJECT_SOURCES
     Entity/Character/CharacterEventLeaveDTO.h
     Entity/Character/CharacterIntentActionDTO.cpp
     Entity/Character/CharacterIntentActionDTO.h
+    Entity/Character/CharacterIntentDropDTO.cpp
+    Entity/Character/CharacterIntentDropDTO.h
     Entity/Character/CharacterIntentEquipDTO.cpp
     Entity/Character/CharacterIntentEquipDTO.h
     Entity/Character/CharacterIntentMoveDTO.cpp
     Entity/Character/CharacterIntentMoveDTO.h
+    Entity/Character/CharacterIntentPickupDTO.cpp
+    Entity/Character/CharacterIntentPickupDTO.h
     Entity/Character/CharacterIntentUnequipDTO.cpp
     Entity/Character/CharacterIntentUnequipDTO.h
     Entity/Character/CharacterInventoryDTO.cpp
@@ -158,6 +162,12 @@ set(PROJECT_SOURCES
     Entity/Creature/CreatureEventAttackStartDTO.h
     Entity/Creature/CreatureEventLeaveDTO.cpp
     Entity/Creature/CreatureEventLeaveDTO.h
+    Entity/GroundItem/GroundItemDTO.cpp
+    Entity/GroundItem/GroundItemDTO.h
+    Entity/GroundItem/GroundItemEventLeaveDTO.cpp
+    Entity/GroundItem/GroundItemEventLeaveDTO.h
+    Entity/GroundItem/GroundItemModel.cpp
+    Entity/GroundItem/GroundItemModel.h
     Entity/CombatActionEnum.h
     Entity/CombatActionHelper.cpp
     Entity/CombatActionHelper.h

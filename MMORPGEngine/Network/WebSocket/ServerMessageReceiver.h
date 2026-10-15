@@ -1,6 +1,8 @@
 #ifndef SERVERMESSAGERECEIVER_H
 #define SERVERMESSAGERECEIVER_H
 
+#include <cstdint>
+
 #include <QObject>
 #include <QString>
 
@@ -37,6 +39,8 @@ signals:
     void creatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds );
     void creatureEventAttackReceived( int idCreature, int x, int y, int z );
     void creatureEventLeaveReceived( int idCreature );
+    void groundItemStateReceived( int idGroundItem, const QString& idItem, int x, int y, int z );
+    void groundItemEventLeaveReceived( int idGroundItem );
 };
 
 } // namespace Engine

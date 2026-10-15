@@ -21,7 +21,7 @@ bool CharacterInventoryRepository::create( int idCharacter, const Engine::Charac
 
     query.bindInt( 1, idCharacter );
     query.bindInt( 2, static_cast<int>( inventory.position() ) );
-    query.bindInt( 3, static_cast<int>( inventory.idItem() ) );
+    query.bindText( 3, inventory.idItem().toStdString() );
     query.bindInt( 4, static_cast<int>( inventory.amount() ) );
 
     return query.exec();
@@ -47,7 +47,7 @@ std::unique_ptr<Engine::CharacterInventoryModel> CharacterInventoryRepository::f
 
     auto inventory = std::make_unique<Engine::CharacterInventoryModel>();
     inventory->setPosition( static_cast<uint32_t>( query.getColumnInt( 0 ) ) );
-    inventory->setIdItem( static_cast<uint32_t>( query.getColumnInt( 1 ) ) );
+    inventory->setIdItem( QString::fromStdString( query.getColumnText( 1 ) ) );
     inventory->setAmount( static_cast<uint32_t>( query.getColumnInt( 2 ) ) );
 
     return inventory;
@@ -71,7 +71,7 @@ std::vector<Engine::CharacterInventoryModel> CharacterInventoryRepository::findA
     while ( query.step() ) {
         Engine::CharacterInventoryModel entry;
         entry.setPosition( static_cast<uint32_t>( query.getColumnInt( 0 ) ) );
-        entry.setIdItem( static_cast<uint32_t>( query.getColumnInt( 1 ) ) );
+        entry.setIdItem( QString::fromStdString( query.getColumnText( 1 ) ) );
         entry.setAmount( static_cast<uint32_t>( query.getColumnInt( 2 ) ) );
 
         inventory.push_back( std::move( entry ) );
@@ -96,7 +96,7 @@ bool CharacterInventoryRepository::save( int idCharacter, const Engine::Characte
 
     query.bindInt( 1, idCharacter );
     query.bindInt( 2, static_cast<int>( inventory.position() ) );
-    query.bindInt( 3, static_cast<int>( inventory.idItem() ) );
+    query.bindText( 3, inventory.idItem().toStdString() );
     query.bindInt( 4, static_cast<int>( inventory.amount() ) );
 
     return query.exec();

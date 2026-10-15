@@ -8,11 +8,9 @@
 #include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGServer/Server/Event/WorldEventType.h>
 #include <MMORPGServer/Server/Runtime/Character/CharacterCombatActionResolver.h>
+#include <MMORPGServer/Server/Runtime/Character/System/CharacterInventorySystem.h>
 
 namespace {
-
-// TODO: capacidade provisória do inventário, espelha o vCapacity do Client; depende de Level como stat
-constexpr uint32_t INVENTORY_CAPACITY = 20;
 
 bool hasSlot( const std::vector<Engine::CharacterEquipmentModel>& equipment, Engine::EquipmentSlotEnum slot ) {
     return std::any_of( equipment.begin(), equipment.end(), [ slot ]( const Engine::CharacterEquipmentModel& entry ) {
@@ -50,7 +48,7 @@ bool CharacterEquipmentSystem::equip( uint32_t inventoryPosition ) {
         return false;
     }
 
-    const uint32_t idItem = source->idItem();
+    const QString idItem = source->idItem();
     const Engine::ItemTypeModel* itemType = itemTypeOf( idItem );
     if ( !itemType ) {
         qWarning() << "[CharacterEquipmentSystem] Equip rejected: unknown item [CHARACTER]" << idCharacter << "[ITEM]" << idItem;
@@ -63,7 +61,7 @@ bool CharacterEquipmentSystem::equip( uint32_t inventoryPosition ) {
         return false;
     }
 
-    std::vector<uint32_t> displacedItems;
+    std::vector<QString> displacedItems;
     for ( const Engine::EquipmentSlotEnum slot : slotsToFree( *itemType, *target, equipment ) ) {
         auto occupied = std::find_if( equipment.begin(), equipment.end(), [ slot ]( const Engine::CharacterEquipmentModel& entry ) {
             return entry.slot() == slot;
@@ -81,14 +79,14 @@ bool CharacterEquipmentSystem::equip( uint32_t inventoryPosition ) {
         inventory.erase( source );
     }
 
-    for ( const uint32_t displacedItem : displacedItems ) {
-        const std::optional<uint32_t> freePosition = firstFreePosition( inventory );
+    for ( const QString& displacedItem : displacedItems ) {
+        const std::optional<uint32_t> freePosition = CharacterInventorySystem::firstFreePosition( inventory );
         if ( !freePosition ) {
             qWarning() << "[CharacterEquipmentSystem] Equip rejected: inventory full [CHARACTER]" << idCharacter;
             return false;
         }
 
-        inventory.push_back( inventoryEntry( *freePosition, displacedItem ) );
+        inventory.push_back( CharacterInventorySystem::inventoryEntry( *freePosition, displacedItem ) );
     }
 
     Engine::CharacterEquipmentModel equipped;
@@ -117,15 +115,15 @@ bool CharacterEquipmentSystem::unequip( Engine::EquipmentSlotEnum slot ) {
         return false;
     }
 
-    const std::optional<uint32_t> freePosition = firstFreePosition( inventory );
+    const std::optional<uint32_t> freePosition = CharacterInventorySystem::firstFreePosition( inventory );
     if ( !freePosition ) {
         qWarning() << "[CharacterEquipmentSystem] Unequip rejected: inventory full [CHARACTER]" << idCharacter;
         return false;
     }
 
-    const uint32_t idItem = occupied->idItem();
+    const QString idItem = occupied->idItem();
     equipment.erase( occupied );
-    inventory.push_back( inventoryEntry( *freePosition, idItem ) );
+    inventory.push_back( CharacterInventorySystem::inventoryEntry( *freePosition, idItem ) );
 
     commit( inventory, equipment );
 
@@ -134,7 +132,7 @@ bool CharacterEquipmentSystem::unequip( Engine::EquipmentSlotEnum slot ) {
     return true;
 }
 
-const Engine::ItemTypeModel* CharacterEquipmentSystem::itemTypeOf( uint32_t idItem ) {
+const Engine::ItemTypeModel* CharacterEquipmentSystem::itemTypeOf( const QString& idItem ) {
     const Engine::DataManager& dataManager = Engine::Singleton<Engine::DataManager>::instance();
 
     const Engine::ItemModel* item = dataManager.itemCatalog().item( idItem );
@@ -191,29 +189,6 @@ std::vector<Engine::EquipmentSlotEnum> CharacterEquipmentSystem::slotsToFree( co
     }
 
     return freedSlots;
-}
-
-std::optional<uint32_t> CharacterEquipmentSystem::firstFreePosition( const std::vector<Engine::CharacterInventoryModel>& inventory ) {
-    for ( uint32_t position = 0; position < INVENTORY_CAPACITY; ++position ) {
-        const bool occupied = std::any_of( inventory.begin(), inventory.end(), [ position ]( const Engine::CharacterInventoryModel& entry ) {
-            return entry.position() == position;
-        } );
-
-        if ( !occupied ) {
-            return position;
-        }
-    }
-
-    return std::nullopt;
-}
-
-Engine::CharacterInventoryModel CharacterEquipmentSystem::inventoryEntry( uint32_t position, uint32_t idItem ) {
-    Engine::CharacterInventoryModel entry;
-    entry.setPosition( position );
-    entry.setIdItem( idItem );
-    entry.setAmount( 1 );
-
-    return entry;
 }
 
 void CharacterEquipmentSystem::commit( const std::vector<Engine::CharacterInventoryModel>& inventory, const std::vector<Engine::CharacterEquipmentModel>& equipment ) {

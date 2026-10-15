@@ -9,6 +9,8 @@ enum class ClientMessageType {
     CHARACTER_INTENT_ACTION,
     CHARACTER_INTENT_EQUIP,
     CHARACTER_INTENT_UNEQUIP,
+    CHARACTER_INTENT_DROP,
+    CHARACTER_INTENT_PICKUP,
 };
 
 } // namespace Engine

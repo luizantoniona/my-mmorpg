@@ -3,18 +3,18 @@
 namespace Engine {
 
 ItemModel::ItemModel() :
+    _id( "" ),
     _name( "" ),
     _idItemType( "" ),
     _folder( "" ),
-    _animation(),
-    _id( 0 ) {
+    _animation() {
 }
 
-uint32_t ItemModel::id() const {
+QString ItemModel::id() const {
     return _id;
 }
 
-void ItemModel::setId( uint32_t id ) {
+void ItemModel::setId( const QString& id ) {
     _id = id;
 }
 

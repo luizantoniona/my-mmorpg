@@ -3,8 +3,8 @@
 namespace Engine {
 
 CharacterEquipmentModel::CharacterEquipmentModel() :
-    _slot( EquipmentSlotEnum::NONE ),
-    _idItem( 0 ) {
+    _idItem( "" ),
+    _slot( EquipmentSlotEnum::NONE ) {
 }
 
 EquipmentSlotEnum CharacterEquipmentModel::slot() const {
@@ -15,11 +15,11 @@ void CharacterEquipmentModel::setSlot( EquipmentSlotEnum slot ) {
     _slot = slot;
 }
 
-uint32_t CharacterEquipmentModel::idItem() const {
+QString CharacterEquipmentModel::idItem() const {
     return _idItem;
 }
 
-void CharacterEquipmentModel::setIdItem( uint32_t idItem ) {
+void CharacterEquipmentModel::setIdItem( const QString& idItem ) {
     _idItem = idItem;
 }
 

@@ -30,6 +30,10 @@ std::string ServerMessageTypeHelper::toString( ServerMessageType type ) {
         return "CREATURE_EVENT_ATTACK";
     case ServerMessageType::CREATURE_EVENT_LEAVE:
         return "CREATURE_EVENT_LEAVE";
+    case ServerMessageType::GROUND_ITEM:
+        return "GROUND_ITEM";
+    case ServerMessageType::GROUND_ITEM_EVENT_LEAVE:
+        return "GROUND_ITEM_EVENT_LEAVE";
     case ServerMessageType::UNKNOWN:
         return "UNKNOWN";
     }
@@ -76,6 +80,12 @@ ServerMessageType ServerMessageTypeHelper::fromString( const std::string& value 
     }
     if ( value == "CREATURE_EVENT_LEAVE" ) {
         return ServerMessageType::CREATURE_EVENT_LEAVE;
+    }
+    if ( value == "GROUND_ITEM" ) {
+        return ServerMessageType::GROUND_ITEM;
+    }
+    if ( value == "GROUND_ITEM_EVENT_LEAVE" ) {
+        return ServerMessageType::GROUND_ITEM_EVENT_LEAVE;
     }
 
     return ServerMessageType::UNKNOWN;

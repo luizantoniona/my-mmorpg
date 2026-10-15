@@ -14,8 +14,8 @@ class ItemModel {
 public:
     ItemModel();
 
-    uint32_t id() const;
-    void setId( uint32_t id );
+    QString id() const;
+    void setId( const QString& id );
 
     QString idItemType() const;
     void setIdItemType( const QString& idItemType );
@@ -32,11 +32,11 @@ public:
     void setAnimation( const AnimationModel& animation );
 
 private:
+    QString _id;
     QString _name;
     QString _idItemType;
     QString _folder;
     AnimationModel _animation;
-    uint32_t _id;
 };
 
 } // namespace Engine

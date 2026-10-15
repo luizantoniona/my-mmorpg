@@ -9,6 +9,8 @@
 #include <MMORPGEngine/Entity/Creature/CreatureEventAttackDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureEventAttackStartDTO.h>
 #include <MMORPGEngine/Entity/Creature/CreatureEventLeaveDTO.h>
+#include <MMORPGEngine/Entity/GroundItem/GroundItemDTO.h>
+#include <MMORPGEngine/Entity/GroundItem/GroundItemEventLeaveDTO.h>
 #include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
 
 namespace Engine {
@@ -104,6 +106,18 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     case ServerMessageType::CREATURE_EVENT_LEAVE: {
         const CreatureEventLeaveDTO event = CreatureEventLeaveDTO::fromJson( json );
         emit creatureEventLeaveReceived( event.idCreature() );
+        return;
+    }
+
+    case ServerMessageType::GROUND_ITEM: {
+        const GroundItemDTO state = GroundItemDTO::fromJson( json );
+        emit groundItemStateReceived( state.idGroundItem(), state.idItem(), state.x(), state.y(), state.z() );
+        return;
+    }
+
+    case ServerMessageType::GROUND_ITEM_EVENT_LEAVE: {
+        const GroundItemEventLeaveDTO event = GroundItemEventLeaveDTO::fromJson( json );
+        emit groundItemEventLeaveReceived( event.idGroundItem() );
         return;
     }
 

@@ -9,8 +9,10 @@
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentActionDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentDropDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentEquipDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentMoveDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterIntentPickupDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterIntentUnequipDTO.h>
 #include <MMORPGEngine/Entity/Character/EquipmentSlotHelper.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
@@ -205,6 +207,28 @@ void GamePageControl::unequip( const QString& slot ) {
 
     Engine::CharacterIntentUnequipDTO input;
     input.setSlot( *equipmentSlot );
+
+    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
+}
+
+void GamePageControl::drop( int inventoryPosition ) {
+    if ( inventoryPosition < 0 ) {
+        return;
+    }
+
+    Engine::CharacterIntentDropDTO input;
+    input.setPosition( static_cast<uint32_t>( inventoryPosition ) );
+
+    _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
+}
+
+void GamePageControl::pickup( int idGroundItem ) {
+    if ( idGroundItem <= 0 ) {
+        return;
+    }
+
+    Engine::CharacterIntentPickupDTO input;
+    input.setIdGroundItem( idGroundItem );
 
     _webSocket.sendMessage( QString::fromStdString( Engine::JsonHelper::writeJsonString( input.toJson() ) ) );
 }

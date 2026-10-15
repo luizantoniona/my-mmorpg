@@ -15,7 +15,7 @@ CREATE TABLE 'character' (
 CREATE TABLE character_equipment (
     id_character INTEGER NOT NULL,
     slot INTEGER NOT NULL,
-    id_item INTEGER NOT NULL,
+    id_item TEXT NOT NULL,
 
     PRIMARY KEY (id_character, slot),
     FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
@@ -24,7 +24,7 @@ CREATE TABLE character_equipment (
 CREATE TABLE character_inventory (
     id_character INTEGER NOT NULL,
     position INTEGER NOT NULL,
-    id_item INTEGER NOT NULL,
+    id_item TEXT NOT NULL,
     amount INTEGER DEFAULT 0,
 
     PRIMARY KEY (id_character, position),
