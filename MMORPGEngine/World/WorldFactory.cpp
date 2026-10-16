@@ -9,7 +9,7 @@
 
 namespace Engine {
 
-std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldPath ) {
+std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldPath, bool loadFloors ) {
     qInfo() << "WorldFactory::createWorld";
 
     std::unique_ptr<WorldModel> world = std::make_unique<WorldModel>();
@@ -44,6 +44,10 @@ std::unique_ptr<WorldModel> WorldFactory::createWorld( const std::string& worldP
     world->setSpawnZ( mapJson.get( "SpawnZ", 0 ).asInt() );
 
     // --- Floors
+    if ( !loadFloors ) {
+        return world;
+    }
+
     for ( const Json::Value& floorFile : mapJson[ "Floors" ] ) {
         FloorFactory::createFloor( mapPath + "Floors/" + floorFile.asString(), world.get() );
     }

@@ -1,7 +1,11 @@
 #include "WorldRuntime.h"
 
+#include <algorithm>
+#include <iterator>
+
 #include <QDebug>
 
+#include <MMORPGEngine/World/WorldConstants.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
 #include <MMORPGServer/Server/Event/WorldEventType.h>
 
@@ -264,6 +268,108 @@ std::vector<Engine::GroundItemModel> WorldRuntime::groundItemsNear( const Engine
     std::lock_guard<std::mutex> lock( _mutex );
 
     return _groundItemSystem.itemsNear( position );
+}
+
+std::optional<Engine::GroundItemModel> WorldRuntime::groundItem( int idGroundItem ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    return _groundItemSystem.find( idGroundItem );
+}
+
+std::vector<ChunkCoordinate> WorldRuntime::terrainChunksNear( const Engine::EntityPositionModel& position ) const {
+    std::vector<ChunkCoordinate> result;
+
+    if ( !_world ) {
+        return result;
+    }
+
+    const int chunkCountX = ( static_cast<int>( _world->width() ) + Engine::WorldConstants::CHUNK_SIZE - 1 ) / Engine::WorldConstants::CHUNK_SIZE;
+    const int chunkCountY = ( static_cast<int>( _world->height() ) + Engine::WorldConstants::CHUNK_SIZE - 1 ) / Engine::WorldConstants::CHUNK_SIZE;
+
+    const int centerX = position.x() / Engine::WorldConstants::CHUNK_SIZE;
+    const int centerY = position.y() / Engine::WorldConstants::CHUNK_SIZE;
+
+    for ( int chunkX = centerX - 1; chunkX <= centerX + 1; ++chunkX ) {
+        for ( int chunkY = centerY - 1; chunkY <= centerY + 1; ++chunkY ) {
+            if ( chunkX >= 0 && chunkY >= 0 && chunkX < chunkCountX && chunkY < chunkCountY ) {
+                result.push_back( ChunkCoordinate( chunkX, chunkY, 0 ) );
+            }
+        }
+    }
+
+    return result;
+}
+
+WorldVisibilityDelta WorldRuntime::visibilityDelta( const Engine::EntityPositionModel& previousPosition, const Engine::EntityPositionModel& currentPosition, int ignoredIdCharacter ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    const auto sorted = []( std::vector<int> ids ) {
+        std::sort( ids.begin(), ids.end() );
+        return ids;
+    };
+
+    const auto difference = [ &sorted ]( const std::vector<int>& from, const std::vector<int>& other ) {
+        const std::vector<int> sortedFrom = sorted( from );
+        const std::vector<int> sortedOther = sorted( other );
+
+        std::vector<int> result;
+        std::set_difference( sortedFrom.begin(), sortedFrom.end(), sortedOther.begin(), sortedOther.end(), std::back_inserter( result ) );
+
+        return result;
+    };
+
+    const auto withoutIgnored = [ ignoredIdCharacter ]( std::vector<int> ids ) {
+        ids.erase( std::remove( ids.begin(), ids.end(), ignoredIdCharacter ), ids.end() );
+        return ids;
+    };
+
+    const auto creatureIds = [ this ]( const Engine::EntityPositionModel& position ) {
+        std::vector<int> ids;
+        for ( const Engine::CreatureModel& creature : _spatialIndex.creaturesNear( position ) ) {
+            ids.push_back( creature.idCreature() );
+        }
+        return ids;
+    };
+
+    const auto groundItemIds = [ this ]( const Engine::EntityPositionModel& position ) {
+        std::vector<int> ids;
+        for ( const Engine::GroundItemModel& groundItem : _groundItemSystem.itemsNear( position ) ) {
+            ids.push_back( groundItem.idGroundItem() );
+        }
+        return ids;
+    };
+
+    const std::vector<int> previousCharacters = withoutIgnored( _spatialIndex.charactersNear( previousPosition ) );
+    const std::vector<int> currentCharacters = withoutIgnored( _spatialIndex.charactersNear( currentPosition ) );
+    const std::vector<int> previousCreatures = creatureIds( previousPosition );
+    const std::vector<int> currentCreatures = creatureIds( currentPosition );
+    const std::vector<int> previousGroundItems = groundItemIds( previousPosition );
+    const std::vector<int> currentGroundItems = groundItemIds( currentPosition );
+
+    WorldVisibilityDelta delta;
+    delta.charactersEntered = difference( currentCharacters, previousCharacters );
+    delta.charactersLeft = difference( previousCharacters, currentCharacters );
+    delta.creaturesEntered = difference( currentCreatures, previousCreatures );
+    delta.creaturesLeft = difference( previousCreatures, currentCreatures );
+    delta.groundItemsEntered = difference( currentGroundItems, previousGroundItems );
+    delta.groundItemsLeft = difference( previousGroundItems, currentGroundItems );
+
+    const std::vector<ChunkCoordinate> previousChunks = terrainChunksNear( previousPosition );
+    const std::vector<ChunkCoordinate> currentChunks = terrainChunksNear( currentPosition );
+
+    for ( const ChunkCoordinate& chunk : currentChunks ) {
+        if ( std::find( previousChunks.begin(), previousChunks.end(), chunk ) == previousChunks.end() ) {
+            delta.terrainChunksEntered.push_back( chunk );
+        }
+    }
+
+    for ( const ChunkCoordinate& chunk : previousChunks ) {
+        if ( std::find( currentChunks.begin(), currentChunks.end(), chunk ) == currentChunks.end() ) {
+            delta.terrainChunksLeft.push_back( chunk );
+        }
+    }
+
+    return delta;
 }
 
 std::map<int, Engine::EntityPositionModel> WorldRuntime::characterPositions() {

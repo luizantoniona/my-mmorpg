@@ -20,6 +20,8 @@ enum class ServerMessageType {
     CREATURE_EVENT_LEAVE,
     GROUND_ITEM,
     GROUND_ITEM_EVENT_LEAVE,
+    CHUNK,
+    CHUNK_EVENT_LEAVE,
 };
 
 } // namespace Engine

@@ -92,6 +92,10 @@ const ChunkModel* WorldModel::chunk( int x, int y ) const {
     return iterator->second.get();
 }
 
+void WorldModel::removeChunk( int x, int y ) {
+    _chunks.erase( chunkKey( x, y ) );
+}
+
 std::vector<int> WorldModel::floors() const {
     return std::vector<int>( _floors.begin(), _floors.end() );
 }

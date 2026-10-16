@@ -45,6 +45,9 @@ bool WorldMovementSystem::move( int idCharacter, int dx, int dy ) {
 void WorldMovementSystem::moveCharacter( int idCharacter, int x, int y, int z ) {
     _runtime.combatSystem().cancelCharacterActions( idCharacter );
 
+    Engine::EntityPositionModel previousPosition;
+    bool changedChunk = false;
+
     {
         std::lock_guard<std::mutex> lock( _runtime.mutex() );
 
@@ -53,13 +56,15 @@ void WorldMovementSystem::moveCharacter( int idCharacter, int x, int y, int z ) 
             return;
         }
 
-        const Engine::EntityPositionModel previousPosition = characterPtr->position();
+        previousPosition = characterPtr->position();
 
         characterPtr->position().setX( x );
         characterPtr->position().setY( y );
         characterPtr->position().setZ( z );
 
         characterPtr->movement().setCounter( 0 );
+
+        changedChunk = _runtime.spatialIndex().chunkCoordinateFor( previousPosition ) != _runtime.spatialIndex().chunkCoordinateFor( characterPtr->position() );
 
         _runtime.spatialIndex().updateCharacterChunk( characterPtr, previousPosition );
     }
@@ -71,6 +76,14 @@ void WorldMovementSystem::moveCharacter( int idCharacter, int x, int y, int z ) 
     payload[ "z" ] = z;
 
     _runtime.eventBus().publish( WorldEvent( WorldEventType::CHARACTER_MOVED, payload ) );
+
+    if ( changedChunk ) {
+        payload[ "previousX" ] = previousPosition.x();
+        payload[ "previousY" ] = previousPosition.y();
+        payload[ "previousZ" ] = previousPosition.z();
+
+        _runtime.eventBus().publish( WorldEvent( WorldEventType::CHARACTER_VISIBILITY_CHANGED, payload ) );
+    }
 }
 
 } // namespace Server

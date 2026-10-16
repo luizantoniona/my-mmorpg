@@ -17,6 +17,8 @@
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/GroundItem/GroundItemDTO.h>
 #include <MMORPGEngine/Entity/GroundItem/GroundItemEventLeaveDTO.h>
+#include <MMORPGEngine/World/Chunk/ChunkDTO.h>
+#include <MMORPGEngine/World/Chunk/ChunkEventLeaveDTO.h>
 #include <MMORPGEngine/World/WorldBasicDTO.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/Observer/ObserverRegistry.h>
@@ -32,6 +34,14 @@ EntityBroadcaster::EntityBroadcaster() {
 
     worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_MOVED, [ this ]( const WorldEvent& event ) {
         onCharacterMoved( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_VISIBILITY_CHANGED, [ this ]( const WorldEvent& event ) {
+        onCharacterVisibilityChanged( event );
+    } );
+
+    worldRuntime.eventBus().subscribe( WorldEventType::CREATURE_VISIBILITY_CHANGED, [ this ]( const WorldEvent& event ) {
+        onCreatureVisibilityChanged( event );
     } );
 
     worldRuntime.eventBus().subscribe( WorldEventType::CHARACTER_LEFT, [ this ]( const WorldEvent& event ) {
@@ -105,6 +115,7 @@ void EntityBroadcaster::sendSnapshot( EntityObserver& observer ) {
 
 void EntityBroadcaster::onCharacterEntered( const WorldEvent& event ) {
     sendWorldBasic( event );
+    sendTerrain( event );
     sendOwnCharacter( event );
     sendOwnCombat( event );
     sendOwnEquipment( event );
@@ -117,6 +128,73 @@ void EntityBroadcaster::onCharacterEntered( const WorldEvent& event ) {
 
 void EntityBroadcaster::onCharacterMoved( const WorldEvent& event ) {
     broadcastCharacter( event );
+}
+
+void EntityBroadcaster::onCharacterVisibilityChanged( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+    const int idCharacter = payload[ "idCharacter" ].asInt();
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    const WorldVisibilityDelta delta = worldRuntime.visibilityDelta( previousPositionFromPayload( payload ), positionFromPayload( payload ), idCharacter );
+
+    for ( const ChunkCoordinate& chunk : delta.terrainChunksLeft ) {
+        Engine::ChunkEventLeaveDTO message;
+        message.setChunkX( chunk.x );
+        message.setChunkY( chunk.y );
+        sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( message.toJson() ) );
+    }
+
+    const Engine::WorldModel* world = worldRuntime.world();
+
+    for ( const ChunkCoordinate& chunk : delta.terrainChunksEntered ) {
+        if ( world ) {
+            sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::ChunkDTO::fromModel( *world, chunk.x, chunk.y ).toJson() ) );
+        }
+    }
+
+    for ( int idLeft : delta.charactersLeft ) {
+        Engine::CharacterEventLeaveDTO fromMover;
+        fromMover.setIdCharacter( idLeft );
+        sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( fromMover.toJson() ) );
+
+        Engine::CharacterEventLeaveDTO fromOther;
+        fromOther.setIdCharacter( idCharacter );
+        sendToCharacter( idLeft, Engine::JsonHelper::writeJsonString( fromOther.toJson() ) );
+    }
+
+    for ( int idEntered : delta.charactersEntered ) {
+        const Engine::CharacterModel* entered = worldRuntime.character( idEntered );
+        if ( entered ) {
+            sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::CharacterDTO::fromModel( entered ).toJson() ) );
+        }
+    }
+
+    for ( int idLeft : delta.creaturesLeft ) {
+        Engine::CreatureEventLeaveDTO message;
+        message.setIdCreature( idLeft );
+        sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( message.toJson() ) );
+    }
+
+    for ( int idEntered : delta.creaturesEntered ) {
+        const Engine::CreatureModel* entered = worldRuntime.creature( idEntered );
+        if ( entered ) {
+            sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::CreatureDTO::fromModel( entered ).toJson() ) );
+        }
+    }
+
+    for ( int idLeft : delta.groundItemsLeft ) {
+        Engine::GroundItemEventLeaveDTO message;
+        message.setIdGroundItem( idLeft );
+        sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( message.toJson() ) );
+    }
+
+    for ( int idEntered : delta.groundItemsEntered ) {
+        const std::optional<Engine::GroundItemModel> entered = worldRuntime.groundItem( idEntered );
+        if ( entered ) {
+            sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::GroundItemDTO::fromModel( &*entered ).toJson() ) );
+        }
+    }
 }
 
 void EntityBroadcaster::onCharacterLeft( const WorldEvent& event ) {
@@ -180,6 +258,22 @@ void EntityBroadcaster::onCreatureMoved( const WorldEvent& event ) {
     broadcastCreature( event.payload() );
 }
 
+void EntityBroadcaster::onCreatureVisibilityChanged( const WorldEvent& event ) {
+    const Json::Value& payload = event.payload();
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    const WorldVisibilityDelta delta = worldRuntime.visibilityDelta( previousPositionFromPayload( payload ), positionFromPayload( payload ), -1 );
+
+    Engine::CreatureEventLeaveDTO message;
+    message.setIdCreature( payload[ "idCreature" ].asInt() );
+    const std::string messageJson = Engine::JsonHelper::writeJsonString( message.toJson() );
+
+    for ( int idLeft : delta.charactersLeft ) {
+        sendToCharacter( idLeft, messageJson );
+    }
+}
+
 void EntityBroadcaster::onCreatureVitalsChanged( const WorldEvent& event ) {
     broadcastCreature( event.payload() );
 }
@@ -223,6 +317,21 @@ void EntityBroadcaster::sendWorldBasic( const WorldEvent& event ) {
     }
 
     sendToCharacter( event.payload()[ "idCharacter" ].asInt(), Engine::JsonHelper::writeJsonString( Engine::WorldBasicDTO::fromModel( world ).toJson() ) );
+}
+
+void EntityBroadcaster::sendTerrain( const WorldEvent& event ) {
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    const Engine::WorldModel* world = worldRuntime.world();
+    if ( !world ) {
+        return;
+    }
+
+    const int idCharacter = event.payload()[ "idCharacter" ].asInt();
+
+    for ( const ChunkCoordinate& chunk : worldRuntime.terrainChunksNear( positionFromPayload( event.payload() ) ) ) {
+        sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::ChunkDTO::fromModel( *world, chunk.x, chunk.y ).toJson() ) );
+    }
 }
 
 void EntityBroadcaster::sendOwnCharacter( const WorldEvent& event ) {
@@ -373,6 +482,15 @@ Engine::EntityPositionModel EntityBroadcaster::positionFromPayload( const Json::
     position.setX( payload[ "x" ].asInt() );
     position.setY( payload[ "y" ].asInt() );
     position.setZ( payload[ "z" ].asInt() );
+
+    return position;
+}
+
+Engine::EntityPositionModel EntityBroadcaster::previousPositionFromPayload( const Json::Value& payload ) {
+    Engine::EntityPositionModel position;
+    position.setX( payload[ "previousX" ].asInt() );
+    position.setY( payload[ "previousY" ].asInt() );
+    position.setZ( payload[ "previousZ" ].asInt() );
 
     return position;
 }

@@ -226,6 +226,10 @@ set(PROJECT_SOURCES
     Renderer/TileRenderer.h
     UI/Viewport/Viewport.cpp
     UI/Viewport/Viewport.h
+    World/Chunk/ChunkDTO.cpp
+    World/Chunk/ChunkDTO.h
+    World/Chunk/ChunkEventLeaveDTO.cpp
+    World/Chunk/ChunkEventLeaveDTO.h
     World/Chunk/ChunkModel.cpp
     World/Chunk/ChunkModel.h
     World/Object/WorldObjectModel.cpp

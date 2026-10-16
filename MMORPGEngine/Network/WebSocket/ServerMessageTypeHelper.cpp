@@ -34,6 +34,10 @@ std::string ServerMessageTypeHelper::toString( ServerMessageType type ) {
         return "GROUND_ITEM";
     case ServerMessageType::GROUND_ITEM_EVENT_LEAVE:
         return "GROUND_ITEM_EVENT_LEAVE";
+    case ServerMessageType::CHUNK:
+        return "CHUNK";
+    case ServerMessageType::CHUNK_EVENT_LEAVE:
+        return "CHUNK_EVENT_LEAVE";
     case ServerMessageType::UNKNOWN:
         return "UNKNOWN";
     }
@@ -86,6 +90,12 @@ ServerMessageType ServerMessageTypeHelper::fromString( const std::string& value 
     }
     if ( value == "GROUND_ITEM_EVENT_LEAVE" ) {
         return ServerMessageType::GROUND_ITEM_EVENT_LEAVE;
+    }
+    if ( value == "CHUNK" ) {
+        return ServerMessageType::CHUNK;
+    }
+    if ( value == "CHUNK_EVENT_LEAVE" ) {
+        return ServerMessageType::CHUNK_EVENT_LEAVE;
     }
 
     return ServerMessageType::UNKNOWN;

@@ -11,6 +11,7 @@
 #include <MMORPGEngine/Entity/Character/OwnCombatDTO.h>
 #include <MMORPGEngine/Entity/CombatActionEnum.h>
 #include <MMORPGEngine/Network/WebSocketClient.h>
+#include <MMORPGEngine/World/Chunk/ChunkDTO.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
 class GamePageControl : public QObject {
@@ -92,6 +93,8 @@ signals:
 private slots:
     void onOwnCharacterReceived( const Engine::OwnCharacterDTO& state );
     void onOwnCombatReceived( const Engine::OwnCombatDTO& state );
+    void onChunkReceived( const Engine::ChunkDTO& chunk );
+    void onChunkEventLeaveReceived( int chunkX, int chunkY );
 
 private:
     void sendAction( Engine::CombatActionEnum action, int dx, int dy );

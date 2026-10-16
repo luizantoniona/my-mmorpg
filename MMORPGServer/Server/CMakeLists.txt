@@ -123,7 +123,8 @@ set(PROJECT_SOURCES
     Runtime/World/WorldRuntime.cpp
     Runtime/World/WorldRuntime.h
     Runtime/World/WorldSpatialIndex.cpp
-    Runtime/World/WorldSpatialIndex.h)
+    Runtime/World/WorldSpatialIndex.h
+    Runtime/World/WorldVisibilityDelta.h)
 
 qt_add_executable(${PROJECT_NAME} main.cpp ${PROJECT_SOURCES})
 

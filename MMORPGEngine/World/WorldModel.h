@@ -39,6 +39,7 @@ public:
 
     ChunkModel* chunk( int x, int y );
     const ChunkModel* chunk( int x, int y ) const;
+    void removeChunk( int x, int y );
 
     std::vector<int> floors() const;
     void addFloor( int z );

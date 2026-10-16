@@ -10,6 +10,7 @@
 #include <MMORPGEngine/Entity/Character/OwnCombatDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnInventoryDTO.h>
+#include <MMORPGEngine/World/Chunk/ChunkDTO.h>
 
 namespace Engine {
 
@@ -41,6 +42,8 @@ signals:
     void creatureEventLeaveReceived( int idCreature );
     void groundItemStateReceived( int idGroundItem, const QString& idItem, int x, int y, int z );
     void groundItemEventLeaveReceived( int idGroundItem );
+    void chunkReceived( const Engine::ChunkDTO& chunk );
+    void chunkEventLeaveReceived( int chunkX, int chunkY );
 };
 
 } // namespace Engine

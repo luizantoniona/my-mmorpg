@@ -10,7 +10,7 @@ namespace Engine {
 
 class WorldFactory {
 public:
-    static std::unique_ptr<WorldModel> createWorld( const std::string& worldPath );
+    static std::unique_ptr<WorldModel> createWorld( const std::string& worldPath, bool loadFloors = true );
 
     static void saveWorld( const std::string& worldPath, const WorldModel& world );
 

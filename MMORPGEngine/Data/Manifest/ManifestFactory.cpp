@@ -25,7 +25,13 @@ ManifestModel ManifestFactory::createManifest( const std::string& configPath ) {
     QDirIterator it( mapPath, QDir::Files, QDirIterator::Subdirectories );
     while ( it.hasNext() ) {
         const QString filePath = it.next();
-        const QString relativePath = mapFolder + "/" + mapDir.relativeFilePath( filePath );
+        const QString mapRelativePath = mapDir.relativeFilePath( filePath );
+
+        if ( mapRelativePath.startsWith( "Floors/" ) ) {
+            continue;
+        }
+
+        const QString relativePath = mapFolder + "/" + mapRelativePath;
 
         manifest.addData( ManifestDataModel( relativePath.toStdString(), hashFile( filePath ) ) );
     }

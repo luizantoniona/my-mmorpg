@@ -19,6 +19,7 @@ public:
 private:
     void onCharacterEntered( const WorldEvent& event );
     void onCharacterMoved( const WorldEvent& event );
+    void onCharacterVisibilityChanged( const WorldEvent& event );
     void onCharacterLeft( const WorldEvent& event );
     void onCharacterVitalsChanged( const WorldEvent& event );
     void onCharacterAttackStarted( const WorldEvent& event );
@@ -29,12 +30,14 @@ private:
     void onGroundItemLeft( const WorldEvent& event );
     void onCreatureEntered( const WorldEvent& event );
     void onCreatureMoved( const WorldEvent& event );
+    void onCreatureVisibilityChanged( const WorldEvent& event );
     void onCreatureVitalsChanged( const WorldEvent& event );
     void onCreatureLeft( const WorldEvent& event );
     void onCreatureAttackStarted( const WorldEvent& event );
     void onCreatureAttacked( const WorldEvent& event );
 
     void sendWorldBasic( const WorldEvent& event );
+    void sendTerrain( const WorldEvent& event );
     void sendOwnCharacter( const WorldEvent& event );
     void sendOwnCombat( const WorldEvent& event );
     void sendOwnEquipment( const WorldEvent& event );
@@ -52,6 +55,7 @@ private:
     void broadcastNear( const Json::Value& payload, const std::string& message );
 
     static Engine::EntityPositionModel positionFromPayload( const Json::Value& payload );
+    static Engine::EntityPositionModel previousPositionFromPayload( const Json::Value& payload );
 };
 
 } // namespace Server

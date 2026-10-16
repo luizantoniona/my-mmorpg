@@ -55,6 +55,7 @@ WorldCreatureSystem::WorldCreatureSystem( WorldRuntime& runtime ) :
 
 void WorldCreatureSystem::onTick() {
     std::vector<Json::Value> movedCreaturePayloads;
+    std::vector<Json::Value> changedChunkPayloads;
     std::vector<CreatureAttackIntent> attackIntents;
 
     {
@@ -100,6 +101,8 @@ void WorldCreatureSystem::onTick() {
             const int aggroRadius = creatureType ? static_cast<int>( creatureType->aggroRadius() ) : 0;
             const Engine::CharacterModel* target = aggroRadius > 0 && !creatureRuntime.isReturning() ? spatialIndex.nearestCharacterWithin( creaturePtr->position(), aggroRadius ) : nullptr;
 
+            const Engine::EntityPositionModel previousPosition = creaturePtr->position();
+
             std::optional<Engine::EntityPositionModel> movedPosition;
 
             if ( target ) {
@@ -134,11 +137,23 @@ void WorldCreatureSystem::onTick() {
             payload[ "creatureType" ] = creaturePtr->type().toStdString();
 
             movedCreaturePayloads.push_back( payload );
+
+            if ( spatialIndex.chunkCoordinateFor( previousPosition ) != spatialIndex.chunkCoordinateFor( *movedPosition ) ) {
+                payload[ "previousX" ] = previousPosition.x();
+                payload[ "previousY" ] = previousPosition.y();
+                payload[ "previousZ" ] = previousPosition.z();
+
+                changedChunkPayloads.push_back( payload );
+            }
         }
     }
 
     for ( const Json::Value& payload : movedCreaturePayloads ) {
         _runtime.eventBus().publish( WorldEvent( WorldEventType::CREATURE_MOVED, payload ) );
+    }
+
+    for ( const Json::Value& payload : changedChunkPayloads ) {
+        _runtime.eventBus().publish( WorldEvent( WorldEventType::CREATURE_VISIBILITY_CHANGED, payload ) );
     }
 
     for ( const CreatureAttackIntent& intent : attackIntents ) {

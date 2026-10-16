@@ -38,6 +38,8 @@ GamePageControl::GamePageControl( QObject* parent ) :
     connect( &messageReceiver, &Engine::ServerMessageReceiver::errorReceived, this, &GamePageControl::worldEntryFailed );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCharacterReceived, this, &GamePageControl::onOwnCharacterReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCombatReceived, this, &GamePageControl::onOwnCombatReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::chunkReceived, this, &GamePageControl::onChunkReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::chunkEventLeaveReceived, this, &GamePageControl::onChunkEventLeaveReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackStartReceived, this, &GamePageControl::characterEventAttackStartReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackReceived, this, &GamePageControl::characterEventAttackReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &GamePageControl::creatureEventAttackStartReceived );
@@ -141,7 +143,7 @@ QString GamePageControl::secondAction() const {
 void GamePageControl::loadWorld() {
     ServerManager& serverManager = Engine::Singleton<ServerManager>::instance();
 
-    _world = Engine::WorldFactory::createWorld( serverManager.dataDirectory().toStdString() );
+    _world = Engine::WorldFactory::createWorld( serverManager.dataDirectory().toStdString(), false );
 
     emit worldChanged();
 }
@@ -258,6 +260,22 @@ void GamePageControl::onOwnCombatReceived( const Engine::OwnCombatDTO& state ) {
     _character.combat().setAvailableActions( state.actions() );
 
     emit combatChanged();
+}
+
+void GamePageControl::onChunkReceived( const Engine::ChunkDTO& chunk ) {
+    if ( !_world ) {
+        return;
+    }
+
+    chunk.applyTo( *_world );
+}
+
+void GamePageControl::onChunkEventLeaveReceived( int chunkX, int chunkY ) {
+    if ( !_world ) {
+        return;
+    }
+
+    _world->removeChunk( chunkX, chunkY );
 }
 
 void GamePageControl::sendAction( Engine::CombatActionEnum action, int dx, int dy ) {

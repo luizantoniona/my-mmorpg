@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <vector>
 
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
@@ -20,6 +21,7 @@
 #include <MMORPGServer/Server/Runtime/World/System/WorldMovementSystem.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldSpawnSystem.h>
 #include <MMORPGServer/Server/Runtime/World/WorldSpatialIndex.h>
+#include <MMORPGServer/Server/Runtime/World/WorldVisibilityDelta.h>
 
 namespace Server {
 
@@ -54,6 +56,12 @@ public:
     bool pickupCharacterItem( int idCharacter, int idGroundItem );
 
     std::vector<Engine::GroundItemModel> groundItemsNear( const Engine::EntityPositionModel& position );
+    std::optional<Engine::GroundItemModel> groundItem( int idGroundItem );
+
+    std::vector<ChunkCoordinate> terrainChunksNear( const Engine::EntityPositionModel& position ) const;
+
+    WorldVisibilityDelta visibilityDelta( const Engine::EntityPositionModel& previousPosition, const Engine::EntityPositionModel& currentPosition, int ignoredIdCharacter );
+
     std::map<int, Engine::EntityPositionModel> characterPositions();
 
     std::vector<Engine::CharacterModel> connectedCharacters();

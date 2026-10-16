@@ -12,6 +12,7 @@
 #include <MMORPGEngine/Entity/GroundItem/GroundItemDTO.h>
 #include <MMORPGEngine/Entity/GroundItem/GroundItemEventLeaveDTO.h>
 #include <MMORPGEngine/Network/WebSocket/ServerMessageTypeHelper.h>
+#include <MMORPGEngine/World/Chunk/ChunkEventLeaveDTO.h>
 
 namespace Engine {
 
@@ -118,6 +119,18 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     case ServerMessageType::GROUND_ITEM_EVENT_LEAVE: {
         const GroundItemEventLeaveDTO event = GroundItemEventLeaveDTO::fromJson( json );
         emit groundItemEventLeaveReceived( event.idGroundItem() );
+        return;
+    }
+
+    case ServerMessageType::CHUNK: {
+        const ChunkDTO chunk = ChunkDTO::fromJson( json );
+        emit chunkReceived( chunk );
+        return;
+    }
+
+    case ServerMessageType::CHUNK_EVENT_LEAVE: {
+        const ChunkEventLeaveDTO event = ChunkEventLeaveDTO::fromJson( json );
+        emit chunkEventLeaveReceived( event.chunkX(), event.chunkY() );
         return;
     }
 
