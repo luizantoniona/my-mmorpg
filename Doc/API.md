@@ -263,6 +263,12 @@ not carry a `"type"`, they are a separate pre-handshake error shape):
 ```json
 {"error":"invalid_character"}
 ```
+```json
+{"error":"character_already_online"}
+```
+An account can have several characters online at once, but each character
+has a single session: a second connection for a character that is already in
+the world is rejected and the existing session is kept.
 
 #### Server → Client messages
 
@@ -309,8 +315,10 @@ connecting client only:
 4. `CREATURE` (`Engine::CreatureDTO`) — one per creature currently in the
    world (no proximity filter yet — `// TODO` in `EntityBroadcaster::sendCreatures`):
    ```json
-   { "type": "CREATURE", "idCreature": 1, "x": 18, "y": 16, "z": 0, "health": 40.0, "maxHealth": 40.0, "movementCooldownSeconds": 1.0 }
+   { "type": "CREATURE", "idCreature": 1, "x": 18, "y": 16, "z": 0, "health": 40.0, "maxHealth": 40.0, "movementCooldownSeconds": 1.0, "footprint": 1, "creatureType": "ORC" }
    ```
+   `creatureType` is the catalog key of the creature (`Creatures/<KEY>/`); the
+   client looks up its sprites in the synced catalog.
 
 The server also broadcasts a `CHARACTER` message for the entering character
 to everyone already nearby, so existing clients learn about the newcomer.
@@ -328,9 +336,45 @@ connection whenever something relevant changes nearby:
   { "type": "CHARACTER_EVENT_LEAVE", "idCharacter": 11 }
   ```
 - `CREATURE` — a creature spawned (or respawned), moved or took damage.
-- `CREATURE_EVENT_LEAVE` (`Engine::CreatureEventLeaveDTO`) — a creature died:
+- `CHUNK` (`Engine::ChunkDTO`) — the terrain of one 32×32 chunk, for every floor
+  that has content in it:
+  ```json
+  { "type": "CHUNK", "chunkX": 1, "chunkY": 0,
+    "floors": [ { "z": 0, "tiles": [ 0, 3, ... ],
+                  "overlays": [ { "X": 2, "Y": 3, "Type": 5 } ],
+                  "objects": [ { "X": 5, "Y": 6, "Type": 9 } ] } ] }
+  ```
+  `tiles` has 1024 entries (row-major, `y * 32 + x`, `0` = empty); `X`/`Y` of
+  overlays and objects are local to the chunk. Sent for the 3×3 chunk window
+  around a character (clamped to the map) on entering the world and again for
+  the chunks that enter the window as it crosses a chunk boundary. The client
+  no longer reads `Floors/*.json` (they are not part of `/data/manifest`).
+- `CHUNK_EVENT_LEAVE` (`Engine::ChunkEventLeaveDTO`) — a chunk left the window; the
+  client drops its terrain:
+  ```json
+  { "type": "CHUNK_EVENT_LEAVE", "chunkX": 1, "chunkY": 0 }
+  ```
+- Visibility: whenever an entity (character or creature) crosses a chunk
+  boundary or changes floor, the `*_EVENT_LEAVE` of whatever dropped out of a
+  character's 3×3 chunk neighbourhood is sent to that character, and the
+  state message (`CHARACTER`, `CREATURE`, `GROUND_ITEM`) of whatever entered
+  it. Clients can therefore drop entities on `*_EVENT_LEAVE` without tracking
+  distance themselves.
+- `CREATURE_EVENT_LEAVE` (`Engine::CreatureEventLeaveDTO`) — a creature died
+  or left the character's view:
   ```json
   { "type": "CREATURE_EVENT_LEAVE", "idCreature": 1 }
+  ```
+- `GROUND_ITEM` (`Engine::GroundItemDTO`) — an item lies on a tile, sent when it
+  is dropped and, on entering the world, for every ground item near the
+  character:
+  ```json
+  { "type": "GROUND_ITEM", "idGroundItem": 7, "idItem": "IRON_SWORD", "x": 17, "y": 16, "z": 0 }
+  ```
+- `GROUND_ITEM_EVENT_LEAVE` (`Engine::GroundItemEventLeaveDTO`) — a ground item was
+  picked up:
+  ```json
+  { "type": "GROUND_ITEM_EVENT_LEAVE", "idGroundItem": 7 }
   ```
 - `CHARACTER_EVENT_ATTACK_START` (`Engine::CharacterEventAttackStartDTO`) — a character
   began casting an attack on a tile, sent to the attacker and to everyone nearby:
@@ -428,6 +472,28 @@ connection whenever something relevant changes nearby:
   grants `ATTACK` (bare hands count as a weapon, so `ATTACK` is always
   available unless an item disables it), a shield grants `BLOCK`, and an item
   type may list `DisabledActions` that remove an action while it is equipped.
+
+- `CHARACTER_INTENT_DROP` (`Engine::CharacterIntentDropDTO`)
+  ```json
+  { "type": "CHARACTER_INTENT_DROP", "position": 3 }
+  ```
+  Drops one unit of the item at inventory `position` on the character's own
+  tile. The server resends `OWN_INVENTORY` to that character and publishes a
+  `GROUND_ITEM` to everyone nearby. Rejected (no reply) when the position is
+  empty.
+
+- `CHARACTER_INTENT_PICKUP` (`Engine::CharacterIntentPickupDTO`)
+  ```json
+  { "type": "CHARACTER_INTENT_PICKUP", "idGroundItem": 7 }
+  ```
+  Moves the ground item into the first free inventory position. The item must
+  be on the same floor and at most one tile away (same tile or adjacent).
+  On success the server resends `OWN_INVENTORY` and publishes
+  `GROUND_ITEM_EVENT_LEAVE` to everyone nearby. Rejected (no reply) when the
+  item does not exist, is out of reach, or the inventory is full.
+
+Ground items live only in server memory: they are lost when the server
+restarts.
 
 Movement does not carry a facing/orientation — `EntityModel` (and every DTO
 built on top of it) has no orientation field.
