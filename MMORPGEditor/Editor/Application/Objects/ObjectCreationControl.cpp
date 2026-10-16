@@ -2,8 +2,6 @@
 
 #include <algorithm>
 
-#include <QFileInfo>
-
 #include <MMORPGEditor/Editor/Application/Assets/TextureImportHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
 #include <MMORPGEngine/Data/Animation/AnimationModel.h>
@@ -114,21 +112,7 @@ bool ObjectCreationControl::createObject( int type, const QString& name, const Q
         return false;
     }
 
-    const QString textureName = QFileInfo( sourcePath ).completeBaseName();
-
-    if ( !TextureImportHelper::isValidFileName( textureName ) ) {
-        setLastError( "Texture file name '" + textureName + "' may only contain lowercase letters, digits, '_' and '-'. Rename the file." );
-        return false;
-    }
-
-    const QString textureFile = "Textures/Objects/" + textureName;
-
-    for ( const auto& entry : dataManager.objectCatalog().objects() ) {
-        if ( entry.second.textureFile().compare( textureFile, Qt::CaseInsensitive ) == 0 && entry.first != static_cast<uint32_t>( type ) ) {
-            setLastError( "Texture file '" + textureName + "' is already used by type " + QString::number( entry.first ) + " ('" + entry.second.name() + "'). Rename the file." );
-            return false;
-        }
-    }
+    const QString textureFile = "Textures/Objects/" + QString::number( type );
 
     const bool isAnimated = TextureImportHelper::isAnimatedSource( sourcePath );
     const Engine::AnimationModel animation = Engine::DataFactory::loadAnimation( sourcePath, isAnimated, frameDurationMs > 0 ? frameDurationMs : 100 );

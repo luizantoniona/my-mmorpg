@@ -3,7 +3,6 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QRegularExpression>
 #include <QUrl>
 
 #include <MMORPGEngine/Data/DataFactory.h>
@@ -14,12 +13,6 @@ QString TextureImportHelper::toLocalFilePath( const QString& path ) {
     }
 
     return path;
-}
-
-bool TextureImportHelper::isValidFileName( const QString& fileName ) {
-    static const QRegularExpression validName( "^[a-z0-9_-]+$" );
-
-    return validName.match( fileName ).hasMatch();
 }
 
 bool TextureImportHelper::isAnimatedSource( const QString& sourcePath ) {

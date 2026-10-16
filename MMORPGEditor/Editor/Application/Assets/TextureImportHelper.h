@@ -7,8 +7,6 @@ class TextureImportHelper {
 public:
     static QString toLocalFilePath( const QString& path );
 
-    static bool isValidFileName( const QString& fileName );
-
     static bool isAnimatedSource( const QString& sourcePath );
     static QString destinationExtension( const QString& sourcePath );
 

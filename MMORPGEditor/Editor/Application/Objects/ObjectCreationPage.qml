@@ -103,7 +103,7 @@ Item {
                     InputBase {
                         id: textureInput
                         Layout.fillWidth: true
-                        vTitle: "Texture (.png, .gif or .webp; the file name becomes its id)"
+                        vTitle: "Texture (.png, .gif or .webp; saved as the object type)"
                         vPlaceholder: "No texture selected"
                     }
 
