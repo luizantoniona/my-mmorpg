@@ -10,6 +10,7 @@ add_executable(
   CharacterIntentEquipDTOTest.cpp
   ChunkDTOTest.cpp
   ChunkModelTest.cpp
+  DataFactoryTest.cpp
   EntityCombatModelTest.cpp
   EntityMovementModelTest.cpp
   FloorFactoryTest.cpp

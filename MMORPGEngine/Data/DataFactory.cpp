@@ -7,6 +7,12 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 
+namespace {
+
+constexpr int MAX_ANIMATION_FRAMES = 4096;
+
+} // namespace
+
 namespace Engine {
 
 QString DataFactory::mapPath( const QString& configPath ) {
@@ -54,9 +60,18 @@ AnimationModel DataFactory::loadAnimation( const QString& texturePath, bool isAn
 
     QImageReader reader( texturePath );
 
+    const int declaredFrameCount = reader.imageCount();
+    const int frameLimit = declaredFrameCount > 0 ? declaredFrameCount : MAX_ANIMATION_FRAMES;
+
     QList<QImage> frames;
-    while ( reader.canRead() ) {
-        frames.append( reader.read() );
+    while ( frames.size() < frameLimit && reader.canRead() ) {
+        const QImage frame = reader.read();
+
+        if ( frame.isNull() ) {
+            break;
+        }
+
+        frames.append( frame );
     }
 
     return AnimationModel( frames, frameDurationMs );
