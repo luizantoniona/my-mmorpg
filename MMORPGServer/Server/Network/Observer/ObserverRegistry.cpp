@@ -7,9 +7,10 @@ namespace Server {
 ObserverRegistry::ObserverRegistry() {
 }
 
-void ObserverRegistry::registerCharacterObserver( int idCharacter, const std::shared_ptr<EntityObserver>& observer ) {
+bool ObserverRegistry::tryRegisterCharacterObserver( int idCharacter, const std::shared_ptr<EntityObserver>& observer ) {
     std::lock_guard<std::mutex> lock( _mutex );
-    _characterObservers[ idCharacter ] = observer;
+
+    return _characterObservers.emplace( idCharacter, observer ).second;
 }
 
 void ObserverRegistry::unregisterCharacterObserver( int idCharacter ) {

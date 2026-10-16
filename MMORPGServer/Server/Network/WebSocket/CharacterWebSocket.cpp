@@ -77,13 +77,26 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
 
     qInfo() << "[WebSocket] Character entering world [ACCOUNT]" << session->idAccount() << "[CHARACTER]" << idCharacter;
 
-    connection->setContext( std::make_shared<CharacterConnectionContext>( sessionId, idCharacter ) );
+    auto& observerRegistry = Engine::Singleton<ObserverRegistry>::instance();
 
-    Engine::Singleton<ObserverRegistry>::instance().registerCharacterObserver( idCharacter, std::make_shared<CharacterObserver>( connection ) );
+    if ( !observerRegistry.tryRegisterCharacterObserver( idCharacter, std::make_shared<CharacterObserver>( connection ) ) ) {
+        qWarning() << "[WebSocket] Rejected connection: character already online [CHARACTER]" << idCharacter;
+        connection->send( R"({"error":"character_already_online"})" );
+        connection->shutdown();
+        return;
+    }
+
+    connection->setContext( std::make_shared<CharacterConnectionContext>( sessionId, idCharacter ) );
 
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
-    worldRuntime.addCharacter( std::move( character ) );
+    if ( !worldRuntime.addCharacter( std::move( character ) ) ) {
+        observerRegistry.unregisterCharacterObserver( idCharacter );
+        connection->setContext( nullptr );
+        connection->send( R"({"error":"character_already_online"})" );
+        connection->shutdown();
+        return;
+    }
 
     qInfo() << "[WebSocket] Character entered world [CHARACTER]" << idCharacter;
 }

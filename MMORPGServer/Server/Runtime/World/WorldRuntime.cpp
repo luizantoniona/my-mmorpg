@@ -70,6 +70,12 @@ Engine::CharacterModel* WorldRuntime::addCharacter( std::unique_ptr<Engine::Char
         std::lock_guard<std::mutex> lock( _mutex );
 
         idCharacter = character->idCharacter();
+
+        if ( _characters.find( idCharacter ) != _characters.end() ) {
+            qWarning() << "[WorldRuntime] Character already in world, add rejected [CHARACTER]" << idCharacter;
+            return nullptr;
+        }
+
         position = character->position();
 
         auto characterRuntime = std::make_unique<CharacterRuntime>( std::move( character ), _eventBus, _tickRate );

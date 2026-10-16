@@ -14,7 +14,7 @@ class ObserverRegistry {
 public:
     ObserverRegistry();
 
-    void registerCharacterObserver( int idCharacter, const std::shared_ptr<EntityObserver>& observer );
+    bool tryRegisterCharacterObserver( int idCharacter, const std::shared_ptr<EntityObserver>& observer );
     void unregisterCharacterObserver( int idCharacter );
 
     void registerGlobalObserver( const std::shared_ptr<EntityObserver>& observer );
