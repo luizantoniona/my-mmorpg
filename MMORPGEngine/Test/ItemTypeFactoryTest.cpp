@@ -1,7 +1,10 @@
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <optional>
 #include <set>
+#include <string>
+#include <vector>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Data/Item/HandRequirementEnum.h>
@@ -65,6 +68,73 @@ protected:
     Json::Value _index;
 };
 
+class InvalidItemTypeCase {
+public:
+    InvalidItemTypeCase( std::string name, std::string key, bool includeName, bool includeCategory, bool includeSlot ) :
+        name( std::move( name ) ),
+        key( std::move( key ) ),
+        includeName( includeName ),
+        includeCategory( includeCategory ),
+        includeSlot( includeSlot ) {
+    }
+
+    std::string name;
+    std::string key;
+    bool includeName;
+    bool includeCategory;
+    bool includeSlot;
+};
+
+class HandRequirementCase {
+public:
+    HandRequirementCase( std::string name, bool present, std::string value, bool expectedPresent, Engine::HandRequirementEnum expected ) :
+        name( std::move( name ) ),
+        present( present ),
+        value( std::move( value ) ),
+        expectedPresent( expectedPresent ),
+        expected( expected ) {
+    }
+
+    std::string name;
+    bool present;
+    std::string value;
+    bool expectedPresent;
+    Engine::HandRequirementEnum expected;
+};
+
+class DisabledActionsCase {
+public:
+    DisabledActionsCase( std::string name, bool present, std::vector<std::string> actions, std::set<Engine::CombatActionEnum> expected ) :
+        name( std::move( name ) ),
+        present( present ),
+        actions( std::move( actions ) ),
+        expected( std::move( expected ) ) {
+    }
+
+    std::string name;
+    bool present;
+    std::vector<std::string> actions;
+    std::set<Engine::CombatActionEnum> expected;
+};
+
+class ItemTypeWrongTypeCase {
+public:
+    ItemTypeWrongTypeCase( std::string name, std::string key, Json::Value value ) :
+        name( std::move( name ) ),
+        key( std::move( key ) ),
+        value( std::move( value ) ) {
+    }
+
+    std::string name;
+    std::string key;
+    Json::Value value;
+};
+
+class ItemTypeFactoryWrongTypeTest : public ItemTypeFactoryTest, public ::testing::WithParamInterface<ItemTypeWrongTypeCase> {};
+class ItemTypeFactoryInvalidEntryTest : public ItemTypeFactoryTest, public ::testing::WithParamInterface<InvalidItemTypeCase> {};
+class ItemTypeFactoryHandRequirementTest : public ItemTypeFactoryTest, public ::testing::WithParamInterface<HandRequirementCase> {};
+class ItemTypeFactoryDisabledActionsTest : public ItemTypeFactoryTest, public ::testing::WithParamInterface<DisabledActionsCase> {};
+
 } // namespace
 
 TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_ParsesFields ) {
@@ -94,10 +164,41 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MultipleItemTypes_AllAdded ) 
     EXPECT_EQ( catalog.itemTypes().size(), 2u );
 }
 
-TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingName_SkipsEntry ) {
+TEST_P( ItemTypeFactoryInvalidEntryTest, CreateItemTypeCatalog_InvalidEntry_IsSkippedAndOthersLoad ) {
     Json::Value invalid;
-    invalid[ "Category" ] = "WEAPON";
-    invalid[ "Slot" ] = "HAND";
+    if ( GetParam().includeName ) {
+        invalid[ "Name" ] = "Invalid";
+    }
+    if ( GetParam().includeCategory ) {
+        invalid[ "Category" ] = "WEAPON";
+    }
+    if ( GetParam().includeSlot ) {
+        invalid[ "Slot" ] = "HAND";
+    }
+    writeItemType( GetParam().key, invalid );
+    writeItemType( "SHIELD", itemTypeJson( "Shield", "SHIELD", "HAND" ) );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.itemType( QString::fromStdString( GetParam().key ) ), nullptr );
+    ASSERT_NE( catalog.itemType( "SHIELD" ), nullptr );
+    EXPECT_EQ( catalog.itemTypes().size(), 1u );
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Entries,
+    ItemTypeFactoryInvalidEntryTest,
+    ::testing::Values(
+        InvalidItemTypeCase( "MissingName", "SWORD", false, true, true ),
+        InvalidItemTypeCase( "MissingCategory", "SWORD", true, false, true ),
+        InvalidItemTypeCase( "MissingSlot", "AXE", true, true, false ),
+        InvalidItemTypeCase( "LowercaseKey", "sword", true, true, true ) ),
+    []( const ::testing::TestParamInfo<InvalidItemTypeCase>& info ) { return info.param.name; } );
+
+TEST_P( ItemTypeFactoryWrongTypeTest, CreateItemTypeCatalog_WrongFieldType_SkipsEntryAndKeepsOthers ) {
+    Json::Value invalid = itemTypeJson( "Sword", "WEAPON", "HAND" );
+    invalid[ GetParam().key ] = GetParam().value;
     writeItemType( "SWORD", invalid );
     writeItemType( "SHIELD", itemTypeJson( "Shield", "SHIELD", "HAND" ) );
 
@@ -105,91 +206,80 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingName_SkipsEntry ) {
     Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
 
     EXPECT_EQ( catalog.itemType( "SWORD" ), nullptr );
-    ASSERT_NE( catalog.itemType( "SHIELD" ), nullptr );
+    EXPECT_NE( catalog.itemType( "SHIELD" ), nullptr );
     EXPECT_EQ( catalog.itemTypes().size(), 1u );
 }
 
-TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingCategoryOrSlot_SkipsEntry ) {
-    Json::Value missingCategory;
-    missingCategory[ "Name" ] = "Sword";
-    missingCategory[ "Slot" ] = "HAND";
-    writeItemType( "SWORD", missingCategory );
+INSTANTIATE_TEST_SUITE_P(
+    Fields,
+    ItemTypeFactoryWrongTypeTest,
+    ::testing::Values(
+        ItemTypeWrongTypeCase( "NameIsNumber", "Name", Json::Value( 5 ) ),
+        ItemTypeWrongTypeCase( "CategoryIsNumber", "Category", Json::Value( 5 ) ),
+        ItemTypeWrongTypeCase( "SlotIsNumber", "Slot", Json::Value( 5 ) ),
+        ItemTypeWrongTypeCase( "HandRequirementIsNumber", "HandRequirement", Json::Value( 1 ) ),
+        ItemTypeWrongTypeCase( "DisabledActionsIsText", "DisabledActions", Json::Value( "DODGE" ) ) ),
+    []( const ::testing::TestParamInfo<ItemTypeWrongTypeCase>& info ) { return info.param.name; } );
 
-    Json::Value missingSlot;
-    missingSlot[ "Name" ] = "Axe";
-    missingSlot[ "Category" ] = "WEAPON";
-    writeItemType( "AXE", missingSlot );
-
-    writeItemType( "SHIELD", itemTypeJson( "Shield", "SHIELD", "HAND" ) );
-
-    Engine::ItemTypeCatalog catalog;
-    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
-
-    EXPECT_EQ( catalog.itemType( "SWORD" ), nullptr );
-    EXPECT_EQ( catalog.itemType( "AXE" ), nullptr );
-    ASSERT_NE( catalog.itemType( "SHIELD" ), nullptr );
-    EXPECT_EQ( catalog.itemTypes().size(), 1u );
-}
-
-TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingHandRequirement_IsEmpty ) {
-    writeItemType( "HELMET", itemTypeJson( "Helmet", "ARMOR", "HEAD" ) );
+TEST_P( ItemTypeFactoryHandRequirementTest, CreateItemTypeCatalog_HandRequirement ) {
+    Json::Value json = itemTypeJson( "Item", "WEAPON", "HAND" );
+    if ( GetParam().present ) {
+        json[ "HandRequirement" ] = GetParam().value;
+    }
+    writeItemType( "ITEM", json );
 
     Engine::ItemTypeCatalog catalog;
     Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
 
-    ASSERT_NE( catalog.itemType( "HELMET" ), nullptr );
-    EXPECT_FALSE( catalog.itemType( "HELMET" )->handRequirement().has_value() );
+    ASSERT_NE( catalog.itemType( "ITEM" ), nullptr );
+    const std::optional<Engine::HandRequirementEnum>& handRequirement = catalog.itemType( "ITEM" )->handRequirement();
+
+    ASSERT_EQ( handRequirement.has_value(), GetParam().expectedPresent );
+    if ( GetParam().expectedPresent ) {
+        EXPECT_EQ( handRequirement.value(), GetParam().expected );
+    }
 }
 
-TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_UnknownHandRequirement_IsFlaggedUnknown ) {
-    Json::Value json = itemTypeJson( "Sword", "WEAPON", "HAND" );
-    json[ "HandRequirement" ] = "THREE_HANDED";
-    writeItemType( "SWORD", json );
+INSTANTIATE_TEST_SUITE_P(
+    Values,
+    ItemTypeFactoryHandRequirementTest,
+    ::testing::Values(
+        HandRequirementCase( "Missing_IsEmpty", false, "", false, Engine::HandRequirementEnum::UNKNOWN ),
+        HandRequirementCase( "OneHanded", true, "ONE_HANDED", true, Engine::HandRequirementEnum::ONE_HANDED ),
+        HandRequirementCase( "TwoHanded", true, "TWO_HANDED", true, Engine::HandRequirementEnum::TWO_HANDED ),
+        HandRequirementCase( "UnknownName_IsFlaggedUnknown", true, "THREE_HANDED", true, Engine::HandRequirementEnum::UNKNOWN ),
+        HandRequirementCase( "LowercaseName_IsFlaggedUnknown", true, "one_handed", true, Engine::HandRequirementEnum::UNKNOWN ) ),
+    []( const ::testing::TestParamInfo<HandRequirementCase>& info ) { return info.param.name; } );
 
-    Engine::ItemTypeCatalog catalog;
-    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
-
-    ASSERT_NE( catalog.itemType( "SWORD" ), nullptr );
-    ASSERT_TRUE( catalog.itemType( "SWORD" )->handRequirement().has_value() );
-    EXPECT_EQ( catalog.itemType( "SWORD" )->handRequirement().value(), Engine::HandRequirementEnum::UNKNOWN );
-}
-
-TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MissingDisabledActions_IsEmpty ) {
-    writeItemType( "SHIELD", itemTypeJson( "Shield", "SHIELD", "HAND" ) );
-
-    Engine::ItemTypeCatalog catalog;
-    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
-
-    ASSERT_NE( catalog.itemType( "SHIELD" ), nullptr );
-    EXPECT_TRUE( catalog.itemType( "SHIELD" )->disabledActions().empty() );
-}
-
-TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_ParsesDisabledActions ) {
+TEST_P( ItemTypeFactoryDisabledActionsTest, CreateItemTypeCatalog_DisabledActions ) {
     Json::Value json = itemTypeJson( "Shield", "SHIELD", "HAND" );
-    json[ "DisabledActions" ] = Json::Value( Json::arrayValue );
-    json[ "DisabledActions" ].append( "DODGE" );
+    if ( GetParam().present ) {
+        json[ "DisabledActions" ] = Json::Value( Json::arrayValue );
+        for ( const std::string& action : GetParam().actions ) {
+            json[ "DisabledActions" ].append( action );
+        }
+    }
     writeItemType( "SHIELD", json );
 
     Engine::ItemTypeCatalog catalog;
     Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
 
     ASSERT_NE( catalog.itemType( "SHIELD" ), nullptr );
-    EXPECT_EQ( catalog.itemType( "SHIELD" )->disabledActions(), std::set<Engine::CombatActionEnum>( { Engine::CombatActionEnum::DODGE } ) );
+    EXPECT_EQ( catalog.itemType( "SHIELD" )->disabledActions(), GetParam().expected );
 }
 
-TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_UnknownDisabledAction_IsSkipped ) {
-    Json::Value json = itemTypeJson( "Shield", "SHIELD", "HAND" );
-    json[ "DisabledActions" ] = Json::Value( Json::arrayValue );
-    json[ "DisabledActions" ].append( "FLY" );
-    json[ "DisabledActions" ].append( "DODGE" );
-    writeItemType( "SHIELD", json );
-
-    Engine::ItemTypeCatalog catalog;
-    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
-
-    ASSERT_NE( catalog.itemType( "SHIELD" ), nullptr );
-    EXPECT_EQ( catalog.itemType( "SHIELD" )->disabledActions(), std::set<Engine::CombatActionEnum>( { Engine::CombatActionEnum::DODGE } ) );
-}
+INSTANTIATE_TEST_SUITE_P(
+    Values,
+    ItemTypeFactoryDisabledActionsTest,
+    ::testing::Values(
+        DisabledActionsCase( "Missing_IsEmpty", false, {}, {} ),
+        DisabledActionsCase( "EmptyList_IsEmpty", true, {}, {} ),
+        DisabledActionsCase( "Dodge", true, { "DODGE" }, { Engine::CombatActionEnum::DODGE } ),
+        DisabledActionsCase( "DodgeAndBlock", true, { "DODGE", "BLOCK" }, { Engine::CombatActionEnum::DODGE, Engine::CombatActionEnum::BLOCK } ),
+        DisabledActionsCase( "UnknownAction_IsSkipped", true, { "FLY", "DODGE" }, { Engine::CombatActionEnum::DODGE } ),
+        DisabledActionsCase( "OnlyUnknownActions_IsEmpty", true, { "FLY" }, {} ),
+        DisabledActionsCase( "DuplicatedAction_IsDeduplicated", true, { "DODGE", "DODGE" }, { Engine::CombatActionEnum::DODGE } ) ),
+    []( const ::testing::TestParamInfo<DisabledActionsCase>& info ) { return info.param.name; } );
 
 TEST_F( ItemTypeFactoryTest, SaveItemTypeCatalog_RoundTripsDisabledActions ) {
     Engine::ItemTypeCatalog original;
@@ -240,17 +330,6 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_IndexedTypeWithoutFile_IsSkip
 
     EXPECT_EQ( catalog.itemType( "SWORD" ), nullptr );
     ASSERT_NE( catalog.itemType( "SHIELD" ), nullptr );
-}
-
-TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_InvalidKey_IsSkipped ) {
-    writeItemType( "sword", itemTypeJson( "Sword", "WEAPON", "HAND" ) );
-    writeItemType( "SHIELD", itemTypeJson( "Shield", "SHIELD", "HAND" ) );
-
-    Engine::ItemTypeCatalog catalog;
-    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
-
-    EXPECT_EQ( catalog.itemType( "sword" ), nullptr );
-    EXPECT_EQ( catalog.itemTypes().size(), 1u );
 }
 
 TEST_F( ItemTypeFactoryTest, ReadTypeKeys_DuplicatedKey_KeepsFirst ) {

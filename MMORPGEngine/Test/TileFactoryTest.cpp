@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <string>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Data/Tile/TileFactory.h>
@@ -40,6 +41,21 @@ protected:
     std::filesystem::path _tempDir;
 };
 
+class WrongTypeCase {
+public:
+    WrongTypeCase( std::string name, std::string key, Json::Value value ) :
+        name( std::move( name ) ),
+        key( std::move( key ) ),
+        value( std::move( value ) ) {
+    }
+
+    std::string name;
+    std::string key;
+    Json::Value value;
+};
+
+class TileFactoryWrongTypeTest : public TileFactoryTest, public ::testing::WithParamInterface<WrongTypeCase> {};
+
 } // namespace
 
 TEST_F( TileFactoryTest, CreateTileCatalog_ParsesFields ) {
@@ -65,6 +81,81 @@ TEST_F( TileFactoryTest, CreateTileCatalog_ParsesFields ) {
     EXPECT_FALSE( catalog.tile( 1 )->isWalkable() );
     ASSERT_EQ( catalog.tile( 1 )->tags().size(), 1 );
     EXPECT_EQ( catalog.tile( 1 )->tags().first(), "nature" );
+}
+
+TEST_P( TileFactoryWrongTypeTest, CreateTileCatalog_WrongFieldType_SkipsEntryAndKeepsOthers ) {
+    Json::Value invalid;
+    invalid[ "Type" ] = 1;
+    invalid[ "Name" ] = "Bad";
+    invalid[ "TextureFile" ] = "Textures/Tiles/bad";
+    invalid[ GetParam().key ] = GetParam().value;
+
+    Json::Value valid;
+    valid[ "Type" ] = 2;
+    valid[ "Name" ] = "Grass";
+    valid[ "TextureFile" ] = "Textures/Tiles/grass_01";
+
+    Json::Value tiles( Json::arrayValue );
+    tiles.append( invalid );
+    tiles.append( valid );
+    writeTilesJson( tiles );
+
+    Engine::TileCatalog catalog;
+    Engine::TileFactory::createTileCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.tile( 1 ), nullptr );
+    EXPECT_NE( catalog.tile( 2 ), nullptr );
+    EXPECT_EQ( catalog.tiles().size(), 1u );
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Fields,
+    TileFactoryWrongTypeTest,
+    ::testing::Values(
+        WrongTypeCase( "TypeIsText", "Type", Json::Value( "one" ) ),
+        WrongTypeCase( "NameIsNumber", "Name", Json::Value( 5 ) ),
+        WrongTypeCase( "TextureFileIsNumber", "TextureFile", Json::Value( 5 ) ),
+        WrongTypeCase( "TagsIsText", "Tags", Json::Value( "nature" ) ),
+        WrongTypeCase( "IsWalkableIsText", "IsWalkable", Json::Value( "yes" ) ),
+        WrongTypeCase( "FrameDurationIsText", "FrameDurationMs", Json::Value( "fast" ) ) ),
+    []( const ::testing::TestParamInfo<WrongTypeCase>& info ) { return info.param.name; } );
+
+TEST_F( TileFactoryTest, CreateTileCatalog_NonStringTag_IsIgnoredButTileLoads ) {
+    Json::Value tile;
+    tile[ "Type" ] = 1;
+    tile[ "Name" ] = "Grass";
+    tile[ "TextureFile" ] = "Textures/Tiles/grass_01";
+    tile[ "Tags" ] = Json::Value( Json::arrayValue );
+    tile[ "Tags" ].append( "nature" );
+    tile[ "Tags" ].append( 7 );
+
+    Json::Value tiles( Json::arrayValue );
+    tiles.append( tile );
+    writeTilesJson( tiles );
+
+    Engine::TileCatalog catalog;
+    Engine::TileFactory::createTileCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.tile( 1 ), nullptr );
+    EXPECT_EQ( catalog.tile( 1 )->tags(), QStringList( { "nature" } ) );
+}
+
+TEST_F( TileFactoryTest, CreateTileCatalog_EntryNotAnObject_IsSkipped ) {
+    Json::Value valid;
+    valid[ "Type" ] = 2;
+    valid[ "Name" ] = "Grass";
+    valid[ "TextureFile" ] = "Textures/Tiles/grass_01";
+
+    Json::Value tiles( Json::arrayValue );
+    tiles.append( 5 );
+    tiles.append( valid );
+    writeTilesJson( tiles );
+
+    Engine::TileCatalog catalog;
+    Engine::TileFactory::createTileCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.tiles().size(), 1u );
+    EXPECT_NE( catalog.tile( 2 ), nullptr );
 }
 
 TEST_F( TileFactoryTest, CreateTileCatalog_MissingIsWalkable_DefaultsToTrue ) {

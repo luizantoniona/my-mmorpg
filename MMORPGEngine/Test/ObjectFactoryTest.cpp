@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <optional>
+#include <string>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Data/Object/ObjectFactory.h>
@@ -40,13 +42,72 @@ protected:
     std::filesystem::path _tempDir;
 };
 
+class InteractionCase {
+public:
+    InteractionCase( std::string name, bool present, std::string interaction, int containerCapacity, bool expectedPresent, Engine::ObjectInteractionEnum expectedType, uint32_t expectedCapacity ) :
+        name( std::move( name ) ),
+        present( present ),
+        interaction( std::move( interaction ) ),
+        containerCapacity( containerCapacity ),
+        expectedPresent( expectedPresent ),
+        expectedType( expectedType ),
+        expectedCapacity( expectedCapacity ) {
+    }
+
+    std::string name;
+    bool present;
+    std::string interaction;
+    int containerCapacity;
+    bool expectedPresent;
+    Engine::ObjectInteractionEnum expectedType;
+    uint32_t expectedCapacity;
+};
+
+class FootprintCase {
+public:
+    FootprintCase( std::string name, bool present, int width, int height, int expectedWidth, int expectedHeight ) :
+        name( std::move( name ) ),
+        present( present ),
+        width( width ),
+        height( height ),
+        expectedWidth( expectedWidth ),
+        expectedHeight( expectedHeight ) {
+    }
+
+    std::string name;
+    bool present;
+    int width;
+    int height;
+    int expectedWidth;
+    int expectedHeight;
+};
+
+class ObjectWrongTypeCase {
+public:
+    ObjectWrongTypeCase( std::string name, std::string parent, std::string key, Json::Value value ) :
+        name( std::move( name ) ),
+        parent( std::move( parent ) ),
+        key( std::move( key ) ),
+        value( std::move( value ) ) {
+    }
+
+    std::string name;
+    std::string parent;
+    std::string key;
+    Json::Value value;
+};
+
+class ObjectFactoryWrongTypeTest : public ObjectFactoryTest, public ::testing::WithParamInterface<ObjectWrongTypeCase> {};
+class ObjectFactoryInteractionTest : public ObjectFactoryTest, public ::testing::WithParamInterface<InteractionCase> {};
+class ObjectFactoryFootprintTest : public ObjectFactoryTest, public ::testing::WithParamInterface<FootprintCase> {};
+
 } // namespace
 
 TEST_F( ObjectFactoryTest, CreateObjectCatalog_ParsesFields ) {
     Json::Value object;
     object[ "Type" ] = 1;
     object[ "Name" ] = "StoneWall";
-    object[ "TextureFolder" ] = "Textures/Objects/StoneWall";
+    object[ "TextureFile" ] = "Textures/Objects/stone_wall_01";
     Json::Value footprint;
     footprint[ "Width" ] = 2;
     footprint[ "Height" ] = 3;
@@ -61,27 +122,34 @@ TEST_F( ObjectFactoryTest, CreateObjectCatalog_ParsesFields ) {
 
     ASSERT_NE( catalog.object( 1 ), nullptr );
     EXPECT_EQ( catalog.object( 1 )->name(), "StoneWall" );
-    EXPECT_EQ( catalog.object( 1 )->folder(), "Textures/Objects/StoneWall" );
+    EXPECT_EQ( catalog.object( 1 )->textureFile(), "Textures/Objects/stone_wall_01" );
     EXPECT_EQ( catalog.object( 1 )->size().width(), 2 );
     EXPECT_EQ( catalog.object( 1 )->size().height(), 3 );
 }
 
-TEST_F( ObjectFactoryTest, CreateObjectCatalog_MissingFootprint_DefaultsToOneByOne ) {
-    Json::Value object;
-    object[ "Type" ] = 1;
-    object[ "Name" ] = "StoneWall";
-    object[ "TextureFolder" ] = "Textures/Objects/StoneWall";
+TEST_F( ObjectFactoryTest, CreateObjectCatalog_SameNameDifferentTextureFile_BothKept ) {
+    Json::Value first;
+    first[ "Type" ] = 1;
+    first[ "Name" ] = "Tree";
+    first[ "TextureFile" ] = "Textures/Objects/tree_01";
+
+    Json::Value second;
+    second[ "Type" ] = 2;
+    second[ "Name" ] = "Tree";
+    second[ "TextureFile" ] = "Textures/Objects/tree_02";
 
     Json::Value objects( Json::arrayValue );
-    objects.append( object );
+    objects.append( first );
+    objects.append( second );
     writeObjectsJson( objects );
 
     Engine::ObjectCatalog catalog;
     Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
 
     ASSERT_NE( catalog.object( 1 ), nullptr );
-    EXPECT_EQ( catalog.object( 1 )->size().width(), 1 );
-    EXPECT_EQ( catalog.object( 1 )->size().height(), 1 );
+    ASSERT_NE( catalog.object( 2 ), nullptr );
+    EXPECT_EQ( catalog.object( 1 )->name(), catalog.object( 2 )->name() );
+    EXPECT_NE( catalog.object( 1 )->textureFile(), catalog.object( 2 )->textureFile() );
 }
 
 TEST_F( ObjectFactoryTest, SaveObjectCatalog_ThenCreateObjectCatalog_RoundTripsFields ) {
@@ -89,7 +157,7 @@ TEST_F( ObjectFactoryTest, SaveObjectCatalog_ThenCreateObjectCatalog_RoundTripsF
     Engine::ObjectModel object;
     object.setType( 5 );
     object.setName( "WoodenCrate" );
-    object.setFolder( "Textures/Objects/WoodenCrate" );
+    object.setTextureFile( "Textures/Objects/wooden_crate_01" );
     Engine::ObjectSizeModel size;
     size.setWidth( 2 );
     size.setHeight( 1 );
@@ -103,7 +171,7 @@ TEST_F( ObjectFactoryTest, SaveObjectCatalog_ThenCreateObjectCatalog_RoundTripsF
 
     ASSERT_NE( reloaded.object( 5 ), nullptr );
     EXPECT_EQ( reloaded.object( 5 )->name(), "WoodenCrate" );
-    EXPECT_EQ( reloaded.object( 5 )->folder(), "Textures/Objects/WoodenCrate" );
+    EXPECT_EQ( reloaded.object( 5 )->textureFile(), "Textures/Objects/wooden_crate_01" );
     EXPECT_EQ( reloaded.object( 5 )->size().width(), 2 );
     EXPECT_EQ( reloaded.object( 5 )->size().height(), 1 );
 }
@@ -112,7 +180,7 @@ TEST_F( ObjectFactoryTest, CreateObjectCatalog_MissingIsWalkable_DefaultsToWalka
     Json::Value object;
     object[ "Type" ] = 1;
     object[ "Name" ] = "StoneWall";
-    object[ "TextureFolder" ] = "Textures/Objects/StoneWall";
+    object[ "TextureFile" ] = "Textures/Objects/stone_wall_01";
 
     Json::Value objects( Json::arrayValue );
     objects.append( object );
@@ -132,7 +200,7 @@ TEST_F( ObjectFactoryTest, SaveObjectCatalog_NotWalkable_ThenCreateObjectCatalog
     Engine::ObjectModel object;
     object.setType( 5 );
     object.setName( "Tree" );
-    object.setFolder( "Textures/Objects/Tree" );
+    object.setTextureFile( "Textures/Objects/tree_01" );
     Engine::ObjectSizeModel size;
     size.setWidth( 2 );
     size.setHeight( 3 );
@@ -151,11 +219,17 @@ TEST_F( ObjectFactoryTest, SaveObjectCatalog_NotWalkable_ThenCreateObjectCatalog
     EXPECT_EQ( reloaded.maxBlockingFootprintHeight(), 3 );
 }
 
-TEST_F( ObjectFactoryTest, CreateObjectCatalog_MissingInteraction_IsEmpty ) {
+TEST_P( ObjectFactoryInteractionTest, CreateObjectCatalog_Interaction ) {
     Json::Value object;
     object[ "Type" ] = 1;
-    object[ "Name" ] = "StoneWall";
-    object[ "TextureFolder" ] = "Textures/Objects/StoneWall";
+    object[ "Name" ] = "Object";
+    object[ "TextureFile" ] = "Textures/Objects/object_01";
+    if ( GetParam().present ) {
+        object[ "Interaction" ] = GetParam().interaction;
+    }
+    if ( GetParam().containerCapacity >= 0 ) {
+        object[ "ContainerCapacity" ] = GetParam().containerCapacity;
+    }
 
     Json::Value objects( Json::arrayValue );
     objects.append( object );
@@ -165,15 +239,80 @@ TEST_F( ObjectFactoryTest, CreateObjectCatalog_MissingInteraction_IsEmpty ) {
     Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
 
     ASSERT_NE( catalog.object( 1 ), nullptr );
-    EXPECT_FALSE( catalog.object( 1 )->interaction().has_value() );
+
+    const std::optional<Engine::ObjectInteractionModel>& interaction = catalog.object( 1 )->interaction();
+
+    ASSERT_EQ( interaction.has_value(), GetParam().expectedPresent );
+    if ( GetParam().expectedPresent ) {
+        EXPECT_EQ( interaction->type(), GetParam().expectedType );
+        EXPECT_EQ( interaction->containerCapacity(), GetParam().expectedCapacity );
+    }
 }
 
-TEST_F( ObjectFactoryTest, CreateObjectCatalog_UnknownInteraction_IsEmpty ) {
+INSTANTIATE_TEST_SUITE_P(
+    Values,
+    ObjectFactoryInteractionTest,
+    ::testing::Values(
+        InteractionCase( "Missing_IsEmpty", false, "", -1, false, Engine::ObjectInteractionEnum::CONTAINER, 0 ),
+        InteractionCase( "UnknownName_IsEmpty", true, "LEVER", -1, false, Engine::ObjectInteractionEnum::CONTAINER, 0 ),
+        InteractionCase( "LowercaseName_IsEmpty", true, "container", 8, false, Engine::ObjectInteractionEnum::CONTAINER, 0 ),
+        InteractionCase( "Container_ParsesCapacity", true, "CONTAINER", 8, true, Engine::ObjectInteractionEnum::CONTAINER, 8 ),
+        InteractionCase( "Container_ParsesLargeCapacity", true, "CONTAINER", 40, true, Engine::ObjectInteractionEnum::CONTAINER, 40 ) ),
+    []( const ::testing::TestParamInfo<InteractionCase>& info ) { return info.param.name; } );
+
+TEST_P( ObjectFactoryWrongTypeTest, CreateObjectCatalog_WrongFieldType_SkipsEntryAndKeepsOthers ) {
+    Json::Value invalid;
+    invalid[ "Type" ] = 1;
+    invalid[ "Name" ] = "Bad";
+    invalid[ "TextureFile" ] = "Textures/Objects/bad";
+    if ( GetParam().parent.empty() ) {
+        invalid[ GetParam().key ] = GetParam().value;
+    } else {
+        invalid[ GetParam().parent ][ GetParam().key ] = GetParam().value;
+    }
+
+    Json::Value valid;
+    valid[ "Type" ] = 2;
+    valid[ "Name" ] = "Tree";
+    valid[ "TextureFile" ] = "Textures/Objects/tree_01";
+
+    Json::Value objects( Json::arrayValue );
+    objects.append( invalid );
+    objects.append( valid );
+    writeObjectsJson( objects );
+
+    Engine::ObjectCatalog catalog;
+    Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.object( 1 ), nullptr );
+    EXPECT_NE( catalog.object( 2 ), nullptr );
+    EXPECT_EQ( catalog.objects().size(), 1u );
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Fields,
+    ObjectFactoryWrongTypeTest,
+    ::testing::Values(
+        ObjectWrongTypeCase( "TypeIsText", "", "Type", Json::Value( "one" ) ),
+        ObjectWrongTypeCase( "NameIsNumber", "", "Name", Json::Value( 5 ) ),
+        ObjectWrongTypeCase( "TextureFileIsNumber", "", "TextureFile", Json::Value( 5 ) ),
+        ObjectWrongTypeCase( "FootprintIsNumber", "", "Footprint", Json::Value( 2 ) ),
+        ObjectWrongTypeCase( "FootprintWidthIsText", "Footprint", "Width", Json::Value( "wide" ) ),
+        ObjectWrongTypeCase( "FootprintHeightIsFraction", "Footprint", "Height", Json::Value( 1.5 ) ),
+        ObjectWrongTypeCase( "IsWalkableIsText", "", "IsWalkable", Json::Value( "no" ) ),
+        ObjectWrongTypeCase( "InteractionIsNumber", "", "Interaction", Json::Value( 3 ) ),
+        ObjectWrongTypeCase( "ContainerCapacityIsText", "", "ContainerCapacity", Json::Value( "eight" ) ) ),
+    []( const ::testing::TestParamInfo<ObjectWrongTypeCase>& info ) { return info.param.name; } );
+
+TEST_P( ObjectFactoryFootprintTest, CreateObjectCatalog_Footprint ) {
     Json::Value object;
     object[ "Type" ] = 1;
-    object[ "Name" ] = "StoneWall";
-    object[ "TextureFolder" ] = "Textures/Objects/StoneWall";
-    object[ "Interaction" ] = "LEVER";
+    object[ "Name" ] = "Object";
+    object[ "TextureFile" ] = "Textures/Objects/object_01";
+    if ( GetParam().present ) {
+        object[ "Footprint" ][ "Width" ] = GetParam().width;
+        object[ "Footprint" ][ "Height" ] = GetParam().height;
+    }
 
     Json::Value objects( Json::arrayValue );
     objects.append( object );
@@ -183,36 +322,26 @@ TEST_F( ObjectFactoryTest, CreateObjectCatalog_UnknownInteraction_IsEmpty ) {
     Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
 
     ASSERT_NE( catalog.object( 1 ), nullptr );
-    EXPECT_FALSE( catalog.object( 1 )->interaction().has_value() );
+    EXPECT_EQ( catalog.object( 1 )->size().width(), GetParam().expectedWidth );
+    EXPECT_EQ( catalog.object( 1 )->size().height(), GetParam().expectedHeight );
 }
 
-TEST_F( ObjectFactoryTest, CreateObjectCatalog_ContainerInteraction_ParsesCapacity ) {
-    Json::Value object;
-    object[ "Type" ] = 1;
-    object[ "Name" ] = "TreasureChest";
-    object[ "TextureFolder" ] = "Textures/Objects/TreasureChest";
-    object[ "Interaction" ] = "CONTAINER";
-    object[ "ContainerCapacity" ] = 8;
-
-    Json::Value objects( Json::arrayValue );
-    objects.append( object );
-    writeObjectsJson( objects );
-
-    Engine::ObjectCatalog catalog;
-    Engine::ObjectFactory::createObjectCatalog( configPath(), catalog );
-
-    ASSERT_NE( catalog.object( 1 ), nullptr );
-    ASSERT_TRUE( catalog.object( 1 )->interaction().has_value() );
-    EXPECT_EQ( catalog.object( 1 )->interaction()->type(), Engine::ObjectInteractionEnum::CONTAINER );
-    EXPECT_EQ( catalog.object( 1 )->interaction()->containerCapacity(), 8u );
-}
+INSTANTIATE_TEST_SUITE_P(
+    Values,
+    ObjectFactoryFootprintTest,
+    ::testing::Values(
+        FootprintCase( "Missing_DefaultsToOneByOne", false, 0, 0, 1, 1 ),
+        FootprintCase( "TwoByThree", true, 2, 3, 2, 3 ),
+        FootprintCase( "WideStrip", true, 4, 1, 4, 1 ),
+        FootprintCase( "TallStrip", true, 1, 4, 1, 4 ) ),
+    []( const ::testing::TestParamInfo<FootprintCase>& info ) { return info.param.name; } );
 
 TEST_F( ObjectFactoryTest, SaveObjectCatalog_ContainerInteraction_ThenCreateObjectCatalog_RoundTrips ) {
     Engine::ObjectCatalog original;
     Engine::ObjectModel object;
     object.setType( 5 );
     object.setName( "TreasureChest" );
-    object.setFolder( "Textures/Objects/TreasureChest" );
+    object.setTextureFile( "Textures/Objects/treasure_chest_01" );
 
     Engine::ObjectInteractionModel interaction;
     interaction.setType( Engine::ObjectInteractionEnum::CONTAINER );

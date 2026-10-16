@@ -19,6 +19,9 @@ protected:
         writeFile( _tempDir / "Config.json", R"({"ActiveFolder":"TestMap"})" );
         writeFile( _tempDir / "TestMap" / "Map.json", R"({"Name":"Test"})" );
         writeFile( _tempDir / "TestMap" / "sub" / "file.txt", "nested-content" );
+
+        std::filesystem::create_directories( _tempDir / "TestMap" / "Floors" );
+        writeFile( _tempDir / "TestMap" / "Floors" / "0.json", "{}" );
     }
 
     void TearDown() override {
@@ -54,6 +57,12 @@ TEST_F( ManifestFactoryTest, CreateManifest_IncludesConfigAndAllMapFiles ) {
     EXPECT_NE( findByPath( manifest, "Config.json" ), nullptr );
     EXPECT_NE( findByPath( manifest, "TestMap/Map.json" ), nullptr );
     EXPECT_NE( findByPath( manifest, "TestMap/sub/file.txt" ), nullptr );
+}
+
+TEST_F( ManifestFactoryTest, CreateManifest_ExcludesFloorFiles ) {
+    const Engine::ManifestModel manifest = Engine::ManifestFactory::createManifest( configPath() );
+
+    EXPECT_EQ( findByPath( manifest, "TestMap/Floors/0.json" ), nullptr );
 }
 
 TEST_F( ManifestFactoryTest, CreateManifest_HashMatchesIndependentMd5 ) {

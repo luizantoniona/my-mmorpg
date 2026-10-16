@@ -4,13 +4,16 @@ include(GoogleTest)
 add_executable(
   MMORPGEngineTests
   AnimationModelTest.cpp
+  AppearanceFactoryTest.cpp
   CameraTest.cpp
   CharacterDTOTest.cpp
   CharacterIntentEquipDTOTest.cpp
+  ChunkDTOTest.cpp
   ChunkModelTest.cpp
   EntityCombatModelTest.cpp
   EntityMovementModelTest.cpp
   FloorFactoryTest.cpp
+  GroundItemDTOTest.cpp
   ItemCatalogTest.cpp
   ItemCategoryHelperTest.cpp
   ItemFactoryTest.cpp

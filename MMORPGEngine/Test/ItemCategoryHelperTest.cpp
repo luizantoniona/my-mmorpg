@@ -1,19 +1,40 @@
 #include <gtest/gtest.h>
 
 #include <set>
+#include <string>
 
 #include <MMORPGEngine/Data/Item/ItemCategoryHelper.h>
 
-TEST( ItemCategoryHelperTest, GrantedActions_Weapon_GrantsAttack ) {
-    EXPECT_EQ( Engine::ItemCategoryHelper::grantedActions( Engine::ItemCategoryEnum::WEAPON ), std::set<Engine::CombatActionEnum>( { Engine::CombatActionEnum::ATTACK } ) );
+namespace {
+
+class GrantedActionsCase {
+public:
+    GrantedActionsCase( std::string name, Engine::ItemCategoryEnum category, std::set<Engine::CombatActionEnum> expected ) :
+        name( std::move( name ) ),
+        category( category ),
+        expected( std::move( expected ) ) {
+    }
+
+    std::string name;
+    Engine::ItemCategoryEnum category;
+    std::set<Engine::CombatActionEnum> expected;
+};
+
+class ItemCategoryHelperGrantedActionsTest : public ::testing::TestWithParam<GrantedActionsCase> {};
+
+} // namespace
+
+TEST_P( ItemCategoryHelperGrantedActionsTest, GrantedActions_ReturnsExpectedActions ) {
+    EXPECT_EQ( Engine::ItemCategoryHelper::grantedActions( GetParam().category ), GetParam().expected );
 }
 
-TEST( ItemCategoryHelperTest, GrantedActions_Shield_GrantsBlock ) {
-    EXPECT_EQ( Engine::ItemCategoryHelper::grantedActions( Engine::ItemCategoryEnum::SHIELD ), std::set<Engine::CombatActionEnum>( { Engine::CombatActionEnum::BLOCK } ) );
-}
-
-TEST( ItemCategoryHelperTest, GrantedActions_OffhandArmorAndUnknown_GrantNothing ) {
-    EXPECT_TRUE( Engine::ItemCategoryHelper::grantedActions( Engine::ItemCategoryEnum::OFFHAND ).empty() );
-    EXPECT_TRUE( Engine::ItemCategoryHelper::grantedActions( Engine::ItemCategoryEnum::ARMOR ).empty() );
-    EXPECT_TRUE( Engine::ItemCategoryHelper::grantedActions( Engine::ItemCategoryEnum::UNKNOWN ).empty() );
-}
+INSTANTIATE_TEST_SUITE_P(
+    Categories,
+    ItemCategoryHelperGrantedActionsTest,
+    ::testing::Values(
+        GrantedActionsCase( "Weapon_GrantsAttack", Engine::ItemCategoryEnum::WEAPON, { Engine::CombatActionEnum::ATTACK } ),
+        GrantedActionsCase( "Shield_GrantsBlock", Engine::ItemCategoryEnum::SHIELD, { Engine::CombatActionEnum::BLOCK } ),
+        GrantedActionsCase( "Offhand_GrantsNothing", Engine::ItemCategoryEnum::OFFHAND, {} ),
+        GrantedActionsCase( "Armor_GrantsNothing", Engine::ItemCategoryEnum::ARMOR, {} ),
+        GrantedActionsCase( "Unknown_GrantsNothing", Engine::ItemCategoryEnum::UNKNOWN, {} ) ),
+    []( const ::testing::TestParamInfo<GrantedActionsCase>& info ) { return info.param.name; } );

@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <string>
+
+#include <QImage>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeFactory.h>
@@ -47,7 +50,103 @@ protected:
     std::filesystem::path _tempDir;
 };
 
+class InvalidCreatureCase {
+public:
+    InvalidCreatureCase( std::string name, bool includeName, bool includeVitals, int footprint ) :
+        name( std::move( name ) ),
+        includeName( includeName ),
+        includeVitals( includeVitals ),
+        footprint( footprint ) {
+    }
+
+    std::string name;
+    bool includeName;
+    bool includeVitals;
+    int footprint;
+};
+
+class NumericFieldCase {
+public:
+    NumericFieldCase( std::string name, std::string field, bool present, int value, uint32_t expected ) :
+        name( std::move( name ) ),
+        field( std::move( field ) ),
+        present( present ),
+        value( value ),
+        expected( expected ) {
+    }
+
+    std::string name;
+    std::string field;
+    bool present;
+    int value;
+    uint32_t expected;
+};
+
+class CreatureWrongTypeCase {
+public:
+    CreatureWrongTypeCase( std::string name, std::string parent, std::string key, Json::Value value ) :
+        name( std::move( name ) ),
+        parent( std::move( parent ) ),
+        key( std::move( key ) ),
+        value( std::move( value ) ) {
+    }
+
+    std::string name;
+    std::string parent;
+    std::string key;
+    Json::Value value;
+};
+
+class CreatureTypeFactoryWrongTypeTest : public CreatureTypeFactoryTest, public ::testing::WithParamInterface<CreatureWrongTypeCase> {};
+class CreatureTypeFactoryInvalidEntryTest : public CreatureTypeFactoryTest, public ::testing::WithParamInterface<InvalidCreatureCase> {};
+class CreatureTypeFactoryNumericFieldTest : public CreatureTypeFactoryTest, public ::testing::WithParamInterface<NumericFieldCase> {};
+
 } // namespace
+
+TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_ParsesAppearanceFromCreatureFolder ) {
+    QImage sheet( 8, 4, QImage::Format_ARGB32 );
+    sheet.fill( Qt::red );
+
+    writeIndex( { "GOBLIN" } );
+
+    Json::Value creatureType;
+    creatureType[ "Name" ] = "Goblin";
+    creatureType[ "Vitals" ][ "MaxHealth" ] = 10;
+    creatureType[ "Appearance" ][ "FrameSize" ][ 0 ] = 4;
+    creatureType[ "Appearance" ][ "FrameSize" ][ 1 ] = 4;
+    creatureType[ "Appearance" ][ "Clips" ][ "idle" ][ "File" ] = "idle.png";
+    creatureType[ "Appearance" ][ "Clips" ][ "idle" ][ "Rows" ][ "south" ] = 0;
+    creatureType[ "Appearance" ][ "Clips" ][ "idle" ][ "Count" ] = 2;
+    creatureType[ "Appearance" ][ "Clips" ][ "idle" ][ "FrameDurationMs" ] = 200;
+    writeCreature( "GOBLIN", creatureType );
+
+    sheet.save( QString::fromStdString( ( _tempDir / "TestMap" / "Creatures" / "GOBLIN" / "idle.png" ).string() ) );
+
+    Engine::CreatureTypeCatalog catalog;
+    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.creatureType( "GOBLIN" ), nullptr );
+
+    const Engine::AnimationModel& idle = catalog.creatureType( "GOBLIN" )->appearance().animation( Engine::AppearanceStateEnum::IDLE, Engine::AppearanceDirectionEnum::SOUTH );
+
+    EXPECT_TRUE( idle.isAnimated() );
+    EXPECT_EQ( idle.frameDurationMs(), 200 );
+}
+
+TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_WithoutAppearance_HasNullAppearance ) {
+    Json::Value creatureType;
+    creatureType[ "Name" ] = "Goblin";
+    creatureType[ "Vitals" ][ "MaxHealth" ] = 10;
+
+    writeIndex( { "GOBLIN" } );
+    writeCreature( "GOBLIN", creatureType );
+
+    Engine::CreatureTypeCatalog catalog;
+    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.creatureType( "GOBLIN" ), nullptr );
+    EXPECT_TRUE( catalog.creatureType( "GOBLIN" )->appearance().isNull() );
+}
 
 TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_ParsesFields ) {
     Json::Value creatureType;
@@ -68,9 +167,17 @@ TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_ParsesFields ) {
     EXPECT_EQ( catalog.creatureType( "GOBLIN" )->aggroRadius(), 5u );
 }
 
-TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MissingVitals_SkipsEntry ) {
+TEST_P( CreatureTypeFactoryInvalidEntryTest, CreateCreatureTypeCatalog_InvalidEntry_IsSkippedAndOthersLoad ) {
     Json::Value invalid;
-    invalid[ "Name" ] = "Goblin";
+    if ( GetParam().includeName ) {
+        invalid[ "Name" ] = "Goblin";
+    }
+    if ( GetParam().includeVitals ) {
+        invalid[ "Vitals" ][ "MaxHealth" ] = 10;
+    }
+    if ( GetParam().footprint >= 0 ) {
+        invalid[ "Footprint" ] = GetParam().footprint;
+    }
 
     Json::Value valid;
     valid[ "Name" ] = "Rat";
@@ -87,6 +194,95 @@ TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MissingVitals_SkipsEn
     ASSERT_NE( catalog.creatureType( "RAT" ), nullptr );
     EXPECT_EQ( catalog.creatureTypes().size(), 1u );
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    Entries,
+    CreatureTypeFactoryInvalidEntryTest,
+    ::testing::Values(
+        InvalidCreatureCase( "MissingVitals", true, false, -1 ),
+        InvalidCreatureCase( "MissingName", false, true, -1 ),
+        InvalidCreatureCase( "ZeroFootprint", true, true, 0 ) ),
+    []( const ::testing::TestParamInfo<InvalidCreatureCase>& info ) { return info.param.name; } );
+
+TEST_P( CreatureTypeFactoryWrongTypeTest, CreateCreatureTypeCatalog_WrongFieldType_SkipsEntryAndKeepsOthers ) {
+    Json::Value invalid;
+    invalid[ "Name" ] = "Goblin";
+    invalid[ "Vitals" ][ "MaxHealth" ] = 10;
+    if ( GetParam().parent.empty() ) {
+        invalid[ GetParam().key ] = GetParam().value;
+    } else {
+        invalid[ GetParam().parent ][ GetParam().key ] = GetParam().value;
+    }
+
+    Json::Value valid;
+    valid[ "Name" ] = "Rat";
+    valid[ "Vitals" ][ "MaxHealth" ] = 5;
+
+    writeIndex( { "GOBLIN", "RAT" } );
+    writeCreature( "GOBLIN", invalid );
+    writeCreature( "RAT", valid );
+
+    Engine::CreatureTypeCatalog catalog;
+    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.creatureType( "GOBLIN" ), nullptr );
+    EXPECT_NE( catalog.creatureType( "RAT" ), nullptr );
+    EXPECT_EQ( catalog.creatureTypes().size(), 1u );
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Fields,
+    CreatureTypeFactoryWrongTypeTest,
+    ::testing::Values(
+        CreatureWrongTypeCase( "NameIsNumber", "", "Name", Json::Value( 5 ) ),
+        CreatureWrongTypeCase( "VitalsIsNumber", "", "Vitals", Json::Value( 5 ) ),
+        CreatureWrongTypeCase( "MaxHealthIsText", "Vitals", "MaxHealth", Json::Value( "ten" ) ),
+        CreatureWrongTypeCase( "AggroRadiusIsText", "", "AggroRadius", Json::Value( "far" ) ),
+        CreatureWrongTypeCase( "AttackRangeIsNegative", "", "AttackRange", Json::Value( -1 ) ),
+        CreatureWrongTypeCase( "FootprintIsText", "", "Footprint", Json::Value( "big" ) ),
+        CreatureWrongTypeCase( "AppearanceIsNumber", "", "Appearance", Json::Value( 5 ) ) ),
+    []( const ::testing::TestParamInfo<CreatureWrongTypeCase>& info ) { return info.param.name; } );
+
+TEST_P( CreatureTypeFactoryNumericFieldTest, CreateCreatureTypeCatalog_NumericField ) {
+    Json::Value creature;
+    creature[ "Name" ] = "Creature";
+    creature[ "Vitals" ][ "MaxHealth" ] = 3;
+    if ( GetParam().present ) {
+        creature[ GetParam().field ] = GetParam().value;
+    }
+
+    writeIndex( { "CREATURE" } );
+    writeCreature( "CREATURE", creature );
+
+    Engine::CreatureTypeCatalog catalog;
+    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
+
+    const Engine::CreatureTypeModel* creatureType = catalog.creatureType( "CREATURE" );
+    ASSERT_NE( creatureType, nullptr );
+
+    uint32_t actual = 0;
+    if ( GetParam().field == "AttackRange" ) {
+        actual = creatureType->attackRange();
+    } else if ( GetParam().field == "AggroRadius" ) {
+        actual = creatureType->aggroRadius();
+    } else {
+        actual = creatureType->footprint();
+    }
+
+    EXPECT_EQ( actual, GetParam().expected );
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Fields,
+    CreatureTypeFactoryNumericFieldTest,
+    ::testing::Values(
+        NumericFieldCase( "AttackRange_Missing_DefaultsToMelee", "AttackRange", false, 0, 1 ),
+        NumericFieldCase( "AttackRange_Parsed", "AttackRange", true, 4, 4 ),
+        NumericFieldCase( "AggroRadius_Missing_DefaultsToPassive", "AggroRadius", false, 0, 0 ),
+        NumericFieldCase( "AggroRadius_Parsed", "AggroRadius", true, 5, 5 ),
+        NumericFieldCase( "Footprint_Missing_DefaultsToOne", "Footprint", false, 0, 1 ),
+        NumericFieldCase( "Footprint_Parsed", "Footprint", true, 3, 3 ) ),
+    []( const ::testing::TestParamInfo<NumericFieldCase>& info ) { return info.param.name; } );
 
 TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MultipleCreatureTypes_AllAdded ) {
     Json::Value first;
@@ -105,26 +301,6 @@ TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MultipleCreatureTypes
     Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
 
     EXPECT_EQ( catalog.creatureTypes().size(), 2u );
-}
-
-TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MissingName_SkipsEntry ) {
-    Json::Value invalid;
-    invalid[ "Vitals" ][ "MaxHealth" ] = 10;
-
-    Json::Value valid;
-    valid[ "Name" ] = "Rat";
-    valid[ "Vitals" ][ "MaxHealth" ] = 5;
-
-    writeIndex( { "GOBLIN", "RAT" } );
-    writeCreature( "GOBLIN", invalid );
-    writeCreature( "RAT", valid );
-
-    Engine::CreatureTypeCatalog catalog;
-    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
-
-    EXPECT_EQ( catalog.creatureType( "GOBLIN" ), nullptr );
-    ASSERT_NE( catalog.creatureType( "RAT" ), nullptr );
-    EXPECT_EQ( catalog.creatureTypes().size(), 1u );
 }
 
 TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_IndexedKeyWithoutFile_IsSkipped ) {
@@ -192,59 +368,6 @@ TEST_F( CreatureTypeFactoryTest, SaveCreatureTypeCatalog_PreservesUnknownFieldsI
     EXPECT_EQ( saved[ "Appearance" ][ "FrameSize" ][ 0 ].asInt(), 64 );
 }
 
-TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MissingAttackRange_DefaultsToMelee ) {
-    Json::Value creatureType;
-    creatureType[ "Name" ] = "Rat";
-    creatureType[ "Vitals" ][ "MaxHealth" ] = 3;
-
-    writeIndex( { "RAT" } );
-    writeCreature( "RAT", creatureType );
-
-    Engine::CreatureTypeCatalog catalog;
-    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
-
-    ASSERT_NE( catalog.creatureType( "RAT" ), nullptr );
-    EXPECT_EQ( catalog.creatureType( "RAT" )->attackRange(), 1u );
-}
-
-TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_ParsesFootprint_AndDefaultsToOne ) {
-    Json::Value cow;
-    cow[ "Name" ] = "Cow";
-    cow[ "Vitals" ][ "MaxHealth" ] = 30;
-    cow[ "Footprint" ] = 3;
-
-    Json::Value rat;
-    rat[ "Name" ] = "Rat";
-    rat[ "Vitals" ][ "MaxHealth" ] = 3;
-
-    writeIndex( { "COW", "RAT" } );
-    writeCreature( "COW", cow );
-    writeCreature( "RAT", rat );
-
-    Engine::CreatureTypeCatalog catalog;
-    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
-
-    ASSERT_NE( catalog.creatureType( "COW" ), nullptr );
-    ASSERT_NE( catalog.creatureType( "RAT" ), nullptr );
-    EXPECT_EQ( catalog.creatureType( "COW" )->footprint(), 3u );
-    EXPECT_EQ( catalog.creatureType( "RAT" )->footprint(), 1u );
-}
-
-TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_ZeroFootprint_SkipsEntry ) {
-    Json::Value invalid;
-    invalid[ "Name" ] = "Ghost";
-    invalid[ "Vitals" ][ "MaxHealth" ] = 3;
-    invalid[ "Footprint" ] = 0;
-
-    writeIndex( { "GHOST" } );
-    writeCreature( "GHOST", invalid );
-
-    Engine::CreatureTypeCatalog catalog;
-    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
-
-    EXPECT_EQ( catalog.creatureType( "GHOST" ), nullptr );
-}
-
 TEST_F( CreatureTypeFactoryTest, SaveCreatureTypeCatalog_RoundTripsFootprint ) {
     Engine::CreatureTypeCatalog original;
     Engine::CreatureTypeModel creatureType;
@@ -261,19 +384,4 @@ TEST_F( CreatureTypeFactoryTest, SaveCreatureTypeCatalog_RoundTripsFootprint ) {
 
     ASSERT_NE( reloaded.creatureType( "COW" ), nullptr );
     EXPECT_EQ( reloaded.creatureType( "COW" )->footprint(), 3u );
-}
-
-TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_MissingAggroRadius_DefaultsToPassive ) {
-    Json::Value creatureType;
-    creatureType[ "Name" ] = "Rat";
-    creatureType[ "Vitals" ][ "MaxHealth" ] = 3;
-
-    writeIndex( { "RAT" } );
-    writeCreature( "RAT", creatureType );
-
-    Engine::CreatureTypeCatalog catalog;
-    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
-
-    ASSERT_NE( catalog.creatureType( "RAT" ), nullptr );
-    EXPECT_EQ( catalog.creatureType( "RAT" )->aggroRadius(), 0u );
 }

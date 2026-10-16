@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <memory>
+#include <string>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
@@ -32,6 +33,41 @@ protected:
 
     std::filesystem::path _tempDir;
 };
+
+class InvalidSpawnAreaCase {
+public:
+    InvalidSpawnAreaCase( std::string name, bool includeX, bool includeY, bool includeWidth, bool includeHeight, Json::Value respawnSeconds ) :
+        name( std::move( name ) ),
+        includeX( includeX ),
+        includeY( includeY ),
+        includeWidth( includeWidth ),
+        includeHeight( includeHeight ),
+        respawnSeconds( std::move( respawnSeconds ) ) {
+    }
+
+    std::string name;
+    bool includeX;
+    bool includeY;
+    bool includeWidth;
+    bool includeHeight;
+    Json::Value respawnSeconds;
+};
+
+class SpawnAreaWrongTypeCase {
+public:
+    SpawnAreaWrongTypeCase( std::string name, std::string key, Json::Value value ) :
+        name( std::move( name ) ),
+        key( std::move( key ) ),
+        value( std::move( value ) ) {
+    }
+
+    std::string name;
+    std::string key;
+    Json::Value value;
+};
+
+class FloorFactorySpawnAreaWrongTypeTest : public FloorFactoryTest, public ::testing::WithParamInterface<SpawnAreaWrongTypeCase> {};
+class FloorFactoryInvalidSpawnAreaTest : public FloorFactoryTest, public ::testing::WithParamInterface<InvalidSpawnAreaCase> {};
 
 } // namespace
 
@@ -273,28 +309,22 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_ParsesFieldsAndSkipsUnknownCreat
     EXPECT_EQ( areas[ 0 ].creatures()[ 0 ].quantity(), 2u );
 }
 
-TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_MissingOrInvalidRespawnSeconds_SkipsEntry ) {
+TEST_P( FloorFactorySpawnAreaWrongTypeTest, CreateFloor_SpawnAreaWithWrongFieldType_IsSkipped ) {
+    Json::Value area;
+    area[ "X" ] = 0;
+    area[ "Y" ] = 0;
+    area[ "Width" ] = 2;
+    area[ "Height" ] = 2;
+    area[ "RespawnSeconds" ] = 30;
+    area[ GetParam().key ] = GetParam().value;
+
     Json::Value floorJson;
     floorJson[ "Z" ] = 8;
     floorJson[ "Tiles" ] = Json::Value( Json::arrayValue );
     floorJson[ "Objects" ] = Json::Value( Json::arrayValue );
+    floorJson[ "SpawnAreas" ].append( area );
 
-    Json::Value missing;
-    missing[ "X" ] = 0;
-    missing[ "Y" ] = 0;
-    missing[ "Width" ] = 2;
-    missing[ "Height" ] = 2;
-    floorJson[ "SpawnAreas" ].append( missing );
-
-    Json::Value zero = missing;
-    zero[ "RespawnSeconds" ] = 0;
-    floorJson[ "SpawnAreas" ].append( zero );
-
-    Json::Value text = missing;
-    text[ "RespawnSeconds" ] = "soon";
-    floorJson[ "SpawnAreas" ].append( text );
-
-    const std::string path = floorPath( "no_respawn_spawn_area.json" );
+    const std::string path = floorPath( "wrong_type_spawn_area.json" );
     ASSERT_TRUE( Engine::JsonHelper::saveJsonFile( path, floorJson ) );
 
     Engine::WorldModel world;
@@ -303,16 +333,77 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_MissingOrInvalidRespawnSeconds_S
     EXPECT_TRUE( world.spawnAreas( 8 ).empty() );
 }
 
-TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_MissingDimensions_SkipsEntry ) {
+INSTANTIATE_TEST_SUITE_P(
+    Fields,
+    FloorFactorySpawnAreaWrongTypeTest,
+    ::testing::Values(
+        SpawnAreaWrongTypeCase( "XIsText", "X", Json::Value( "left" ) ),
+        SpawnAreaWrongTypeCase( "YIsFraction", "Y", Json::Value( 1.5 ) ),
+        SpawnAreaWrongTypeCase( "WidthIsNegative", "Width", Json::Value( -2 ) ),
+        SpawnAreaWrongTypeCase( "HeightIsText", "Height", Json::Value( "tall" ) ),
+        SpawnAreaWrongTypeCase( "CreaturesIsText", "Creatures", Json::Value( "rats" ) ) ),
+    []( const ::testing::TestParamInfo<SpawnAreaWrongTypeCase>& info ) { return info.param.name; } );
+
+TEST_F( FloorFactoryTest, CreateFloor_MalformedGridAndEntries_DoNotThrow ) {
+    Json::Value badOverlay;
+    badOverlay[ "X" ] = "left";
+    badOverlay[ "Y" ] = 0;
+    badOverlay[ "Type" ] = 1;
+
+    Json::Value badObject;
+    badObject[ "X" ] = 0;
+    badObject[ "Y" ] = 0;
+    badObject[ "Type" ] = "tree";
+
     Json::Value floorJson;
-    floorJson[ "Z" ] = 7;
+    floorJson[ "Z" ] = 9;
+    floorJson[ "Tiles" ] = Json::Value( Json::arrayValue );
+    floorJson[ "Tiles" ].append( 5 );
+    Json::Value row( Json::arrayValue );
+    row.append( "grass" );
+    row.append( -1 );
+    floorJson[ "Tiles" ].append( row );
+    floorJson[ "Overlays" ] = Json::Value( Json::arrayValue );
+    floorJson[ "Overlays" ].append( badOverlay );
+    floorJson[ "Overlays" ].append( 7 );
+    floorJson[ "Objects" ] = Json::Value( Json::arrayValue );
+    floorJson[ "Objects" ].append( badObject );
+    floorJson[ "Objects" ].append( "tree" );
+    floorJson[ "SpawnAreas" ] = Json::Value( Json::arrayValue );
+    floorJson[ "SpawnAreas" ].append( 7 );
+
+    const std::string path = floorPath( "malformed_floor.json" );
+    ASSERT_TRUE( Engine::JsonHelper::saveJsonFile( path, floorJson ) );
+
+    Engine::WorldModel world;
+
+    EXPECT_NO_THROW( Engine::FloorFactory::createFloor( path, &world ) );
+    EXPECT_TRUE( world.spawnAreas( 9 ).empty() );
+}
+
+TEST_P( FloorFactoryInvalidSpawnAreaTest, CreateFloor_InvalidSpawnArea_IsSkipped ) {
+    Json::Value area;
+    if ( GetParam().includeX ) {
+        area[ "X" ] = 0;
+    }
+    if ( GetParam().includeY ) {
+        area[ "Y" ] = 0;
+    }
+    if ( GetParam().includeWidth ) {
+        area[ "Width" ] = 2;
+    }
+    if ( GetParam().includeHeight ) {
+        area[ "Height" ] = 2;
+    }
+    if ( GetParam().respawnSeconds.isNumeric() || GetParam().respawnSeconds.isString() ) {
+        area[ "RespawnSeconds" ] = GetParam().respawnSeconds;
+    }
+
+    Json::Value floorJson;
+    floorJson[ "Z" ] = 8;
     floorJson[ "Tiles" ] = Json::Value( Json::arrayValue );
     floorJson[ "Objects" ] = Json::Value( Json::arrayValue );
-
-    Json::Value invalidArea;
-    invalidArea[ "X" ] = 0;
-    invalidArea[ "Y" ] = 0;
-    floorJson[ "SpawnAreas" ].append( invalidArea );
+    floorJson[ "SpawnAreas" ].append( area );
 
     const std::string path = floorPath( "invalid_spawn_area.json" );
     ASSERT_TRUE( Engine::JsonHelper::saveJsonFile( path, floorJson ) );
@@ -320,5 +411,19 @@ TEST_F( FloorFactoryTest, CreateFloor_SpawnArea_MissingDimensions_SkipsEntry ) {
     Engine::WorldModel world;
     Engine::FloorFactory::createFloor( path, &world );
 
-    EXPECT_TRUE( world.spawnAreas( 7 ).empty() );
+    EXPECT_TRUE( world.spawnAreas( 8 ).empty() );
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    Areas,
+    FloorFactoryInvalidSpawnAreaTest,
+    ::testing::Values(
+        InvalidSpawnAreaCase( "MissingRespawnSeconds", true, true, true, true, Json::Value( Json::nullValue ) ),
+        InvalidSpawnAreaCase( "ZeroRespawnSeconds", true, true, true, true, Json::Value( 0 ) ),
+        InvalidSpawnAreaCase( "NegativeRespawnSeconds", true, true, true, true, Json::Value( -5 ) ),
+        InvalidSpawnAreaCase( "TextRespawnSeconds", true, true, true, true, Json::Value( "soon" ) ),
+        InvalidSpawnAreaCase( "MissingX", false, true, true, true, Json::Value( 30 ) ),
+        InvalidSpawnAreaCase( "MissingY", true, false, true, true, Json::Value( 30 ) ),
+        InvalidSpawnAreaCase( "MissingWidth", true, true, false, true, Json::Value( 30 ) ),
+        InvalidSpawnAreaCase( "MissingHeight", true, true, true, false, Json::Value( 30 ) ) ),
+    []( const ::testing::TestParamInfo<InvalidSpawnAreaCase>& info ) { return info.param.name; } );
