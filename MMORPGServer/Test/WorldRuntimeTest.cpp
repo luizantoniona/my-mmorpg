@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <set>
+#include <string>
 #include <utility>
 
 #include <MMORPGEngine/Commons/Singleton.h>
@@ -329,43 +330,82 @@ TEST( WorldRuntimeTest, CharactersNear_ExcludesSelf ) {
     EXPECT_TRUE( worldRuntime.charactersNear( 1 ).empty() );
 }
 
-TEST( WorldRuntimeTest, CharactersNear_SameChunk_IsIncluded ) {
+namespace {
+
+class CharactersNearCase {
+public:
+    CharactersNearCase( std::string name, int x, int y, int z, bool expectedNear ) :
+        name( std::move( name ) ),
+        x( x ),
+        y( y ),
+        z( z ),
+        expectedNear( expectedNear ) {
+    }
+
+    std::string name;
+    int x;
+    int y;
+    int z;
+    bool expectedNear;
+};
+
+class WorldRuntimeCharactersNearCharacterTest : public ::testing::TestWithParam<CharactersNearCase> {};
+class WorldRuntimeCharactersNearPositionTest : public ::testing::TestWithParam<CharactersNearCase> {};
+
+std::string charactersNearCaseName( const ::testing::TestParamInfo<CharactersNearCase>& info ) {
+    return info.param.name;
+}
+
+} // namespace
+
+TEST_P( WorldRuntimeCharactersNearCharacterTest, CharactersNear_OtherCharacter ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
-    worldRuntime.addCharacter( makeCharacter( 2, 1, 1, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 2, GetParam().x, GetParam().y, GetParam().z ) );
 
     const std::vector<int> nearby = worldRuntime.charactersNear( 1 );
 
-    ASSERT_EQ( nearby.size(), 1u );
-    EXPECT_EQ( nearby[ 0 ], 2 );
+    if ( GetParam().expectedNear ) {
+        ASSERT_EQ( nearby.size(), 1u );
+        EXPECT_EQ( nearby[ 0 ], 2 );
+    } else {
+        EXPECT_TRUE( nearby.empty() );
+    }
 }
 
-TEST( WorldRuntimeTest, CharactersNear_AdjacentChunk_IsIncluded ) {
+INSTANTIATE_TEST_SUITE_P(
+    Neighborhood,
+    WorldRuntimeCharactersNearCharacterTest,
+    ::testing::Values(
+        CharactersNearCase( "SameChunk_IsIncluded", 1, 1, 0, true ),
+        CharactersNearCase( "AdjacentChunk_IsIncluded", Engine::WorldConstants::CHUNK_SIZE, 0, 0, true ),
+        CharactersNearCase( "DiagonalChunk_IsIncluded", Engine::WorldConstants::CHUNK_SIZE, Engine::WorldConstants::CHUNK_SIZE, 0, true ),
+        CharactersNearCase( "TwoChunksAwayInX_IsExcluded", Engine::WorldConstants::CHUNK_SIZE * 2, 0, 0, false ),
+        CharactersNearCase( "TwoChunksAwayInY_IsExcluded", 0, Engine::WorldConstants::CHUNK_SIZE * 2, 0, false ),
+        CharactersNearCase( "DifferentFloor_IsExcluded", 0, 0, 1, false ) ),
+    charactersNearCaseName );
+
+TEST_P( WorldRuntimeCharactersNearPositionTest, CharactersNearPosition_Character ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
-    worldRuntime.addCharacter( makeCharacter( 2, 32, 0, 0 ) );
 
-    const std::vector<int> nearby = worldRuntime.charactersNear( 1 );
+    Engine::EntityPositionModel position;
+    position.setX( GetParam().x );
+    position.setY( GetParam().y );
+    position.setZ( GetParam().z );
 
-    ASSERT_EQ( nearby.size(), 1u );
-    EXPECT_EQ( nearby[ 0 ], 2 );
+    EXPECT_EQ( worldRuntime.charactersNear( position ).size(), GetParam().expectedNear ? 1u : 0u );
 }
 
-TEST( WorldRuntimeTest, CharactersNear_TwoChunksAway_IsExcluded ) {
-    Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
-    worldRuntime.addCharacter( makeCharacter( 2, 64, 0, 0 ) );
-
-    EXPECT_TRUE( worldRuntime.charactersNear( 1 ).empty() );
-}
-
-TEST( WorldRuntimeTest, CharactersNear_DifferentFloor_IsExcluded ) {
-    Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
-    worldRuntime.addCharacter( makeCharacter( 2, 0, 0, 1 ) );
-
-    EXPECT_TRUE( worldRuntime.charactersNear( 1 ).empty() );
-}
+INSTANTIATE_TEST_SUITE_P(
+    Neighborhood,
+    WorldRuntimeCharactersNearPositionTest,
+    ::testing::Values(
+        CharactersNearCase( "SameChunk_IsIncluded", 1, 1, 0, true ),
+        CharactersNearCase( "AdjacentChunk_IsIncluded", Engine::WorldConstants::CHUNK_SIZE, 0, 0, true ),
+        CharactersNearCase( "TwoChunksAway_IsExcluded", Engine::WorldConstants::CHUNK_SIZE * 2, 0, 0, false ),
+        CharactersNearCase( "DifferentFloor_IsExcluded", 0, 0, 1, false ) ),
+    charactersNearCaseName );
 
 TEST( WorldRuntimeTest, CharactersNearPosition_IncludesEveryoneInRange ) {
     Server::WorldRuntime worldRuntime( nullptr );
@@ -378,30 +418,6 @@ TEST( WorldRuntimeTest, CharactersNearPosition_IncludesEveryoneInRange ) {
     position.setZ( 0 );
 
     EXPECT_EQ( worldRuntime.charactersNear( position ).size(), 2u );
-}
-
-TEST( WorldRuntimeTest, CharactersNearPosition_TwoChunksAway_IsExcluded ) {
-    Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
-
-    Engine::EntityPositionModel position;
-    position.setX( 2 * Engine::WorldConstants::CHUNK_SIZE );
-    position.setY( 0 );
-    position.setZ( 0 );
-
-    EXPECT_TRUE( worldRuntime.charactersNear( position ).empty() );
-}
-
-TEST( WorldRuntimeTest, CharactersNearPosition_DifferentFloor_IsExcluded ) {
-    Server::WorldRuntime worldRuntime( nullptr );
-    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
-
-    Engine::EntityPositionModel position;
-    position.setX( 0 );
-    position.setY( 0 );
-    position.setZ( 1 );
-
-    EXPECT_TRUE( worldRuntime.charactersNear( position ).empty() );
 }
 
 TEST( WorldRuntimeTest, MoveCharacter_OutOfNeighborhood_UpdatesCharactersNear ) {
@@ -702,57 +718,69 @@ TEST( WorldRuntimeTest, SpawnSystem_Respawn_PublishesCreatureEntered ) {
     EXPECT_EQ( entered, 1 );
 }
 
-TEST( WorldRuntimeTest, Move_OntoUpperRowOfBlockingObjectFootprint_IsBlocked ) {
+namespace {
+
+class MoveOntoObjectCase {
+public:
+    MoveOntoObjectCase( std::string name, bool objectWalkable, int startX, int startY, int dx, int dy, bool expectedMoved ) :
+        name( std::move( name ) ),
+        objectWalkable( objectWalkable ),
+        startX( startX ),
+        startY( startY ),
+        dx( dx ),
+        dy( dy ),
+        expectedMoved( expectedMoved ) {
+    }
+
+    std::string name;
+    bool objectWalkable;
+    int startX;
+    int startY;
+    int dx;
+    int dy;
+    bool expectedMoved;
+};
+
+class WorldRuntimeMoveOntoObjectTest : public ::testing::TestWithParam<MoveOntoObjectCase> {};
+
+} // namespace
+
+TEST_P( WorldRuntimeMoveOntoObjectTest, Move_OntoObjectFootprint ) {
+    const uint32_t objectType = GetParam().objectWalkable ? WALKABLE_OBJECT_TYPE : BLOCKING_OBJECT_TYPE;
+
     auto world = std::make_unique<Engine::WorldModel>();
     world->addFloor( 0 );
     paintWalkableTiles( *world, 0, 5, 5, 10, 10 );
-    addObjectType( BLOCKING_OBJECT_TYPE, false, 2, 2 );
-    world->setObject( 10, 10, 0, BLOCKING_OBJECT_TYPE );
+    addObjectType( objectType, GetParam().objectWalkable, 2, 2 );
+    world->setObject( 10, 10, 0, objectType );
     Server::WorldRuntime worldRuntime( std::move( world ) );
-    worldRuntime.addCharacter( makeCharacter( 1, 11, 8, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 1, GetParam().startX, GetParam().startY, 0 ) );
 
-    EXPECT_FALSE( worldRuntime.movementSystem().move( 1, 0, 1 ) );
-    EXPECT_EQ( worldRuntime.character( 1 )->position().y(), 8 );
+    EXPECT_EQ( worldRuntime.movementSystem().move( 1, GetParam().dx, GetParam().dy ), GetParam().expectedMoved );
+
+    const int expectedX = GetParam().expectedMoved ? GetParam().startX + GetParam().dx : GetParam().startX;
+    const int expectedY = GetParam().expectedMoved ? GetParam().startY + GetParam().dy : GetParam().startY;
+    EXPECT_EQ( worldRuntime.character( 1 )->position().x(), expectedX );
+    EXPECT_EQ( worldRuntime.character( 1 )->position().y(), expectedY );
 }
 
-TEST( WorldRuntimeTest, Move_OntoRightColumnOfBlockingObjectFootprint_IsBlocked ) {
-    auto world = std::make_unique<Engine::WorldModel>();
-    world->addFloor( 0 );
-    paintWalkableTiles( *world, 0, 5, 5, 10, 10 );
-    addObjectType( BLOCKING_OBJECT_TYPE, false, 2, 2 );
-    world->setObject( 10, 10, 0, BLOCKING_OBJECT_TYPE );
-    Server::WorldRuntime worldRuntime( std::move( world ) );
-    worldRuntime.addCharacter( makeCharacter( 1, 12, 10, 0 ) );
-
-    EXPECT_FALSE( worldRuntime.movementSystem().move( 1, -1, 0 ) );
-    EXPECT_EQ( worldRuntime.character( 1 )->position().x(), 12 );
-}
-
-TEST( WorldRuntimeTest, Move_OntoCellsAroundBlockingObjectFootprint_IsAllowed ) {
-    auto world = std::make_unique<Engine::WorldModel>();
-    world->addFloor( 0 );
-    paintWalkableTiles( *world, 0, 5, 5, 10, 10 );
-    addObjectType( BLOCKING_OBJECT_TYPE, false, 2, 2 );
-    world->setObject( 10, 10, 0, BLOCKING_OBJECT_TYPE );
-    Server::WorldRuntime worldRuntime( std::move( world ) );
-    worldRuntime.addCharacter( makeCharacter( 1, 10, 12, 0 ) );
-
-    EXPECT_TRUE( worldRuntime.movementSystem().move( 1, 0, -1 ) );
-    EXPECT_EQ( worldRuntime.character( 1 )->position().y(), 11 );
-}
-
-TEST( WorldRuntimeTest, Move_OntoWalkableObject_IsAllowed ) {
-    auto world = std::make_unique<Engine::WorldModel>();
-    world->addFloor( 0 );
-    paintWalkableTiles( *world, 0, 5, 5, 10, 10 );
-    addObjectType( WALKABLE_OBJECT_TYPE, true, 2, 2 );
-    world->setObject( 10, 10, 0, WALKABLE_OBJECT_TYPE );
-    Server::WorldRuntime worldRuntime( std::move( world ) );
-    worldRuntime.addCharacter( makeCharacter( 1, 9, 10, 0 ) );
-
-    EXPECT_TRUE( worldRuntime.movementSystem().move( 1, 1, 0 ) );
-    EXPECT_EQ( worldRuntime.character( 1 )->position().x(), 10 );
-}
+INSTANTIATE_TEST_SUITE_P(
+    TwoByTwoFootprintAnchoredAtBottomLeft,
+    WorldRuntimeMoveOntoObjectTest,
+    ::testing::Values(
+        MoveOntoObjectCase( "Blocking_UpperRightCell_IsBlocked", false, 11, 8, 0, 1, false ),
+        MoveOntoObjectCase( "Blocking_UpperLeftCell_IsBlocked", false, 10, 8, 0, 1, false ),
+        MoveOntoObjectCase( "Blocking_RightColumnLowerCell_IsBlocked", false, 12, 10, -1, 0, false ),
+        MoveOntoObjectCase( "Blocking_RightColumnUpperCell_IsBlocked", false, 12, 9, -1, 0, false ),
+        MoveOntoObjectCase( "Blocking_AnchorCell_IsBlocked", false, 9, 10, 1, 0, false ),
+        MoveOntoObjectCase( "Blocking_FromBelowIntoAnchorCell_IsBlocked", false, 10, 11, 0, -1, false ),
+        MoveOntoObjectCase( "Blocking_RowBelowFootprint_IsAllowed", false, 10, 12, 0, -1, true ),
+        MoveOntoObjectCase( "Blocking_RowAboveFootprint_IsAllowed", false, 10, 7, 0, 1, true ),
+        MoveOntoObjectCase( "Blocking_ColumnLeftOfFootprint_IsAllowed", false, 8, 10, 1, 0, true ),
+        MoveOntoObjectCase( "Blocking_ColumnRightOfFootprint_IsAllowed", false, 13, 10, -1, 0, true ),
+        MoveOntoObjectCase( "Walkable_AnchorCell_IsAllowed", true, 9, 10, 1, 0, true ),
+        MoveOntoObjectCase( "Walkable_UpperRightCell_IsAllowed", true, 11, 8, 0, 1, true ) ),
+    []( const ::testing::TestParamInfo<MoveOntoObjectCase>& info ) { return info.param.name; } );
 
 TEST( WorldRuntimeTest, Tick_CreatureDoesNotWalkOntoEmptyTile ) {
     auto world = makeWorldWithSpawnArea( 0, 5, 5, 2, 2, 3, 1 );
@@ -1320,15 +1348,15 @@ TEST( WorldRuntimeTest, Tick_PassiveCreature_NeverAttacks ) {
 
 namespace {
 
-constexpr uint32_t SWORD_ITEM = 9101;
-constexpr uint32_t GREATSWORD_ITEM = 9102;
-constexpr uint32_t HEAVY_SHIELD_ITEM = 9103;
-constexpr uint32_t SMALL_SHIELD_ITEM = 9104;
-constexpr uint32_t HELMET_ITEM = 9105;
-constexpr uint32_t RING_ITEM = 9106;
+const QString SWORD_ITEM( "EQTEST_SWORD_ITEM" );
+const QString GREATSWORD_ITEM( "EQTEST_GREATSWORD_ITEM" );
+const QString HEAVY_SHIELD_ITEM( "EQTEST_HEAVY_SHIELD_ITEM" );
+const QString SMALL_SHIELD_ITEM( "EQTEST_SMALL_SHIELD_ITEM" );
+const QString HELMET_ITEM( "EQTEST_HELMET_ITEM" );
+const QString RING_ITEM( "EQTEST_RING_ITEM" );
 constexpr uint32_t INVENTORY_CAPACITY = 20;
 
-void registerEquipmentItem( uint32_t idItem, const QString& type, Engine::ItemCategoryEnum category, Engine::ItemSlotEnum slot, Engine::HandRequirementEnum handRequirement, const std::set<Engine::CombatActionEnum>& disabledActions ) {
+void registerEquipmentItem( const QString& idItem, const QString& type, Engine::ItemCategoryEnum category, Engine::ItemSlotEnum slot, Engine::HandRequirementEnum handRequirement, const std::set<Engine::CombatActionEnum>& disabledActions ) {
     Engine::ItemTypeModel itemType;
     itemType.setType( type );
     itemType.setName( type );
@@ -1356,7 +1384,7 @@ void registerEquipmentItems() {
     registerEquipmentItem( RING_ITEM, "EQTEST_RING", Engine::ItemCategoryEnum::ARMOR, Engine::ItemSlotEnum::RING, Engine::HandRequirementEnum::UNKNOWN, {} );
 }
 
-Engine::CharacterInventoryModel inventoryEntry( uint32_t position, uint32_t idItem ) {
+Engine::CharacterInventoryModel inventoryEntry( uint32_t position, const QString& idItem ) {
     Engine::CharacterInventoryModel entry;
     entry.setPosition( position );
     entry.setIdItem( idItem );
@@ -1365,7 +1393,7 @@ Engine::CharacterInventoryModel inventoryEntry( uint32_t position, uint32_t idIt
     return entry;
 }
 
-Engine::CharacterEquipmentModel equipmentEntry( Engine::EquipmentSlotEnum slot, uint32_t idItem ) {
+Engine::CharacterEquipmentModel equipmentEntry( Engine::EquipmentSlotEnum slot, const QString& idItem ) {
     Engine::CharacterEquipmentModel entry;
     entry.setSlot( slot );
     entry.setIdItem( idItem );
@@ -1373,24 +1401,24 @@ Engine::CharacterEquipmentModel equipmentEntry( Engine::EquipmentSlotEnum slot, 
     return entry;
 }
 
-uint32_t equippedItem( const Engine::CharacterModel& character, Engine::EquipmentSlotEnum slot ) {
+QString equippedItem( const Engine::CharacterModel& character, Engine::EquipmentSlotEnum slot ) {
     for ( const Engine::CharacterEquipmentModel& entry : character.equipment() ) {
         if ( entry.slot() == slot ) {
             return entry.idItem();
         }
     }
 
-    return 0;
+    return QString();
 }
 
-uint32_t inventoryItem( const Engine::CharacterModel& character, uint32_t position ) {
+QString inventoryItem( const Engine::CharacterModel& character, uint32_t position ) {
     for ( const Engine::CharacterInventoryModel& entry : character.inventory() ) {
         if ( entry.position() == position ) {
             return entry.idItem();
         }
     }
 
-    return 0;
+    return QString();
 }
 
 Engine::CharacterModel* addEquipmentCharacter( Server::WorldRuntime& worldRuntime, const std::vector<Engine::CharacterInventoryModel>& inventory, const std::vector<Engine::CharacterEquipmentModel>& equipment ) {
@@ -1426,7 +1454,7 @@ TEST( WorldRuntimeTest, Equip_Weapon_GoesToRightHandAndLeavesInventory ) {
     EXPECT_TRUE( worldRuntime.equipCharacter( 1, 3 ) );
 
     EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), SWORD_ITEM );
-    EXPECT_EQ( inventoryItem( *character, 3 ), 0u );
+    EXPECT_EQ( inventoryItem( *character, 3 ), QString() );
     EXPECT_TRUE( character->combat().isActionAvailable( Engine::CombatActionEnum::ATTACK ) );
 }
 
@@ -1459,7 +1487,7 @@ TEST( WorldRuntimeTest, Equip_TwoHandedOverEquippedWeapon_SendsWeaponToFirstFree
 
     EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), GREATSWORD_ITEM );
     EXPECT_EQ( inventoryItem( *character, 0 ), SWORD_ITEM );
-    EXPECT_EQ( inventoryItem( *character, 5 ), 0u );
+    EXPECT_EQ( inventoryItem( *character, 5 ), QString() );
 }
 
 TEST( WorldRuntimeTest, Equip_TwoHandedWeapon_SendsShieldBackToInventory ) {
@@ -1469,7 +1497,7 @@ TEST( WorldRuntimeTest, Equip_TwoHandedWeapon_SendsShieldBackToInventory ) {
     EXPECT_TRUE( worldRuntime.equipCharacter( 1, 0 ) );
 
     EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), GREATSWORD_ITEM );
-    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), 0u );
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), QString() );
     EXPECT_EQ( inventoryItem( *character, 0 ), SMALL_SHIELD_ITEM );
     EXPECT_FALSE( character->combat().isActionAvailable( Engine::CombatActionEnum::BLOCK ) );
 }
@@ -1481,7 +1509,7 @@ TEST( WorldRuntimeTest, Equip_ShieldWhileTwoHandedEquipped_SendsTwoHandedBackToI
     EXPECT_TRUE( worldRuntime.equipCharacter( 1, 0 ) );
 
     EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), SMALL_SHIELD_ITEM );
-    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), 0u );
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::RIGHT_HAND ), QString() );
     EXPECT_EQ( inventoryItem( *character, 0 ), GREATSWORD_ITEM );
 }
 
@@ -1542,7 +1570,7 @@ TEST( WorldRuntimeTest, Unequip_ReturnsItemToFirstFreePositionAndRestoresActions
 
     EXPECT_TRUE( worldRuntime.unequipCharacter( 1, Engine::EquipmentSlotEnum::LEFT_HAND ) );
 
-    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), 0u );
+    EXPECT_EQ( equippedItem( *character, Engine::EquipmentSlotEnum::LEFT_HAND ), QString() );
     EXPECT_EQ( inventoryItem( *character, 1 ), HEAVY_SHIELD_ITEM );
     EXPECT_FALSE( character->combat().isActionAvailable( Engine::CombatActionEnum::BLOCK ) );
     EXPECT_TRUE( character->combat().isActionAvailable( Engine::CombatActionEnum::DODGE ) );
@@ -1579,4 +1607,411 @@ TEST( WorldRuntimeTest, Attack_WhenAttackActionUnavailable_IsBlocked ) {
 
     EXPECT_FALSE( worldRuntime.combatSystem().attack( 1, 1, 0 ) );
     EXPECT_DOUBLE_EQ( character->vitals().stamina(), 100.0 );
+}
+
+TEST( WorldRuntimeTest, Drop_RemovesItemFromInventoryAndCreatesGroundItemAtCharacterTile ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 2, SWORD_ITEM ) }, {} );
+    character->position().setX( 5 );
+    character->position().setY( 6 );
+
+    EXPECT_TRUE( worldRuntime.dropCharacterItem( 1, 2 ) );
+
+    EXPECT_EQ( inventoryItem( *character, 2 ), QString() );
+
+    const std::vector<Engine::GroundItemModel> groundItems = worldRuntime.groundItemsNear( character->position() );
+
+    ASSERT_EQ( groundItems.size(), 1u );
+    EXPECT_EQ( groundItems.front().idItem(), SWORD_ITEM );
+    EXPECT_EQ( groundItems.front().position().x(), 5 );
+    EXPECT_EQ( groundItems.front().position().y(), 6 );
+}
+
+TEST( WorldRuntimeTest, Drop_EmptyPositionOrUnknownCharacter_IsRejected ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+
+    EXPECT_FALSE( worldRuntime.dropCharacterItem( 1, 7 ) );
+    EXPECT_FALSE( worldRuntime.dropCharacterItem( 99, 0 ) );
+    EXPECT_EQ( inventoryItem( *character, 0 ), SWORD_ITEM );
+    EXPECT_TRUE( worldRuntime.groundItemsNear( character->position() ).empty() );
+}
+
+TEST( WorldRuntimeTest, Drop_PublishesInventoryChangedAndGroundItemEntered ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+
+    bool inventoryChanged = false;
+    Json::Value groundItemPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_INVENTORY_CHANGED, [ &inventoryChanged ]( const Server::WorldEvent& ) {
+        inventoryChanged = true;
+    } );
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::GROUND_ITEM_ENTERED, [ &groundItemPayload ]( const Server::WorldEvent& event ) {
+        groundItemPayload = event.payload();
+    } );
+
+    worldRuntime.dropCharacterItem( 1, 0 );
+
+    EXPECT_TRUE( inventoryChanged );
+    EXPECT_EQ( QString::fromStdString( groundItemPayload[ "idItem" ].asString() ), SWORD_ITEM );
+    EXPECT_GT( groundItemPayload[ "idGroundItem" ].asInt(), 0 );
+}
+
+TEST( WorldRuntimeTest, Pickup_AdjacentGroundItem_MovesItToFirstFreeInventoryPosition ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, HELMET_ITEM ), inventoryEntry( 1, SWORD_ITEM ) }, {} );
+    worldRuntime.dropCharacterItem( 1, 1 );
+    character->position().setX( 1 );
+
+    const int idGroundItem = worldRuntime.groundItemsNear( character->position() ).front().idGroundItem();
+
+    EXPECT_TRUE( worldRuntime.pickupCharacterItem( 1, idGroundItem ) );
+
+    EXPECT_EQ( inventoryItem( *character, 1 ), SWORD_ITEM );
+    EXPECT_TRUE( worldRuntime.groundItemsNear( character->position() ).empty() );
+}
+
+TEST( WorldRuntimeTest, Pickup_PublishesInventoryChangedAndGroundItemLeft ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+    worldRuntime.dropCharacterItem( 1, 0 );
+    const int idGroundItem = worldRuntime.groundItemsNear( Engine::EntityPositionModel() ).front().idGroundItem();
+
+    bool inventoryChanged = false;
+    Json::Value leftPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_INVENTORY_CHANGED, [ &inventoryChanged ]( const Server::WorldEvent& ) {
+        inventoryChanged = true;
+    } );
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::GROUND_ITEM_LEFT, [ &leftPayload ]( const Server::WorldEvent& event ) {
+        leftPayload = event.payload();
+    } );
+
+    worldRuntime.pickupCharacterItem( 1, idGroundItem );
+
+    EXPECT_TRUE( inventoryChanged );
+    EXPECT_EQ( leftPayload[ "idGroundItem" ].asInt(), idGroundItem );
+}
+
+TEST( WorldRuntimeTest, Pickup_OutOfReachOrAnotherFloor_IsRejected ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+    worldRuntime.dropCharacterItem( 1, 0 );
+    const int idGroundItem = worldRuntime.groundItemsNear( character->position() ).front().idGroundItem();
+
+    character->position().setX( 2 );
+    EXPECT_FALSE( worldRuntime.pickupCharacterItem( 1, idGroundItem ) );
+
+    character->position().setX( 0 );
+    character->position().setZ( 1 );
+    EXPECT_FALSE( worldRuntime.pickupCharacterItem( 1, idGroundItem ) );
+
+    character->position().setZ( 0 );
+    EXPECT_EQ( worldRuntime.groundItemsNear( character->position() ).size(), 1u );
+}
+
+TEST( WorldRuntimeTest, Pickup_UnknownGroundItem_IsRejected ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    addEquipmentCharacter( worldRuntime, {}, {} );
+
+    EXPECT_FALSE( worldRuntime.pickupCharacterItem( 1, 123 ) );
+}
+
+TEST( WorldRuntimeTest, Pickup_WhenInventoryIsFull_KeepsGroundItem ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+    worldRuntime.dropCharacterItem( 1, 0 );
+    const int idGroundItem = worldRuntime.groundItemsNear( character->position() ).front().idGroundItem();
+
+    std::vector<Engine::CharacterInventoryModel> fullInventory;
+    for ( uint32_t position = 0; position < INVENTORY_CAPACITY; ++position ) {
+        fullInventory.push_back( inventoryEntry( position, HELMET_ITEM ) );
+    }
+    character->setInventory( fullInventory );
+
+    EXPECT_FALSE( worldRuntime.pickupCharacterItem( 1, idGroundItem ) );
+    EXPECT_EQ( worldRuntime.groundItemsNear( character->position() ).size(), 1u );
+}
+
+TEST( WorldRuntimeTest, GroundItemsNear_TwoChunksAwayOrOtherFloor_IsExcluded ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* character = addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+    worldRuntime.dropCharacterItem( 1, 0 );
+
+    Engine::EntityPositionModel farAway;
+    farAway.setX( Engine::WorldConstants::CHUNK_SIZE * 2 );
+
+    Engine::EntityPositionModel otherFloor;
+    otherFloor.setZ( 1 );
+
+    EXPECT_EQ( worldRuntime.groundItemsNear( character->position() ).size(), 1u );
+    EXPECT_TRUE( worldRuntime.groundItemsNear( farAway ).empty() );
+    EXPECT_TRUE( worldRuntime.groundItemsNear( otherFloor ).empty() );
+}
+
+namespace {
+
+Engine::EntityPositionModel positionAt( int x, int y, int z ) {
+    Engine::EntityPositionModel position;
+    position.setX( x );
+    position.setY( y );
+    position.setZ( z );
+
+    return position;
+}
+
+} // namespace
+
+TEST( WorldRuntimeTest, MoveCharacter_CrossingChunkOutOfView_PublishesVisibilityChangedWithPreviousPosition ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 10, 20, 0 ) );
+
+    Json::Value receivedPayload;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_VISIBILITY_CHANGED, [ &receivedPayload ]( const Server::WorldEvent& event ) {
+        receivedPayload = event.payload();
+    } );
+
+    worldRuntime.movementSystem().moveCharacter( 1, Engine::WorldConstants::CHUNK_SIZE * 2, 20, 0 );
+
+    EXPECT_EQ( receivedPayload[ "idCharacter" ].asInt(), 1 );
+    EXPECT_EQ( receivedPayload[ "previousX" ].asInt(), 10 );
+    EXPECT_EQ( receivedPayload[ "previousY" ].asInt(), 20 );
+    EXPECT_EQ( receivedPayload[ "x" ].asInt(), Engine::WorldConstants::CHUNK_SIZE * 2 );
+}
+
+TEST( WorldRuntimeTest, MoveCharacter_InsideSameChunk_DoesNotPublishVisibilityChanged ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    bool published = false;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_VISIBILITY_CHANGED, [ &published ]( const Server::WorldEvent& ) {
+        published = true;
+    } );
+
+    worldRuntime.movementSystem().moveCharacter( 1, 3, 4, 0 );
+
+    EXPECT_FALSE( published );
+}
+
+TEST( WorldRuntimeTest, MoveCharacter_ChangingFloor_PublishesVisibilityChanged ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    bool published = false;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_VISIBILITY_CHANGED, [ &published ]( const Server::WorldEvent& ) {
+        published = true;
+    } );
+
+    worldRuntime.movementSystem().moveCharacter( 1, 0, 0, 1 );
+
+    EXPECT_TRUE( published );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_CharacterLeavingView_ListsOtherCharacterAsLeft ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 2, 0, 0, 0 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilityDelta( positionAt( 0, 0, 0 ), positionAt( 100, 100, 0 ), 2 );
+
+    EXPECT_EQ( delta.charactersLeft, std::vector<int>( { 1 } ) );
+    EXPECT_TRUE( delta.charactersEntered.empty() );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_CharacterEnteringView_ListsOtherCharacterAsEntered ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 2, 0, 0, 0 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilityDelta( positionAt( 100, 100, 0 ), positionAt( 0, 0, 0 ), 2 );
+
+    EXPECT_EQ( delta.charactersEntered, std::vector<int>( { 1 } ) );
+    EXPECT_TRUE( delta.charactersLeft.empty() );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_StepToAdjacentChunk_KeepsSharedNeighborsOutOfDelta ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, Engine::WorldConstants::CHUNK_SIZE, 0, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 2, 0, 0, 0 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilityDelta( positionAt( 0, 0, 0 ), positionAt( Engine::WorldConstants::CHUNK_SIZE, 0, 0 ), 2 );
+
+    EXPECT_TRUE( delta.charactersEntered.empty() );
+    EXPECT_TRUE( delta.charactersLeft.empty() );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_ChangingFloor_ListsCharactersOfBothFloors ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 3, 0, 0, 1 ) );
+    worldRuntime.addCharacter( makeCharacter( 2, 0, 0, 0 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilityDelta( positionAt( 0, 0, 0 ), positionAt( 0, 0, 1 ), 2 );
+
+    EXPECT_EQ( delta.charactersLeft, std::vector<int>( { 1 } ) );
+    EXPECT_EQ( delta.charactersEntered, std::vector<int>( { 3 } ) );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_Creatures_ListsEnteredAndLeft ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCreature( makeCreature( 5, 0, 0, 0 ) );
+
+    const Server::WorldVisibilityDelta entering = worldRuntime.visibilityDelta( positionAt( 100, 100, 0 ), positionAt( 0, 0, 0 ), -1 );
+    const Server::WorldVisibilityDelta leaving = worldRuntime.visibilityDelta( positionAt( 0, 0, 0 ), positionAt( 100, 100, 0 ), -1 );
+
+    EXPECT_EQ( entering.creaturesEntered, std::vector<int>( { 5 } ) );
+    EXPECT_EQ( leaving.creaturesLeft, std::vector<int>( { 5 } ) );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_GroundItems_ListsEnteredAndLeft ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+    worldRuntime.dropCharacterItem( 1, 0 );
+    const int idGroundItem = worldRuntime.groundItemsNear( positionAt( 0, 0, 0 ) ).front().idGroundItem();
+
+    const Server::WorldVisibilityDelta entering = worldRuntime.visibilityDelta( positionAt( 100, 100, 0 ), positionAt( 0, 0, 0 ), -1 );
+    const Server::WorldVisibilityDelta leaving = worldRuntime.visibilityDelta( positionAt( 0, 0, 0 ), positionAt( 100, 100, 0 ), -1 );
+
+    EXPECT_EQ( entering.groundItemsEntered, std::vector<int>( { idGroundItem } ) );
+    EXPECT_EQ( leaving.groundItemsLeft, std::vector<int>( { idGroundItem } ) );
+}
+
+TEST( WorldRuntimeTest, GroundItem_ById_ReturnsItOrNothing ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    addEquipmentCharacter( worldRuntime, { inventoryEntry( 0, SWORD_ITEM ) }, {} );
+    worldRuntime.dropCharacterItem( 1, 0 );
+    const int idGroundItem = worldRuntime.groundItemsNear( positionAt( 0, 0, 0 ) ).front().idGroundItem();
+
+    ASSERT_TRUE( worldRuntime.groundItem( idGroundItem ).has_value() );
+    EXPECT_EQ( worldRuntime.groundItem( idGroundItem )->idItem(), SWORD_ITEM );
+    EXPECT_FALSE( worldRuntime.groundItem( idGroundItem + 100 ).has_value() );
+}
+
+namespace {
+
+std::unique_ptr<Engine::WorldModel> makeSizedWorld( uint32_t width, uint32_t height ) {
+    auto world = std::make_unique<Engine::WorldModel>();
+    world->setWidth( width );
+    world->setHeight( height );
+
+    return world;
+}
+
+} // namespace
+
+namespace {
+
+class TerrainChunksCase {
+public:
+    TerrainChunksCase( std::string name, uint32_t width, uint32_t height, int x, int y, int z, size_t expectedChunks ) :
+        name( std::move( name ) ),
+        width( width ),
+        height( height ),
+        x( x ),
+        y( y ),
+        z( z ),
+        expectedChunks( expectedChunks ) {
+    }
+
+    std::string name;
+    uint32_t width;
+    uint32_t height;
+    int x;
+    int y;
+    int z;
+    size_t expectedChunks;
+};
+
+class WorldRuntimeTerrainChunksNearTest : public ::testing::TestWithParam<TerrainChunksCase> {};
+
+} // namespace
+
+TEST_P( WorldRuntimeTerrainChunksNearTest, TerrainChunksNear_ReturnsExpectedCount ) {
+    Server::WorldRuntime worldRuntime( makeSizedWorld( GetParam().width, GetParam().height ) );
+
+    EXPECT_EQ( worldRuntime.terrainChunksNear( positionAt( GetParam().x, GetParam().y, GetParam().z ) ).size(), GetParam().expectedChunks );
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    WorldSizes,
+    WorldRuntimeTerrainChunksNearTest,
+    ::testing::Values(
+        TerrainChunksCase( "Middle_ReturnsNineChunks", 200, 200, 40, 40, 0, 9 ),
+        TerrainChunksCase( "OriginCorner_IsClampedToFour", 200, 200, 0, 0, 0, 4 ),
+        TerrainChunksCase( "FarCorner_IsClampedToFour", 200, 200, 199, 199, 0, 4 ),
+        TerrainChunksCase( "IgnoresFloor", 200, 200, 40, 40, 3, 9 ),
+        TerrainChunksCase( "SizeNotMultipleOfChunk_IncludesPartialLastChunk", 100, 100, 70, 70, 0, 9 ),
+        TerrainChunksCase( "SizeNotMultipleOfChunk_PartialChunkAsCenter", 100, 100, 96, 96, 0, 4 ),
+        TerrainChunksCase( "SizeExactMultipleOfChunk_HasNoExtraChunk", 64, 64, 63, 63, 0, 4 ),
+        TerrainChunksCase( "SmallerThanOneChunk_ReturnsSingleChunk", 10, 10, 5, 5, 0, 1 ),
+        TerrainChunksCase( "OneChunkWideStrip_OnlyAlongHeight", 20, 200, 5, 100, 0, 3 ),
+        TerrainChunksCase( "ZeroSizedWorld_ReturnsNothing", 0, 0, 0, 0, 0, 0 ) ),
+    []( const ::testing::TestParamInfo<TerrainChunksCase>& info ) { return info.param.name; } );
+
+TEST( WorldRuntimeTest, TerrainChunksNear_WithoutWorld_ReturnsNothing ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    EXPECT_TRUE( worldRuntime.terrainChunksNear( positionAt( 40, 40, 0 ) ).empty() );
+}
+
+TEST( WorldRuntimeTest, AddCharacter_AlreadyInWorld_IsRejectedAndKeepsOriginal ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    Engine::CharacterModel* original = worldRuntime.addCharacter( makeCharacter( 1, 5, 5, 0 ) );
+
+    Engine::CharacterModel* duplicate = worldRuntime.addCharacter( makeCharacter( 1, 90, 90, 0 ) );
+
+    EXPECT_EQ( duplicate, nullptr );
+    EXPECT_EQ( worldRuntime.character( 1 ), original );
+    EXPECT_EQ( worldRuntime.character( 1 )->position().x(), 5 );
+    EXPECT_EQ( worldRuntime.charactersNear( positionAt( 5, 5, 0 ) ), std::vector<int>( { 1 } ) );
+}
+
+TEST( WorldRuntimeTest, AddCharacter_AlreadyInWorld_DoesNotPublishEntered ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    bool published = false;
+    worldRuntime.eventBus().subscribe( Server::WorldEventType::CHARACTER_ENTERED, [ &published ]( const Server::WorldEvent& ) {
+        published = true;
+    } );
+
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+
+    EXPECT_FALSE( published );
+}
+
+TEST( WorldRuntimeTest, AddCharacter_DifferentCharactersOfSameAccount_AreBothAllowed ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+
+    EXPECT_NE( worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) ), nullptr );
+    EXPECT_NE( worldRuntime.addCharacter( makeCharacter( 2, 0, 0, 0 ) ), nullptr );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_StepToAdjacentChunk_LoadsOnlyTheNewColumn ) {
+    Server::WorldRuntime worldRuntime( makeSizedWorld( 200, 200 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilityDelta( positionAt( 0, 0, 0 ), positionAt( Engine::WorldConstants::CHUNK_SIZE, 0, 0 ), -1 );
+
+    EXPECT_EQ( delta.terrainChunksEntered.size(), 2u );
+    EXPECT_TRUE( delta.terrainChunksLeft.empty() );
+    for ( const Server::ChunkCoordinate& chunk : delta.terrainChunksEntered ) {
+        EXPECT_EQ( chunk.x, 2 );
+    }
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_JumpAcrossTheMap_ReplacesTheWholeWindow ) {
+    Server::WorldRuntime worldRuntime( makeSizedWorld( 200, 200 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilityDelta( positionAt( 0, 0, 0 ), positionAt( Engine::WorldConstants::CHUNK_SIZE * 3, 0, 0 ), -1 );
+
+    EXPECT_EQ( delta.terrainChunksLeft.size(), 4u );
+    EXPECT_EQ( delta.terrainChunksEntered.size(), 6u );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_ChangingFloorOnly_DoesNotReloadTerrain ) {
+    Server::WorldRuntime worldRuntime( makeSizedWorld( 200, 200 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilityDelta( positionAt( 40, 40, 0 ), positionAt( 40, 40, 1 ), -1 );
+
+    EXPECT_TRUE( delta.terrainChunksEntered.empty() );
+    EXPECT_TRUE( delta.terrainChunksLeft.empty() );
 }

@@ -14,6 +14,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/CharacterRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterCombatSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterEquipmentSystem.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterInventorySystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterMovementSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterVitalsSystem.cpp
@@ -25,6 +26,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Spawn/WorldSpawnAreaRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldCombatSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldCreatureSystem.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldGroundItemSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldMovementSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldSpawnSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldSystem.cpp
