@@ -47,7 +47,7 @@ void ItemFactory::createItemCatalog( const QString& configPath, const ItemTypeCa
                 continue;
             }
 
-            if ( !JsonHelper::hasValidFields( itemJson, { { "Name", JsonFieldTypeEnum::STRING }, { "TextureFolder", JsonFieldTypeEnum::STRING }, { "IsAnimated", JsonFieldTypeEnum::BOOL }, { "FrameDurationMs", JsonFieldTypeEnum::INT } } ) || !isValidItemId( itemJson[ "Id" ] ) ) {
+            if ( !JsonHelper::hasValidFields( itemJson, { { "Name", JsonFieldTypeEnum::STRING }, { "TextureFile", JsonFieldTypeEnum::STRING }, { "IsAnimated", JsonFieldTypeEnum::BOOL }, { "FrameDurationMs", JsonFieldTypeEnum::INT } } ) || !isValidItemId( itemJson[ "Id" ] ) ) {
                 qWarning() << "ItemFactory::createItemCatalog"
                            << "Item Id must be a key text (A-Z, 0-9, _) and Name a text, skipping";
                 continue;
@@ -65,12 +65,12 @@ void ItemFactory::createItemCatalog( const QString& configPath, const ItemTypeCa
             item.setIdItemType( idItemType );
             item.setName( QString( itemJson[ "Name" ].asCString() ) );
 
-            if ( itemJson.isMember( "TextureFolder" ) ) {
-                item.setFolder( QString( itemJson[ "TextureFolder" ].asCString() ) );
+            if ( itemJson.isMember( "TextureFile" ) ) {
+                item.setTextureFile( QString::fromStdString( itemJson[ "TextureFile" ].asString() ) );
 
                 const bool isAnimated = itemJson.get( "IsAnimated", false ).asBool();
                 const int frameDurationMs = itemJson.get( "FrameDurationMs", 100 ).asInt();
-                const QString texturePath = DataFactory::resolveTexturePath( mapPath + item.folder() + "/" + item.name(), isAnimated );
+                const QString texturePath = DataFactory::resolveTexturePath( mapPath + item.textureFile(), isAnimated );
 
                 const AnimationModel animation = DataFactory::loadAnimation( texturePath, isAnimated, frameDurationMs );
                 if ( animation.isNull() ) {
@@ -130,8 +130,8 @@ void ItemFactory::saveItemCatalog( const QString& configPath, const ItemCatalog&
                 itemJson[ "Id" ] = item->id().toStdString();
                 itemJson[ "Name" ] = item->name().toStdString();
 
-                if ( !item->folder().isEmpty() ) {
-                    itemJson[ "TextureFolder" ] = item->folder().toStdString();
+                if ( !item->textureFile().isEmpty() ) {
+                    itemJson[ "TextureFile" ] = item->textureFile().toStdString();
 
                     if ( item->animation().isAnimated() ) {
                         itemJson[ "IsAnimated" ] = true;

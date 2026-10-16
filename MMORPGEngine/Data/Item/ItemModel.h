@@ -23,8 +23,8 @@ public:
     QString name() const;
     void setName( const QString& name );
 
-    QString folder() const;
-    void setFolder( const QString& folder );
+    QString textureFile() const;
+    void setTextureFile( const QString& textureFile );
 
     QImage texture() const;
 
@@ -35,7 +35,7 @@ private:
     QString _id;
     QString _name;
     QString _idItemType;
-    QString _folder;
+    QString _textureFile;
     AnimationModel _animation;
 };
 

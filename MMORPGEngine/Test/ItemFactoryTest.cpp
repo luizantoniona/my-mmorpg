@@ -194,7 +194,7 @@ INSTANTIATE_TEST_SUITE_P(
     ItemFactoryWrongTypeTest,
     ::testing::Values(
         ItemWrongTypeCase( "NameIsNumber", "Name", Json::Value( 5 ) ),
-        ItemWrongTypeCase( "TextureFolderIsNumber", "TextureFolder", Json::Value( 5 ) ),
+        ItemWrongTypeCase( "TextureFileIsNumber", "TextureFile", Json::Value( 5 ) ),
         ItemWrongTypeCase( "IsAnimatedIsText", "IsAnimated", Json::Value( "yes" ) ),
         ItemWrongTypeCase( "FrameDurationIsText", "FrameDurationMs", Json::Value( "fast" ) ) ),
     []( const ::testing::TestParamInfo<ItemWrongTypeCase>& info ) { return info.param.name; } );
@@ -282,7 +282,7 @@ TEST_F( ItemFactoryTest, SaveItemCatalog_TypeWithoutItems_RemovesItemsButKeepsOt
     EXPECT_EQ( saved[ "Name" ].asString(), "SWORD" );
 }
 
-TEST_F( ItemFactoryTest, CreateItemCatalog_WithoutTextureFolder_LoadsWithoutAnimation ) {
+TEST_F( ItemFactoryTest, CreateItemCatalog_WithoutTextureFile_LoadsWithoutAnimation ) {
     Json::Value items( Json::arrayValue );
     items.append( itemJson( "IRON_SWORD", "Iron Sword" ) );
     writeItemsJson( "SWORD", items );
@@ -291,13 +291,13 @@ TEST_F( ItemFactoryTest, CreateItemCatalog_WithoutTextureFolder_LoadsWithoutAnim
     Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, catalog );
 
     ASSERT_NE( catalog.item( "IRON_SWORD" ), nullptr );
-    EXPECT_TRUE( catalog.item( "IRON_SWORD" )->folder().isEmpty() );
+    EXPECT_TRUE( catalog.item( "IRON_SWORD" )->textureFile().isEmpty() );
     EXPECT_TRUE( catalog.item( "IRON_SWORD" )->animation().isNull() );
 }
 
 TEST_F( ItemFactoryTest, CreateItemCatalog_MissingTextureFile_StillAddsItem ) {
     Json::Value item = itemJson( "IRON_SWORD", "Iron Sword" );
-    item[ "TextureFolder" ] = "Textures/Items/Iron Sword";
+    item[ "TextureFile" ] = "Textures/Items/IRON_SWORD";
 
     Json::Value items( Json::arrayValue );
     items.append( item );
@@ -307,20 +307,68 @@ TEST_F( ItemFactoryTest, CreateItemCatalog_MissingTextureFile_StillAddsItem ) {
     Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, catalog );
 
     ASSERT_NE( catalog.item( "IRON_SWORD" ), nullptr );
-    EXPECT_EQ( catalog.item( "IRON_SWORD" )->folder(), "Textures/Items/Iron Sword" );
+    EXPECT_EQ( catalog.item( "IRON_SWORD" )->textureFile(), "Textures/Items/IRON_SWORD" );
+    EXPECT_TRUE( catalog.item( "IRON_SWORD" )->animation().isNull() );
+}
+
+TEST_F( ItemFactoryTest, CreateItemCatalog_AnimatedFlag_LoadsWebpTextureAndRoundTripsFlag ) {
+    const std::filesystem::path textureDir = _tempDir / "TestMap" / "Textures" / "Items";
+    std::filesystem::create_directories( textureDir );
+
+    QImage image( 16, 16, QImage::Format_ARGB32 );
+    image.fill( Qt::blue );
+    ASSERT_TRUE( image.save( QString::fromStdString( ( textureDir / "IRON_SWORD.webp" ).string() ) ) );
+
+    Json::Value item = itemJson( "IRON_SWORD", "Iron Sword" );
+    item[ "TextureFile" ] = "Textures/Items/IRON_SWORD";
+    item[ "IsAnimated" ] = true;
+    item[ "FrameDurationMs" ] = 80;
+
+    Json::Value items( Json::arrayValue );
+    items.append( item );
+    writeItemsJson( "SWORD", items );
+
+    Engine::ItemCatalog catalog;
+    Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, catalog );
+
+    ASSERT_NE( catalog.item( "IRON_SWORD" ), nullptr );
+    EXPECT_FALSE( catalog.item( "IRON_SWORD" )->animation().isNull() );
+    EXPECT_EQ( catalog.item( "IRON_SWORD" )->animation().frameDurationMs(), 80 );
+    EXPECT_EQ( catalog.item( "IRON_SWORD" )->texture().size(), QSize( 16, 16 ) );
+}
+
+TEST_F( ItemFactoryTest, CreateItemCatalog_StaticFlagWithOnlyWebpFile_LoadsWithoutTexture ) {
+    const std::filesystem::path textureDir = _tempDir / "TestMap" / "Textures" / "Items";
+    std::filesystem::create_directories( textureDir );
+
+    QImage image( 16, 16, QImage::Format_ARGB32 );
+    image.fill( Qt::blue );
+    ASSERT_TRUE( image.save( QString::fromStdString( ( textureDir / "IRON_SWORD.webp" ).string() ) ) );
+
+    Json::Value item = itemJson( "IRON_SWORD", "Iron Sword" );
+    item[ "TextureFile" ] = "Textures/Items/IRON_SWORD";
+
+    Json::Value items( Json::arrayValue );
+    items.append( item );
+    writeItemsJson( "SWORD", items );
+
+    Engine::ItemCatalog catalog;
+    Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, catalog );
+
+    ASSERT_NE( catalog.item( "IRON_SWORD" ), nullptr );
     EXPECT_TRUE( catalog.item( "IRON_SWORD" )->animation().isNull() );
 }
 
 TEST_F( ItemFactoryTest, CreateItemCatalog_StaticTexture_LoadsAndRoundTrips ) {
-    const std::filesystem::path textureDir = _tempDir / "TestMap" / "Textures" / "Items" / "Iron Sword";
+    const std::filesystem::path textureDir = _tempDir / "TestMap" / "Textures" / "Items";
     std::filesystem::create_directories( textureDir );
 
     QImage image( 32, 32, QImage::Format_ARGB32 );
     image.fill( Qt::red );
-    ASSERT_TRUE( image.save( QString::fromStdString( ( textureDir / "Iron Sword.png" ).string() ) ) );
+    ASSERT_TRUE( image.save( QString::fromStdString( ( textureDir / "IRON_SWORD.png" ).string() ) ) );
 
-    Json::Value item = itemJson( "IRON_SWORD", "Iron Sword" );
-    item[ "TextureFolder" ] = "Textures/Items/Iron Sword";
+    Json::Value item = itemJson( "IRON_SWORD", "Renamed For Display" );
+    item[ "TextureFile" ] = "Textures/Items/IRON_SWORD";
 
     Json::Value items( Json::arrayValue );
     items.append( item );
@@ -340,6 +388,6 @@ TEST_F( ItemFactoryTest, CreateItemCatalog_StaticTexture_LoadsAndRoundTrips ) {
     Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, reloaded );
 
     ASSERT_NE( reloaded.item( "IRON_SWORD" ), nullptr );
-    EXPECT_EQ( reloaded.item( "IRON_SWORD" )->folder(), "Textures/Items/Iron Sword" );
+    EXPECT_EQ( reloaded.item( "IRON_SWORD" )->textureFile(), "Textures/Items/IRON_SWORD" );
     EXPECT_FALSE( reloaded.item( "IRON_SWORD" )->animation().isNull() );
 }

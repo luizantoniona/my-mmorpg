@@ -6,7 +6,7 @@ ItemModel::ItemModel() :
     _id( "" ),
     _name( "" ),
     _idItemType( "" ),
-    _folder( "" ),
+    _textureFile( "" ),
     _animation() {
 }
 
@@ -34,12 +34,12 @@ void ItemModel::setName( const QString& name ) {
     _name = name;
 }
 
-QString ItemModel::folder() const {
-    return _folder;
+QString ItemModel::textureFile() const {
+    return _textureFile;
 }
 
-void ItemModel::setFolder( const QString& folder ) {
-    _folder = folder;
+void ItemModel::setTextureFile( const QString& textureFile ) {
+    _textureFile = textureFile;
 }
 
 QImage ItemModel::texture() const {
