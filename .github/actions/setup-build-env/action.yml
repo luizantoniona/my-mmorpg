@@ -9,7 +9,7 @@ inputs:
   qt-modules:
     description: Módulos extras do Qt (aqt)
     required: false
-    default: "qtwebsockets"
+    default: "qtwebsockets qtimageformats"
 
 runs:
   using: composite
