@@ -71,3 +71,59 @@ TEST( ChunkModelTest, DifferentZLayers_AreIndependent ) {
     EXPECT_EQ( chunk.tile( 5, 5, 0 )->tileType(), 1u );
     EXPECT_EQ( chunk.tile( 5, 5, 1 )->tileType(), 2u );
 }
+
+TEST( ChunkModelTest, Revision_NewChunks_StartDifferent ) {
+    const Engine::ChunkModel first;
+    const Engine::ChunkModel second;
+
+    EXPECT_NE( first.revision(), second.revision() );
+}
+
+TEST( ChunkModelTest, Revision_ConstRead_DoesNotChange ) {
+    Engine::ChunkModel chunk;
+    chunk.setTile( 1, 1, 0, std::make_unique<Engine::WorldTileModel>() );
+
+    const Engine::ChunkModel& constChunk = chunk;
+    const quint64 before = constChunk.revision();
+
+    constChunk.tile( 1, 1, 0 );
+    constChunk.object( 1, 1, 0 );
+
+    EXPECT_EQ( constChunk.revision(), before );
+}
+
+TEST( ChunkModelTest, Revision_SetAndMarkChanged_Change ) {
+    Engine::ChunkModel chunk;
+    quint64 previous = chunk.revision();
+
+    chunk.setTile( 1, 1, 0, std::make_unique<Engine::WorldTileModel>() );
+    EXPECT_NE( chunk.revision(), previous );
+    previous = chunk.revision();
+
+    chunk.setObject( 1, 1, 0, std::make_unique<Engine::WorldObjectModel>() );
+    EXPECT_NE( chunk.revision(), previous );
+    previous = chunk.revision();
+
+    chunk.markChanged();
+    EXPECT_NE( chunk.revision(), previous );
+}
+
+TEST( ChunkModelTest, Revision_NonConstGetters_DoNotChange ) {
+    Engine::ChunkModel chunk;
+    const quint64 before = chunk.revision();
+
+    chunk.tile( 1, 1, 0 );
+    chunk.object( 1, 1, 0 );
+
+    EXPECT_EQ( chunk.revision(), before );
+}
+
+TEST( ChunkModelTest, Revision_OutOfBoundsAccess_DoesNotChange ) {
+    Engine::ChunkModel chunk;
+    const quint64 before = chunk.revision();
+
+    chunk.setTile( 99, 0, 0, std::make_unique<Engine::WorldTileModel>() );
+    chunk.tile( -1, 0, 0 );
+
+    EXPECT_EQ( chunk.revision(), before );
+}

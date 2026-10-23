@@ -297,3 +297,96 @@ TEST( WorldModelTest, RemoveSpawnArea_PointOutsideArea_ReturnsFalse ) {
     EXPECT_FALSE( world.removeSpawnArea( 20, 20, 0 ) );
     EXPECT_EQ( world.spawnAreas( 0 ).size(), 1u );
 }
+
+TEST( WorldModelTest, HasChunk_NotCreated_ReturnsFalseAndDoesNotCreateIt ) {
+    const Engine::WorldModel world;
+
+    EXPECT_FALSE( world.hasChunk( 2, 3 ) );
+    EXPECT_EQ( world.chunk( 2, 3 ), nullptr );
+}
+
+TEST( WorldModelTest, HasChunk_AfterCreation_ReturnsTrueOnlyForThatChunk ) {
+    Engine::WorldModel world;
+    world.chunk( 2, 3 );
+
+    EXPECT_TRUE( world.hasChunk( 2, 3 ) );
+    EXPECT_FALSE( world.hasChunk( 3, 2 ) );
+    EXPECT_FALSE( world.hasChunk( -2, 3 ) );
+}
+
+TEST( WorldModelTest, HasChunk_AfterRemove_ReturnsFalse ) {
+    Engine::WorldModel world;
+    world.chunk( 1, 1 );
+
+    world.removeChunk( 1, 1 );
+
+    EXPECT_FALSE( world.hasChunk( 1, 1 ) );
+}
+
+TEST( WorldModelTest, ChunkRevision_MissingChunk_IsZero ) {
+    const Engine::WorldModel world;
+
+    EXPECT_EQ( world.chunkRevision( 0, 0 ), 0u );
+}
+
+TEST( WorldModelTest, ChunkRevision_ChangesOnlyForTheEditedChunk ) {
+    Engine::TileModel tile;
+    tile.setType( 9231 );
+    tile.setName( "WorldModelRevisionTile" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( tile );
+
+    Engine::WorldModel world;
+    world.chunk( 0, 0 );
+    world.chunk( 1, 0 );
+
+    const quint64 editedBefore = world.chunkRevision( 0, 0 );
+    const quint64 untouchedBefore = world.chunkRevision( 1, 0 );
+
+    world.setTile( 1, 1, 0, 9231 );
+
+    EXPECT_NE( world.chunkRevision( 0, 0 ), editedBefore );
+    EXPECT_EQ( world.chunkRevision( 1, 0 ), untouchedBefore );
+}
+
+TEST( WorldModelTest, ChunkRevision_ReadingThroughConstWorld_DoesNotChange ) {
+    Engine::WorldModel world;
+    world.chunk( 0, 0 );
+
+    const Engine::WorldModel& constWorld = world;
+    const quint64 before = constWorld.chunkRevision( 0, 0 );
+
+    constWorld.tile( 1, 1, 0 );
+    constWorld.object( 1, 1, 0 );
+    constWorld.isWalkable( 1, 1, 0 );
+
+    EXPECT_EQ( constWorld.chunkRevision( 0, 0 ), before );
+}
+
+TEST( WorldModelTest, ChunkRevision_SetObjectAndSetOverlay_Change ) {
+    Engine::TileModel overlay;
+    overlay.setType( 9232 );
+    overlay.setName( "WorldModelRevisionOverlay" );
+    Engine::Singleton<Engine::DataManager>::instance().addTile( overlay );
+
+    Engine::WorldModel world;
+    world.chunk( 0, 0 );
+
+    const quint64 beforeOverlay = world.chunkRevision( 0, 0 );
+    world.setOverlay( 1, 1, 0, 9232 );
+    EXPECT_NE( world.chunkRevision( 0, 0 ), beforeOverlay );
+
+    const quint64 beforeObject = world.chunkRevision( 0, 0 );
+    world.setObject( 1, 1, 0, 0 );
+    EXPECT_NE( world.chunkRevision( 0, 0 ), beforeObject );
+}
+
+TEST( WorldModelTest, ChunkRevision_RecreatedChunk_DoesNotReuseOldRevision ) {
+    Engine::WorldModel world;
+    world.chunk( 0, 0 );
+    const quint64 before = world.chunkRevision( 0, 0 );
+
+    world.removeChunk( 0, 0 );
+    world.chunk( 0, 0 );
+
+    EXPECT_NE( world.chunkRevision( 0, 0 ), before );
+}

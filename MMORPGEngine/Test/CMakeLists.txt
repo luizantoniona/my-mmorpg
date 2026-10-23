@@ -34,6 +34,7 @@ add_executable(
   SkillTreeModelTest.cpp
   TileCatalogTest.cpp
   TileFactoryTest.cpp
+  TileRendererTest.cpp
   WorldFactoryTest.cpp
   WorldModelTest.cpp
 )
