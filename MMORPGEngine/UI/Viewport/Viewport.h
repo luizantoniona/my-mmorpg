@@ -16,6 +16,7 @@ namespace Engine {
 class Viewport : public QQuickItem {
     Q_OBJECT
     Q_PROPERTY( QPointF cameraPosition READ cameraPosition WRITE setCameraPosition NOTIFY cameraPositionChanged )
+    Q_PROPERTY( double zoom READ zoom WRITE setZoom NOTIFY zoomChanged )
     Q_PROPERTY( RenderWorld* renderWorld READ renderWorld WRITE setRenderWorld )
     Q_PROPERTY( int activeFloor READ activeFloor WRITE setActiveFloor NOTIFY activeFloorChanged )
     Q_PROPERTY( int cursorShape READ cursorShape WRITE setCursorShape NOTIFY cursorShapeChanged )
@@ -26,6 +27,9 @@ public:
 
     QPointF cameraPosition() const;
     void setCameraPosition( const QPointF& position );
+
+    double zoom() const;
+    void setZoom( double zoom );
 
     Q_INVOKABLE void centerCameraOnTile( int x, int y );
     Q_INVOKABLE void moveCameraByTiles( int dx, int dy );
@@ -57,6 +61,7 @@ public:
 
 signals:
     void cameraPositionChanged();
+    void zoomChanged();
     void activeFloorChanged();
     void cursorShapeChanged();
     void hoveredTileChanged();

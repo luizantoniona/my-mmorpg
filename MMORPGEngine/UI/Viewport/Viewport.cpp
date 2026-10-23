@@ -64,6 +64,23 @@ void Viewport::setCameraPosition(
     update();
 }
 
+double Viewport::zoom() const {
+    return _camera->zoom();
+}
+
+void Viewport::setZoom( double zoom ) {
+    if ( zoom <= 0.0 || qFuzzyCompare( _camera->zoom(), zoom ) ) {
+        return;
+    }
+
+    _camera->setZoom( zoom );
+
+    emit zoomChanged();
+    emit cameraPositionChanged();
+
+    update();
+}
+
 void Viewport::centerCameraOnTile( int x, int y ) {
     _camera->centerOnTile( x, y );
 

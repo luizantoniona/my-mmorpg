@@ -8,6 +8,8 @@ Item {
     id: root
 
     property int currentFloor: 0
+    readonly property var zoomSteps: [0.0625, 0.125, 0.25, 0.5, 1.0, 2.0]
+    property int zoomIndex: 4
     readonly property color attackFlashColor: Qt.rgba(Colors.error.r, Colors.error.g, Colors.error.b, 0.55)
     readonly property int attackFlashDurationMs: 220
     readonly property color attackWarningColor: Qt.rgba(Colors.warning.r, Colors.warning.g, Colors.warning.b, 0.45)
@@ -118,9 +120,20 @@ Item {
                     anchors.margins: Borders.border1
                     renderWorld: serverWorld
                     activeFloor: root.currentFloor
+                    zoom: root.zoomSteps[root.zoomIndex]
+
+                    WheelHandler {
+                        onWheel: function (event) {
+                            root.changeZoom(event.angleDelta.y > 0 ? 1 : -1)
+                        }
+                    }
                 }
             }
         }
+    }
+
+    function changeZoom(direction) {
+        root.zoomIndex = Math.max(0, Math.min(root.zoomSteps.length - 1, root.zoomIndex + direction))
     }
 
     Component.onCompleted: {
@@ -146,5 +159,15 @@ Item {
     Shortcut {
         sequence: "D"
         onActivated: viewport.moveCameraByTiles(1, 0)
+    }
+
+    Shortcut {
+        sequence: "-"
+        onActivated: root.changeZoom(-1)
+    }
+
+    Shortcut {
+        sequences: ["+", "="]
+        onActivated: root.changeZoom(1)
     }
 }
