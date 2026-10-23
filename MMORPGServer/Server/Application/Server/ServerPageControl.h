@@ -39,6 +39,7 @@ public:
 signals:
     void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
     void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds, int footprint, const QString& creatureType );
+    void groundItemStateReceived( int idGroundItem, const QString& idItem, int x, int y, int z );
 
     void characterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds );
     void characterEventAttackReceived( int idCharacter, int x, int y, int z );
@@ -47,6 +48,7 @@ signals:
 
     void characterEventLeaveReceived( int idCharacter );
     void creatureEventLeaveReceived( int idCreature );
+    void groundItemEventLeaveReceived( int idGroundItem );
 
 private:
     std::shared_ptr<GodObserver> _godObserver;

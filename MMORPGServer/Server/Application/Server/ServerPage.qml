@@ -21,6 +21,9 @@ Item {
         onCreatureStateReceived: function (idCreature, x, y, z, movementSeconds, footprint, creatureType) {
             serverWorld.addCreature(idCreature, x, y, z, movementSeconds, footprint, creatureType)
         }
+        onGroundItemStateReceived: function (idGroundItem, idItem, x, y, z) {
+            serverWorld.addGroundItem(idGroundItem, idItem, x, y, z)
+        }
         onCharacterEventAttackStartReceived: function (idCharacter, x, y, z, castSeconds) {
             if (z === root.currentFloor) {
                 viewport.addTileWarning(x, y, root.attackWarningColor, castSeconds * 1000)
@@ -47,6 +50,9 @@ Item {
         }
         onCreatureEventLeaveReceived: function (idCreature) {
             serverWorld.removeCreature(idCreature)
+        }
+        onGroundItemEventLeaveReceived: function (idGroundItem) {
+            serverWorld.removeGroundItem(idGroundItem)
         }
     }
 
