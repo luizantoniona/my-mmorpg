@@ -35,6 +35,12 @@ a Qt debug window that renders the map and every connected character.
   objects host pluggable `*System`s that run every tick. State changes are
   published as events; a single `EntityBroadcaster` turns events into DTOs
   and sends them.
+- **Intents become commands, commands go to the owning system.** The
+  WebSocket layer only validates the shape of a message and queues a plain
+  data command (`CharacterMoveCommand`, `CharacterDropItemCommand`…). On the
+  next tick the runtime hands each command straight to the system that owns
+  the rule — movement, combat, ground items — so network threads never touch
+  world state and `WorldRuntime` stays a manager of instances.
 - **One delivery path, two kinds of viewer.** The broadcaster doesn't know
   about sockets: it sends to *observers*. A player's observer wraps a
   WebSocket connection and sees only its surroundings; the debug window
