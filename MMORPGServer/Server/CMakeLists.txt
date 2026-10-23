@@ -84,6 +84,8 @@ set(PROJECT_SOURCES
     Runtime/Character/System/CharacterSystem.h
     Runtime/Character/System/CharacterVitalsSystem.cpp
     Runtime/Character/System/CharacterVitalsSystem.h
+    Runtime/Chunk/ChunkRuntime.cpp
+    Runtime/Chunk/ChunkRuntime.h
     Runtime/Creature/CreaturePathfinder.cpp
     Runtime/Creature/CreaturePathfinder.h
     Runtime/Creature/CreatureRuntime.cpp
@@ -92,20 +94,21 @@ set(PROJECT_SOURCES
     Runtime/World/Action/WorldCombatAction.h
     Runtime/World/Action/WorldCombatAttackAction.cpp
     Runtime/World/Action/WorldCombatAttackAction.h
-    Runtime/World/Command/AttackCharacterCommand.cpp
-    Runtime/World/Command/AttackCharacterCommand.h
-    Runtime/World/Command/DropCharacterCommand.cpp
-    Runtime/World/Command/DropCharacterCommand.h
-    Runtime/World/Command/EquipCharacterCommand.cpp
-    Runtime/World/Command/EquipCharacterCommand.h
-    Runtime/World/Command/MoveCharacterCommand.cpp
-    Runtime/World/Command/MoveCharacterCommand.h
-    Runtime/World/Command/PickupCharacterCommand.cpp
-    Runtime/World/Command/PickupCharacterCommand.h
-    Runtime/World/Command/UnequipCharacterCommand.cpp
-    Runtime/World/Command/UnequipCharacterCommand.h
+    Runtime/World/Command/Character/CharacterAttackEntityCommand.cpp
+    Runtime/World/Command/Character/CharacterAttackEntityCommand.h
+    Runtime/World/Command/Character/CharacterDropItemCommand.cpp
+    Runtime/World/Command/Character/CharacterDropItemCommand.h
+    Runtime/World/Command/Character/CharacterEquipItemCommand.cpp
+    Runtime/World/Command/Character/CharacterEquipItemCommand.h
+    Runtime/World/Command/Character/CharacterMoveCommand.cpp
+    Runtime/World/Command/Character/CharacterMoveCommand.h
+    Runtime/World/Command/Character/CharacterPickupItemCommand.cpp
+    Runtime/World/Command/Character/CharacterPickupItemCommand.h
+    Runtime/World/Command/Character/CharacterUnequipItemCommand.cpp
+    Runtime/World/Command/Character/CharacterUnequipItemCommand.h
     Runtime/World/Command/WorldCommand.cpp
     Runtime/World/Command/WorldCommand.h
+    Runtime/World/Command/WorldCommandTypeEnum.h
     Runtime/World/Spawn/WorldSpawnAreaRuntime.cpp
     Runtime/World/Spawn/WorldSpawnAreaRuntime.h
     Runtime/World/System/WorldCombatSystem.cpp
@@ -120,6 +123,8 @@ set(PROJECT_SOURCES
     Runtime/World/System/WorldSpawnSystem.h
     Runtime/World/System/WorldSystem.cpp
     Runtime/World/System/WorldSystem.h
+    Runtime/World/System/WorldVisibilitySystem.cpp
+    Runtime/World/System/WorldVisibilitySystem.h
     Runtime/World/WorldRuntime.cpp
     Runtime/World/WorldRuntime.h
     Runtime/World/WorldSpatialIndex.cpp

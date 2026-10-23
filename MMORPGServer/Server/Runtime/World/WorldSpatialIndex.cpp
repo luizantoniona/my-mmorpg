@@ -5,6 +5,25 @@
 
 #include <MMORPGEngine/World/WorldConstants.h>
 
+namespace {
+
+constexpr int FLOOR_BELOW = -1;
+constexpr int FLOOR_ABOVE = 1;
+
+std::vector<int> characterIds( const std::vector<const Server::ChunkRuntime*>& chunks ) {
+    std::vector<int> result;
+
+    for ( const Server::ChunkRuntime* chunk : chunks ) {
+        for ( const Engine::CharacterModel* characterPtr : chunk->characters() ) {
+            result.push_back( characterPtr->idCharacter() );
+        }
+    }
+
+    return result;
+}
+
+} // namespace
+
 namespace Server {
 
 WorldSpatialIndex::WorldSpatialIndex( const std::map<int, std::unique_ptr<CharacterRuntime>>& characters, const std::map<int, std::unique_ptr<CreatureRuntime>>& creatures ) :
@@ -13,12 +32,17 @@ WorldSpatialIndex::WorldSpatialIndex( const std::map<int, std::unique_ptr<Charac
 }
 
 void WorldSpatialIndex::addCharacter( Engine::CharacterModel* character ) {
-    _charactersByChunk[ chunkCoordinateFor( character->position() ) ].push_back( character );
+    const ChunkCoordinate coordinate = chunkCoordinateFor( character->position() );
+
+    chunkOrCreate( coordinate ).characters().push_back( character );
+    observe( coordinate, true );
 }
 
 void WorldSpatialIndex::removeCharacter( Engine::CharacterModel* character ) {
-    auto& bucket = _charactersByChunk[ chunkCoordinateFor( character->position() ) ];
-    bucket.erase( std::remove( bucket.begin(), bucket.end(), character ), bucket.end() );
+    const ChunkCoordinate coordinate = chunkCoordinateFor( character->position() );
+
+    std::erase( chunkOrCreate( coordinate ).characters(), character );
+    observe( coordinate, false );
 }
 
 void WorldSpatialIndex::updateCharacterChunk( Engine::CharacterModel* character, const Engine::EntityPositionModel& previousPosition ) {
@@ -29,67 +53,106 @@ void WorldSpatialIndex::updateCharacterChunk( Engine::CharacterModel* character,
         return;
     }
 
-    auto& previousBucket = _charactersByChunk[ previousChunk ];
-    previousBucket.erase( std::remove( previousBucket.begin(), previousBucket.end(), character ), previousBucket.end() );
+    std::erase( chunkOrCreate( previousChunk ).characters(), character );
+    chunkOrCreate( newChunk ).characters().push_back( character );
 
-    _charactersByChunk[ newChunk ].push_back( character );
+    observe( newChunk, true );
+    observe( previousChunk, false );
+}
+
+void WorldSpatialIndex::addCreature( CreatureRuntime* creature ) {
+    chunkOrCreate( chunkCoordinateFor( creature->creature()->position() ) ).creatures().push_back( creature );
+}
+
+void WorldSpatialIndex::removeCreature( CreatureRuntime* creature ) {
+    std::erase( chunkOrCreate( chunkCoordinateFor( creature->creature()->position() ) ).creatures(), creature );
+}
+
+void WorldSpatialIndex::updateCreatureChunk( CreatureRuntime* creature, const Engine::EntityPositionModel& previousPosition ) {
+    const ChunkCoordinate previousChunk = chunkCoordinateFor( previousPosition );
+    const ChunkCoordinate newChunk = chunkCoordinateFor( creature->creature()->position() );
+
+    if ( previousChunk == newChunk ) {
+        return;
+    }
+
+    std::erase( chunkOrCreate( previousChunk ).creatures(), creature );
+    chunkOrCreate( newChunk ).creatures().push_back( creature );
+}
+
+void WorldSpatialIndex::addGroundItem( int idGroundItem, const Engine::EntityPositionModel& position ) {
+    chunkOrCreate( chunkCoordinateFor( position ) ).groundItems().push_back( idGroundItem );
+}
+
+void WorldSpatialIndex::removeGroundItem( int idGroundItem, const Engine::EntityPositionModel& position ) {
+    std::erase( chunkOrCreate( chunkCoordinateFor( position ) ).groundItems(), idGroundItem );
+}
+
+void WorldSpatialIndex::addSpawnArea( WorldSpawnAreaRuntime* spawnArea ) {
+    chunkOrCreate( ChunkCoordinate( spawnArea->area().x() / Engine::WorldConstants::CHUNK_SIZE, spawnArea->area().y() / Engine::WorldConstants::CHUNK_SIZE, spawnArea->z() ) ).spawnAreas().push_back( spawnArea );
 }
 
 ChunkCoordinate WorldSpatialIndex::chunkCoordinateFor( const Engine::EntityPositionModel& position ) const {
     return ChunkCoordinate( position.x() / Engine::WorldConstants::CHUNK_SIZE, position.y() / Engine::WorldConstants::CHUNK_SIZE, position.z() );
 }
 
-std::vector<int> WorldSpatialIndex::charactersNear( int idCharacter ) const {
+const ChunkRuntime* WorldSpatialIndex::findChunk( const ChunkCoordinate& coordinate ) const {
+    const auto it = _chunks.find( coordinate );
+
+    return it != _chunks.end() ? it->second.get() : nullptr;
+}
+
+std::vector<ChunkRuntime*> WorldSpatialIndex::activeChunks() const {
+    std::vector<ChunkRuntime*> result;
+
+    for ( const auto& entry : _chunks ) {
+        if ( entry.second->isActive() ) {
+            result.push_back( entry.second.get() );
+        }
+    }
+
+    std::sort( result.begin(), result.end(), []( const ChunkRuntime* left, const ChunkRuntime* right ) {
+        const ChunkCoordinate& a = left->coordinate();
+        const ChunkCoordinate& b = right->coordinate();
+
+        return a.z != b.z ? a.z < b.z : ( a.y != b.y ? a.y < b.y : a.x < b.x );
+    } );
+
+    return result;
+}
+
+std::vector<int> WorldSpatialIndex::charactersVisibleFrom( int idCharacter ) const {
     auto it = _characters.find( idCharacter );
     if ( it == _characters.end() ) {
         return {};
     }
 
-    std::vector<int> result = charactersNear( it->second->character()->position() );
+    std::vector<int> result = charactersVisibleFrom( it->second->character()->position() );
 
-    result.erase( std::remove( result.begin(), result.end(), idCharacter ), result.end() );
-
-    return result;
-}
-
-std::vector<int> WorldSpatialIndex::charactersNear( const Engine::EntityPositionModel& position ) const {
-    std::vector<int> result;
-
-    const ChunkCoordinate centerChunk = chunkCoordinateFor( position );
-
-    for ( int dx = -1; dx <= 1; ++dx ) {
-        for ( int dy = -1; dy <= 1; ++dy ) {
-            const ChunkCoordinate neighborChunk( centerChunk.x + dx, centerChunk.y + dy, centerChunk.z );
-
-            auto chunkIt = _charactersByChunk.find( neighborChunk );
-            if ( chunkIt == _charactersByChunk.end() ) {
-                continue;
-            }
-
-            for ( Engine::CharacterModel* characterPtr : chunkIt->second ) {
-                result.push_back( characterPtr->idCharacter() );
-            }
-        }
-    }
+    std::erase( result, idCharacter );
 
     return result;
 }
 
-bool WorldSpatialIndex::hasCharacterNear( const Engine::EntityPositionModel& position ) const {
-    const ChunkCoordinate centerChunk = chunkCoordinateFor( position );
+std::vector<int> WorldSpatialIndex::charactersVisibleFrom( const Engine::EntityPositionModel& position ) const {
+    return characterIds( chunksAround( position, FLOOR_BELOW ) );
+}
 
-    for ( int dx = -1; dx <= 1; ++dx ) {
-        for ( int dy = -1; dy <= 1; ++dy ) {
-            const ChunkCoordinate neighborChunk( centerChunk.x + dx, centerChunk.y + dy, centerChunk.z );
-
-            auto chunkIt = _charactersByChunk.find( neighborChunk );
-            if ( chunkIt != _charactersByChunk.end() && !chunkIt->second.empty() ) {
-                return true;
-            }
-        }
+std::vector<int> WorldSpatialIndex::charactersViewing( int idCharacter ) const {
+    auto it = _characters.find( idCharacter );
+    if ( it == _characters.end() ) {
+        return {};
     }
 
-    return false;
+    std::vector<int> result = charactersViewing( it->second->character()->position() );
+
+    std::erase( result, idCharacter );
+
+    return result;
+}
+
+std::vector<int> WorldSpatialIndex::charactersViewing( const Engine::EntityPositionModel& position ) const {
+    return characterIds( chunksAround( position, FLOOR_ABOVE ) );
 }
 
 Engine::CharacterModel* WorldSpatialIndex::characterAt( int x, int y, int z ) const {
@@ -127,25 +190,18 @@ Engine::CharacterModel* WorldSpatialIndex::nearestCharacterWithin( const Engine:
     return nearest;
 }
 
-std::vector<Engine::CreatureModel> WorldSpatialIndex::creaturesNear( const Engine::EntityPositionModel& position ) const {
-    const ChunkCoordinate centerChunk = chunkCoordinateFor( position );
-
+std::vector<Engine::CreatureModel> WorldSpatialIndex::creaturesVisibleFrom( const Engine::EntityPositionModel& position ) const {
     std::vector<Engine::CreatureModel> result;
 
-    for ( const auto& entry : _creatures ) {
-        const Engine::CreatureModel* creaturePtr = entry.second->creature();
-        const ChunkCoordinate creatureChunk = chunkCoordinateFor( creaturePtr->position() );
-
-        if ( creatureChunk.z != centerChunk.z ) {
-            continue;
+    for ( const ChunkRuntime* chunk : chunksAround( position, FLOOR_BELOW ) ) {
+        for ( const CreatureRuntime* creatureRuntime : chunk->creatures() ) {
+            result.push_back( *creatureRuntime->creature() );
         }
-
-        if ( std::abs( creatureChunk.x - centerChunk.x ) > 1 || std::abs( creatureChunk.y - centerChunk.y ) > 1 ) {
-            continue;
-        }
-
-        result.push_back( *creaturePtr );
     }
+
+    std::sort( result.begin(), result.end(), []( const Engine::CreatureModel& left, const Engine::CreatureModel& right ) {
+        return left.idCreature() < right.idCreature();
+    } );
 
     return result;
 }
@@ -160,6 +216,18 @@ Engine::CreatureModel* WorldSpatialIndex::creatureAt( int x, int y, int z ) cons
     }
 
     return nullptr;
+}
+
+std::vector<int> WorldSpatialIndex::groundItemsVisibleFrom( const Engine::EntityPositionModel& position ) const {
+    std::vector<int> result;
+
+    for ( const ChunkRuntime* chunk : chunksAround( position, FLOOR_BELOW ) ) {
+        result.insert( result.end(), chunk->groundItems().begin(), chunk->groundItems().end() );
+    }
+
+    std::sort( result.begin(), result.end() );
+
+    return result;
 }
 
 bool WorldSpatialIndex::isPositionOccupied( const Engine::EntityPositionModel& position ) const {
@@ -182,6 +250,60 @@ bool WorldSpatialIndex::isAreaOccupied( int x, int y, int z, int width, int heig
     }
 
     return false;
+}
+
+ChunkRuntime& WorldSpatialIndex::chunkOrCreate( const ChunkCoordinate& coordinate ) {
+    std::unique_ptr<ChunkRuntime>& chunk = _chunks[ coordinate ];
+
+    if ( !chunk ) {
+        chunk = std::make_unique<ChunkRuntime>( coordinate );
+    }
+
+    return *chunk;
+}
+
+std::vector<const ChunkRuntime*> WorldSpatialIndex::chunksAround( const Engine::EntityPositionModel& position, int floorOffset ) const {
+    const ChunkCoordinate center = chunkCoordinateFor( position );
+
+    std::vector<const ChunkRuntime*> result;
+
+    for ( int dz : { 0, floorOffset } ) {
+        for ( int dx = -1; dx <= 1; ++dx ) {
+            for ( int dy = -1; dy <= 1; ++dy ) {
+                const ChunkRuntime* chunk = findChunk( ChunkCoordinate( center.x + dx, center.y + dy, center.z + dz ) );
+
+                if ( chunk ) {
+                    result.push_back( chunk );
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+void WorldSpatialIndex::observe( const ChunkCoordinate& center, bool observed ) {
+    for ( int dz : { 0, FLOOR_BELOW } ) {
+        for ( int dx = -1; dx <= 1; ++dx ) {
+            for ( int dy = -1; dy <= 1; ++dy ) {
+                const int x = center.x + dx;
+                const int y = center.y + dy;
+                const int z = center.z + dz;
+
+                if ( x < 0 || y < 0 || z < 0 ) {
+                    continue;
+                }
+
+                ChunkRuntime& chunk = chunkOrCreate( ChunkCoordinate( x, y, z ) );
+
+                if ( observed ) {
+                    chunk.addObserver();
+                } else {
+                    chunk.removeObserver();
+                }
+            }
+        }
+    }
 }
 
 } // namespace Server

@@ -15,12 +15,12 @@
 #include <MMORPGEngine/Entity/CombatActionHelper.h>
 #include <MMORPGEngine/Network/WebSocket/ClientMessageTypeHelper.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
-#include <MMORPGServer/Server/Runtime/World/Command/AttackCharacterCommand.h>
-#include <MMORPGServer/Server/Runtime/World/Command/DropCharacterCommand.h>
-#include <MMORPGServer/Server/Runtime/World/Command/EquipCharacterCommand.h>
-#include <MMORPGServer/Server/Runtime/World/Command/MoveCharacterCommand.h>
-#include <MMORPGServer/Server/Runtime/World/Command/PickupCharacterCommand.h>
-#include <MMORPGServer/Server/Runtime/World/Command/UnequipCharacterCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterAttackEntityCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterDropItemCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterEquipItemCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterMoveCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterPickupItemCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterUnequipItemCommand.h>
 
 namespace Server {
 
@@ -28,7 +28,7 @@ ClientMessageReceiver::ClientMessageReceiver() {
     _worldRuntime = &Engine::Singleton<WorldManager>::instance().runtime();
 }
 
-void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const std::string& message ) {
+void ClientMessageReceiver::receive( int idCharacter, const std::string& message ) {
     if ( message.empty() ) {
         return;
     }
@@ -42,7 +42,7 @@ void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& conne
 
     switch ( type ) {
     case Engine::ClientMessageType::CHARACTER_INTENT_MOVE:
-        receiveMove( connection, idCharacter, messageJson );
+        receiveMove( idCharacter, messageJson );
         break;
     case Engine::ClientMessageType::CHARACTER_INTENT_ACTION:
         receiveAction( idCharacter, messageJson );
@@ -64,7 +64,7 @@ void ClientMessageReceiver::receive( const drogon::WebSocketConnectionPtr& conne
     }
 }
 
-void ClientMessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson ) {
+void ClientMessageReceiver::receiveMove( int idCharacter, const Json::Value& messageJson ) {
     const Engine::CharacterIntentMoveDTO input = Engine::CharacterIntentMoveDTO::fromJson( messageJson );
     const int dx = input.dx();
     const int dy = input.dy();
@@ -74,9 +74,7 @@ void ClientMessageReceiver::receiveMove( const drogon::WebSocketConnectionPtr& c
         return;
     }
 
-    _worldRuntime->enqueueCommand( std::make_unique<MoveCharacterCommand>( idCharacter, dx, dy, [ connection ]( const std::string& json ) {
-        connection->send( json );
-    } ) );
+    _worldRuntime->enqueueCommand( std::make_unique<CharacterMoveCommand>( idCharacter, dx, dy ) );
 }
 
 void ClientMessageReceiver::receiveAction( int idCharacter, const Json::Value& messageJson ) {
@@ -108,7 +106,7 @@ void ClientMessageReceiver::receiveAttack( int idCharacter, const Engine::Charac
         return;
     }
 
-    _worldRuntime->enqueueCommand( std::make_unique<AttackCharacterCommand>( idCharacter, dx, dy ) );
+    _worldRuntime->enqueueCommand( std::make_unique<CharacterAttackEntityCommand>( idCharacter, dx, dy ) );
 }
 
 void ClientMessageReceiver::receiveEquip( int idCharacter, const Json::Value& messageJson ) {
@@ -119,7 +117,7 @@ void ClientMessageReceiver::receiveEquip( int idCharacter, const Json::Value& me
         return;
     }
 
-    _worldRuntime->enqueueCommand( std::make_unique<EquipCharacterCommand>( idCharacter, *input.position() ) );
+    _worldRuntime->enqueueCommand( std::make_unique<CharacterEquipItemCommand>( idCharacter, *input.position() ) );
 }
 
 void ClientMessageReceiver::receiveUnequip( int idCharacter, const Json::Value& messageJson ) {
@@ -130,7 +128,7 @@ void ClientMessageReceiver::receiveUnequip( int idCharacter, const Json::Value& 
         return;
     }
 
-    _worldRuntime->enqueueCommand( std::make_unique<UnequipCharacterCommand>( idCharacter, *input.slot() ) );
+    _worldRuntime->enqueueCommand( std::make_unique<CharacterUnequipItemCommand>( idCharacter, *input.slot() ) );
 }
 
 void ClientMessageReceiver::receiveDrop( int idCharacter, const Json::Value& messageJson ) {
@@ -141,7 +139,7 @@ void ClientMessageReceiver::receiveDrop( int idCharacter, const Json::Value& mes
         return;
     }
 
-    _worldRuntime->enqueueCommand( std::make_unique<DropCharacterCommand>( idCharacter, *input.position() ) );
+    _worldRuntime->enqueueCommand( std::make_unique<CharacterDropItemCommand>( idCharacter, *input.position() ) );
 }
 
 void ClientMessageReceiver::receivePickup( int idCharacter, const Json::Value& messageJson ) {
@@ -152,7 +150,7 @@ void ClientMessageReceiver::receivePickup( int idCharacter, const Json::Value& m
         return;
     }
 
-    _worldRuntime->enqueueCommand( std::make_unique<PickupCharacterCommand>( idCharacter, *input.idGroundItem() ) );
+    _worldRuntime->enqueueCommand( std::make_unique<CharacterPickupItemCommand>( idCharacter, *input.idGroundItem() ) );
 }
 
 } // namespace Server

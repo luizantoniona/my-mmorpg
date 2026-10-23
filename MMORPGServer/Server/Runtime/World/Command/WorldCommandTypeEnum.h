@@ -1,0 +1,17 @@
+#ifndef WORLDCOMMANDTYPEENUM_H
+#define WORLDCOMMANDTYPEENUM_H
+
+namespace Server {
+
+enum class WorldCommandTypeEnum {
+    CHARACTER_ATTACK_ENTITY,
+    CHARACTER_DROP_ITEM,
+    CHARACTER_EQUIP_ITEM,
+    CHARACTER_MOVE,
+    CHARACTER_PICKUP_ITEM,
+    CHARACTER_UNEQUIP_ITEM
+};
+
+} // namespace Server
+
+#endif // WORLDCOMMANDTYPEENUM_H

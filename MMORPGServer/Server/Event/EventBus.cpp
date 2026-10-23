@@ -17,4 +17,10 @@ void EventBus::publish( const WorldEvent& event ) {
     }
 }
 
+void EventBus::publish( const std::vector<WorldEvent>& events ) {
+    for ( const WorldEvent& event : events ) {
+        publish( event );
+    }
+}
+
 } // namespace Server

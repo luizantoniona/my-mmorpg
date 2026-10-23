@@ -24,7 +24,7 @@ void CharacterWebSocket::handleNewMessage( const drogon::WebSocketConnectionPtr&
         return;
     }
 
-    _receiver.receive( connection, contextPtr->idCharacter(), message );
+    _receiver.receive( contextPtr->idCharacter(), message );
 }
 
 void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& request, const drogon::WebSocketConnectionPtr& connection ) {

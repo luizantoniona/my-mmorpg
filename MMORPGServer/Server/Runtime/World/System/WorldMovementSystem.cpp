@@ -17,6 +17,10 @@ WorldMovementSystem::WorldMovementSystem( WorldRuntime& runtime ) :
 void WorldMovementSystem::onTick() {
 }
 
+void WorldMovementSystem::handle( const CharacterMoveCommand& command ) {
+    move( command.idCharacter(), command.dx(), command.dy() );
+}
+
 bool WorldMovementSystem::move( int idCharacter, int dx, int dy ) {
     Engine::CharacterModel* character = _runtime.character( idCharacter );
     if ( !character ) {

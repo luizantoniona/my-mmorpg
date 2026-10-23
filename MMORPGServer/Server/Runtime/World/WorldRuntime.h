@@ -1,10 +1,10 @@
 #ifndef WORLDRUNTIME_H
 #define WORLDRUNTIME_H
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <optional>
 #include <vector>
 
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
@@ -20,8 +20,8 @@
 #include <MMORPGServer/Server/Runtime/World/System/WorldGroundItemSystem.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldMovementSystem.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldSpawnSystem.h>
+#include <MMORPGServer/Server/Runtime/World/System/WorldVisibilitySystem.h>
 #include <MMORPGServer/Server/Runtime/World/WorldSpatialIndex.h>
-#include <MMORPGServer/Server/Runtime/World/WorldVisibilityDelta.h>
 
 namespace Server {
 
@@ -40,29 +40,16 @@ public:
     const WorldSpatialIndex& spatialIndex() const;
 
     WorldCombatSystem& combatSystem();
+    WorldGroundItemSystem& groundItemSystem();
     WorldMovementSystem& movementSystem();
     WorldSpawnSystem& spawnSystem();
+    WorldVisibilitySystem& visibilitySystem();
 
     int tickRate() const;
 
     Engine::CharacterModel* addCharacter( std::unique_ptr<Engine::CharacterModel> character );
     void removeCharacter( int idCharacter );
     Engine::CharacterModel* character( int idCharacter );
-
-    bool equipCharacter( int idCharacter, uint32_t inventoryPosition );
-    bool unequipCharacter( int idCharacter, Engine::EquipmentSlotEnum slot );
-
-    bool dropCharacterItem( int idCharacter, uint32_t inventoryPosition );
-    bool pickupCharacterItem( int idCharacter, int idGroundItem );
-
-    std::vector<Engine::GroundItemModel> groundItemsNear( const Engine::EntityPositionModel& position );
-    std::optional<Engine::GroundItemModel> groundItem( int idGroundItem );
-
-    std::vector<ChunkCoordinate> terrainChunksNear( const Engine::EntityPositionModel& position ) const;
-
-    WorldVisibilityDelta visibilityDelta( const Engine::EntityPositionModel& previousPosition, const Engine::EntityPositionModel& currentPosition, int ignoredIdCharacter );
-
-    std::map<int, Engine::EntityPositionModel> characterPositions();
 
     std::vector<Engine::CharacterModel> connectedCharacters();
 
@@ -72,14 +59,16 @@ public:
     Engine::CreatureModel* creatureAt( int x, int y, int z );
 
     std::vector<Engine::CreatureModel> creatures();
-    std::vector<Engine::CreatureModel> creaturesNear( const Engine::EntityPositionModel& position );
+    std::vector<Engine::CreatureModel> creaturesVisibleFrom( const Engine::EntityPositionModel& position );
 
     Engine::CharacterModel* characterLocked( int idCharacter ) const;
+    CharacterRuntime* characterRuntimeLocked( int idCharacter );
     std::map<int, std::unique_ptr<CreatureRuntime>>& creaturesLocked();
     void eraseCreatureLocked( int idCreature );
 
-    std::vector<int> charactersNear( int idCharacter );
-    std::vector<int> charactersNear( const Engine::EntityPositionModel& position );
+    std::vector<int> charactersVisibleFrom( int idCharacter );
+    std::vector<int> charactersViewing( int idCharacter );
+    std::vector<int> charactersViewing( const Engine::EntityPositionModel& position );
 
     bool isPositionOccupied( int x, int y, int z );
     bool isAreaOccupied( int x, int y, int z, int width, int height );
@@ -89,17 +78,22 @@ public:
     void tick();
 
 private:
+    void dispatch( const WorldCommand& command );
+    void dispatchToCharacter( int idCharacter, const std::function<void( CharacterRuntime& )>& action );
+
+private:
     std::mutex _mutex;
     EventBus _eventBus;
     std::unique_ptr<Engine::WorldModel> _world;
     std::map<int, std::unique_ptr<CharacterRuntime>> _characters;
     std::map<int, std::unique_ptr<CreatureRuntime>> _creatures;
     WorldSpatialIndex _spatialIndex;
-    WorldGroundItemSystem _groundItemSystem;
     std::unique_ptr<WorldCombatSystem> _combatSystem;
+    std::unique_ptr<WorldGroundItemSystem> _groundItemSystem;
     std::unique_ptr<WorldMovementSystem> _movementSystem;
     std::unique_ptr<WorldCreatureSystem> _creatureSystem;
     std::unique_ptr<WorldSpawnSystem> _spawnSystem;
+    std::unique_ptr<WorldVisibilitySystem> _visibilitySystem;
     std::mutex _commandMutex;
     std::vector<std::unique_ptr<WorldCommand>> _commands;
     int _tickRate;

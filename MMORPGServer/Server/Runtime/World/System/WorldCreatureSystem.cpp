@@ -61,7 +61,7 @@ void WorldCreatureSystem::onTick() {
     {
         std::lock_guard<std::mutex> lock( _runtime.mutex() );
 
-        const WorldSpatialIndex& spatialIndex = _runtime.spatialIndex();
+        WorldSpatialIndex& spatialIndex = _runtime.spatialIndex();
         const Engine::CreatureTypeCatalog& creatureTypeCatalog = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog();
         const Engine::WorldModel* world = _runtime.world();
 
@@ -69,8 +69,20 @@ void WorldCreatureSystem::onTick() {
             return world && world->isWalkable( x, y, z );
         };
 
-        for ( auto& entry : _runtime.creaturesLocked() ) {
-            CreatureRuntime& creatureRuntime = *entry.second;
+        std::vector<CreatureRuntime*> activeCreatures;
+
+        for ( const ChunkRuntime* chunk : spatialIndex.activeChunks() ) {
+            if ( chunk->hasObservers() ) {
+                activeCreatures.insert( activeCreatures.end(), chunk->creatures().begin(), chunk->creatures().end() );
+            }
+        }
+
+        std::sort( activeCreatures.begin(), activeCreatures.end(), []( const CreatureRuntime* left, const CreatureRuntime* right ) {
+            return left->creature()->idCreature() < right->creature()->idCreature();
+        } );
+
+        for ( CreatureRuntime* activeCreature : activeCreatures ) {
+            CreatureRuntime& creatureRuntime = *activeCreature;
             Engine::CreatureModel* creaturePtr = creatureRuntime.creature();
 
             const int footprint = creaturePtr->size().width();
@@ -114,16 +126,14 @@ void WorldCreatureSystem::onTick() {
                     attackIntents.push_back( CreatureAttackIntent( creaturePtr->idCreature(), target->position().x(), target->position().y(), target->position().z() ) );
                 }
             } else {
-                movedPosition = creatureRuntime.tick(
-                    [ &spatialIndex ]( const Engine::EntityPositionModel& position ) { return spatialIndex.hasCharacterNear( position ); },
-                    isWalkable,
-                    isOccupied,
-                    _runtime.tickRate() );
+                movedPosition = creatureRuntime.tick( isWalkable, isOccupied, _runtime.tickRate() );
             }
 
             if ( !movedPosition ) {
                 continue;
             }
+
+            spatialIndex.updateCreatureChunk( &creatureRuntime, previousPosition );
 
             Json::Value payload;
             payload[ "idCreature" ] = creaturePtr->idCreature();

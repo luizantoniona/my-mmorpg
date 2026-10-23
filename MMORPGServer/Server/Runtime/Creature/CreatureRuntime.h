@@ -24,7 +24,6 @@ public:
     void updateLeash();
 
     std::optional<Engine::EntityPositionModel> tick(
-        const std::function<bool( const Engine::EntityPositionModel& )>& hasCharacterNear,
         const CreaturePathfinder::PositionPredicate& isWalkable,
         const CreaturePathfinder::PositionPredicate& isOccupied,
         int tickRate );

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <mutex>
 
 #include <QDebug>
 
@@ -42,14 +43,23 @@ void WorldSpawnSystem::onTick() {
         buildAreas();
     }
 
-    for ( size_t i = 0; i < _activeAreas.size(); ++i ) {
-        spawnDue( *_activeAreas[ i ] );
+    std::vector<WorldSpawnAreaRuntime*> pendingAreas;
+
+    {
+        std::lock_guard<std::mutex> lock( _runtime.mutex() );
+
+        for ( const ChunkRuntime* chunk : _runtime.spatialIndex().activeChunks() ) {
+            for ( WorldSpawnAreaRuntime* area : chunk->spawnAreas() ) {
+                if ( area->hasPending() ) {
+                    pendingAreas.push_back( area );
+                }
+            }
+        }
     }
 
-    _activeAreas.erase( std::remove_if( _activeAreas.begin(), _activeAreas.end(), []( const WorldSpawnAreaRuntime* area ) {
-                            return !area->hasPending();
-                        } ),
-                        _activeAreas.end() );
+    for ( WorldSpawnAreaRuntime* area : pendingAreas ) {
+        spawnDue( *area );
+    }
 }
 
 const std::vector<std::unique_ptr<WorldSpawnAreaRuntime>>& WorldSpawnSystem::areas() const {
@@ -57,7 +67,9 @@ const std::vector<std::unique_ptr<WorldSpawnAreaRuntime>>& WorldSpawnSystem::are
 }
 
 size_t WorldSpawnSystem::activeAreaCount() const {
-    return _activeAreas.size();
+    return static_cast<size_t>( std::count_if( _areas.begin(), _areas.end(), []( const std::unique_ptr<WorldSpawnAreaRuntime>& area ) {
+        return area->hasPending();
+    } ) );
 }
 
 void WorldSpawnSystem::buildAreas() {
@@ -87,8 +99,10 @@ void WorldSpawnSystem::buildAreas() {
                 }
             }
 
-            if ( area->hasPending() ) {
-                _activeAreas.push_back( area.get() );
+            {
+                std::lock_guard<std::mutex> lock( _runtime.mutex() );
+
+                _runtime.spatialIndex().addSpawnArea( area.get() );
             }
 
             _areas.push_back( std::move( area ) );
@@ -108,10 +122,6 @@ void WorldSpawnSystem::onCreatureDied( const WorldEvent& event ) {
     _creatureAreas.erase( it );
 
     area->addPending( QString::fromStdString( payload[ "type" ].asString() ), _currentTick + ticksFromSeconds( area->area().respawnSeconds() ) );
-
-    if ( std::find( _activeAreas.begin(), _activeAreas.end(), area ) == _activeAreas.end() ) {
-        _activeAreas.push_back( area );
-    }
 }
 
 void WorldSpawnSystem::spawnDue( WorldSpawnAreaRuntime& area ) {

@@ -1,13 +1,15 @@
 #include "WorldRuntime.h"
 
-#include <algorithm>
-#include <iterator>
-
 #include <QDebug>
 
-#include <MMORPGEngine/World/WorldConstants.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
 #include <MMORPGServer/Server/Event/WorldEventType.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterAttackEntityCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterDropItemCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterEquipItemCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterMoveCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterPickupItemCommand.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterUnequipItemCommand.h>
 
 namespace Server {
 
@@ -15,9 +17,11 @@ WorldRuntime::WorldRuntime( std::unique_ptr<Engine::WorldModel> world, int tickR
     _world( std::move( world ) ),
     _spatialIndex( _characters, _creatures ),
     _combatSystem( std::make_unique<WorldCombatSystem>( *this ) ),
+    _groundItemSystem( std::make_unique<WorldGroundItemSystem>( *this ) ),
     _movementSystem( std::make_unique<WorldMovementSystem>( *this ) ),
     _creatureSystem( std::make_unique<WorldCreatureSystem>( *this ) ),
     _spawnSystem( std::make_unique<WorldSpawnSystem>( *this ) ),
+    _visibilitySystem( std::make_unique<WorldVisibilitySystem>( *this ) ),
     _tickRate( tickRate ) {
 }
 
@@ -49,12 +53,20 @@ WorldCombatSystem& WorldRuntime::combatSystem() {
     return *_combatSystem;
 }
 
+WorldGroundItemSystem& WorldRuntime::groundItemSystem() {
+    return *_groundItemSystem;
+}
+
 WorldMovementSystem& WorldRuntime::movementSystem() {
     return *_movementSystem;
 }
 
 WorldSpawnSystem& WorldRuntime::spawnSystem() {
     return *_spawnSystem;
+}
+
+WorldVisibilitySystem& WorldRuntime::visibilitySystem() {
+    return *_visibilitySystem;
 }
 
 int WorldRuntime::tickRate() const {
@@ -100,27 +112,21 @@ Engine::CharacterModel* WorldRuntime::addCharacter( std::unique_ptr<Engine::Char
 
 void WorldRuntime::removeCharacter( int idCharacter ) {
     std::vector<int> nearbyCharacters;
-    bool removed = false;
 
     {
         std::lock_guard<std::mutex> lock( _mutex );
 
         auto it = _characters.find( idCharacter );
-        if ( it != _characters.end() ) {
-            nearbyCharacters = _spatialIndex.charactersNear( idCharacter );
-
-            _spatialIndex.removeCharacter( it->second->character() );
-
-            removed = true;
+        if ( it == _characters.end() ) {
+            return;
         }
 
-        _characters.erase( idCharacter );
+        nearbyCharacters = _spatialIndex.charactersViewing( idCharacter );
+
+        _spatialIndex.removeCharacter( it->second->character() );
+        _characters.erase( it );
 
         qInfo() << "[WorldRuntime] Character removed [CHARACTER]" << idCharacter << "[TOTAL]" << _characters.size();
-    }
-
-    if ( !removed ) {
-        return;
     }
 
     Json::Value nearbyJson( Json::arrayValue );
@@ -139,254 +145,6 @@ Engine::CharacterModel* WorldRuntime::character( int idCharacter ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
     return characterLocked( idCharacter );
-}
-
-bool WorldRuntime::equipCharacter( int idCharacter, uint32_t inventoryPosition ) {
-    std::vector<WorldEvent> events;
-    bool equipped = false;
-
-    {
-        std::lock_guard<std::mutex> lock( _mutex );
-
-        auto it = _characters.find( idCharacter );
-        if ( it == _characters.end() ) {
-            return false;
-        }
-
-        equipped = it->second->equipmentSystem().equip( inventoryPosition );
-        events = it->second->takePendingEvents();
-    }
-
-    for ( const WorldEvent& event : events ) {
-        _eventBus.publish( event );
-    }
-
-    return equipped;
-}
-
-bool WorldRuntime::unequipCharacter( int idCharacter, Engine::EquipmentSlotEnum slot ) {
-    std::vector<WorldEvent> events;
-    bool unequipped = false;
-
-    {
-        std::lock_guard<std::mutex> lock( _mutex );
-
-        auto it = _characters.find( idCharacter );
-        if ( it == _characters.end() ) {
-            return false;
-        }
-
-        unequipped = it->second->equipmentSystem().unequip( slot );
-        events = it->second->takePendingEvents();
-    }
-
-    for ( const WorldEvent& event : events ) {
-        _eventBus.publish( event );
-    }
-
-    return unequipped;
-}
-
-bool WorldRuntime::dropCharacterItem( int idCharacter, uint32_t inventoryPosition ) {
-    std::vector<WorldEvent> events;
-
-    {
-        std::lock_guard<std::mutex> lock( _mutex );
-
-        auto it = _characters.find( idCharacter );
-        if ( it == _characters.end() ) {
-            return false;
-        }
-
-        const std::optional<QString> idItem = it->second->inventorySystem().take( inventoryPosition );
-        if ( !idItem ) {
-            return false;
-        }
-
-        const Engine::GroundItemModel groundItem = _groundItemSystem.drop( *idItem, it->second->character()->position() );
-        events = it->second->takePendingEvents();
-
-        Json::Value payload;
-        payload[ "idGroundItem" ] = groundItem.idGroundItem();
-        payload[ "idItem" ] = groundItem.idItem().toStdString();
-        payload[ "x" ] = groundItem.position().x();
-        payload[ "y" ] = groundItem.position().y();
-        payload[ "z" ] = groundItem.position().z();
-        events.push_back( WorldEvent( WorldEventType::GROUND_ITEM_ENTERED, payload ) );
-
-        qInfo() << "[WorldRuntime] Item dropped [CHARACTER]" << idCharacter << "[GROUND ITEM]" << groundItem.idGroundItem();
-    }
-
-    for ( const WorldEvent& event : events ) {
-        _eventBus.publish( event );
-    }
-
-    return true;
-}
-
-bool WorldRuntime::pickupCharacterItem( int idCharacter, int idGroundItem ) {
-    std::vector<WorldEvent> events;
-
-    {
-        std::lock_guard<std::mutex> lock( _mutex );
-
-        auto it = _characters.find( idCharacter );
-        if ( it == _characters.end() ) {
-            return false;
-        }
-
-        const std::optional<Engine::GroundItemModel> groundItem = _groundItemSystem.find( idGroundItem );
-        if ( !groundItem ) {
-            qWarning() << "[WorldRuntime] Pickup rejected: unknown ground item [CHARACTER]" << idCharacter << "[GROUND ITEM]" << idGroundItem;
-            return false;
-        }
-
-        if ( !WorldGroundItemSystem::isReachable( *groundItem, it->second->character()->position() ) ) {
-            qWarning() << "[WorldRuntime] Pickup rejected: out of reach [CHARACTER]" << idCharacter << "[GROUND ITEM]" << idGroundItem;
-            return false;
-        }
-
-        if ( !it->second->inventorySystem().add( groundItem->idItem() ) ) {
-            return false;
-        }
-
-        _groundItemSystem.remove( idGroundItem );
-        events = it->second->takePendingEvents();
-
-        Json::Value payload;
-        payload[ "idGroundItem" ] = groundItem->idGroundItem();
-        payload[ "x" ] = groundItem->position().x();
-        payload[ "y" ] = groundItem->position().y();
-        payload[ "z" ] = groundItem->position().z();
-        events.push_back( WorldEvent( WorldEventType::GROUND_ITEM_LEFT, payload ) );
-
-        qInfo() << "[WorldRuntime] Item picked up [CHARACTER]" << idCharacter << "[GROUND ITEM]" << idGroundItem;
-    }
-
-    for ( const WorldEvent& event : events ) {
-        _eventBus.publish( event );
-    }
-
-    return true;
-}
-
-std::vector<Engine::GroundItemModel> WorldRuntime::groundItemsNear( const Engine::EntityPositionModel& position ) {
-    std::lock_guard<std::mutex> lock( _mutex );
-
-    return _groundItemSystem.itemsNear( position );
-}
-
-std::optional<Engine::GroundItemModel> WorldRuntime::groundItem( int idGroundItem ) {
-    std::lock_guard<std::mutex> lock( _mutex );
-
-    return _groundItemSystem.find( idGroundItem );
-}
-
-std::vector<ChunkCoordinate> WorldRuntime::terrainChunksNear( const Engine::EntityPositionModel& position ) const {
-    std::vector<ChunkCoordinate> result;
-
-    if ( !_world ) {
-        return result;
-    }
-
-    const int chunkCountX = ( static_cast<int>( _world->width() ) + Engine::WorldConstants::CHUNK_SIZE - 1 ) / Engine::WorldConstants::CHUNK_SIZE;
-    const int chunkCountY = ( static_cast<int>( _world->height() ) + Engine::WorldConstants::CHUNK_SIZE - 1 ) / Engine::WorldConstants::CHUNK_SIZE;
-
-    const int centerX = position.x() / Engine::WorldConstants::CHUNK_SIZE;
-    const int centerY = position.y() / Engine::WorldConstants::CHUNK_SIZE;
-
-    for ( int chunkX = centerX - 1; chunkX <= centerX + 1; ++chunkX ) {
-        for ( int chunkY = centerY - 1; chunkY <= centerY + 1; ++chunkY ) {
-            if ( chunkX >= 0 && chunkY >= 0 && chunkX < chunkCountX && chunkY < chunkCountY ) {
-                result.push_back( ChunkCoordinate( chunkX, chunkY, 0 ) );
-            }
-        }
-    }
-
-    return result;
-}
-
-WorldVisibilityDelta WorldRuntime::visibilityDelta( const Engine::EntityPositionModel& previousPosition, const Engine::EntityPositionModel& currentPosition, int ignoredIdCharacter ) {
-    std::lock_guard<std::mutex> lock( _mutex );
-
-    const auto sorted = []( std::vector<int> ids ) {
-        std::sort( ids.begin(), ids.end() );
-        return ids;
-    };
-
-    const auto difference = [ &sorted ]( const std::vector<int>& from, const std::vector<int>& other ) {
-        const std::vector<int> sortedFrom = sorted( from );
-        const std::vector<int> sortedOther = sorted( other );
-
-        std::vector<int> result;
-        std::set_difference( sortedFrom.begin(), sortedFrom.end(), sortedOther.begin(), sortedOther.end(), std::back_inserter( result ) );
-
-        return result;
-    };
-
-    const auto withoutIgnored = [ ignoredIdCharacter ]( std::vector<int> ids ) {
-        ids.erase( std::remove( ids.begin(), ids.end(), ignoredIdCharacter ), ids.end() );
-        return ids;
-    };
-
-    const auto creatureIds = [ this ]( const Engine::EntityPositionModel& position ) {
-        std::vector<int> ids;
-        for ( const Engine::CreatureModel& creature : _spatialIndex.creaturesNear( position ) ) {
-            ids.push_back( creature.idCreature() );
-        }
-        return ids;
-    };
-
-    const auto groundItemIds = [ this ]( const Engine::EntityPositionModel& position ) {
-        std::vector<int> ids;
-        for ( const Engine::GroundItemModel& groundItem : _groundItemSystem.itemsNear( position ) ) {
-            ids.push_back( groundItem.idGroundItem() );
-        }
-        return ids;
-    };
-
-    const std::vector<int> previousCharacters = withoutIgnored( _spatialIndex.charactersNear( previousPosition ) );
-    const std::vector<int> currentCharacters = withoutIgnored( _spatialIndex.charactersNear( currentPosition ) );
-    const std::vector<int> previousCreatures = creatureIds( previousPosition );
-    const std::vector<int> currentCreatures = creatureIds( currentPosition );
-    const std::vector<int> previousGroundItems = groundItemIds( previousPosition );
-    const std::vector<int> currentGroundItems = groundItemIds( currentPosition );
-
-    WorldVisibilityDelta delta;
-    delta.charactersEntered = difference( currentCharacters, previousCharacters );
-    delta.charactersLeft = difference( previousCharacters, currentCharacters );
-    delta.creaturesEntered = difference( currentCreatures, previousCreatures );
-    delta.creaturesLeft = difference( previousCreatures, currentCreatures );
-    delta.groundItemsEntered = difference( currentGroundItems, previousGroundItems );
-    delta.groundItemsLeft = difference( previousGroundItems, currentGroundItems );
-
-    const std::vector<ChunkCoordinate> previousChunks = terrainChunksNear( previousPosition );
-    const std::vector<ChunkCoordinate> currentChunks = terrainChunksNear( currentPosition );
-
-    for ( const ChunkCoordinate& chunk : currentChunks ) {
-        if ( std::find( previousChunks.begin(), previousChunks.end(), chunk ) == previousChunks.end() ) {
-            delta.terrainChunksEntered.push_back( chunk );
-        }
-    }
-
-    for ( const ChunkCoordinate& chunk : previousChunks ) {
-        if ( std::find( currentChunks.begin(), currentChunks.end(), chunk ) == currentChunks.end() ) {
-            delta.terrainChunksLeft.push_back( chunk );
-        }
-    }
-
-    return delta;
-}
-
-std::map<int, Engine::EntityPositionModel> WorldRuntime::characterPositions() {
-    std::lock_guard<std::mutex> lock( _mutex );
-
-    std::map<int, Engine::EntityPositionModel> positions;
-    for ( const auto& entry : _characters ) {
-        positions[ entry.first ] = entry.second->character()->position();
-    }
-
-    return positions;
 }
 
 std::vector<Engine::CharacterModel> WorldRuntime::connectedCharacters() {
@@ -413,6 +171,7 @@ Engine::CreatureModel* WorldRuntime::addCreature( std::unique_ptr<Engine::Creatu
 
     auto creatureRuntime = std::make_unique<CreatureRuntime>( std::move( creature ), spawnArea );
     Engine::CreatureModel* creaturePtr = creatureRuntime->creature();
+    _spatialIndex.addCreature( creatureRuntime.get() );
     _creatures[ idCreature ] = std::move( creatureRuntime );
 
     qInfo() << "[WorldRuntime] Creature added [CREATURE]" << idCreature << "[TOTAL]" << _creatures.size();
@@ -446,10 +205,10 @@ std::vector<Engine::CreatureModel> WorldRuntime::creatures() {
     return result;
 }
 
-std::vector<Engine::CreatureModel> WorldRuntime::creaturesNear( const Engine::EntityPositionModel& position ) {
+std::vector<Engine::CreatureModel> WorldRuntime::creaturesVisibleFrom( const Engine::EntityPositionModel& position ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
-    return _spatialIndex.creaturesNear( position );
+    return _spatialIndex.creaturesVisibleFrom( position );
 }
 
 Engine::CharacterModel* WorldRuntime::characterLocked( int idCharacter ) const {
@@ -457,24 +216,41 @@ Engine::CharacterModel* WorldRuntime::characterLocked( int idCharacter ) const {
     return it != _characters.end() ? it->second->character() : nullptr;
 }
 
+CharacterRuntime* WorldRuntime::characterRuntimeLocked( int idCharacter ) {
+    auto it = _characters.find( idCharacter );
+    return it != _characters.end() ? it->second.get() : nullptr;
+}
+
 std::map<int, std::unique_ptr<CreatureRuntime>>& WorldRuntime::creaturesLocked() {
     return _creatures;
 }
 
 void WorldRuntime::eraseCreatureLocked( int idCreature ) {
-    _creatures.erase( idCreature );
+    const auto it = _creatures.find( idCreature );
+    if ( it == _creatures.end() ) {
+        return;
+    }
+
+    _spatialIndex.removeCreature( it->second.get() );
+    _creatures.erase( it );
 }
 
-std::vector<int> WorldRuntime::charactersNear( int idCharacter ) {
+std::vector<int> WorldRuntime::charactersVisibleFrom( int idCharacter ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
-    return _spatialIndex.charactersNear( idCharacter );
+    return _spatialIndex.charactersVisibleFrom( idCharacter );
 }
 
-std::vector<int> WorldRuntime::charactersNear( const Engine::EntityPositionModel& position ) {
+std::vector<int> WorldRuntime::charactersViewing( int idCharacter ) {
     std::lock_guard<std::mutex> lock( _mutex );
 
-    return _spatialIndex.charactersNear( position );
+    return _spatialIndex.charactersViewing( idCharacter );
+}
+
+std::vector<int> WorldRuntime::charactersViewing( const Engine::EntityPositionModel& position ) {
+    std::lock_guard<std::mutex> lock( _mutex );
+
+    return _spatialIndex.charactersViewing( position );
 }
 
 bool WorldRuntime::isPositionOccupied( int x, int y, int z ) {
@@ -510,7 +286,7 @@ void WorldRuntime::tick() {
     }
 
     for ( const std::unique_ptr<WorldCommand>& command : commands ) {
-        command->execute( *this );
+        dispatch( *command );
     }
 
     std::vector<WorldEvent> characterEvents;
@@ -526,14 +302,61 @@ void WorldRuntime::tick() {
         }
     }
 
-    for ( const WorldEvent& event : characterEvents ) {
-        _eventBus.publish( event );
-    }
+    _eventBus.publish( characterEvents );
 
     _combatSystem->onTick();
     _movementSystem->onTick();
     _spawnSystem->onTick();
     _creatureSystem->onTick();
+}
+
+void WorldRuntime::dispatchToCharacter( int idCharacter, const std::function<void( CharacterRuntime& )>& action ) {
+    std::vector<WorldEvent> events;
+
+    {
+        std::lock_guard<std::mutex> lock( _mutex );
+
+        CharacterRuntime* characterRuntime = characterRuntimeLocked( idCharacter );
+        if ( !characterRuntime ) {
+            return;
+        }
+
+        action( *characterRuntime );
+        events = characterRuntime->takePendingEvents();
+    }
+
+    _eventBus.publish( events );
+}
+
+void WorldRuntime::dispatch( const WorldCommand& command ) {
+    switch ( command.type() ) {
+    case WorldCommandTypeEnum::CHARACTER_MOVE:
+        _movementSystem->handle( static_cast<const CharacterMoveCommand&>( command ) );
+        break;
+    case WorldCommandTypeEnum::CHARACTER_ATTACK_ENTITY:
+        _combatSystem->handle( static_cast<const CharacterAttackEntityCommand&>( command ) );
+        break;
+    case WorldCommandTypeEnum::CHARACTER_EQUIP_ITEM: {
+        const auto& equip = static_cast<const CharacterEquipItemCommand&>( command );
+        dispatchToCharacter( equip.idCharacter(), [ &equip ]( CharacterRuntime& characterRuntime ) {
+            characterRuntime.equipmentSystem().equip( equip.inventoryPosition() );
+        } );
+        break;
+    }
+    case WorldCommandTypeEnum::CHARACTER_UNEQUIP_ITEM: {
+        const auto& unequip = static_cast<const CharacterUnequipItemCommand&>( command );
+        dispatchToCharacter( unequip.idCharacter(), [ &unequip ]( CharacterRuntime& characterRuntime ) {
+            characterRuntime.equipmentSystem().unequip( unequip.slot() );
+        } );
+        break;
+    }
+    case WorldCommandTypeEnum::CHARACTER_DROP_ITEM:
+        _groundItemSystem->handle( static_cast<const CharacterDropItemCommand&>( command ) );
+        break;
+    case WorldCommandTypeEnum::CHARACTER_PICKUP_ITEM:
+        _groundItemSystem->handle( static_cast<const CharacterPickupItemCommand&>( command ) );
+        break;
+    }
 }
 
 } // namespace Server

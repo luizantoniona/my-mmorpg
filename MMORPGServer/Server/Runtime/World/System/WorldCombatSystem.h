@@ -6,6 +6,7 @@
 
 #include <MMORPGServer/Server/Runtime/World/Action/WorldCombatAction.h>
 #include <MMORPGServer/Server/Runtime/World/Action/WorldCombatAttackAction.h>
+#include <MMORPGServer/Server/Runtime/World/Command/Character/CharacterAttackEntityCommand.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldCombatAttackerEnum.h>
 #include <MMORPGServer/Server/Runtime/World/System/WorldSystem.h>
 
@@ -16,6 +17,8 @@ public:
     explicit WorldCombatSystem( WorldRuntime& runtime );
 
     void onTick() override;
+
+    void handle( const CharacterAttackEntityCommand& command );
 
     bool attack( int idCharacter, int dx, int dy );
     bool attackCreature( int idCreature, int x, int y, int z );

@@ -15,6 +15,7 @@ public:
 
     void subscribe( WorldEventType type, Listener listener );
     void publish( const WorldEvent& event );
+    void publish( const std::vector<WorldEvent>& events );
 
 private:
     std::unordered_map<WorldEventType, std::vector<Listener>> _listeners;

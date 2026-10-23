@@ -1,15 +1,19 @@
 #ifndef WORLDCOMMAND_H
 #define WORLDCOMMAND_H
 
-namespace Server {
+#include <MMORPGServer/Server/Runtime/World/Command/WorldCommandTypeEnum.h>
 
-class WorldRuntime;
+namespace Server {
 
 class WorldCommand {
 public:
+    explicit WorldCommand( WorldCommandTypeEnum type );
     virtual ~WorldCommand();
 
-    virtual void execute( WorldRuntime& runtime ) = 0;
+    WorldCommandTypeEnum type() const;
+
+private:
+    WorldCommandTypeEnum _type;
 };
 
 } // namespace Server

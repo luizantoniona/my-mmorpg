@@ -33,7 +33,6 @@ private:
 
 private:
     std::vector<std::unique_ptr<WorldSpawnAreaRuntime>> _areas;
-    std::vector<WorldSpawnAreaRuntime*> _activeAreas;
     std::map<int, WorldSpawnAreaRuntime*> _creatureAreas;
     std::mt19937 _randomEngine;
     int64_t _currentTick;

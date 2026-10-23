@@ -21,6 +21,10 @@ void WorldCombatSystem::onTick() {
     }
 }
 
+void WorldCombatSystem::handle( const CharacterAttackEntityCommand& command ) {
+    attack( command.idCharacter(), command.dx(), command.dy() );
+}
+
 bool WorldCombatSystem::attack( int idCharacter, int dx, int dy ) {
     Engine::CharacterModel* character = _runtime.character( idCharacter );
     if ( !character ) {

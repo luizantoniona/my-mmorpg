@@ -15,10 +15,10 @@ class ClientMessageReceiver {
 public:
     ClientMessageReceiver();
 
-    void receive( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const std::string& message );
+    void receive( int idCharacter, const std::string& message );
 
 private:
-    void receiveMove( const drogon::WebSocketConnectionPtr& connection, int idCharacter, const Json::Value& messageJson );
+    void receiveMove( int idCharacter, const Json::Value& messageJson );
     void receiveAction( int idCharacter, const Json::Value& messageJson );
     void receiveAttack( int idCharacter, const Engine::CharacterIntentActionDTO& input );
     void receiveEquip( int idCharacter, const Json::Value& messageJson );

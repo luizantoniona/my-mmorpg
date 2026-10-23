@@ -44,14 +44,9 @@ void CreatureRuntime::updateLeash() {
 }
 
 std::optional<Engine::EntityPositionModel> CreatureRuntime::tick(
-    const std::function<bool( const Engine::EntityPositionModel& )>& hasCharacterNear,
     const CreaturePathfinder::PositionPredicate& isWalkable,
     const CreaturePathfinder::PositionPredicate& isOccupied,
     int tickRate ) {
-
-    if ( !hasCharacterNear( _creature->position() ) ) {
-        return std::nullopt;
-    }
 
     Engine::EntityMovementModel& movement = _creature->movement();
     movement.setCounter( movement.counter() + 1 );

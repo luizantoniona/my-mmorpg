@@ -11,6 +11,7 @@ class WorldVisibilityDelta {
 public:
     std::vector<int> charactersEntered;
     std::vector<int> charactersLeft;
+    std::vector<int> viewersLeft;
     std::vector<int> creaturesEntered;
     std::vector<int> creaturesLeft;
     std::vector<int> groundItemsEntered;
