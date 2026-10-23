@@ -4,6 +4,7 @@ include(GoogleTest)
 add_executable(
   MMORPGServerTests
   ChunkCoordinateTest.cpp
+  ChunkRuntimeTest.cpp
   CreaturePathfinderTest.cpp
   EventBusTest.cpp
   WorldRuntimeTest.cpp
@@ -18,10 +19,17 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterMovementSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterVitalsSystem.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Chunk/ChunkRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Creature/CreaturePathfinder.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Creature/CreatureRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Action/WorldCombatAction.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Action/WorldCombatAttackAction.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterAttackEntityCommand.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterDropItemCommand.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterEquipItemCommand.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterMoveCommand.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterPickupItemCommand.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterUnequipItemCommand.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/WorldCommand.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Spawn/WorldSpawnAreaRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldCombatSystem.cpp
@@ -30,6 +38,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldMovementSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldSpawnSystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldSystem.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/System/WorldVisibilitySystem.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/WorldRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/WorldSpatialIndex.cpp
 )
