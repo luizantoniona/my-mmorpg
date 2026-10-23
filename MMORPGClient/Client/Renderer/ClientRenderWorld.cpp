@@ -69,6 +69,22 @@ uint32_t ClientRenderWorld::height() const {
     return _world->height();
 }
 
+bool ClientRenderWorld::hasChunk( int chunkX, int chunkY ) const {
+    if ( !_world ) {
+        return false;
+    }
+
+    return _world->hasChunk( chunkX, chunkY );
+}
+
+quint64 ClientRenderWorld::chunkRevision( int chunkX, int chunkY ) const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->chunkRevision( chunkX, chunkY );
+}
+
 void ClientRenderWorld::onOwnCharacterReceived( const Engine::OwnCharacterDTO& state ) {
     setOwnCharacter( state.idCharacter(), state.x(), state.y(), state.z(), state.movementCooldownSeconds() );
 }

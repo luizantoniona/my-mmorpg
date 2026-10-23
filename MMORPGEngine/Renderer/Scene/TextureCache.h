@@ -19,6 +19,8 @@ public:
 
     QSGTexture* texture( QQuickWindow* window, const QImage& image );
 
+    void release( qint64 cacheKey );
+
 private:
     void clear();
 

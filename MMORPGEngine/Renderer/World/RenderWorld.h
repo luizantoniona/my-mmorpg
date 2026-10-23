@@ -41,6 +41,9 @@ public:
     virtual uint32_t width() const = 0;
     virtual uint32_t height() const = 0;
 
+    virtual bool hasChunk( int chunkX, int chunkY ) const;
+    virtual quint64 chunkRevision( int chunkX, int chunkY ) const;
+
     Q_INVOKABLE bool hasObject( int x, int y, int z ) const;
     Q_INVOKABLE bool hasTile( int x, int y, int z ) const;
 

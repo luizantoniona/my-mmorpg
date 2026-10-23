@@ -24,6 +24,9 @@ public:
     uint32_t width() const override;
     uint32_t height() const override;
 
+    bool hasChunk( int chunkX, int chunkY ) const override;
+    quint64 chunkRevision( int chunkX, int chunkY ) const override;
+
 private slots:
     void onOwnCharacterReceived( const Engine::OwnCharacterDTO& state );
     void onCreatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds );

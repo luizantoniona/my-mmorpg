@@ -212,6 +212,8 @@ set(PROJECT_SOURCES
     Renderer/EffectRenderer.h
     Renderer/OverlayRenderer.cpp
     Renderer/OverlayRenderer.h
+    Renderer/RenderVisibleArea.cpp
+    Renderer/RenderVisibleArea.h
     Renderer/Renderer.cpp
     Renderer/Renderer.h
     Renderer/EntityAnimationModel.cpp

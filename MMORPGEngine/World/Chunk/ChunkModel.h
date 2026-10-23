@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+#include <QtGlobal>
+
 #include <MMORPGEngine/World/Object/WorldObjectModel.h>
 #include <MMORPGEngine/World/Tile/WorldTileModel.h>
 
@@ -23,11 +25,15 @@ public:
     WorldTileModel* tile( int x, int y, int z );
     const WorldTileModel* tile( int x, int y, int z ) const;
 
+    quint64 revision() const;
+    void markChanged();
+
 private:
     bool validPosition( int x, int y ) const;
     int index( int x, int y ) const;
 
 private:
+    quint64 _revision;
     std::map<int, std::vector<std::unique_ptr<WorldObjectModel>>> _objects;
     std::map<int, std::vector<std::unique_ptr<WorldTileModel>>> _tiles;
 };

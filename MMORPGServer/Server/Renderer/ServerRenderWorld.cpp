@@ -57,3 +57,19 @@ uint32_t ServerRenderWorld::height() const {
 
     return _world->height();
 }
+
+bool ServerRenderWorld::hasChunk( int chunkX, int chunkY ) const {
+    if ( !_world ) {
+        return false;
+    }
+
+    return _world->hasChunk( chunkX, chunkY );
+}
+
+quint64 ServerRenderWorld::chunkRevision( int chunkX, int chunkY ) const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->chunkRevision( chunkX, chunkY );
+}

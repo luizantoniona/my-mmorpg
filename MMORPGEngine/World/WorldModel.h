@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 #include <QString>
@@ -40,6 +41,8 @@ public:
     ChunkModel* chunk( int x, int y );
     const ChunkModel* chunk( int x, int y ) const;
     void removeChunk( int x, int y );
+    bool hasChunk( int x, int y ) const;
+    quint64 chunkRevision( int x, int y ) const;
 
     std::vector<int> floors() const;
     void addFloor( int z );
@@ -60,7 +63,7 @@ public:
 
 private:
     bool isBlockedByObject( int x, int y, int z ) const;
-    QString chunkKey( int x, int y ) const;
+    static quint64 chunkKey( int x, int y );
 
 private:
     QString _name;
@@ -69,7 +72,7 @@ private:
     int _spawnX;
     int _spawnY;
     int _spawnZ;
-    std::map<QString, std::unique_ptr<ChunkModel>> _chunks;
+    std::unordered_map<quint64, std::unique_ptr<ChunkModel>> _chunks;
     std::map<int, std::vector<CreatureSpawnAreaModel>> _spawnAreas;
     std::set<int> _floors;
 };

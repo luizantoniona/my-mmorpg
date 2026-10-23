@@ -63,3 +63,19 @@ uint32_t EditorRenderWorld::height() const {
 
     return _world->height();
 }
+
+bool EditorRenderWorld::hasChunk( int chunkX, int chunkY ) const {
+    if ( !_world ) {
+        return false;
+    }
+
+    return _world->hasChunk( chunkX, chunkY );
+}
+
+quint64 EditorRenderWorld::chunkRevision( int chunkX, int chunkY ) const {
+    if ( !_world ) {
+        return 0;
+    }
+
+    return _world->chunkRevision( chunkX, chunkY );
+}

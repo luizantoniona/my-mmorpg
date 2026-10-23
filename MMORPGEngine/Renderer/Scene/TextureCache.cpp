@@ -19,6 +19,10 @@ void TextureCache::clear() {
     _textures.clear();
 }
 
+void TextureCache::release( qint64 cacheKey ) {
+    delete _textures.take( cacheKey );
+}
+
 QSGTexture* TextureCache::texture( QQuickWindow* window, const QImage& image ) {
     if ( window != _window ) {
         clear();

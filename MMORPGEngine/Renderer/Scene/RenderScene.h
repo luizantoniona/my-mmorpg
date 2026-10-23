@@ -24,10 +24,22 @@ public:
     void addTexture( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QImage& image );
     void addRect( RenderSceneLayerEnum layer, int row, const QPointF& position, const QSizeF& size, const QColor& color );
 
+    void releaseTexture( qint64 cacheKey );
+
+    int itemCount() const;
+
     void build( QSGNode* rootNode, QQuickWindow* window, const Camera& camera, TextureCache& textureCache );
 
 private:
-    QList<RenderSceneItem> _items;
+    void add( const RenderSceneItem& item );
+    void buildItems( const QList<RenderSceneItem>& items, QSGNode* rootNode, QQuickWindow* window, const Camera& camera, TextureCache& textureCache ) const;
+
+private:
+    QList<RenderSceneItem> _tiles;
+    QList<RenderSceneItem> _objects;
+    QList<RenderSceneItem> _overlays;
+    QList<RenderSceneItem> _effects;
+    QList<qint64> _releasedTextures;
 };
 
 } // namespace Engine

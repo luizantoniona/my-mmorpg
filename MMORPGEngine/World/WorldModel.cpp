@@ -70,7 +70,7 @@ void WorldModel::setSpawnZ( int spawnZ ) {
 }
 
 ChunkModel* WorldModel::chunk( int x, int y ) {
-    const QString key = chunkKey( x, y );
+    const quint64 key = chunkKey( x, y );
 
     auto iterator = _chunks.find( key );
 
@@ -94,6 +94,20 @@ const ChunkModel* WorldModel::chunk( int x, int y ) const {
 
 void WorldModel::removeChunk( int x, int y ) {
     _chunks.erase( chunkKey( x, y ) );
+}
+
+bool WorldModel::hasChunk( int x, int y ) const {
+    return _chunks.find( chunkKey( x, y ) ) != _chunks.end();
+}
+
+quint64 WorldModel::chunkRevision( int x, int y ) const {
+    const auto iterator = _chunks.find( chunkKey( x, y ) );
+
+    if ( iterator == _chunks.end() ) {
+        return 0;
+    }
+
+    return iterator->second->revision();
 }
 
 std::vector<int> WorldModel::floors() const {
@@ -125,6 +139,7 @@ void WorldModel::setObject( int x, int y, int z, uint32_t objectType ) {
     const int localY = y % WorldConstants::CHUNK_SIZE;
 
     ChunkModel* chunkModel = chunk( chunkX, chunkY );
+    chunkModel->markChanged();
 
     if ( objectType == 0 ) {
         chunkModel->setObject( localX, localY, z, nullptr );
@@ -168,6 +183,7 @@ void WorldModel::setTile( int x, int y, int z, uint32_t tileType ) {
     const int localY = y % WorldConstants::CHUNK_SIZE;
 
     ChunkModel* chunkModel = chunk( chunkX, chunkY );
+    chunkModel->markChanged();
 
     if ( tileType == 0 ) {
         const ChunkModel* constChunk = chunkModel;
@@ -204,6 +220,7 @@ void WorldModel::setOverlay( int x, int y, int z, uint32_t overlayType ) {
     const int localY = y % WorldConstants::CHUNK_SIZE;
 
     ChunkModel* chunkModel = chunk( chunkX, chunkY );
+    chunkModel->markChanged();
 
     if ( overlayType == 0 ) {
         const ChunkModel* constChunk = chunkModel;
@@ -329,8 +346,8 @@ bool WorldModel::isBlockedByObject( int x, int y, int z ) const {
     return false;
 }
 
-QString WorldModel::chunkKey( int x, int y ) const {
-    return QStringLiteral( "%1:%2" ).arg( x ).arg( y );
+quint64 WorldModel::chunkKey( int x, int y ) {
+    return ( static_cast<quint64>( static_cast<quint32>( x ) ) << 32 ) | static_cast<quint32>( y );
 }
 
 } // namespace Engine

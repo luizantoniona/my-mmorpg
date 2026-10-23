@@ -25,6 +25,9 @@ public:
     uint32_t width() const override;
     uint32_t height() const override;
 
+    bool hasChunk( int chunkX, int chunkY ) const override;
+    quint64 chunkRevision( int chunkX, int chunkY ) const override;
+
 private:
     Engine::WorldModel* _world;
 };

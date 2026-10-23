@@ -6,6 +6,20 @@ RenderWorld::RenderWorld( QObject* parent ) :
     QObject( parent ) {
 }
 
+bool RenderWorld::hasChunk( int chunkX, int chunkY ) const {
+    Q_UNUSED( chunkX );
+    Q_UNUSED( chunkY );
+
+    return true;
+}
+
+quint64 RenderWorld::chunkRevision( int chunkX, int chunkY ) const {
+    Q_UNUSED( chunkX );
+    Q_UNUSED( chunkY );
+
+    return 0;
+}
+
 bool RenderWorld::hasObject( int x, int y, int z ) const {
     return object( x, y, z ) != nullptr;
 }
