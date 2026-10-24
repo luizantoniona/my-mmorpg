@@ -9,12 +9,12 @@
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
 #include <MMORPGServer/Server/Event/WorldEventType.h>
+#include <MMORPGServer/Server/Runtime/Character/CharacterAttackResolver.h>
+#include <MMORPGServer/Server/Runtime/World/Action/WorldCombatAttackPlanner.h>
 #include <MMORPGServer/Server/Runtime/World/WorldRuntime.h>
 
 namespace {
 
-constexpr int NO_CREATURE = -1;
-constexpr double ATTACK_DAMAGE = 5.0;
 constexpr double ATTACK_STAMINA_COST = 10.0;
 
 // TODO: duração do cast e dano de criatura fixos por ora; depois vêm da arma equipada (ItemType) e do catálogo de criatura
@@ -49,9 +49,9 @@ void WorldCombatAttackAction::onTick() {
 
     for ( const PendingAttack& pendingAttack : dueAttacks ) {
         if ( pendingAttack.attacker == WorldCombatAttackerEnum::CHARACTER ) {
-            resolveCharacterAttack( pendingAttack.idAttacker, pendingAttack.x, pendingAttack.y, pendingAttack.z, pendingAttack.damage );
+            resolveCharacterStrike( pendingAttack.idAttacker, pendingAttack.cells, pendingAttack.z, pendingAttack.hitMode, pendingAttack.damage );
         } else {
-            resolveCreatureAttack( pendingAttack.idAttacker, pendingAttack.x, pendingAttack.y, pendingAttack.z, pendingAttack.damage );
+            resolveCreatureAttack( pendingAttack.idAttacker, pendingAttack.cells.front().first, pendingAttack.cells.front().second, pendingAttack.z, pendingAttack.damage );
         }
     }
 }
@@ -106,14 +106,39 @@ bool WorldCombatAttackAction::startCharacterAttack( int idCharacter, int targetX
         characterPtr->combat().setCounter( 0 );
     }
 
-    _pendingAttacks.push_back( PendingAttack( WorldCombatAttackerEnum::CHARACTER, idCharacter, targetX, targetY, targetZ, ATTACK_DAMAGE, castTicks() ) );
+    const std::vector<Engine::CharacterEquipmentModel> equipment = character->equipment();
+    const Engine::AttackModel attack = CharacterAttackResolver::attack( equipment );
+    const double damage = CharacterAttackResolver::damage( equipment );
+    const Engine::EntityPositionModel position = character->position();
+
+    const std::vector<WorldCombatStrikeModel> strikes = WorldCombatAttackPlanner::plan( attack, position.x(), position.y(), targetX - position.x(), targetY - position.y(), _runtime.tickRate() );
+
+    Json::Value planPayload( Json::arrayValue );
+
+    for ( const WorldCombatStrikeModel& strike : strikes ) {
+        _pendingAttacks.push_back( PendingAttack( WorldCombatAttackerEnum::CHARACTER, idCharacter, strike.cells(), targetZ, strike.hitMode(), damage * strike.damageMultiplier(), strike.ticks() ) );
+
+        Json::Value strikePayload;
+        strikePayload[ "seconds" ] = strike.seconds();
+        strikePayload[ "cells" ] = Json::Value( Json::arrayValue );
+
+        for ( const std::pair<int, int>& cell : strike.cells() ) {
+            Json::Value cellPayload;
+            cellPayload[ "x" ] = cell.first;
+            cellPayload[ "y" ] = cell.second;
+            strikePayload[ "cells" ].append( cellPayload );
+        }
+
+        planPayload.append( strikePayload );
+    }
 
     Json::Value startedPayload;
     startedPayload[ "idCharacter" ] = idCharacter;
     startedPayload[ "x" ] = targetX;
     startedPayload[ "y" ] = targetY;
     startedPayload[ "z" ] = targetZ;
-    startedPayload[ "castSeconds" ] = ATTACK_CAST_SECONDS;
+    startedPayload[ "castSeconds" ] = attack.castSeconds();
+    startedPayload[ "plan" ] = planPayload;
     _runtime.eventBus().publish( WorldEvent( WorldEventType::CHARACTER_ATTACK_STARTED, startedPayload ) );
 
     Json::Value vitalsPayload;
@@ -138,7 +163,7 @@ bool WorldCombatAttackAction::startCreatureAttack( int idCreature, int targetX, 
         it->second->creature()->combat().setCounter( 0 );
     }
 
-    _pendingAttacks.push_back( PendingAttack( WorldCombatAttackerEnum::CREATURE, idCreature, targetX, targetY, targetZ, CREATURE_ATTACK_DAMAGE, castTicks() ) );
+    _pendingAttacks.push_back( PendingAttack( WorldCombatAttackerEnum::CREATURE, idCreature, { std::make_pair( targetX, targetY ) }, targetZ, Engine::AttackHitModeEnum::FIRST, CREATURE_ATTACK_DAMAGE, castTicks() ) );
 
     Json::Value startedPayload;
     startedPayload[ "idCreature" ] = idCreature;
@@ -152,15 +177,12 @@ bool WorldCombatAttackAction::startCreatureAttack( int idCreature, int targetX, 
 }
 
 bool WorldCombatAttackAction::resolveCharacterAttack( int idCharacter, int x, int y, int z, double damage ) {
-    int idCreature = NO_CREATURE;
-    bool creatureDied = false;
-    QString creatureType;
-    double creatureHealth = 0.0;
-    double creatureMaxHealth = 0.0;
-    double creatureMovementCooldownSeconds = 0.0;
-    int creatureX = x;
-    int creatureY = y;
-    int creatureFootprint = 1;
+    return resolveCharacterStrike( idCharacter, { std::make_pair( x, y ) }, z, Engine::AttackHitModeEnum::FIRST, damage );
+}
+
+bool WorldCombatAttackAction::resolveCharacterStrike( int idCharacter, const std::vector<std::pair<int, int>>& cells, int z, Engine::AttackHitModeEnum hitMode, double damage ) {
+    std::vector<Json::Value> creaturePayloads;
+    std::vector<bool> creatureDeaths;
 
     {
         std::lock_guard<std::mutex> lock( _runtime.mutex() );
@@ -169,24 +191,47 @@ bool WorldCombatAttackAction::resolveCharacterAttack( int idCharacter, int x, in
             return false;
         }
 
-        Engine::CreatureModel* creaturePtr = _runtime.spatialIndex().creatureAt( x, y, z );
+        std::vector<int> hitCreatures;
 
-        if ( creaturePtr ) {
-            idCreature = creaturePtr->idCreature();
-            creatureType = creaturePtr->type();
-            creatureX = creaturePtr->position().x();
-            creatureY = creaturePtr->position().y();
-            creatureFootprint = creaturePtr->size().width();
+        for ( const std::pair<int, int>& cell : cells ) {
+            Engine::CreatureModel* creaturePtr = _runtime.spatialIndex().creatureAt( cell.first, cell.second, z );
+
+            if ( !creaturePtr ) {
+                continue;
+            }
+
+            const int idCreature = creaturePtr->idCreature();
+
+            if ( std::find( hitCreatures.begin(), hitCreatures.end(), idCreature ) != hitCreatures.end() ) {
+                continue;
+            }
+
+            hitCreatures.push_back( idCreature );
 
             creaturePtr->vitals().setHealth( std::max( 0.0, creaturePtr->vitals().health() - damage ) );
 
-            creatureDied = creaturePtr->vitals().health() <= 0.0;
-            creatureHealth = creaturePtr->vitals().health();
-            creatureMaxHealth = creaturePtr->vitals().maxHealth();
-            creatureMovementCooldownSeconds = creaturePtr->movement().cooldownSeconds();
+            const bool creatureDied = creaturePtr->vitals().health() <= 0.0;
+
+            Json::Value creaturePayload;
+            creaturePayload[ "idCreature" ] = idCreature;
+            creaturePayload[ "x" ] = creaturePtr->position().x();
+            creaturePayload[ "y" ] = creaturePtr->position().y();
+            creaturePayload[ "z" ] = z;
+            creaturePayload[ "health" ] = creaturePtr->vitals().health();
+            creaturePayload[ "maxHealth" ] = creaturePtr->vitals().maxHealth();
+            creaturePayload[ "movementCooldownSeconds" ] = creaturePtr->movement().cooldownSeconds();
+            creaturePayload[ "footprint" ] = creaturePtr->size().width();
+            creaturePayload[ "creatureType" ] = creaturePtr->type().toStdString();
+
+            creaturePayloads.push_back( creaturePayload );
+            creatureDeaths.push_back( creatureDied );
 
             if ( creatureDied ) {
                 _runtime.eraseCreatureLocked( idCreature );
+            }
+
+            if ( hitMode == Engine::AttackHitModeEnum::FIRST ) {
+                break;
             }
         }
     }
@@ -195,30 +240,30 @@ bool WorldCombatAttackAction::resolveCharacterAttack( int idCharacter, int x, in
 
     Json::Value attackPayload;
     attackPayload[ "idCharacter" ] = idCharacter;
-    attackPayload[ "x" ] = x;
-    attackPayload[ "y" ] = y;
+    attackPayload[ "x" ] = cells.front().first;
+    attackPayload[ "y" ] = cells.front().second;
     attackPayload[ "z" ] = z;
-    eventBus.publish( WorldEvent( WorldEventType::CHARACTER_ATTACKED, attackPayload ) );
+    attackPayload[ "cells" ] = Json::Value( Json::arrayValue );
 
-    if ( idCreature == NO_CREATURE ) {
-        return true;
+    for ( const std::pair<int, int>& cell : cells ) {
+        Json::Value cellPayload;
+        cellPayload[ "x" ] = cell.first;
+        cellPayload[ "y" ] = cell.second;
+        attackPayload[ "cells" ].append( cellPayload );
     }
 
-    Json::Value creaturePayload;
-    creaturePayload[ "idCreature" ] = idCreature;
-    creaturePayload[ "x" ] = creatureX;
-    creaturePayload[ "y" ] = creatureY;
-    creaturePayload[ "z" ] = z;
-    creaturePayload[ "health" ] = creatureHealth;
-    creaturePayload[ "maxHealth" ] = creatureMaxHealth;
-    creaturePayload[ "movementCooldownSeconds" ] = creatureMovementCooldownSeconds;
-    creaturePayload[ "footprint" ] = creatureFootprint;
-    creaturePayload[ "creatureType" ] = creatureType.toStdString();
-    eventBus.publish( WorldEvent( creatureDied ? WorldEventType::CREATURE_LEFT : WorldEventType::CREATURE_VITALS_CHANGED, creaturePayload ) );
+    eventBus.publish( WorldEvent( WorldEventType::CHARACTER_ATTACKED, attackPayload ) );
 
-    if ( creatureDied ) {
-        creaturePayload[ "type" ] = creatureType.toStdString();
-        eventBus.publish( WorldEvent( WorldEventType::CREATURE_DIED, creaturePayload ) );
+    for ( size_t index = 0; index < creaturePayloads.size(); ++index ) {
+        Json::Value& creaturePayload = creaturePayloads[ index ];
+        const bool creatureDied = creatureDeaths[ index ];
+
+        eventBus.publish( WorldEvent( creatureDied ? WorldEventType::CREATURE_LEFT : WorldEventType::CREATURE_VITALS_CHANGED, creaturePayload ) );
+
+        if ( creatureDied ) {
+            creaturePayload[ "type" ] = creaturePayload[ "creatureType" ];
+            eventBus.publish( WorldEvent( WorldEventType::CREATURE_DIED, creaturePayload ) );
+        }
     }
 
     return true;

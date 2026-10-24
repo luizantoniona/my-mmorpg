@@ -1,9 +1,12 @@
 #ifndef WORLDCOMBATATTACKACTION_H
 #define WORLDCOMBATATTACKACTION_H
 
+#include <utility>
 #include <vector>
 
+#include <MMORPGEngine/Data/Attack/AttackHitModeEnum.h>
 #include <MMORPGServer/Server/Runtime/World/Action/WorldCombatAction.h>
+#include <MMORPGServer/Server/Runtime/World/Action/WorldCombatStrikeModel.h>
 
 namespace Server {
 
@@ -20,26 +23,27 @@ public:
     bool isActive( WorldCombatAttackerEnum attacker, int idAttacker ) const override;
 
     bool resolveCharacterAttack( int idCharacter, int x, int y, int z, double damage );
+    bool resolveCharacterStrike( int idCharacter, const std::vector<std::pair<int, int>>& cells, int z, Engine::AttackHitModeEnum hitMode, double damage );
     void resolveCreatureAttack( int idCreature, int x, int y, int z, double damage );
 
 private:
     class PendingAttack {
     public:
-        PendingAttack( WorldCombatAttackerEnum attacker, int idAttacker, int x, int y, int z, double damage, int ticksRemaining ) :
+        PendingAttack( WorldCombatAttackerEnum attacker, int idAttacker, std::vector<std::pair<int, int>> cells, int z, Engine::AttackHitModeEnum hitMode, double damage, int ticksRemaining ) :
+            cells( std::move( cells ) ),
             damage( damage ),
             attacker( attacker ),
+            hitMode( hitMode ),
             idAttacker( idAttacker ),
-            x( x ),
-            y( y ),
             z( z ),
             ticksRemaining( ticksRemaining ) {
         }
 
+        std::vector<std::pair<int, int>> cells;
         double damage;
         WorldCombatAttackerEnum attacker;
+        Engine::AttackHitModeEnum hitMode;
         int idAttacker;
-        int x;
-        int y;
         int z;
         int ticksRemaining;
     };

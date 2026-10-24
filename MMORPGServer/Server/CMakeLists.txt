@@ -70,6 +70,8 @@ set(PROJECT_SOURCES
     Repository/Repository.h
     Runtime/Character/CharacterRuntime.cpp
     Runtime/Character/CharacterRuntime.h
+    Runtime/Character/CharacterAttackResolver.cpp
+    Runtime/Character/CharacterAttackResolver.h
     Runtime/Character/CharacterCombatActionResolver.cpp
     Runtime/Character/CharacterCombatActionResolver.h
     Runtime/Character/System/CharacterCombatSystem.cpp
@@ -94,6 +96,10 @@ set(PROJECT_SOURCES
     Runtime/World/Action/WorldCombatAction.h
     Runtime/World/Action/WorldCombatAttackAction.cpp
     Runtime/World/Action/WorldCombatAttackAction.h
+    Runtime/World/Action/WorldCombatAttackPlanner.cpp
+    Runtime/World/Action/WorldCombatAttackPlanner.h
+    Runtime/World/Action/WorldCombatStrikeModel.cpp
+    Runtime/World/Action/WorldCombatStrikeModel.h
     Runtime/World/Command/Character/CharacterAttackEntityCommand.cpp
     Runtime/World/Command/Character/CharacterAttackEntityCommand.h
     Runtime/World/Command/Character/CharacterDropItemCommand.cpp

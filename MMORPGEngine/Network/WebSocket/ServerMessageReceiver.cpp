@@ -76,7 +76,9 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
 
     case ServerMessageType::CHARACTER_EVENT_ATTACK: {
         const CharacterEventAttackDTO event = CharacterEventAttackDTO::fromJson( json );
-        emit characterEventAttackReceived( event.idCharacter(), event.x(), event.y(), event.z() );
+        for ( const std::pair<int, int>& cell : event.cells() ) {
+            emit characterEventAttackReceived( event.idCharacter(), cell.first, cell.second, event.z() );
+        }
         return;
     }
 

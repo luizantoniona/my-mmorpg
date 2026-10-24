@@ -7,10 +7,12 @@ add_executable(
   ChunkRuntimeTest.cpp
   CreaturePathfinderTest.cpp
   EventBusTest.cpp
+  WorldCombatAttackPlannerTest.cpp
   WorldRuntimeTest.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Event/EventBus.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Event/WorldEvent.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Manager/ChunkCoordinate.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/CharacterAttackResolver.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/CharacterCombatActionResolver.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/CharacterRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Character/System/CharacterCombatSystem.cpp
@@ -24,6 +26,8 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/Creature/CreatureRuntime.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Action/WorldCombatAction.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Action/WorldCombatAttackAction.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Action/WorldCombatAttackPlanner.cpp
+  ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Action/WorldCombatStrikeModel.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterAttackEntityCommand.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterDropItemCommand.cpp
   ${CMAKE_SOURCE_DIR}/MMORPGServer/Server/Runtime/World/Command/Character/CharacterEquipItemCommand.cpp

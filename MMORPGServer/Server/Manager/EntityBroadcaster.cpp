@@ -462,6 +462,15 @@ void EntityBroadcaster::broadcastAttack( const WorldEvent& event ) {
     message.setY( payload[ "y" ].asInt() );
     message.setZ( payload[ "z" ].asInt() );
 
+    std::vector<std::pair<int, int>> cells;
+    for ( const Json::Value& cellJson : payload[ "cells" ] ) {
+        cells.emplace_back( cellJson[ "x" ].asInt(), cellJson[ "y" ].asInt() );
+    }
+
+    if ( !cells.empty() ) {
+        message.setCells( cells );
+    }
+
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
     std::vector<int> receivers = worldRuntime.charactersViewing( idCharacter );
