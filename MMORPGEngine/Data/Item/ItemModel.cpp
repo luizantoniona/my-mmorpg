@@ -7,7 +7,8 @@ ItemModel::ItemModel() :
     _name( "" ),
     _idItemType( "" ),
     _textureFile( "" ),
-    _animation() {
+    _animation(),
+    _damage( 0.0 ) {
 }
 
 QString ItemModel::id() const {
@@ -52,6 +53,22 @@ AnimationModel ItemModel::animation() const {
 
 void ItemModel::setAnimation( const AnimationModel& animation ) {
     _animation = animation;
+}
+
+double ItemModel::damage() const {
+    return _damage;
+}
+
+void ItemModel::setDamage( double damage ) {
+    _damage = damage;
+}
+
+const std::optional<AttackModel>& ItemModel::attack() const {
+    return _attack;
+}
+
+void ItemModel::setAttack( const AttackModel& attack ) {
+    _attack = attack;
 }
 
 } // namespace Engine

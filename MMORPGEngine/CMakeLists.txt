@@ -35,6 +35,17 @@ set(PROJECT_SOURCES
     Data/Appearance/AppearanceStateEnum.h
     Data/Appearance/AppearanceStateHelper.cpp
     Data/Appearance/AppearanceStateHelper.h
+    Data/Attack/AttackCellModel.cpp
+    Data/Attack/AttackCellModel.h
+    Data/Attack/AttackFactory.cpp
+    Data/Attack/AttackFactory.h
+    Data/Attack/AttackHitModeEnum.h
+    Data/Attack/AttackHitModeHelper.cpp
+    Data/Attack/AttackHitModeHelper.h
+    Data/Attack/AttackModel.cpp
+    Data/Attack/AttackModel.h
+    Data/Attack/AttackStepModel.cpp
+    Data/Attack/AttackStepModel.h
     Data/Item/HandRequirementEnum.h
     Data/Item/HandRequirementHelper.cpp
     Data/Item/HandRequirementHelper.h

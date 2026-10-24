@@ -118,6 +118,62 @@ TEST_F( ItemFactoryTest, CreateItemCatalog_ParsesFields ) {
     EXPECT_EQ( catalog.item( "IRON_SWORD" )->idItemType(), "SWORD" );
 }
 
+TEST_F( ItemFactoryTest, CreateItemCatalog_ParsesAttackPerItem ) {
+    Json::Value spear = itemJson( "WOODEN_SPEAR", "Wooden Spear" );
+    spear[ "Attack" ] = Engine::JsonHelper::parseJsonString( std::string( R"({"CastSeconds":0.8,"HitMode":"ALL","Steps":[{"Delay":0.0,"Damage":1.0,"Shape":["X","X","@"]}]})" ) );
+
+    Json::Value items( Json::arrayValue );
+    items.append( spear );
+    items.append( itemJson( "IRON_SWORD", "Iron Sword" ) );
+    writeItemsJson( "SWORD", items );
+
+    Engine::ItemCatalog catalog;
+    Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, catalog );
+
+    ASSERT_NE( catalog.item( "WOODEN_SPEAR" ), nullptr );
+    ASSERT_TRUE( catalog.item( "WOODEN_SPEAR" )->attack().has_value() );
+    EXPECT_EQ( catalog.item( "WOODEN_SPEAR" )->attack()->hitMode(), Engine::AttackHitModeEnum::ALL );
+    EXPECT_EQ( catalog.item( "WOODEN_SPEAR" )->attack()->steps()[ 0 ].cells().size(), 2u );
+    ASSERT_NE( catalog.item( "IRON_SWORD" ), nullptr );
+    EXPECT_FALSE( catalog.item( "IRON_SWORD" )->attack().has_value() );
+}
+
+TEST_F( ItemFactoryTest, CreateItemCatalog_InvalidAttack_SkipsOnlyThatItem ) {
+    Json::Value broken = itemJson( "BROKEN_SPEAR", "Broken Spear" );
+    broken[ "Attack" ] = Engine::JsonHelper::parseJsonString( std::string( R"({"CastSeconds":0.8,"HitMode":"ALL","Steps":[{"Shape":["X","X"]}]})" ) );
+
+    Json::Value items( Json::arrayValue );
+    items.append( broken );
+    items.append( itemJson( "IRON_SWORD", "Iron Sword" ) );
+    writeItemsJson( "SWORD", items );
+
+    Engine::ItemCatalog catalog;
+    Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, catalog );
+
+    EXPECT_EQ( catalog.item( "BROKEN_SPEAR" ), nullptr );
+    EXPECT_NE( catalog.item( "IRON_SWORD" ), nullptr );
+}
+
+TEST_F( ItemFactoryTest, SaveItemCatalog_KeepsAttackOfExistingItem ) {
+    Json::Value spear = itemJson( "WOODEN_SPEAR", "Wooden Spear" );
+    spear[ "Attack" ] = Engine::JsonHelper::parseJsonString( std::string( R"({"CastSeconds":0.8,"HitMode":"FIRST","Steps":[{"Delay":0.0,"Damage":1.0,"Shape":["X","X","@"]}]})" ) );
+
+    Json::Value items( Json::arrayValue );
+    items.append( spear );
+    writeItemsJson( "SWORD", items );
+
+    Engine::ItemCatalog loaded;
+    Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, loaded );
+    Engine::ItemFactory::saveItemCatalog( configPath(), loaded );
+
+    Engine::ItemCatalog reloaded;
+    Engine::ItemFactory::createItemCatalog( configPath(), _itemTypeCatalog, reloaded );
+
+    ASSERT_NE( reloaded.item( "WOODEN_SPEAR" ), nullptr );
+    ASSERT_TRUE( reloaded.item( "WOODEN_SPEAR" )->attack().has_value() );
+    EXPECT_EQ( reloaded.item( "WOODEN_SPEAR" )->attack()->steps()[ 0 ].cells().size(), 2u );
+}
+
 TEST_F( ItemFactoryTest, CreateItemCatalog_ItemsOfDifferentTypes_AllAdded ) {
     Json::Value swords( Json::arrayValue );
     swords.append( itemJson( "IRON_SWORD", "Iron Sword" ) );

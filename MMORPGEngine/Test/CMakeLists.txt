@@ -5,6 +5,7 @@ add_executable(
   MMORPGEngineTests
   AnimationModelTest.cpp
   AppearanceFactoryTest.cpp
+  AttackFactoryTest.cpp
   CameraTest.cpp
   CharacterDTOTest.cpp
   CharacterIntentEquipDTOTest.cpp

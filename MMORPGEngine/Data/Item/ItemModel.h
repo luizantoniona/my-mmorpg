@@ -2,11 +2,13 @@
 #define ITEMMODEL_H
 
 #include <cstdint>
+#include <optional>
 
 #include <QImage>
 #include <QString>
 
 #include <MMORPGEngine/Data/Animation/AnimationModel.h>
+#include <MMORPGEngine/Data/Attack/AttackModel.h>
 
 namespace Engine {
 
@@ -31,12 +33,20 @@ public:
     AnimationModel animation() const;
     void setAnimation( const AnimationModel& animation );
 
+    double damage() const;
+    void setDamage( double damage );
+
+    const std::optional<AttackModel>& attack() const;
+    void setAttack( const AttackModel& attack );
+
 private:
     QString _id;
     QString _name;
     QString _idItemType;
     QString _textureFile;
     AnimationModel _animation;
+    std::optional<AttackModel> _attack;
+    double _damage;
 };
 
 } // namespace Engine
