@@ -13,7 +13,7 @@ engine and three applications: Server, Client and Editor.
 | 🛠️ [`MMORPGServer`](MMORPGServer/README.md) | Drogon server (REST + WebSocket), SQLite, world debug window |
 | 🎮 [`MMORPGClient`](MMORPGClient/README.md) | Game client: login, data sync, account/characters, game |
 | 🧩 [`MMORPGEditor`](MMORPGEditor/README.md) | World editor: tiles, objects, floors, catalog |
-| 📁 `Data` | Active world: `Config.json` picks the map folder; each map has `Map.json`, tile/object catalogs, one JSON per floor and the textures |
+| 📁 [`MMORPGData`](MMORPGData/README.md) | World content: `Config.json` picks the active map folder; each map has `Map.json`, the catalogs, one JSON per floor and the textures |
 | 🗄️ `Database` | SQLite `Schema.sql` (account, character, inventory, position, vitals) |
 | 📚 [`Doc`](Doc/) | A presentation of each module + the [server API](Doc/API.md) contract |
 
@@ -42,7 +42,7 @@ opened directly in Qt Creator.
 
 ### Running
 
-Server, Client and Editor resolve `Data/` and `Database/` relative to the
+Server, Client and Editor resolve `MMORPGData/` and `Database/` relative to the
 executable, so run each one from its own build folder. Start with the
 Server — see its [README](MMORPGServer/README.md) for the one-time database
 setup step — then the Client or Editor.

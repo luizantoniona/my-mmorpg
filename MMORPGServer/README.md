@@ -15,7 +15,7 @@ handles accounts/characters and keeps track of where everyone is.
    < Database/Schema.sql`). This isn't automatic yet — if you skip it, the
    server will crash as soon as someone tries to enter the world.
 3. Run the `MMORPGServer` executable from its own build folder (it looks
-   for `Data/` and `Database/` relative to where it's running from).
+   for `MMORPGData/` and `Database/` relative to where it's running from).
 4. It listens on port **8080**. Give players your machine's address (e.g.
    `127.0.0.1:8080` for the same machine, or your local network IP for
    others on the same network) so they can connect from the Client.

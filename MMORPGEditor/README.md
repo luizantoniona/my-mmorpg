@@ -7,7 +7,7 @@ that the Server and Client load.
 
 Build the project (see the [main README](../README.md#getting-started) if
 you haven't yet) and run the `MMORPGEditor` executable from its own build
-folder. It opens the currently active map (set in `Data/Config.json`).
+folder. It opens the currently active map (set in `MMORPGData/Config.json`).
 
 ## Basic usage
 

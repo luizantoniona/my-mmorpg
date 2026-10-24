@@ -41,7 +41,7 @@ Notes:
   (`Engine::ManifestFactory`). The Client compares it against its local
   cache and only downloads files whose hash differs or that are missing.
 - `path` is the manifest-relative path (e.g. `TestMap/Textures/Tiles/Grass/Grass.png`).
-  The server resolves it under the active `Data/` root and rejects anything
+  The server resolves it under the active `MMORPGData/` root and rejects anything
   that escapes it.
 
 ### StatusController
@@ -215,7 +215,7 @@ Response 200:
 
 Errors:
 - 401: no standard body
-- 404: path not found or outside the `Data/` root
+- 404: path not found or outside the `MMORPGData/` root
 
 ### GET /status
 Controller: StatusController::status
@@ -393,10 +393,12 @@ connection whenever something relevant changes nearby:
 - `CHARACTER_EVENT_ATTACK` (`Engine::CharacterEventAttackDTO`) — a character landed an
   attack on a tile, sent to the attacker and to everyone nearby:
   ```json
-  { "type": "CHARACTER_EVENT_ATTACK", "idCharacter": 10, "x": 17, "y": 16, "z": 0 }
+  { "type": "CHARACTER_EVENT_ATTACK", "idCharacter": 10, "x": 17, "y": 16, "z": 0,
+    "cells": [ { "x": 17, "y": 16 }, { "x": 17, "y": 15 } ] }
   ```
-  Presentation only: it exists so the client can play a hit effect on that
-  tile. The resulting damage travels in the `CHARACTER`/`OWN_CHARACTER`,
+  `cells` lists every tile of that strike (an attack can hit several tiles at
+  once); `x`/`y` is the first one. Presentation only: it exists so the client
+  can play a hit effect on those tiles. The resulting damage travels in the `CHARACTER`/`OWN_CHARACTER`,
   `CREATURE` and `CREATURE_EVENT_LEAVE` messages published alongside it — and those
   are absent when the tile held no creature, since a swing at empty ground
   damages nothing. It is sent for every swing the character actually performed,
