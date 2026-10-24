@@ -14,7 +14,7 @@
 
 namespace {
 constexpr const char* DATABASE_PATH = "../../../Database/ServerDatabase";
-constexpr const char* DATA_PATH = "../../../Data/";
+constexpr const char* DATA_PATH = "../../../MMORPGData/";
 } // namespace
 
 int main( int argc, char* argv[] ) {

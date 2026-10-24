@@ -12,7 +12,7 @@
 #include <MMORPGEngine/Data/Object/ObjectSizeModel.h>
 
 namespace {
-constexpr const char* DATA_PATH = "../../../Data/";
+constexpr const char* DATA_PATH = "../../../MMORPGData/";
 
 void removeUnusedTexture( const QString& mapPath, const QString& textureFile, const Engine::ObjectCatalog& catalog ) {
     if ( textureFile.isEmpty() ) {

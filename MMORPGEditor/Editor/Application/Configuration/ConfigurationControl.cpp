@@ -11,7 +11,7 @@
 #include <MMORPGEngine/World/WorldFactory.h>
 
 namespace {
-constexpr const char* DATA_PATH = "../../../Data/";
+constexpr const char* DATA_PATH = "../../../MMORPGData/";
 } // namespace
 
 ConfigurationControl::ConfigurationControl( QObject* parent ) :

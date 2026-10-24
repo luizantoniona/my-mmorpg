@@ -11,7 +11,7 @@
 #include <MMORPGEngine/Data/Tile/TileModel.h>
 
 namespace {
-constexpr const char* DATA_PATH = "../../../Data/";
+constexpr const char* DATA_PATH = "../../../MMORPGData/";
 
 QStringList parseTags( const QString& tagsText ) {
     QStringList tags;
