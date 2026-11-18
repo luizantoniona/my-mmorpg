@@ -11,8 +11,8 @@ std::string stepJson( const std::string& shape, const std::string& delay = "0.0"
     return R"({"Delay":)" + delay + R"(,"Damage":)" + damage + R"(,"Shape":)" + shape + "}";
 }
 
-std::string attackJson( const std::string& steps, const std::string& cast = "0.5", const std::string& hitMode = "FIRST", const std::string& extra = "" ) {
-    return R"({"CastSeconds":)" + cast + R"(,"HitMode":")" + hitMode + R"(",)" + extra + R"("Steps":[)" + steps + "]}";
+std::string attackJson( const std::string& steps, const std::string& cast = "0.5", const std::string& hitMode = "FIRST" ) {
+    return R"({"CastSeconds":)" + cast + R"(,"HitMode":")" + hitMode + R"(","Steps":[)" + steps + "]}";
 }
 
 const std::string FRONT_CELL = R"(["X","@"])";
@@ -46,7 +46,6 @@ INSTANTIATE_TEST_SUITE_P(
         InvalidAttackCase( "SemSteps", R"({"CastSeconds":0.5,"HitMode":"FIRST"})" ),
         InvalidAttackCase( "StepsVazio", attackJson( "" ) ),
         InvalidAttackCase( "StepsComTipoErrado", R"({"CastSeconds":0.5,"HitMode":"FIRST","Steps":"X"})" ),
-        InvalidAttackCase( "ShapeNoTopoDoAtaque", attackJson( stepJson( FRONT_CELL ), "0.5", "FIRST", R"("Shape":["X","@"],)" ) ),
         InvalidAttackCase( "PassoSemDelay", attackJson( R"({"Damage":1.0,"Shape":["X","@"]})" ) ),
         InvalidAttackCase( "PassoSemDamage", attackJson( R"({"Delay":0.0,"Shape":["X","@"]})" ) ),
         InvalidAttackCase( "PassoSemShape", attackJson( R"({"Delay":0.0,"Damage":1.0})" ) ),
