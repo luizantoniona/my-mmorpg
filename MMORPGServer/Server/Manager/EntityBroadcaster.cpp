@@ -300,6 +300,15 @@ void EntityBroadcaster::onCreatureAttackStarted( const WorldEvent& event ) {
     message.setZ( payload[ "z" ].asInt() );
     message.setCastSeconds( payload[ "castSeconds" ].asDouble() );
 
+    std::vector<std::pair<int, int>> cells;
+    for ( const Json::Value& cellJson : payload[ "cells" ] ) {
+        cells.emplace_back( cellJson[ "x" ].asInt(), cellJson[ "y" ].asInt() );
+    }
+
+    if ( !cells.empty() ) {
+        message.setCells( cells );
+    }
+
     broadcastNear( payload, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
 
@@ -311,6 +320,12 @@ void EntityBroadcaster::onCreatureAttacked( const WorldEvent& event ) {
     message.setX( payload[ "x" ].asInt() );
     message.setY( payload[ "y" ].asInt() );
     message.setZ( payload[ "z" ].asInt() );
+
+    std::vector<Engine::AttackStrikeDTO> strikes;
+    for ( const Json::Value& strikeJson : payload[ "plan" ] ) {
+        strikes.push_back( Engine::AttackStrikeDTO::fromJson( strikeJson ) );
+    }
+    message.setStrikes( strikes );
 
     broadcastNear( payload, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
@@ -470,6 +485,12 @@ void EntityBroadcaster::broadcastAttack( const WorldEvent& event ) {
     if ( !cells.empty() ) {
         message.setCells( cells );
     }
+
+    std::vector<Engine::AttackStrikeDTO> strikes;
+    for ( const Json::Value& strikeJson : payload[ "plan" ] ) {
+        strikes.push_back( Engine::AttackStrikeDTO::fromJson( strikeJson ) );
+    }
+    message.setStrikes( strikes );
 
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 

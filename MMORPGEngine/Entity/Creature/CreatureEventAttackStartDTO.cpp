@@ -5,6 +5,7 @@
 namespace Engine {
 
 CreatureEventAttackStartDTO::CreatureEventAttackStartDTO() :
+    _strikes(),
     _castSeconds( 0.0 ),
     _idCreature( 0 ),
     _x( 0 ),
@@ -37,6 +38,12 @@ CreatureEventAttackStartDTO CreatureEventAttackStartDTO::fromJson( const Json::V
         dto._castSeconds = json[ "castSeconds" ].asDouble();
     }
 
+    if ( json.isMember( "plan" ) && json[ "plan" ].isArray() ) {
+        for ( const Json::Value& strikeJson : json[ "plan" ] ) {
+            dto._strikes.push_back( AttackStrikeDTO::fromJson( strikeJson ) );
+        }
+    }
+
     return dto;
 }
 
@@ -49,6 +56,11 @@ Json::Value CreatureEventAttackStartDTO::toJson() const {
     json[ "y" ] = _y;
     json[ "z" ] = _z;
     json[ "castSeconds" ] = _castSeconds;
+
+    json[ "plan" ] = Json::Value( Json::arrayValue );
+    for ( const AttackStrikeDTO& strike : _strikes ) {
+        json[ "plan" ].append( strike.toJson() );
+    }
 
     return json;
 }
@@ -91,6 +103,14 @@ double CreatureEventAttackStartDTO::castSeconds() const {
 
 void CreatureEventAttackStartDTO::setCastSeconds( double castSeconds ) {
     _castSeconds = castSeconds;
+}
+
+const std::vector<AttackStrikeDTO>& CreatureEventAttackStartDTO::strikes() const {
+    return _strikes;
+}
+
+void CreatureEventAttackStartDTO::setStrikes( const std::vector<AttackStrikeDTO>& strikes ) {
+    _strikes = strikes;
 }
 
 } // namespace Engine

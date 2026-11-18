@@ -71,6 +71,7 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     case ServerMessageType::CHARACTER_EVENT_ATTACK_START: {
         const CharacterEventAttackStartDTO event = CharacterEventAttackStartDTO::fromJson( json );
         emit characterEventAttackStartReceived( event.idCharacter(), event.x(), event.y(), event.z(), event.castSeconds() );
+        emitAttackWarnings( event.strikes(), event.x(), event.y(), event.z(), event.castSeconds() );
         return;
     }
 
@@ -97,12 +98,15 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     case ServerMessageType::CREATURE_EVENT_ATTACK_START: {
         const CreatureEventAttackStartDTO event = CreatureEventAttackStartDTO::fromJson( json );
         emit creatureEventAttackStartReceived( event.idCreature(), event.x(), event.y(), event.z(), event.castSeconds() );
+        emitAttackWarnings( event.strikes(), event.x(), event.y(), event.z(), event.castSeconds() );
         return;
     }
 
     case ServerMessageType::CREATURE_EVENT_ATTACK: {
         const CreatureEventAttackDTO event = CreatureEventAttackDTO::fromJson( json );
-        emit creatureEventAttackReceived( event.idCreature(), event.x(), event.y(), event.z() );
+        for ( const std::pair<int, int>& cell : event.cells() ) {
+            emit creatureEventAttackReceived( event.idCreature(), cell.first, cell.second, event.z() );
+        }
         return;
     }
 
@@ -139,6 +143,19 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     case ServerMessageType::WORLD_BASIC:
     case ServerMessageType::UNKNOWN:
         return;
+    }
+}
+
+void ServerMessageReceiver::emitAttackWarnings( const std::vector<AttackStrikeDTO>& strikes, int targetX, int targetY, int z, double castSeconds ) {
+    if ( strikes.empty() ) {
+        emit attackWarningReceived( z, targetX, targetY, castSeconds );
+        return;
+    }
+
+    for ( const AttackStrikeDTO& strike : strikes ) {
+        for ( const std::pair<int, int>& cell : strike.cells() ) {
+            emit attackWarningReceived( z, cell.first, cell.second, strike.seconds() );
+        }
     }
 }
 

@@ -26,16 +26,13 @@ Item {
         onGroundItemStateReceived: function (idGroundItem, idItem, x, y, z) {
             serverWorld.addGroundItem(idGroundItem, idItem, x, y, z)
         }
-        onCharacterEventAttackStartReceived: function (idCharacter, x, y, z, castSeconds) {
+        onAttackWarningReceived: function (z, x, y, seconds) {
             if (z === root.currentFloor) {
-                viewport.addTileWarning(x, y, root.attackWarningColor, castSeconds * 1000)
+                viewport.addTileWarning(x, y, root.attackWarningColor, seconds * 1000)
             }
         }
         onCreatureEventAttackStartReceived: function (idCreature, x, y, z, castSeconds) {
             serverWorld.startCreatureAttack(idCreature, x, y, castSeconds)
-            if (z === root.currentFloor) {
-                viewport.addTileWarning(x, y, root.attackWarningColor, castSeconds * 1000)
-            }
         }
         onCreatureEventAttackReceived: function (idCreature, x, y, z) {
             if (z === root.currentFloor) {

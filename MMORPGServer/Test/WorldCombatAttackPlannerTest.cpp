@@ -57,8 +57,12 @@ INSTANTIATE_TEST_SUITE_P(
         FacingCase( "Baixo", 0, 1, { { 10, 11 }, { 9, 11 } } ),
         FacingCase( "Direita", 1, 0, { { 11, 10 }, { 11, 11 } } ),
         FacingCase( "Esquerda", -1, 0, { { 9, 10 }, { 9, 9 } } ),
-        FacingCase( "DiagonalUsaEixoHorizontalNoEmpate", 1, 1, { { 11, 10 }, { 11, 11 } } ),
-        FacingCase( "DiagonalComEixoVerticalDominante", 1, 3, { { 10, 11 }, { 9, 11 } } ),
+        FacingCase( "CimaDireita", 1, -1, { { 11, 9 }, { 11, 10 } } ),
+        FacingCase( "BaixoDireita", 1, 1, { { 11, 11 }, { 10, 11 } } ),
+        FacingCase( "BaixoEsquerda", -1, 1, { { 9, 11 }, { 9, 10 } } ),
+        FacingCase( "CimaEsquerda", -1, -1, { { 9, 9 }, { 10, 9 } } ),
+        FacingCase( "AlvoDistanteComEixoVerticalDominanteViraBaixo", 1, 3, { { 10, 11 }, { 9, 11 } } ),
+        FacingCase( "AlvoDistanteComEixoHorizontalDominanteViraDireita", 3, 1, { { 11, 10 }, { 11, 11 } } ),
         FacingCase( "SemDirecaoOlhaPraCima", 0, 0, { { 10, 9 }, { 11, 9 } } ) ),
     []( const ::testing::TestParamInfo<FacingCase>& info ) { return info.param.name; } );
 
@@ -78,7 +82,7 @@ TEST( WorldCombatAttackPlannerTest, FormaSimetricaAcertaAsMesmasCelulasEmQualque
     const Engine::AttackModel attack = attackWith( { Engine::AttackCellModel( 1, -1 ), Engine::AttackCellModel( 1, 0 ), Engine::AttackCellModel( 1, 1 ), Engine::AttackCellModel( 0, -1 ), Engine::AttackCellModel( 0, 1 ), Engine::AttackCellModel( -1, -1 ), Engine::AttackCellModel( -1, 0 ), Engine::AttackCellModel( -1, 1 ) } );
 
     std::vector<std::vector<std::pair<int, int>>> results;
-    for ( const std::pair<int, int>& direction : std::vector<std::pair<int, int>>{ { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } } ) {
+    for ( const std::pair<int, int>& direction : std::vector<std::pair<int, int>>{ { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 1 }, { -1, 0 }, { -1, -1 } } ) {
         std::vector<std::pair<int, int>> cells = Server::WorldCombatAttackPlanner::plan( attack, ORIGIN_X, ORIGIN_Y, direction.first, direction.second, TICK_RATE )[ 0 ].cells();
         std::sort( cells.begin(), cells.end() );
         results.push_back( cells );
@@ -87,6 +91,25 @@ TEST( WorldCombatAttackPlannerTest, FormaSimetricaAcertaAsMesmasCelulasEmQualque
     ASSERT_EQ( results[ 0 ].size(), 8u );
     for ( const std::vector<std::pair<int, int>>& cells : results ) {
         EXPECT_EQ( cells, results[ 0 ] );
+    }
+}
+
+TEST( WorldCombatAttackPlannerTest, RotacaoNaDiagonalNaoPerdeNemRepeteCelulas ) {
+    std::vector<Engine::AttackCellModel> block;
+    for ( int forward = 1; forward <= 3; ++forward ) {
+        for ( int lateral = -2; lateral <= 2; ++lateral ) {
+            block.push_back( Engine::AttackCellModel( forward, lateral ) );
+        }
+    }
+
+    const Engine::AttackModel attack = attackWith( block );
+
+    for ( const std::pair<int, int>& direction : std::vector<std::pair<int, int>>{ { 1, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 } } ) {
+        std::vector<std::pair<int, int>> cells = Server::WorldCombatAttackPlanner::plan( attack, ORIGIN_X, ORIGIN_Y, direction.first, direction.second, TICK_RATE )[ 0 ].cells();
+        std::sort( cells.begin(), cells.end() );
+
+        EXPECT_EQ( cells.size(), block.size() );
+        EXPECT_EQ( std::adjacent_find( cells.begin(), cells.end() ), cells.end() );
     }
 }
 

@@ -1347,6 +1347,7 @@ void registerCreatureType( const QString& type, uint32_t aggroRadius ) {
     creatureType.setType( type );
     creatureType.setName( "TestCreature" );
     creatureType.setAggroRadius( aggroRadius );
+    creatureType.setDamage( 2.0 );
 
     Engine::Singleton<Engine::DataManager>::instance().addCreatureType( std::move( creatureType ) );
 }

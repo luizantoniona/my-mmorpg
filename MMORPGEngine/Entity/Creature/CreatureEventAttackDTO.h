@@ -1,6 +1,9 @@
 #ifndef CREATUREEVENTATTACKDTO_H
 #define CREATUREEVENTATTACKDTO_H
 
+#include <utility>
+#include <vector>
+
 #include <json/json.h>
 
 namespace Engine {
@@ -25,7 +28,11 @@ public:
     int z() const;
     void setZ( int z );
 
+    const std::vector<std::pair<int, int>>& cells() const;
+    void setCells( const std::vector<std::pair<int, int>>& cells );
+
 private:
+    std::vector<std::pair<int, int>> _cells;
     int _idCreature;
     int _x;
     int _y;

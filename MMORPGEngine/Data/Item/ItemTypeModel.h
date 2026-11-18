@@ -6,6 +6,7 @@
 
 #include <QString>
 
+#include <MMORPGEngine/Data/Attack/AttackModel.h>
 #include <MMORPGEngine/Data/Item/HandRequirementEnum.h>
 #include <MMORPGEngine/Data/Item/ItemCategoryEnum.h>
 #include <MMORPGEngine/Data/Item/ItemSlotEnum.h>
@@ -35,10 +36,14 @@ public:
     const std::set<CombatActionEnum>& disabledActions() const;
     void setDisabledActions( const std::set<CombatActionEnum>& disabledActions );
 
+    const std::optional<AttackModel>& attack() const;
+    void setAttack( const AttackModel& attack );
+
 private:
     QString _type;
     QString _name;
     std::set<CombatActionEnum> _disabledActions;
+    std::optional<AttackModel> _attack;
     std::optional<HandRequirementEnum> _handRequirement;
     ItemCategoryEnum _category;
     ItemSlotEnum _slot;

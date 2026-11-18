@@ -4,6 +4,8 @@
 #include <utility>
 #include <vector>
 
+#include <json/json.h>
+
 #include <MMORPGEngine/Data/Attack/AttackHitModeEnum.h>
 #include <MMORPGServer/Server/Runtime/World/Action/WorldCombatAction.h>
 #include <MMORPGServer/Server/Runtime/World/Action/WorldCombatStrikeModel.h>
@@ -25,6 +27,7 @@ public:
     bool resolveCharacterAttack( int idCharacter, int x, int y, int z, double damage );
     bool resolveCharacterStrike( int idCharacter, const std::vector<std::pair<int, int>>& cells, int z, Engine::AttackHitModeEnum hitMode, double damage );
     void resolveCreatureAttack( int idCreature, int x, int y, int z, double damage );
+    void resolveCreatureStrike( int idCreature, const std::vector<std::pair<int, int>>& cells, int z, Engine::AttackHitModeEnum hitMode, double damage );
 
 private:
     class PendingAttack {
@@ -51,7 +54,8 @@ private:
 private:
     bool startCharacterAttack( int idCharacter, int targetX, int targetY, int targetZ );
     bool startCreatureAttack( int idCreature, int targetX, int targetY, int targetZ );
-    int castTicks() const;
+    static Json::Value cellsPayload( const std::vector<std::pair<int, int>>& cells );
+    static Json::Value strikePayload( const WorldCombatStrikeModel& strike );
 
 private:
     std::vector<PendingAttack> _pendingAttacks;

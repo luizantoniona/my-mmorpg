@@ -44,6 +44,7 @@ GamePageControl::GamePageControl( QObject* parent ) :
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackReceived, this, &GamePageControl::characterEventAttackReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &GamePageControl::creatureEventAttackStartReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackReceived, this, &GamePageControl::creatureEventAttackReceived );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::attackWarningReceived, this, &GamePageControl::attackWarningReceived );
 }
 
 GamePageControl::~GamePageControl() = default;

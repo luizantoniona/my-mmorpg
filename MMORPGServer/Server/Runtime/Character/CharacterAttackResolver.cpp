@@ -5,6 +5,8 @@
 
 namespace {
 
+const QString BARE_HANDS_ITEM_TYPE = "FIST";
+
 // TODO: dano do punho fixo por ora; depois vem do catálogo (ItemType)
 constexpr double BARE_HANDS_DAMAGE = 5.0;
 
@@ -31,10 +33,18 @@ const Engine::ItemModel* equippedWeapon( const std::vector<Engine::CharacterEqui
 namespace Server {
 
 Engine::AttackModel CharacterAttackResolver::attack( const std::vector<Engine::CharacterEquipmentModel>& equipment ) {
+    const Engine::ItemTypeCatalog& itemTypeCatalog = Engine::Singleton<Engine::DataManager>::instance().itemTypeCatalog();
+
     const Engine::ItemModel* weapon = equippedWeapon( equipment );
 
     if ( weapon && weapon->attack().has_value() ) {
         return weapon->attack().value();
+    }
+
+    const Engine::ItemTypeModel* itemType = itemTypeCatalog.itemType( weapon ? weapon->idItemType() : BARE_HANDS_ITEM_TYPE );
+
+    if ( itemType && itemType->attack().has_value() ) {
+        return itemType->attack().value();
     }
 
     return Engine::AttackModel::basic();

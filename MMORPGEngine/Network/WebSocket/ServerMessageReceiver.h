@@ -2,10 +2,12 @@
 #define SERVERMESSAGERECEIVER_H
 
 #include <cstdint>
+#include <vector>
 
 #include <QObject>
 #include <QString>
 
+#include <MMORPGEngine/Entity/AttackStrikeDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCombatDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
@@ -40,10 +42,14 @@ signals:
     void creatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds );
     void creatureEventAttackReceived( int idCreature, int x, int y, int z );
     void creatureEventLeaveReceived( int idCreature );
+    void attackWarningReceived( int z, int x, int y, double seconds );
     void groundItemStateReceived( int idGroundItem, const QString& idItem, int x, int y, int z );
     void groundItemEventLeaveReceived( int idGroundItem );
     void chunkReceived( const Engine::ChunkDTO& chunk );
     void chunkEventLeaveReceived( int chunkX, int chunkY );
+
+private:
+    void emitAttackWarnings( const std::vector<AttackStrikeDTO>& strikes, int targetX, int targetY, int z, double castSeconds );
 };
 
 } // namespace Engine

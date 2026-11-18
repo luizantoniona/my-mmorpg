@@ -5,6 +5,8 @@
 
 #include <QDebug>
 
+#include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/Creature/CreatureModel.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
@@ -16,10 +18,6 @@
 namespace {
 
 constexpr double ATTACK_STAMINA_COST = 10.0;
-
-// TODO: duração do cast e dano de criatura fixos por ora; depois vêm da arma equipada (ItemType) e do catálogo de criatura
-constexpr double ATTACK_CAST_SECONDS = 0.5;
-constexpr double CREATURE_ATTACK_DAMAGE = 2.0;
 
 } // namespace
 
@@ -51,7 +49,7 @@ void WorldCombatAttackAction::onTick() {
         if ( pendingAttack.attacker == WorldCombatAttackerEnum::CHARACTER ) {
             resolveCharacterStrike( pendingAttack.idAttacker, pendingAttack.cells, pendingAttack.z, pendingAttack.hitMode, pendingAttack.damage );
         } else {
-            resolveCreatureAttack( pendingAttack.idAttacker, pendingAttack.cells.front().first, pendingAttack.cells.front().second, pendingAttack.z, pendingAttack.damage );
+            resolveCreatureStrike( pendingAttack.idAttacker, pendingAttack.cells, pendingAttack.z, pendingAttack.hitMode, pendingAttack.damage );
         }
     }
 }
@@ -117,19 +115,7 @@ bool WorldCombatAttackAction::startCharacterAttack( int idCharacter, int targetX
 
     for ( const WorldCombatStrikeModel& strike : strikes ) {
         _pendingAttacks.push_back( PendingAttack( WorldCombatAttackerEnum::CHARACTER, idCharacter, strike.cells(), targetZ, strike.hitMode(), damage * strike.damageMultiplier(), strike.ticks() ) );
-
-        Json::Value strikePayload;
-        strikePayload[ "seconds" ] = strike.seconds();
-        strikePayload[ "cells" ] = Json::Value( Json::arrayValue );
-
-        for ( const std::pair<int, int>& cell : strike.cells() ) {
-            Json::Value cellPayload;
-            cellPayload[ "x" ] = cell.first;
-            cellPayload[ "y" ] = cell.second;
-            strikePayload[ "cells" ].append( cellPayload );
-        }
-
-        planPayload.append( strikePayload );
+        planPayload.append( strikePayload( strike ) );
     }
 
     Json::Value startedPayload;
@@ -151,6 +137,9 @@ bool WorldCombatAttackAction::startCharacterAttack( int idCharacter, int targetX
 }
 
 bool WorldCombatAttackAction::startCreatureAttack( int idCreature, int targetX, int targetY, int targetZ ) {
+    Engine::EntityPositionModel position;
+    QString creatureTypeKey;
+
     {
         std::lock_guard<std::mutex> lock( _runtime.mutex() );
 
@@ -161,19 +150,55 @@ bool WorldCombatAttackAction::startCreatureAttack( int idCreature, int targetX, 
         }
 
         it->second->creature()->combat().setCounter( 0 );
+        position = it->second->creature()->position();
+        creatureTypeKey = it->second->creature()->type();
     }
 
-    _pendingAttacks.push_back( PendingAttack( WorldCombatAttackerEnum::CREATURE, idCreature, { std::make_pair( targetX, targetY ) }, targetZ, Engine::AttackHitModeEnum::FIRST, CREATURE_ATTACK_DAMAGE, castTicks() ) );
+    const Engine::CreatureTypeModel* creatureType = Engine::Singleton<Engine::DataManager>::instance().creatureTypeCatalog().creatureType( creatureTypeKey );
+
+    const Engine::AttackModel attack = creatureType && creatureType->attack().has_value() ? creatureType->attack().value() : Engine::AttackModel::basic();
+    const double damage = creatureType ? creatureType->damage() : 0.0;
+
+    const std::vector<WorldCombatStrikeModel> strikes = WorldCombatAttackPlanner::plan( attack, position.x(), position.y(), targetX - position.x(), targetY - position.y(), _runtime.tickRate() );
+
+    Json::Value planPayload( Json::arrayValue );
+
+    for ( const WorldCombatStrikeModel& strike : strikes ) {
+        _pendingAttacks.push_back( PendingAttack( WorldCombatAttackerEnum::CREATURE, idCreature, strike.cells(), targetZ, strike.hitMode(), damage * strike.damageMultiplier(), strike.ticks() ) );
+        planPayload.append( strikePayload( strike ) );
+    }
 
     Json::Value startedPayload;
     startedPayload[ "idCreature" ] = idCreature;
     startedPayload[ "x" ] = targetX;
     startedPayload[ "y" ] = targetY;
     startedPayload[ "z" ] = targetZ;
-    startedPayload[ "castSeconds" ] = ATTACK_CAST_SECONDS;
+    startedPayload[ "castSeconds" ] = attack.castSeconds();
+    startedPayload[ "plan" ] = planPayload;
     _runtime.eventBus().publish( WorldEvent( WorldEventType::CREATURE_ATTACK_STARTED, startedPayload ) );
 
     return true;
+}
+
+Json::Value WorldCombatAttackAction::cellsPayload( const std::vector<std::pair<int, int>>& cells ) {
+    Json::Value payload( Json::arrayValue );
+
+    for ( const std::pair<int, int>& cell : cells ) {
+        Json::Value cellPayload;
+        cellPayload[ "x" ] = cell.first;
+        cellPayload[ "y" ] = cell.second;
+        payload.append( cellPayload );
+    }
+
+    return payload;
+}
+
+Json::Value WorldCombatAttackAction::strikePayload( const WorldCombatStrikeModel& strike ) {
+    Json::Value payload;
+    payload[ "seconds" ] = strike.seconds();
+    payload[ "cells" ] = cellsPayload( strike.cells() );
+
+    return payload;
 }
 
 bool WorldCombatAttackAction::resolveCharacterAttack( int idCharacter, int x, int y, int z, double damage ) {
@@ -243,15 +268,7 @@ bool WorldCombatAttackAction::resolveCharacterStrike( int idCharacter, const std
     attackPayload[ "x" ] = cells.front().first;
     attackPayload[ "y" ] = cells.front().second;
     attackPayload[ "z" ] = z;
-    attackPayload[ "cells" ] = Json::Value( Json::arrayValue );
-
-    for ( const std::pair<int, int>& cell : cells ) {
-        Json::Value cellPayload;
-        cellPayload[ "x" ] = cell.first;
-        cellPayload[ "y" ] = cell.second;
-        attackPayload[ "cells" ].append( cellPayload );
-    }
-
+    attackPayload[ "cells" ] = cellsPayload( cells );
     eventBus.publish( WorldEvent( WorldEventType::CHARACTER_ATTACKED, attackPayload ) );
 
     for ( size_t index = 0; index < creaturePayloads.size(); ++index ) {
@@ -270,8 +287,11 @@ bool WorldCombatAttackAction::resolveCharacterStrike( int idCharacter, const std
 }
 
 void WorldCombatAttackAction::resolveCreatureAttack( int idCreature, int x, int y, int z, double damage ) {
-    int idVictim = 0;
-    bool hitCharacter = false;
+    resolveCreatureStrike( idCreature, { std::make_pair( x, y ) }, z, Engine::AttackHitModeEnum::FIRST, damage );
+}
+
+void WorldCombatAttackAction::resolveCreatureStrike( int idCreature, const std::vector<std::pair<int, int>>& cells, int z, Engine::AttackHitModeEnum hitMode, double damage ) {
+    std::vector<int> victims;
 
     {
         std::lock_guard<std::mutex> lock( _runtime.mutex() );
@@ -281,13 +301,20 @@ void WorldCombatAttackAction::resolveCreatureAttack( int idCreature, int x, int 
             return;
         }
 
-        // TODO: morte de personagem; por ora a vida só é limitada a 0
-        Engine::CharacterModel* victim = _runtime.spatialIndex().characterAt( x, y, z );
+        for ( const std::pair<int, int>& cell : cells ) {
+            // TODO: morte de personagem; por ora a vida só é limitada a 0
+            Engine::CharacterModel* victim = _runtime.spatialIndex().characterAt( cell.first, cell.second, z );
 
-        if ( victim ) {
+            if ( !victim || std::find( victims.begin(), victims.end(), victim->idCharacter() ) != victims.end() ) {
+                continue;
+            }
+
             victim->vitals().setHealth( std::max( 0.0, victim->vitals().health() - damage ) );
-            idVictim = victim->idCharacter();
-            hitCharacter = true;
+            victims.push_back( victim->idCharacter() );
+
+            if ( hitMode == Engine::AttackHitModeEnum::FIRST ) {
+                break;
+            }
         }
     }
 
@@ -295,22 +322,17 @@ void WorldCombatAttackAction::resolveCreatureAttack( int idCreature, int x, int 
 
     Json::Value attackPayload;
     attackPayload[ "idCreature" ] = idCreature;
-    attackPayload[ "x" ] = x;
-    attackPayload[ "y" ] = y;
+    attackPayload[ "x" ] = cells.front().first;
+    attackPayload[ "y" ] = cells.front().second;
     attackPayload[ "z" ] = z;
+    attackPayload[ "cells" ] = cellsPayload( cells );
     eventBus.publish( WorldEvent( WorldEventType::CREATURE_ATTACKED, attackPayload ) );
 
-    if ( !hitCharacter ) {
-        return;
+    for ( int idVictim : victims ) {
+        Json::Value vitalsPayload;
+        vitalsPayload[ "idCharacter" ] = idVictim;
+        eventBus.publish( WorldEvent( WorldEventType::CHARACTER_VITALS_CHANGED, vitalsPayload ) );
     }
-
-    Json::Value vitalsPayload;
-    vitalsPayload[ "idCharacter" ] = idVictim;
-    eventBus.publish( WorldEvent( WorldEventType::CHARACTER_VITALS_CHANGED, vitalsPayload ) );
-}
-
-int WorldCombatAttackAction::castTicks() const {
-    return std::max( 1, static_cast<int>( std::ceil( ATTACK_CAST_SECONDS * _runtime.tickRate() ) ) );
 }
 
 } // namespace Server

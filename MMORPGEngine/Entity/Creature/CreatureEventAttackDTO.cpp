@@ -5,6 +5,7 @@
 namespace Engine {
 
 CreatureEventAttackDTO::CreatureEventAttackDTO() :
+    _cells(),
     _idCreature( 0 ),
     _x( 0 ),
     _y( 0 ),
@@ -32,6 +33,18 @@ CreatureEventAttackDTO CreatureEventAttackDTO::fromJson( const Json::Value& json
         dto._z = json[ "z" ].asInt();
     }
 
+    if ( json.isMember( "cells" ) && json[ "cells" ].isArray() ) {
+        for ( const Json::Value& cellJson : json[ "cells" ] ) {
+            if ( cellJson.isMember( "x" ) && cellJson[ "x" ].isInt() && cellJson.isMember( "y" ) && cellJson[ "y" ].isInt() ) {
+                dto._cells.emplace_back( cellJson[ "x" ].asInt(), cellJson[ "y" ].asInt() );
+            }
+        }
+    }
+
+    if ( dto._cells.empty() ) {
+        dto._cells.emplace_back( dto._x, dto._y );
+    }
+
     return dto;
 }
 
@@ -43,6 +56,14 @@ Json::Value CreatureEventAttackDTO::toJson() const {
     json[ "x" ] = _x;
     json[ "y" ] = _y;
     json[ "z" ] = _z;
+
+    json[ "cells" ] = Json::Value( Json::arrayValue );
+    for ( const std::pair<int, int>& cell : _cells ) {
+        Json::Value cellJson;
+        cellJson[ "x" ] = cell.first;
+        cellJson[ "y" ] = cell.second;
+        json[ "cells" ].append( cellJson );
+    }
 
     return json;
 }
@@ -77,6 +98,14 @@ int CreatureEventAttackDTO::z() const {
 
 void CreatureEventAttackDTO::setZ( int z ) {
     _z = z;
+}
+
+const std::vector<std::pair<int, int>>& CreatureEventAttackDTO::cells() const {
+    return _cells;
+}
+
+void CreatureEventAttackDTO::setCells( const std::vector<std::pair<int, int>>& cells ) {
+    _cells = cells;
 }
 
 } // namespace Engine

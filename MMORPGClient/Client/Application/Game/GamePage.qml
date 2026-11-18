@@ -37,14 +37,9 @@ Item {
         onWorldEntryFailed: function (error) {
             root.vTextError = error
         }
-        onCharacterEventAttackStartReceived: function (idCharacter, x, y, z, castSeconds) {
+        onAttackWarningReceived: function (z, x, y, seconds) {
             if (z === root.currentFloor) {
-                viewport.addTileWarning(x, y, root.attackWarningColor, castSeconds * 1000)
-            }
-        }
-        onCreatureEventAttackStartReceived: function (idCreature, x, y, z, castSeconds) {
-            if (z === root.currentFloor) {
-                viewport.addTileWarning(x, y, root.attackWarningColor, castSeconds * 1000)
+                viewport.addTileWarning(x, y, root.attackWarningColor, seconds * 1000)
             }
         }
         onCreatureEventAttackReceived: function (idCreature, x, y, z) {

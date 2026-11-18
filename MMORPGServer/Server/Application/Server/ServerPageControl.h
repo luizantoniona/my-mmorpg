@@ -45,6 +45,7 @@ signals:
     void characterEventAttackReceived( int idCharacter, int x, int y, int z );
     void creatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds );
     void creatureEventAttackReceived( int idCreature, int x, int y, int z );
+    void attackWarningReceived( int z, int x, int y, double seconds );
 
     void characterEventLeaveReceived( int idCharacter );
     void creatureEventLeaveReceived( int idCreature );

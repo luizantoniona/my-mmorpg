@@ -2,10 +2,12 @@
 #define CREATURETYPEMODEL_H
 
 #include <cstdint>
+#include <optional>
 
 #include <QString>
 
 #include <MMORPGEngine/Data/Appearance/AppearanceModel.h>
+#include <MMORPGEngine/Data/Attack/AttackModel.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeVitalsModel.h>
 
 namespace Engine {
@@ -29,6 +31,12 @@ public:
     uint32_t footprint() const;
     void setFootprint( uint32_t footprint );
 
+    double damage() const;
+    void setDamage( double damage );
+
+    const std::optional<AttackModel>& attack() const;
+    void setAttack( const AttackModel& attack );
+
     CreatureTypeVitalsModel& vitals();
     const CreatureTypeVitalsModel& vitals() const;
 
@@ -40,6 +48,8 @@ private:
     QString _name;
     CreatureTypeVitalsModel _vitals;
     AppearanceModel _appearance;
+    std::optional<AttackModel> _attack;
+    double _damage;
     uint32_t _aggroRadius;
     uint32_t _attackRange;
     uint32_t _footprint;

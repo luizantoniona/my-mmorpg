@@ -179,6 +179,8 @@ set(PROJECT_SOURCES
     Entity/GroundItem/GroundItemEventLeaveDTO.h
     Entity/GroundItem/GroundItemModel.cpp
     Entity/GroundItem/GroundItemModel.h
+    Entity/AttackStrikeDTO.cpp
+    Entity/AttackStrikeDTO.h
     Entity/CombatActionEnum.h
     Entity/CombatActionHelper.cpp
     Entity/CombatActionHelper.h

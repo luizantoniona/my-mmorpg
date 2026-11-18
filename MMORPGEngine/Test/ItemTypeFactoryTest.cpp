@@ -154,6 +154,42 @@ TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_ParsesFields ) {
     EXPECT_EQ( catalog.itemType( "SWORD" )->handRequirement().value(), Engine::HandRequirementEnum::ONE_HANDED );
 }
 
+TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_ParsesDefaultAttack ) {
+    Json::Value json = itemTypeJson( "Fist", "WEAPON", "HAND" );
+    json[ "Attack" ] = Engine::JsonHelper::parseJsonString( std::string( R"({"CastSeconds":0.5,"HitMode":"FIRST","Steps":[{"Delay":0.0,"Damage":1.0,"Shape":["X","@"]}]})" ) );
+    writeItemType( "FIST", json );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.itemType( "FIST" ), nullptr );
+    ASSERT_TRUE( catalog.itemType( "FIST" )->attack().has_value() );
+    EXPECT_DOUBLE_EQ( catalog.itemType( "FIST" )->attack()->castSeconds(), 0.5 );
+}
+
+TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_WithoutAttack_HasNoDefaultAttack ) {
+    writeItemType( "SWORD", itemTypeJson( "Sword", "WEAPON", "HAND" ) );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.itemType( "SWORD" ), nullptr );
+    EXPECT_FALSE( catalog.itemType( "SWORD" )->attack().has_value() );
+}
+
+TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_InvalidAttack_SkipsOnlyThatType ) {
+    Json::Value broken = itemTypeJson( "Sword", "WEAPON", "HAND" );
+    broken[ "Attack" ] = Engine::JsonHelper::parseJsonString( std::string( R"({"CastSeconds":0.5,"HitMode":"FIRST","Steps":[]})" ) );
+    writeItemType( "SWORD", broken );
+    writeItemType( "SHIELD", itemTypeJson( "Shield", "SHIELD", "HAND" ) );
+
+    Engine::ItemTypeCatalog catalog;
+    Engine::ItemTypeFactory::createItemTypeCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.itemType( "SWORD" ), nullptr );
+    EXPECT_NE( catalog.itemType( "SHIELD" ), nullptr );
+}
+
 TEST_F( ItemTypeFactoryTest, CreateItemTypeCatalog_MultipleItemTypes_AllAdded ) {
     writeItemType( "SWORD", itemTypeJson( "Sword", "WEAPON", "HAND" ) );
     writeItemType( "SHIELD", itemTypeJson( "Shield", "SHIELD", "HAND" ) );

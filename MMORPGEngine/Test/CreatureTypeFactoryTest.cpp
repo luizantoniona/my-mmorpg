@@ -148,6 +148,63 @@ TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_WithoutAppearance_Has
     EXPECT_TRUE( catalog.creatureType( "GOBLIN" )->appearance().isNull() );
 }
 
+TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_ParsesDamageAndAttack ) {
+    Json::Value creatureType;
+    creatureType[ "Name" ] = "Orc";
+    creatureType[ "Vitals" ][ "MaxHealth" ] = 40;
+    creatureType[ "Damage" ] = 6.5;
+    creatureType[ "Attack" ] = Engine::JsonHelper::parseJsonString( std::string( R"({"CastSeconds":0.9,"HitMode":"ALL","Steps":[{"Delay":0.0,"Damage":1.0,"Shape":["XX","@."]}]})" ) );
+
+    writeIndex( { "ORC" } );
+    writeCreature( "ORC", creatureType );
+
+    Engine::CreatureTypeCatalog catalog;
+    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.creatureType( "ORC" ), nullptr );
+    EXPECT_DOUBLE_EQ( catalog.creatureType( "ORC" )->damage(), 6.5 );
+    ASSERT_TRUE( catalog.creatureType( "ORC" )->attack().has_value() );
+    EXPECT_EQ( catalog.creatureType( "ORC" )->attack()->hitMode(), Engine::AttackHitModeEnum::ALL );
+    EXPECT_EQ( catalog.creatureType( "ORC" )->attack()->steps()[ 0 ].cells().size(), 2u );
+}
+
+TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_WithoutDamageAndAttack_HasNoDamageAndNoAttack ) {
+    Json::Value creatureType;
+    creatureType[ "Name" ] = "Cow";
+    creatureType[ "Vitals" ][ "MaxHealth" ] = 30;
+
+    writeIndex( { "COW" } );
+    writeCreature( "COW", creatureType );
+
+    Engine::CreatureTypeCatalog catalog;
+    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
+
+    ASSERT_NE( catalog.creatureType( "COW" ), nullptr );
+    EXPECT_DOUBLE_EQ( catalog.creatureType( "COW" )->damage(), 0.0 );
+    EXPECT_FALSE( catalog.creatureType( "COW" )->attack().has_value() );
+}
+
+TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_InvalidAttack_SkipsOnlyThatCreature ) {
+    Json::Value broken;
+    broken[ "Name" ] = "Broken";
+    broken[ "Vitals" ][ "MaxHealth" ] = 10;
+    broken[ "Attack" ] = Engine::JsonHelper::parseJsonString( std::string( R"({"CastSeconds":0.9,"HitMode":"ALL","Steps":[]})" ) );
+
+    Json::Value valid;
+    valid[ "Name" ] = "Rat";
+    valid[ "Vitals" ][ "MaxHealth" ] = 5;
+
+    writeIndex( { "BROKEN", "RAT" } );
+    writeCreature( "BROKEN", broken );
+    writeCreature( "RAT", valid );
+
+    Engine::CreatureTypeCatalog catalog;
+    Engine::CreatureTypeFactory::createCreatureTypeCatalog( configPath(), catalog );
+
+    EXPECT_EQ( catalog.creatureType( "BROKEN" ), nullptr );
+    EXPECT_NE( catalog.creatureType( "RAT" ), nullptr );
+}
+
 TEST_F( CreatureTypeFactoryTest, CreateCreatureTypeCatalog_ParsesFields ) {
     Json::Value creatureType;
     creatureType[ "Name" ] = "Goblin";

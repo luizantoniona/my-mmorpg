@@ -10,6 +10,7 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Data/Appearance/AppearanceFactory.h>
+#include <MMORPGEngine/Data/Attack/AttackFactory.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeModel.h>
 #include <MMORPGEngine/Data/DataFactory.h>
 
@@ -84,7 +85,7 @@ void CreatureTypeFactory::createCreatureTypeCatalog( const QString& configPath, 
 
         const Json::Value creatureTypeJson = JsonHelper::loadJsonFile( file );
 
-        const bool hasValidCreatureFields = JsonHelper::hasValidFields( creatureTypeJson, { { "Name", JsonFieldTypeEnum::STRING }, { "Vitals", JsonFieldTypeEnum::OBJECT }, { "AggroRadius", JsonFieldTypeEnum::UINT }, { "AttackRange", JsonFieldTypeEnum::UINT }, { "Footprint", JsonFieldTypeEnum::UINT }, { "Appearance", JsonFieldTypeEnum::OBJECT } } );
+        const bool hasValidCreatureFields = JsonHelper::hasValidFields( creatureTypeJson, { { "Name", JsonFieldTypeEnum::STRING }, { "Vitals", JsonFieldTypeEnum::OBJECT }, { "AggroRadius", JsonFieldTypeEnum::UINT }, { "AttackRange", JsonFieldTypeEnum::UINT }, { "Footprint", JsonFieldTypeEnum::UINT }, { "Damage", JsonFieldTypeEnum::NUMBER }, { "Attack", JsonFieldTypeEnum::OBJECT }, { "Appearance", JsonFieldTypeEnum::OBJECT } } );
         const bool hasValidVitals = !hasValidCreatureFields || !creatureTypeJson.isMember( "Vitals" ) || JsonHelper::hasValidFields( creatureTypeJson[ "Vitals" ], { { "MaxHealth", JsonFieldTypeEnum::NUMBER } } );
 
         if ( !hasValidCreatureFields || !hasValidVitals ) {
@@ -113,6 +114,19 @@ void CreatureTypeFactory::createCreatureTypeCatalog( const QString& configPath, 
             continue;
         }
         creatureType.setFootprint( footprint );
+        creatureType.setDamage( creatureTypeJson.get( "Damage", 0.0 ).asDouble() );
+
+        if ( creatureTypeJson.isMember( "Attack" ) ) {
+            AttackModel attack;
+
+            if ( !AttackFactory::fromJson( creatureTypeJson[ "Attack" ], attack ) ) {
+                qWarning() << "CreatureTypeFactory::createCreatureTypeCatalog"
+                           << "Invalid Attack, skipping" << key;
+                continue;
+            }
+
+            creatureType.setAttack( attack );
+        }
 
         if ( creatureTypeJson.isMember( "Appearance" ) ) {
             const QString folder = QFileInfo( file ).absolutePath() + "/";

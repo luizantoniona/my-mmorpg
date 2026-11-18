@@ -7,6 +7,8 @@ CreatureTypeModel::CreatureTypeModel() :
     _name( "" ),
     _vitals(),
     _appearance(),
+    _attack( std::nullopt ),
+    _damage( 0.0 ),
     _aggroRadius( 0 ),
     _attackRange( 1 ),
     _footprint( 1 ) {
@@ -50,6 +52,22 @@ uint32_t CreatureTypeModel::footprint() const {
 
 void CreatureTypeModel::setFootprint( uint32_t footprint ) {
     _footprint = footprint;
+}
+
+double CreatureTypeModel::damage() const {
+    return _damage;
+}
+
+void CreatureTypeModel::setDamage( double damage ) {
+    _damage = damage;
+}
+
+const std::optional<AttackModel>& CreatureTypeModel::attack() const {
+    return _attack;
+}
+
+void CreatureTypeModel::setAttack( const AttackModel& attack ) {
+    _attack = attack;
 }
 
 CreatureTypeVitalsModel& CreatureTypeModel::vitals() {

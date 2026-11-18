@@ -58,4 +58,12 @@ void ItemTypeModel::setDisabledActions( const std::set<CombatActionEnum>& disabl
     _disabledActions = disabledActions;
 }
 
+const std::optional<AttackModel>& ItemTypeModel::attack() const {
+    return _attack;
+}
+
+void ItemTypeModel::setAttack( const AttackModel& attack ) {
+    _attack = attack;
+}
+
 } // namespace Engine

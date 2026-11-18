@@ -11,6 +11,7 @@
 #include <json/json.h>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Attack/AttackFactory.h>
 #include <MMORPGEngine/Data/DataFactory.h>
 #include <MMORPGEngine/Data/Item/HandRequirementHelper.h>
 #include <MMORPGEngine/Data/Item/ItemCategoryHelper.h>
@@ -89,7 +90,7 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
 
         const Json::Value itemTypeJson = JsonHelper::loadJsonFile( file );
 
-        if ( !JsonHelper::hasValidFields( itemTypeJson, { { "Name", JsonFieldTypeEnum::STRING }, { "Category", JsonFieldTypeEnum::STRING }, { "Slot", JsonFieldTypeEnum::STRING }, { "HandRequirement", JsonFieldTypeEnum::STRING }, { "DisabledActions", JsonFieldTypeEnum::ARRAY } } ) ) {
+        if ( !JsonHelper::hasValidFields( itemTypeJson, { { "Name", JsonFieldTypeEnum::STRING }, { "Category", JsonFieldTypeEnum::STRING }, { "Slot", JsonFieldTypeEnum::STRING }, { "HandRequirement", JsonFieldTypeEnum::STRING }, { "DisabledActions", JsonFieldTypeEnum::ARRAY }, { "Attack", JsonFieldTypeEnum::OBJECT } } ) ) {
             qWarning() << "ItemTypeFactory::createItemTypeCatalog"
                        << "Invalid ItemType (wrong field type), skipping" << key;
             continue;
@@ -139,6 +140,18 @@ void ItemTypeFactory::createItemTypeCatalog( const QString& configPath, ItemType
             disabledActions.insert( action.value() );
         }
         itemType.setDisabledActions( disabledActions );
+
+        if ( itemTypeJson.isMember( "Attack" ) ) {
+            AttackModel attack;
+
+            if ( !AttackFactory::fromJson( itemTypeJson[ "Attack" ], attack ) ) {
+                qWarning() << "ItemTypeFactory::createItemTypeCatalog"
+                           << "Invalid Attack, skipping" << key;
+                continue;
+            }
+
+            itemType.setAttack( attack );
+        }
 
         itemTypeCatalog.addItemType( std::move( itemType ) );
     }
