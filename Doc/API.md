@@ -36,7 +36,7 @@ Routes:
 
 Notes:
 - The manifest lists every file under `Config.json` + the active map folder
-  (`Map.json`, `Tile.json`, `Object.json`, `Floors/*.json`, `Textures/**`),
+  (`Map.json`, `Tiles.json`, `Objects.json`, `Characters.json`, `Floors/*.json`, `Textures/**`),
   with an MD5 hash per file
   (`Engine::ManifestFactory`). The Client compares it against its local
   cache and only downloads files whose hash differs or that are missing.
@@ -141,9 +141,17 @@ Header:
 Request body:
 ```json
 {
-  "name": "Knight"
+  "name": "Knight",
+  "appearance": { "BODY": "FEMININE_IVORY" }
 }
 ```
+
+`appearance` maps a character feature (`BODY`, more to come) to the id of the
+chosen option in the synced `Characters.json` catalog. The server validates
+it against its own catalog: every required feature must be present and every
+id must be one the catalog offers for that feature. The body is chosen only
+here and never changes afterwards. There is no default: without a character
+catalog on the server no appearance is valid, so every `/create` is rejected.
 
 Response 201:
 ```json
@@ -154,7 +162,8 @@ Response 201:
 ```
 
 Errors:
-- 400: {}
+- 400: `{}` (missing or malformed `name`)
+- 400: `{ "error": "invalid_appearance" }` (missing, malformed or not in the catalog)
 - 401: no standard body
 - 500: no standard body
 
@@ -264,6 +273,10 @@ not carry a `"type"`, they are a separate pre-handshake error shape):
 {"error":"invalid_character"}
 ```
 ```json
+{"error":"invalid_appearance"}
+```
+(the stored appearance is missing or no longer in the server's catalog)
+```json
 {"error":"character_already_online"}
 ```
 An account can have several characters online at once, but each character
@@ -307,7 +320,17 @@ connecting client only:
    ```
    The client reads it to decide what its second-action key does: `BLOCK` when
    present (a shield replaces the dodge), otherwise `DODGE`.
-3. `CHARACTER` (`Engine::CharacterDTO`) — one per character already nearby
+3. `CHARACTER_APPEARANCE` (`Engine::CharacterAppearanceDTO`) — sent once, just
+   before the `CHARACTER`/`OWN_CHARACTER` that introduces a character to a
+   client (the own character first, then each one already nearby):
+   ```json
+   { "type": "CHARACTER_APPEARANCE", "idCharacter": 11, "appearance": { "BODY": "FEMININE_IVORY" } }
+   ```
+   It is not repeated on every step. The same message goes to a client
+   whenever a character comes into its view (a nearby character walking in,
+   or the client itself walking up to it), and the client drops the
+   appearance on `CHARACTER_EVENT_LEAVE`.
+   `CHARACTER` (`Engine::CharacterDTO`) — one per character already nearby
    (same fields as `OWN_CHARACTER`, minus the "own" semantics):
    ```json
    { "type": "CHARACTER", "idCharacter": 11, "x": 20, "y": 16, "z": 0, "health": 100.0, "maxHealth": 100.0, "mana": 50.0, "maxMana": 50.0, "stamina": 50.0, "maxStamina": 50.0, "movementCooldownSeconds": 1.0 }
@@ -379,17 +402,23 @@ connection whenever something relevant changes nearby:
 - `CHARACTER_EVENT_ATTACK_START` (`Engine::CharacterEventAttackStartDTO`) — a character
   began casting an attack on a tile, sent to the attacker and to everyone nearby:
   ```json
-  { "type": "CHARACTER_EVENT_ATTACK_START", "idCharacter": 10, "x": 17, "y": 16, "z": 0, "castSeconds": 0.5 }
+  { "type": "CHARACTER_EVENT_ATTACK_START", "idCharacter": 10, "x": 17, "y": 16, "z": 0, "castSeconds": 0.5,
+    "plan": [ { "seconds": 0.5, "cells": [ { "x": 17, "y": 16 } ] },
+              { "seconds": 0.8, "cells": [ { "x": 17, "y": 15 } ] } ] }
   ```
+  `plan` is the whole attack, sent once: one entry per strike, with the cells it
+  will hit and the seconds from this message until it lands (cast time plus the
+  step delay). `x`/`y` is the targeted tile.
   Attacks are not instant: the blow is locked onto that tile and lands
   `castSeconds` later, hitting whoever stands there *then*. Leaving the tile
   during the cast dodges it, and the attacker moving cancels the cast. The
   client uses this to telegraph the tile.
 - `CREATURE_EVENT_ATTACK_START` (`Engine::CreatureEventAttackStartDTO`) — same, for a
-  creature (`idCreature` instead of `idCharacter`), sent to characters near the tile.
+  creature (`idCreature` instead of `idCharacter`), sent to characters near the tile,
+  with the same `plan`.
 - `CREATURE_EVENT_ATTACK` (`Engine::CreatureEventAttackDTO`) — a creature's blow landed
-  on a tile (`idCreature`, `x`, `y`, `z`); the damage reaches the victim as
-  `OWN_CHARACTER`/`CHARACTER`.
+  (`idCreature`, `x`, `y`, `z`, and `cells` like `CHARACTER_EVENT_ATTACK`); the damage
+  reaches the victims as `OWN_CHARACTER`/`CHARACTER`.
 - `CHARACTER_EVENT_ATTACK` (`Engine::CharacterEventAttackDTO`) — a character landed an
   attack on a tile, sent to the attacker and to everyone nearby:
   ```json
