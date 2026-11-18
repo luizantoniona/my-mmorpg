@@ -15,8 +15,10 @@ MMORPGData/
 ├── Config.json                 which map is active + server settings
 └── <MapFolder>/                e.g. ExampleMap/
     ├── Map.json                size, spawn, floors, catalog file names
-    ├── Tile.json               tile catalog
-    ├── Object.json             object catalog
+    ├── Tiles.json              tile catalog
+    ├── Objects.json            object catalog
+    ├── Characters.json         character appearance catalog
+    ├── Characters/             layered sprite sheets (see Characters)
     ├── Items.json              index of item types
     ├── Items/<TYPE>.json       one file per item type (+ its items and skill tree)
     ├── Creatures.json          index of creature types
@@ -65,10 +67,11 @@ General rules:
     "Height": 96,
     "SpawnX": 47, "SpawnY": 47, "SpawnZ": 0,
     "Catalogs": {
-        "Tiles": "Tile.json",
-        "Objects": "Object.json",
+        "Tiles": "Tiles.json",
+        "Objects": "Objects.json",
         "Items": "Items.json",
-        "Creatures": "Creatures.json"
+        "Creatures": "Creatures.json",
+        "Characters": "Characters.json"
     },
     "Floors": [ "0.json" ]
 }
@@ -78,7 +81,7 @@ General rules:
 defaults to the center of the map at `Z = 0`. `Floors` lists the files under
 `Floors/` to load.
 
-## `Tile.json`
+## `Tiles.json`
 
 ```json
 {
@@ -103,7 +106,7 @@ defaults to the center of the map at `Z = 0`. `Floors` lists the files under
 - `IsAnimated: true` loads `<TextureFile>.gif` or `.webp` instead of `.png`;
   `FrameDurationMs` defaults to `100`.
 
-## `Object.json`
+## `Objects.json`
 
 ```json
 {
@@ -199,6 +202,7 @@ unlocks); an **item** is a concrete entry of that type.
 | `Slot` | `HAND`, `HEAD`, `CHEST`, `LEGS`, `FEET`, `GLOVE`, `RING`, `NECK`. |
 | `HandRequirement` | `ONE_HANDED` or `TWO_HANDED`; for hand items. |
 | `DisabledActions` | Actions the character **loses** while it is equipped: `ATTACK`, `DODGE`, `BLOCK`. A shield disabling `DODGE` is the usual case. |
+| `Attack` | Optional **default attack** of every item of this type (format below). Items only need their own `Attack` to override it. |
 | `SkillTree` | Optional list of skill nodes: `Type` (numeric id inside the tree), `Name`, `ProficiencyLevel`, `Prerequisites` (list of `Type`s). |
 | `Items` | Optional list of concrete items. |
 
@@ -210,7 +214,7 @@ An item type with an unknown `Category` or `Slot` is skipped entirely.
 | ----- | ----- |
 | `Id`, `Name` | Required. `Id` is a text id, unique across **all** types. |
 | `Damage` | Base damage of the weapon. Without it, bare hands do `5`. |
-| `Attack` | Attack format of this item, see below. Without it the item uses a basic attack: one cell in front, hits the first creature. |
+| `Attack` | Optional **override** of the type's attack (format below). Resolution order: the item's `Attack`, then its type's `Attack`, then a basic attack (one cell in front, hits the first creature). With no weapon equipped, the `FIST` type's `Attack` is used. |
 | `TextureFile` | Inventory / ground icon, e.g. `Textures/Items/IRON_SWORD`. |
 | `IsAnimated`, `FrameDurationMs` | As in tiles. |
 
@@ -219,8 +223,8 @@ An invalid `Attack` skips only that item.
 ### `Attack`
 
 `CastSeconds`, `HitMode` and `Steps` are all **required**: an attack missing
-any of them is invalid. The same format is meant for every attacker (items
-today; creatures, NPCs and skills later). An attack is **always a list of
+any of them is invalid. The same format is used by every attacker (item
+types, items and creatures today; NPCs and skills later). An attack is **always a list of
 `Steps`**, even when it has just one. Each
 step is a *strike*: a set of cells hit at the same moment. Several steps give
 combos, projectiles and expanding waves.
@@ -229,8 +233,10 @@ A step's `Shape` is a small grid written **facing up**. `@` is the character
 (exactly one), `X` is a cell that gets hit, and a space or `.` is empty. Rows
 read top to bottom, so the cells above the `@` are in front of the character.
 Every row of a step should have the same width. The shape always turns to the
-direction the character attacks in, so a symmetric shape (a ring) simply hits
-the same cells whichever way it is aimed.
+direction the attacker aims in, in any of the 8 directions (diagonals
+included, in 45° steps), so a symmetric shape (a ring) simply hits the same
+cells whichever way it is aimed. A line pointing up becomes an exact diagonal
+line; other shapes keep their cells and only deform slightly on diagonals.
 
 A spear that hits the first creature in two cells:
 
@@ -309,6 +315,8 @@ Each key has `Creatures/<TYPE>/<TYPE>.json`:
 | `AggroRadius` | `0` | Radius, in tiles, in which it notices a character. |
 | `AttackRange` | `1` | Tiles. |
 | `Footprint` | `1` | Side of the `N × N` square it occupies, anchored at the top-left. |
+| `Damage` | `0` | Base damage of its attacks (each step multiplies it). `0` makes the creature harmless. |
+| `Attack` | basic attack | Same format as items (below). Without it the creature uses one cell in front, hits the first character. It is anchored at the creature's top-left cell. |
 | `Appearance` | circle placeholder | Sprite animation, below. |
 
 ### `Appearance`
@@ -335,6 +343,44 @@ Each key has `Creatures/<TYPE>/<TYPE>.json`:
   clip. `Stride` (default = `FrameSize`) is the distance between frames when
   the sheet has padding. `From` (default `0`) is the first column.
 - `Count` and `FrameDurationMs` are required and positive.
+
+## Characters
+
+`Characters.json` describes how a character is drawn: a stack of layered
+sprite sheets (body, head, hair; clothing will come later). The catalog is declared in
+`Map.json` as `"Characters": "Characters.json"` and the sheets live in the
+`Characters/` folder next to it.
+
+```
+Characters/
+└── <Folder>/               the `Folder` of a body, e.g. FEMININE_HONEY
+    ├── body_<state>.png    body_idle.png, body_walk.png, body_attack.png, ...
+    └── head_<state>.png    the head of that body, same grid
+```
+
+Every layer uses the same grid, so the layers of one animation are stacked on
+top of each other. Nothing is inferred from file names: each body lists, per
+layer (`BODY`, `HEAD`), the file it uses for each state (`idle`, `walk`,
+`attack`, `block`, `dodge`), inside its `Folder`. File and folder names have no
+spaces. Hair sheets are not defined yet.
+
+| Field | Notes |
+| ----- | ----- |
+| `FrameSize` | Frame `[width, height]`, shared by every layer. |
+| `Rows` | Row of each direction in every sheet. |
+| `Bodies` | Id → `Name` (shown on screen), `Folder` (under `Characters/`), `Animations` and `Layers`. One entry is a ready-made body + head, e.g. "Feminine (Ivory)". |
+| `Bodies.<id>.Animations` | Animation state (`idle`, `walk`, `attack`, `block`, `dodge`) → `Count` and `FrameDurationMs`. Belongs to the body: it may differ between bodies, and every layer drawn on it (head, hair, ...) must have the same `Count` for that state. |
+| `Bodies.<id>.Layers` | Layer (`BODY`, `HEAD`) → state → file name inside the folder. Both `BODY` and `HEAD` are required with a valid `idle` sheet, or the body is skipped. |
+| `Hairs` | Id → `Name`, `Colors` (id → `Name`, the colors of that style) and `Behind` (optional, the style has a layer drawn behind the body). |
+
+A character picks one body when it is created (it never changes) and,
+optionally, a hair style and one of that style's colors. Ids follow the usual
+`^[A-Z0-9_]+$` rule and each folder is named after its id.
+
+The sprites come from the
+[Liberated Pixel Cup revised base assets](https://github.com/ElizaWy/LPC) by
+Eliza Wyatt (ElizaWy), Stephen Challener (Redshrike) and other contributors,
+licensed OGA-BY; see that repository for the full credits.
 
 ## Checking your changes
 
