@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import MMORPGUIComponents
 import MMORPGClientComponents
@@ -11,6 +10,7 @@ Item {
 
     signal logoutSuccess
     signal enterWorldRequested(int idCharacter)
+    signal createCharacterRequested
 
     property int selectedIdCharacter: -1
     property string selectedName: ""
@@ -27,12 +27,6 @@ Item {
         }
         onLogoutFailed: function (error) {
             root.vTextError = error
-        }
-        onCharacterCreationFailed: function (error) {
-            createDialog.vTextError = error
-        }
-        onCharacterCreated: function () {
-            createDialog.close()
         }
         onCharacterRemovalFailed: function (error) {
             root.vTextError = error
@@ -105,7 +99,7 @@ Item {
                     vText: qsTr("+ New Character")
 
                     onClicked: function () {
-                        createDialog.open()
+                        root.createCharacterRequested()
                     }
                 }
 
@@ -203,76 +197,6 @@ Item {
                     }
                 }
             }
-        }
-    }
-
-    Popup {
-        id: createDialog
-
-        property string vTextError: ""
-
-        parent: Overlay.overlay
-        anchors.centerIn: parent
-        modal: true
-        focus: true
-        width: 320
-        height: 220
-        padding: 0
-
-        background: PanelFrame {}
-
-        contentItem: ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Spaces.spacing8
-            spacing: Spaces.spacing8
-
-            TextSubTitle {
-                Layout.alignment: Qt.AlignHCenter
-                vText: qsTr("New Character")
-            }
-
-            InputBase {
-                id: createNameField
-
-                Layout.alignment: Qt.AlignHCenter
-
-                vTitle: qsTr("Name")
-                vPlaceholder: qsTr("")
-            }
-
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                spacing: Spaces.spacing8
-
-                ButtonBase {
-                    vText: qsTr("Create")
-
-                    onClicked: function () {
-                        control.createCharacter(createNameField.vText)
-                    }
-                }
-
-                ButtonBase {
-                    vText: qsTr("Cancel")
-
-                    onClicked: function () {
-                        createDialog.close()
-                    }
-                }
-            }
-
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                color: Colors.error
-                font: Fonts.bodyBold
-                text: createDialog.vTextError
-                visible: createDialog.vTextError !== ""
-            }
-        }
-
-        onOpened: function () {
-            createNameField.vText = ""
-            createDialog.vTextError = ""
         }
     }
 }

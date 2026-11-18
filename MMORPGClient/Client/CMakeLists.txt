@@ -3,6 +3,10 @@ set(PROJECT_SOURCES
     RegisterClientTypes.h
     Application/Account/AccountPageControl.cpp
     Application/Account/AccountPageControl.h
+    Application/CharacterCreation/CharacterCreationPageControl.cpp
+    Application/CharacterCreation/CharacterCreationPageControl.h
+    Application/CharacterCreation/Component/CharacterAppearancePreview.cpp
+    Application/CharacterCreation/Component/CharacterAppearancePreview.h
     Application/Game/Component/CharacterEquipmentPanelControl.cpp
     Application/Game/Component/CharacterEquipmentPanelControl.h
     Application/Game/Component/CharacterInventoryPanelControl.cpp
@@ -34,6 +38,7 @@ qt_add_qml_module(
   Main.qml
   Application/ClientWindow.qml
   Application/Account/AccountPage.qml
+  Application/CharacterCreation/CharacterCreationPage.qml
   Application/Game/GamePage.qml
   Application/Game/Component/CharacterVitalsPanel.qml
   Application/Game/Component/CharacterEquipmentPanel.qml

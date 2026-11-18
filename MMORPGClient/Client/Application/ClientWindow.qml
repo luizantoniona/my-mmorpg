@@ -22,6 +22,9 @@ Item {
         case "AccountPage":
             stack.push(accountPage)
             break
+        case "CharacterCreationPage":
+            stack.push(characterCreationPage)
+            break
         case "GamePage":
             stack.push(gamePage)
             break
@@ -77,6 +80,24 @@ Item {
             onEnterWorldRequested: function (idCharacter) {
                 root.selectedIdCharacter = idCharacter
                 root.updatePage("GamePage")
+            }
+            onCreateCharacterRequested: function () {
+                root.updatePage("CharacterCreationPage")
+            }
+        }
+    }
+
+    Component {
+        id: characterCreationPage
+
+        CharacterCreationPage {
+            id: characterCreation
+
+            onCharacterCreated: function () {
+                root.updatePage("AccountPage")
+            }
+            onBackRequested: function () {
+                root.updatePage("AccountPage")
             }
         }
     }
