@@ -11,7 +11,9 @@ ClientRenderWorld::ClientRenderWorld( QObject* parent ) :
 
     connect( &messageReceiver, &Engine::ServerMessageReceiver::ownCharacterReceived, this, &ClientRenderWorld::onOwnCharacterReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterStateReceived, this, &ClientRenderWorld::addCharacter );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::characterAppearanceReceived, this, &ClientRenderWorld::setCharacterAppearance );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureStateReceived, this, &ClientRenderWorld::addCreature );
+    connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackStartReceived, this, &ClientRenderWorld::onCharacterEventAttackStartReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventAttackStartReceived, this, &ClientRenderWorld::onCreatureEventAttackStartReceived );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::characterEventLeaveReceived, this, &ClientRenderWorld::removeCharacter );
     connect( &messageReceiver, &Engine::ServerMessageReceiver::creatureEventLeaveReceived, this, &ClientRenderWorld::removeCreature );
@@ -87,6 +89,12 @@ quint64 ClientRenderWorld::chunkRevision( int chunkX, int chunkY ) const {
 
 void ClientRenderWorld::onOwnCharacterReceived( const Engine::OwnCharacterDTO& state ) {
     setOwnCharacter( state.idCharacter(), state.x(), state.y(), state.z(), state.movementCooldownSeconds() );
+}
+
+void ClientRenderWorld::onCharacterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds ) {
+    Q_UNUSED( z );
+
+    startCharacterAttack( idCharacter, x, y, castSeconds );
 }
 
 void ClientRenderWorld::onCreatureEventAttackStartReceived( int idCreature, int x, int y, int z, double castSeconds ) {

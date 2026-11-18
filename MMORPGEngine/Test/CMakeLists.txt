@@ -7,7 +7,11 @@ add_executable(
   AppearanceFactoryTest.cpp
   AttackFactoryTest.cpp
   CameraTest.cpp
+  CharacterAppearanceDTOTest.cpp
+  CharacterAppearanceFactoryTest.cpp
+  CharacterCatalogTest.cpp
   CharacterDTOTest.cpp
+  CharacterFactoryTest.cpp
   CharacterIntentEquipDTOTest.cpp
   ChunkDTOTest.cpp
   ChunkModelTest.cpp

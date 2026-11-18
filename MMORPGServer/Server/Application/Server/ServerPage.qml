@@ -20,6 +20,9 @@ Item {
         onCharacterStateReceived: function (idCharacter, x, y, z, movementSeconds) {
             serverWorld.addCharacter(idCharacter, x, y, z, movementSeconds)
         }
+        onCharacterAppearanceReceived: function (idCharacter, selections) {
+            serverWorld.setCharacterAppearanceFromSelections(idCharacter, selections)
+        }
         onCreatureStateReceived: function (idCreature, x, y, z, movementSeconds, footprint, creatureType) {
             serverWorld.addCreature(idCreature, x, y, z, movementSeconds, footprint, creatureType)
         }
@@ -30,6 +33,9 @@ Item {
             if (z === root.currentFloor) {
                 viewport.addTileWarning(x, y, root.attackWarningColor, seconds * 1000)
             }
+        }
+        onCharacterEventAttackStartReceived: function (idCharacter, x, y, z, castSeconds) {
+            serverWorld.startCharacterAttack(idCharacter, x, y, castSeconds)
         }
         onCreatureEventAttackStartReceived: function (idCreature, x, y, z, castSeconds) {
             serverWorld.startCreatureAttack(idCreature, x, y, castSeconds)

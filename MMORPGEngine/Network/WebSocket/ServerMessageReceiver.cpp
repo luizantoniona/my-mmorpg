@@ -1,6 +1,7 @@
 #include "ServerMessageReceiver.h"
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Entity/Character/CharacterAppearanceDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventAttackStartDTO.h>
@@ -65,6 +66,12 @@ void ServerMessageReceiver::receiveMessage( const QString& message ) {
     case ServerMessageType::CHARACTER: {
         const CharacterDTO state = CharacterDTO::fromJson( json );
         emit characterStateReceived( state.idCharacter(), state.x(), state.y(), state.z(), state.movementCooldownSeconds() );
+        return;
+    }
+
+    case ServerMessageType::CHARACTER_APPEARANCE: {
+        const CharacterAppearanceDTO state = CharacterAppearanceDTO::fromJson( json );
+        emit characterAppearanceReceived( state.idCharacter(), state.appearance() );
         return;
     }
 

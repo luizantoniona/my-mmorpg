@@ -1,11 +1,26 @@
 #include "ServerRenderWorld.h"
 
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/Character/CharacterAppearanceFeatureHelper.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 
 ServerRenderWorld::ServerRenderWorld( QObject* parent ) :
     Engine::StreamRenderWorld( parent ),
     _world( Engine::Singleton<Server::WorldManager>::instance().runtime().world() ) {
+}
+
+void ServerRenderWorld::setCharacterAppearanceFromSelections( int idCharacter, const QVariantMap& selections ) {
+    Engine::CharacterAppearanceModel appearance;
+
+    for ( auto selection = selections.constBegin(); selection != selections.constEnd(); ++selection ) {
+        const Engine::CharacterAppearanceFeatureEnum feature = Engine::CharacterAppearanceFeatureHelper::fromString( selection.key().toStdString() );
+
+        if ( feature != Engine::CharacterAppearanceFeatureEnum::UNKNOWN ) {
+            appearance.setId( feature, selection.value().toString() );
+        }
+    }
+
+    setCharacterAppearance( idCharacter, appearance );
 }
 
 Engine::WorldModel* ServerRenderWorld::world() const {

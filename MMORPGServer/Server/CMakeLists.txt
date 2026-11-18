@@ -54,6 +54,8 @@ set(PROJECT_SOURCES
     Renderer/ServerRenderWorld.h
     Repository/Account/AccountRepository.cpp
     Repository/Account/AccountRepository.h
+    Repository/Character/CharacterAppearanceRepository.cpp
+    Repository/Character/CharacterAppearanceRepository.h
     Repository/Character/CharacterEquipmentRepository.cpp
     Repository/Character/CharacterEquipmentRepository.h
     Repository/Character/CharacterInventoryRepository.cpp

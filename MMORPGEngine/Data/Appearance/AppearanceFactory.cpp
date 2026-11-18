@@ -44,22 +44,6 @@ QImage loadSheet( QHash<QString, QImage>& sheets, const QString& path ) {
     return it.value();
 }
 
-QList<QImage> cutFrames( const QImage& sheet, const QSize& frameSize, const QSize& stride, int row, int from, int count ) {
-    QList<QImage> frames;
-
-    for ( int i = 0; i < count; ++i ) {
-        const QRect rect( QPoint( ( from + i ) * stride.width(), row * stride.height() ), frameSize );
-
-        if ( !sheet.rect().intersects( rect ) ) {
-            return {};
-        }
-
-        frames.append( sheet.copy( rect ) );
-    }
-
-    return frames;
-}
-
 void createClip( const Json::Value& appearanceJson, const Json::Value& clipJson, AppearanceStateEnum state, const QString& folderPath, QHash<QString, QImage>& sheets, AppearanceModel& appearance ) {
     const QString stateName = QString::fromStdString( AppearanceStateHelper::toString( state ) );
 
@@ -118,14 +102,14 @@ void createClip( const Json::Value& appearanceJson, const Json::Value& clipJson,
             continue;
         }
 
-        const QList<QImage> frames = cutFrames( sheet, frameSize, stride, rowJson.asInt(), from, count );
-        if ( frames.isEmpty() ) {
+        const AnimationModel animation = AppearanceFactory::createAnimation( sheet, frameSize, stride, rowJson.asInt(), from, count, frameDurationMs );
+        if ( animation.isNull() ) {
             qWarning() << "AppearanceFactory::createClip"
                        << "Frames outside the sheet, skipping" << stateName + "/" + QString::fromStdString( directionName );
             continue;
         }
 
-        appearance.setAnimation( state, direction, AnimationModel( frames, frameDurationMs ) );
+        appearance.setAnimation( state, direction, animation );
     }
 }
 
@@ -155,6 +139,22 @@ AppearanceModel AppearanceFactory::createAppearance( const Json::Value& json, co
     }
 
     return appearance;
+}
+
+AnimationModel AppearanceFactory::createAnimation( const QImage& sheet, const QSize& frameSize, const QSize& stride, int row, int from, int count, int frameDurationMs ) {
+    QList<QImage> frames;
+
+    for ( int i = 0; i < count; ++i ) {
+        const QRect rect( QPoint( ( from + i ) * stride.width(), row * stride.height() ), frameSize );
+
+        if ( !sheet.rect().intersects( rect ) ) {
+            return AnimationModel();
+        }
+
+        frames.append( sheet.copy( rect ) );
+    }
+
+    return AnimationModel( frames, frameDurationMs );
 }
 
 } // namespace Engine

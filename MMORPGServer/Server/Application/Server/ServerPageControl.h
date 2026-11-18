@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QVariantList>
+#include <QVariantMap>
 
 #include <MMORPGEngine/Network/WebSocket/ServerMessageReceiver.h>
 #include <MMORPGServer/Server/Network/Observer/GodObserver.h>
@@ -38,6 +39,7 @@ public:
 
 signals:
     void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
+    void characterAppearanceReceived( int idCharacter, const QVariantMap& selections );
     void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds, int footprint, const QString& creatureType );
     void groundItemStateReceived( int idGroundItem, const QString& idItem, int x, int y, int z );
 
@@ -50,6 +52,9 @@ signals:
     void characterEventLeaveReceived( int idCharacter );
     void creatureEventLeaveReceived( int idCreature );
     void groundItemEventLeaveReceived( int idGroundItem );
+
+private slots:
+    void onCharacterAppearanceReceived( int idCharacter, const Engine::CharacterAppearanceModel& appearance );
 
 private:
     std::shared_ptr<GodObserver> _godObserver;

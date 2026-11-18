@@ -1,6 +1,7 @@
 #include "CharacterRepository.h"
 
 #include <MMORPGServer/Server/Database/Query.h>
+#include <MMORPGServer/Server/Repository/Character/CharacterAppearanceRepository.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterEquipmentRepository.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterInventoryRepository.h>
 #include <MMORPGServer/Server/Repository/Character/CharacterPositionRepository.h>
@@ -13,7 +14,7 @@ CharacterRepository::CharacterRepository() :
     Repository() {
 }
 
-int CharacterRepository::createCharacter( const int idAccount, const std::string& dsName, const Engine::EntityPositionModel& spawnPosition, const Engine::EntityVitalsModel& spawnVitals ) {
+int CharacterRepository::createCharacter( const int idAccount, const std::string& dsName, const Engine::CharacterAppearanceModel& appearance, const Engine::EntityPositionModel& spawnPosition, const Engine::EntityVitalsModel& spawnVitals ) {
     const std::string sql = R"SQL(
         INSERT INTO character (
             id_account,
@@ -33,6 +34,7 @@ int CharacterRepository::createCharacter( const int idAccount, const std::string
 
     bool success = true;
 
+    success &= CharacterAppearanceRepository().create( idCharacter, appearance );
     success &= CharacterPositionRepository().create( idCharacter, spawnPosition );
     success &= CharacterVitalsRepository().create( idCharacter, spawnVitals );
 
@@ -99,6 +101,8 @@ std::unique_ptr<Engine::CharacterModel> CharacterRepository::findByIdAccountAndI
         character->setIdCharacter( query.getColumnInt( 0 ) );
         character->setIdAccount( query.getColumnInt( 1 ) );
         character->setName( query.getColumnText( 2 ) );
+
+        character->setAppearance( CharacterAppearanceRepository().find( character->idCharacter() ) );
 
         auto position = CharacterPositionRepository().find( character->idCharacter() );
         if ( position ) {

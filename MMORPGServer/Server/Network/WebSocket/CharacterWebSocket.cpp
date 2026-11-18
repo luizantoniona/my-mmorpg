@@ -6,6 +6,7 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
 #include <MMORPGServer/Server/Manager/WorldManager.h>
 #include <MMORPGServer/Server/Network/NetworkServer.h>
 #include <MMORPGServer/Server/Network/Observer/CharacterObserver.h>
@@ -71,6 +72,13 @@ void CharacterWebSocket::handleNewConnection( const drogon::HttpRequestPtr& requ
     if ( !character ) {
         qWarning() << "[WebSocket] Rejected connection: invalid character [ACCOUNT]" << session->idAccount() << "[CHARACTER]" << idCharacter;
         connection->send( R"({"error":"invalid_character"})" );
+        connection->shutdown();
+        return;
+    }
+
+    if ( !Engine::Singleton<Engine::DataManager>::instance().characterCatalog().isValidAppearance( character->appearance() ) ) {
+        qWarning() << "[WebSocket] Rejected connection: invalid appearance [CHARACTER]" << idCharacter;
+        connection->send( R"({"error":"invalid_appearance"})" );
         connection->shutdown();
         return;
     }

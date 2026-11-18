@@ -46,6 +46,23 @@ set(PROJECT_SOURCES
     Data/Attack/AttackModel.h
     Data/Attack/AttackStepModel.cpp
     Data/Attack/AttackStepModel.h
+    Data/Character/CharacterAppearanceFactory.cpp
+    Data/Character/CharacterAppearanceFactory.h
+    Data/Character/CharacterBodyModel.cpp
+    Data/Character/CharacterBodyModel.h
+    Data/Character/CharacterCatalog.cpp
+    Data/Character/CharacterCatalog.h
+    Data/Character/CharacterClipModel.cpp
+    Data/Character/CharacterClipModel.h
+    Data/Character/CharacterFactory.cpp
+    Data/Character/CharacterFactory.h
+    Data/Character/CharacterLayerEnum.h
+    Data/Character/CharacterLayerHelper.cpp
+    Data/Character/CharacterLayerHelper.h
+    Data/Character/CharacterOptionModel.cpp
+    Data/Character/CharacterOptionModel.h
+    Data/Character/CharacterSpriteModel.cpp
+    Data/Character/CharacterSpriteModel.h
     Data/Item/HandRequirementEnum.h
     Data/Item/HandRequirementHelper.cpp
     Data/Item/HandRequirementHelper.h
@@ -120,6 +137,13 @@ set(PROJECT_SOURCES
     Data/DataFactory.h
     Data/DataManager.cpp
     Data/DataManager.h
+    Entity/Character/CharacterAppearanceDTO.cpp
+    Entity/Character/CharacterAppearanceDTO.h
+    Entity/Character/CharacterAppearanceFeatureEnum.h
+    Entity/Character/CharacterAppearanceFeatureHelper.cpp
+    Entity/Character/CharacterAppearanceFeatureHelper.h
+    Entity/Character/CharacterAppearanceModel.cpp
+    Entity/Character/CharacterAppearanceModel.h
     Entity/Character/CharacterDTO.cpp
     Entity/Character/CharacterDTO.h
     Entity/Character/CharacterEquipmentDTO.cpp

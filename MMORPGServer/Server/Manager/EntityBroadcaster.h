@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGServer/Server/Event/WorldEvent.h>
 #include <MMORPGServer/Server/Network/Observer/EntityObserver.h>
@@ -38,6 +39,7 @@ private:
 
     void sendWorldBasic( const WorldEvent& event );
     void sendTerrain( const WorldEvent& event );
+    void sendOwnAppearance( const WorldEvent& event );
     void sendOwnCharacter( const WorldEvent& event );
     void sendOwnCombat( const WorldEvent& event );
     void sendOwnEquipment( const WorldEvent& event );
@@ -45,6 +47,7 @@ private:
     void sendNearbyCharacters( const WorldEvent& event );
     void sendCreatures( const WorldEvent& event );
     void sendGroundItems( const WorldEvent& event );
+    void broadcastAppearance( const WorldEvent& event );
     void broadcastCharacter( const WorldEvent& event );
     void broadcastAttackStart( const WorldEvent& event );
     void broadcastAttack( const WorldEvent& event );
@@ -54,6 +57,7 @@ private:
     void broadcast( const std::vector<int>& idCharacters, const std::string& message );
     void broadcastNear( const Json::Value& payload, const std::string& message );
 
+    static std::string appearanceMessage( const Engine::CharacterModel* character );
     static Engine::EntityPositionModel positionFromPayload( const Json::Value& payload );
     static Engine::EntityPositionModel previousPositionFromPayload( const Json::Value& payload );
 };

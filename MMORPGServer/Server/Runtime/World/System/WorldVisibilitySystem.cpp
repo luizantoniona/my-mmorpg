@@ -70,6 +70,7 @@ WorldVisibilityDelta WorldVisibilitySystem::delta( const Engine::EntityPositionM
     WorldVisibilityDelta visibilityDelta;
     visibilityDelta.charactersEntered = difference( currentCharacters, previousCharacters );
     visibilityDelta.charactersLeft = difference( previousCharacters, currentCharacters );
+    visibilityDelta.viewersEntered = difference( currentViewers, previousViewers );
     visibilityDelta.viewersLeft = difference( previousViewers, currentViewers );
     visibilityDelta.creaturesEntered = difference( currentCreatures, previousCreatures );
     visibilityDelta.creaturesLeft = difference( previousCreatures, currentCreatures );

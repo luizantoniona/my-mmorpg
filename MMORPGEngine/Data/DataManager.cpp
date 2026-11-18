@@ -5,6 +5,7 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
+#include <MMORPGEngine/Data/Character/CharacterFactory.h>
 #include <MMORPGEngine/Data/Creature/CreatureTypeFactory.h>
 #include <MMORPGEngine/Data/Item/ItemFactory.h>
 #include <MMORPGEngine/Data/Item/ItemTypeFactory.h>
@@ -22,7 +23,8 @@ DataManager::DataManager() :
     _itemTypeCatalog(),
     _itemCatalog(),
     _skillCatalog(),
-    _creatureTypeCatalog() {
+    _creatureTypeCatalog(),
+    _characterCatalog() {
 }
 
 DataManager::~DataManager() = default;
@@ -36,6 +38,7 @@ void DataManager::initialize( const std::string& configPath ) {
     ItemFactory::createItemCatalog( QString::fromStdString( configPath ), _itemTypeCatalog, _itemCatalog );
     SkillFactory::createSkillCatalog( QString::fromStdString( configPath ), _itemTypeCatalog, _skillCatalog );
     CreatureTypeFactory::createCreatureTypeCatalog( QString::fromStdString( configPath ), _creatureTypeCatalog );
+    CharacterFactory::createCharacterCatalog( QString::fromStdString( configPath ), _characterCatalog );
 }
 
 void DataManager::reload( const std::string& configPath ) {
@@ -45,6 +48,7 @@ void DataManager::reload( const std::string& configPath ) {
     _itemCatalog = ItemCatalog();
     _skillCatalog = SkillCatalog();
     _creatureTypeCatalog = CreatureTypeCatalog();
+    _characterCatalog = CharacterCatalog();
 
     initialize( configPath );
 }
@@ -118,6 +122,10 @@ const CreatureTypeCatalog& DataManager::creatureTypeCatalog() const {
 
 void DataManager::addCreatureType( const CreatureTypeModel& creatureType ) {
     _creatureTypeCatalog.addCreatureType( creatureType );
+}
+
+const CharacterCatalog& DataManager::characterCatalog() const {
+    return _characterCatalog;
 }
 
 } // namespace Engine

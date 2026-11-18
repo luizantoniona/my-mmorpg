@@ -2130,6 +2130,28 @@ TEST( WorldRuntimeTest, VisibilityDelta_GoingUpOneFloor_ViewersOfTheFloorBelowSt
     EXPECT_EQ( delta.viewersLeft, std::vector<int>( { 1 } ) );
 }
 
+TEST( WorldRuntimeTest, VisibilityDelta_GoingDownOneFloor_ViewersOfTheFloorBelowStartSeeingTheMover ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 3, 0, 0, 1 ) );
+    worldRuntime.addCharacter( makeCharacter( 2, 0, 0, 1 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilitySystem().delta( positionAt( 0, 0, 1 ), positionAt( 0, 0, 0 ), 2 );
+
+    EXPECT_EQ( delta.viewersEntered, std::vector<int>( { 1 } ) );
+}
+
+TEST( WorldRuntimeTest, VisibilityDelta_ArrivingInView_ListsViewersThatGainedTheMover ) {
+    Server::WorldRuntime worldRuntime( nullptr );
+    worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );
+    worldRuntime.addCharacter( makeCharacter( 2, 0, 0, 1 ) );
+
+    const Server::WorldVisibilityDelta delta = worldRuntime.visibilitySystem().delta( positionAt( 100, 100, 0 ), positionAt( 0, 0, 0 ), -1 );
+
+    EXPECT_EQ( delta.viewersEntered.size(), 2u );
+    EXPECT_TRUE( delta.viewersLeft.empty() );
+}
+
 TEST( WorldRuntimeTest, VisibilityDelta_CreatureLeavingView_ListsViewersThatLostIt ) {
     Server::WorldRuntime worldRuntime( nullptr );
     worldRuntime.addCharacter( makeCharacter( 1, 0, 0, 0 ) );

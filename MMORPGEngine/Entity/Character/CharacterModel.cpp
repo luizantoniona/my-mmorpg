@@ -56,4 +56,12 @@ void CharacterModel::setInventory( const std::vector<CharacterInventoryModel>& i
     _inventory = inventory;
 }
 
+const CharacterAppearanceModel& CharacterModel::appearance() const {
+    return _appearance;
+}
+
+void CharacterModel::setAppearance( const CharacterAppearanceModel& appearance ) {
+    _appearance = appearance;
+}
+
 } // namespace Engine

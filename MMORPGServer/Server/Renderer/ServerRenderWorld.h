@@ -1,6 +1,8 @@
 #ifndef SERVERRENDERWORLD_H
 #define SERVERRENDERWORLD_H
 
+#include <QVariantMap>
+
 #include <MMORPGEngine/Renderer/World/StreamRenderWorld.h>
 #include <MMORPGEngine/World/WorldModel.h>
 
@@ -9,6 +11,8 @@ class ServerRenderWorld : public Engine::StreamRenderWorld {
 
 public:
     explicit ServerRenderWorld( QObject* parent = nullptr );
+
+    Q_INVOKABLE void setCharacterAppearanceFromSelections( int idCharacter, const QVariantMap& selections );
 
     Engine::WorldModel* world() const;
     void setWorld( Engine::WorldModel* world );

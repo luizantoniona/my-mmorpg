@@ -16,6 +16,8 @@ std::string ServerMessageTypeHelper::toString( ServerMessageType type ) {
         return "OWN_INVENTORY";
     case ServerMessageType::CHARACTER:
         return "CHARACTER";
+    case ServerMessageType::CHARACTER_APPEARANCE:
+        return "CHARACTER_APPEARANCE";
     case ServerMessageType::CHARACTER_EVENT_ATTACK_START:
         return "CHARACTER_EVENT_ATTACK_START";
     case ServerMessageType::CHARACTER_EVENT_ATTACK:
@@ -63,6 +65,9 @@ ServerMessageType ServerMessageTypeHelper::fromString( const std::string& value 
     }
     if ( value == "CHARACTER" ) {
         return ServerMessageType::CHARACTER;
+    }
+    if ( value == "CHARACTER_APPEARANCE" ) {
+        return ServerMessageType::CHARACTER_APPEARANCE;
     }
     if ( value == "CHARACTER_EVENT_ATTACK_START" ) {
         return ServerMessageType::CHARACTER_EVENT_ATTACK_START;

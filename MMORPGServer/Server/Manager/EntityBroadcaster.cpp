@@ -2,6 +2,7 @@
 
 #include <MMORPGEngine/Commons/JsonHelper.h>
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/Character/CharacterAppearanceDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventAttackDTO.h>
 #include <MMORPGEngine/Entity/Character/CharacterEventAttackStartDTO.h>
@@ -105,6 +106,7 @@ void EntityBroadcaster::sendSnapshot( EntityObserver& observer ) {
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
     for ( const Engine::CharacterModel& character : worldRuntime.connectedCharacters() ) {
+        observer.send( appearanceMessage( &character ) );
         observer.send( Engine::JsonHelper::writeJsonString( Engine::CharacterDTO::fromModel( &character ).toJson() ) );
     }
 
@@ -116,6 +118,7 @@ void EntityBroadcaster::sendSnapshot( EntityObserver& observer ) {
 void EntityBroadcaster::onCharacterEntered( const WorldEvent& event ) {
     sendWorldBasic( event );
     sendTerrain( event );
+    sendOwnAppearance( event );
     sendOwnCharacter( event );
     sendOwnCombat( event );
     sendOwnEquipment( event );
@@ -123,6 +126,7 @@ void EntityBroadcaster::onCharacterEntered( const WorldEvent& event ) {
     sendNearbyCharacters( event );
     sendCreatures( event );
     sendGroundItems( event );
+    broadcastAppearance( event );
     broadcastCharacter( event );
 }
 
@@ -171,7 +175,17 @@ void EntityBroadcaster::onCharacterVisibilityChanged( const WorldEvent& event ) 
     for ( int idEntered : delta.charactersEntered ) {
         const Engine::CharacterModel* entered = worldRuntime.character( idEntered );
         if ( entered ) {
+            sendToCharacter( idCharacter, appearanceMessage( entered ) );
             sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::CharacterDTO::fromModel( entered ).toJson() ) );
+        }
+    }
+
+    const Engine::CharacterModel* mover = worldRuntime.character( idCharacter );
+    if ( mover ) {
+        const std::string moverAppearance = appearanceMessage( mover );
+
+        for ( int idViewer : delta.viewersEntered ) {
+            sendToCharacter( idViewer, moverAppearance );
         }
     }
 
@@ -300,14 +314,11 @@ void EntityBroadcaster::onCreatureAttackStarted( const WorldEvent& event ) {
     message.setZ( payload[ "z" ].asInt() );
     message.setCastSeconds( payload[ "castSeconds" ].asDouble() );
 
-    std::vector<std::pair<int, int>> cells;
-    for ( const Json::Value& cellJson : payload[ "cells" ] ) {
-        cells.emplace_back( cellJson[ "x" ].asInt(), cellJson[ "y" ].asInt() );
+    std::vector<Engine::AttackStrikeDTO> strikes;
+    for ( const Json::Value& strikeJson : payload[ "plan" ] ) {
+        strikes.push_back( Engine::AttackStrikeDTO::fromJson( strikeJson ) );
     }
-
-    if ( !cells.empty() ) {
-        message.setCells( cells );
-    }
+    message.setStrikes( strikes );
 
     broadcastNear( payload, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
@@ -321,11 +332,14 @@ void EntityBroadcaster::onCreatureAttacked( const WorldEvent& event ) {
     message.setY( payload[ "y" ].asInt() );
     message.setZ( payload[ "z" ].asInt() );
 
-    std::vector<Engine::AttackStrikeDTO> strikes;
-    for ( const Json::Value& strikeJson : payload[ "plan" ] ) {
-        strikes.push_back( Engine::AttackStrikeDTO::fromJson( strikeJson ) );
+    std::vector<std::pair<int, int>> cells;
+    for ( const Json::Value& cellJson : payload[ "cells" ] ) {
+        cells.emplace_back( cellJson[ "x" ].asInt(), cellJson[ "y" ].asInt() );
     }
-    message.setStrikes( strikes );
+
+    if ( !cells.empty() ) {
+        message.setCells( cells );
+    }
 
     broadcastNear( payload, Engine::JsonHelper::writeJsonString( message.toJson() ) );
 }
@@ -352,6 +366,17 @@ void EntityBroadcaster::sendTerrain( const WorldEvent& event ) {
     for ( const ChunkCoordinate& chunk : worldRuntime.visibilitySystem().terrainChunksNear( positionFromPayload( event.payload() ) ) ) {
         sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::ChunkDTO::fromModel( *world, chunk.x, chunk.y ).toJson() ) );
     }
+}
+
+void EntityBroadcaster::sendOwnAppearance( const WorldEvent& event ) {
+    const int idCharacter = event.payload()[ "idCharacter" ].asInt();
+
+    const Engine::CharacterModel* character = Engine::Singleton<WorldManager>::instance().runtime().character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    sendToCharacter( idCharacter, appearanceMessage( character ) );
 }
 
 void EntityBroadcaster::sendOwnCharacter( const WorldEvent& event ) {
@@ -409,6 +434,7 @@ void EntityBroadcaster::sendNearbyCharacters( const WorldEvent& event ) {
             continue;
         }
 
+        sendToCharacter( idCharacter, appearanceMessage( nearbyCharacter ) );
         sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::CharacterDTO::fromModel( nearbyCharacter ).toJson() ) );
     }
 }
@@ -431,6 +457,19 @@ void EntityBroadcaster::sendGroundItems( const WorldEvent& event ) {
     for ( const Engine::GroundItemModel& groundItem : worldRuntime.groundItemSystem().itemsVisibleFrom( positionFromPayload( event.payload() ) ) ) {
         sendToCharacter( idCharacter, Engine::JsonHelper::writeJsonString( Engine::GroundItemDTO::fromModel( &groundItem ).toJson() ) );
     }
+}
+
+void EntityBroadcaster::broadcastAppearance( const WorldEvent& event ) {
+    const int idCharacter = event.payload()[ "idCharacter" ].asInt();
+
+    auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
+
+    const Engine::CharacterModel* character = worldRuntime.character( idCharacter );
+    if ( !character ) {
+        return;
+    }
+
+    broadcast( worldRuntime.charactersViewing( idCharacter ), appearanceMessage( character ) );
 }
 
 void EntityBroadcaster::broadcastCharacter( const WorldEvent& event ) {
@@ -457,6 +496,12 @@ void EntityBroadcaster::broadcastAttackStart( const WorldEvent& event ) {
     message.setY( payload[ "y" ].asInt() );
     message.setZ( payload[ "z" ].asInt() );
     message.setCastSeconds( payload[ "castSeconds" ].asDouble() );
+
+    std::vector<Engine::AttackStrikeDTO> strikes;
+    for ( const Json::Value& strikeJson : payload[ "plan" ] ) {
+        strikes.push_back( Engine::AttackStrikeDTO::fromJson( strikeJson ) );
+    }
+    message.setStrikes( strikes );
 
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
@@ -486,12 +531,6 @@ void EntityBroadcaster::broadcastAttack( const WorldEvent& event ) {
         message.setCells( cells );
     }
 
-    std::vector<Engine::AttackStrikeDTO> strikes;
-    for ( const Json::Value& strikeJson : payload[ "plan" ] ) {
-        strikes.push_back( Engine::AttackStrikeDTO::fromJson( strikeJson ) );
-    }
-    message.setStrikes( strikes );
-
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
     std::vector<int> receivers = worldRuntime.charactersViewing( idCharacter );
@@ -510,6 +549,10 @@ void EntityBroadcaster::broadcastNear( const Json::Value& payload, const std::st
     auto& worldRuntime = Engine::Singleton<WorldManager>::instance().runtime();
 
     broadcast( worldRuntime.charactersViewing( positionFromPayload( payload ) ), message );
+}
+
+std::string EntityBroadcaster::appearanceMessage( const Engine::CharacterModel* character ) {
+    return Engine::JsonHelper::writeJsonString( Engine::CharacterAppearanceDTO::fromModel( character ).toJson() );
 }
 
 Engine::EntityPositionModel EntityBroadcaster::positionFromPayload( const Json::Value& payload ) {

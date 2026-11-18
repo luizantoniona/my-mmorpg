@@ -3,6 +3,8 @@
 #include <QDebug>
 
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Data/DataManager.h>
+#include <MMORPGEngine/Entity/Character/CharacterAppearanceDTO.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
@@ -28,7 +30,24 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
 
     int idAccount = session.idAccount();
 
-    qInfo() << "CharacterController::create" << " [ACCOUNT] " << idAccount << " [NAME] " << name;
+    qInfo() << "CharacterController::create"
+            << " [ACCOUNT] " << idAccount << " [NAME] " << name;
+
+    Engine::CharacterAppearanceModel appearance;
+    const Engine::CharacterCatalog& characterCatalog = Engine::Singleton<Engine::DataManager>::instance().characterCatalog();
+    const bool isParsed = Engine::CharacterAppearanceDTO::selectionFromJson( body[ "appearance" ], appearance );
+
+    if ( !isParsed || !characterCatalog.isValidAppearance( appearance ) ) {
+        qWarning() << "CharacterController::create"
+                   << "Invalid appearance, rejecting [ACCOUNT]" << idAccount;
+
+        Json::Value errorJson;
+        errorJson[ "error" ] = "invalid_appearance";
+
+        auto response = drogon::HttpResponse::newHttpJsonResponse( errorJson );
+        response->setStatusCode( drogon::k400BadRequest );
+        return callback( response );
+    }
 
     const Engine::WorldModel* world = Engine::Singleton<WorldManager>::instance().runtime().world();
 
@@ -49,7 +68,7 @@ void CharacterController::create( const drogon::HttpRequestPtr& request, std::fu
     spawnVitals.setStamina( 50.0 );
     spawnVitals.setMaxStamina( 50.0 );
 
-    int idCharacter = CharacterRepository().createCharacter( idAccount, name, spawnPosition, spawnVitals );
+    int idCharacter = CharacterRepository().createCharacter( idAccount, name, appearance, spawnPosition, spawnVitals );
 
     if ( idCharacter == 0 ) {
         auto response = drogon::HttpResponse::newHttpResponse();
@@ -80,7 +99,8 @@ void CharacterController::remove( const drogon::HttpRequestPtr& request, std::fu
     int idAccount = session.idAccount();
     int idCharacter = body[ "characterId" ].asInt();
 
-    qInfo() << "CharacterController::remove" << " [ACCOUNT] " << idAccount << " [CHARACTER] " << idCharacter;
+    qInfo() << "CharacterController::remove"
+            << " [ACCOUNT] " << idAccount << " [CHARACTER] " << idCharacter;
 
     auto character = CharacterRepository().findByIdAccountAndIdCharacter( idAccount, idCharacter );
     if ( !character || character->idAccount() != idAccount ) {

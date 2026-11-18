@@ -3,6 +3,7 @@
 #include <QVariantMap>
 
 #include <MMORPGEngine/Commons/Singleton.h>
+#include <MMORPGEngine/Entity/Character/CharacterAppearanceFeatureHelper.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/World/WorldModel.h>
 #include <MMORPGServer/Server/Manager/EntityBroadcaster.h>
@@ -19,6 +20,7 @@ ServerPageControl::ServerPageControl( QObject* parent ) :
     connect( _godObserver.get(), &GodObserver::messageReceived, &_messageReceiver, &Engine::ServerMessageReceiver::receiveMessage );
 
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterStateReceived, this, &ServerPageControl::characterStateReceived );
+    connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterAppearanceReceived, this, &ServerPageControl::onCharacterAppearanceReceived );
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::creatureStateReceived, this, &ServerPageControl::creatureStateReceived );
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::groundItemStateReceived, this, &ServerPageControl::groundItemStateReceived );
     connect( &_messageReceiver, &Engine::ServerMessageReceiver::characterEventAttackStartReceived, this, &ServerPageControl::characterEventAttackStartReceived );
@@ -107,6 +109,16 @@ void ServerPageControl::disconnectCharacter( int idCharacter ) {
     if ( observer ) {
         observer->shutdown();
     }
+}
+
+void ServerPageControl::onCharacterAppearanceReceived( int idCharacter, const Engine::CharacterAppearanceModel& appearance ) {
+    QVariantMap selections;
+
+    for ( const auto& selection : appearance.selections() ) {
+        selections[ QString::fromStdString( Engine::CharacterAppearanceFeatureHelper::toString( selection.first ) ) ] = selection.second;
+    }
+
+    emit characterAppearanceReceived( idCharacter, selections );
 }
 
 } // namespace Server

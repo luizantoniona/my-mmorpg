@@ -8,6 +8,7 @@
 #include <QString>
 
 #include <MMORPGEngine/Entity/AttackStrikeDTO.h>
+#include <MMORPGEngine/Entity/Character/CharacterAppearanceModel.h>
 #include <MMORPGEngine/Entity/Character/OwnCharacterDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnCombatDTO.h>
 #include <MMORPGEngine/Entity/Character/OwnEquipmentDTO.h>
@@ -35,6 +36,7 @@ signals:
     void ownInventoryReceived( const Engine::OwnInventoryDTO& state );
 
     void characterStateReceived( int idCharacter, int x, int y, int z, double movementSeconds );
+    void characterAppearanceReceived( int idCharacter, const Engine::CharacterAppearanceModel& appearance );
     void creatureStateReceived( int idCreature, int x, int y, int z, double movementSeconds, int footprint, const QString& creatureType );
     void characterEventAttackStartReceived( int idCharacter, int x, int y, int z, double castSeconds );
     void characterEventAttackReceived( int idCharacter, int x, int y, int z );

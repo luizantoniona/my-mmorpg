@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <MMORPGEngine/Entity/Character/CharacterAppearanceModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterModel.h>
 #include <MMORPGEngine/Entity/EntityPositionModel.h>
 #include <MMORPGEngine/Entity/EntityVitalsModel.h>
@@ -14,7 +15,7 @@ class CharacterRepository : public Repository {
 public:
     explicit CharacterRepository();
 
-    int createCharacter( const int idAccount, const std::string& dsName, const Engine::EntityPositionModel& spawnPosition, const Engine::EntityVitalsModel& spawnVitals );
+    int createCharacter( const int idAccount, const std::string& dsName, const Engine::CharacterAppearanceModel& appearance, const Engine::EntityPositionModel& spawnPosition, const Engine::EntityVitalsModel& spawnVitals );
     bool deleteCharacter( int idCharacter );
     bool updateCharacter( Engine::CharacterModel character );
 

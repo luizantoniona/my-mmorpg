@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include <MMORPGEngine/Entity/Character/CharacterAppearanceModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterEquipmentModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterInventoryModel.h>
 #include <MMORPGEngine/Entity/Character/CharacterProficiencyModel.h>
@@ -33,10 +34,14 @@ public:
     std::vector<CharacterInventoryModel> inventory() const;
     void setInventory( const std::vector<CharacterInventoryModel>& inventory );
 
+    const CharacterAppearanceModel& appearance() const;
+    void setAppearance( const CharacterAppearanceModel& appearance );
+
 private:
     std::vector<CharacterProficiencyModel> _proficiencies;
     std::vector<CharacterEquipmentModel> _equipment;
     std::vector<CharacterInventoryModel> _inventory;
+    CharacterAppearanceModel _appearance;
     std::string _name;
     int _idCharacter;
     int _idAccount;

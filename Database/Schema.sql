@@ -12,6 +12,15 @@ CREATE TABLE 'character' (
     FOREIGN KEY (id_account) REFERENCES account(id_account) ON DELETE CASCADE
 );
 
+CREATE TABLE character_appearance (
+    id_character INTEGER NOT NULL,
+    feature TEXT NOT NULL,
+    id_value TEXT NOT NULL,
+
+    PRIMARY KEY (id_character, feature),
+    FOREIGN KEY (id_character) REFERENCES 'character'(id_character) ON DELETE CASCADE
+);
+
 CREATE TABLE character_equipment (
     id_character INTEGER NOT NULL,
     slot INTEGER NOT NULL,
